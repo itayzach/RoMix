@@ -49,9 +49,9 @@ end
 mD = diag(sum(mW));
 %% Graph signals
 nDigits = 10;
-vS = zeros(N, nDigits);
+mS = zeros(N, nDigits);
 for k = 0:9
-    vS(:, k+1) = (vTestLabels == k);
+    mS(:, k+1) = (vTestLabels == k);
 end
 
 %% Nystrom 
@@ -65,8 +65,8 @@ for r = vR
     mDb = mD(r+1:N, r+1:N);
 
 
-    vSSampled = vS(1:r, :);
-    vSEst = diag(diag(mDb).^-0.5) * mB * diag(diag(mDe).^0.5) * vSSampled;
+    mSSampled = mS(1:r, :);
+    vSEst = diag(diag(mDb).^-0.5) * mB * diag(diag(mDe).^0.5) * mSSampled;
     [~, vSEstIdx] = max(vSEst, [], 2);
 
     vSampledTestLabels = vTestLabels(r+1:end);

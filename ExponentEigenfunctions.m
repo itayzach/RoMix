@@ -1,4 +1,4 @@
-%%
+%% Restart run
 clear; close all; clc;
 
 %% Parameters
@@ -7,7 +7,7 @@ b = 3;
 L = 10;
 
 b_verifyEigenfunctions = false;
-b_plotFigures = false;
+b_plotFigures = true;
 
 %% Eigenfunctions
 syms x y
@@ -53,16 +53,21 @@ if b_verifyEigenfunctions
     end
 end
 %% Plot
+figure;
+tg = uitabgroup; % tabgroup
 if b_plotFigures
     x = -1:dx:1-dx;
-    figure;
+    thistab = uitab(tg, 'Title', 'Eigenfunctions'); % build tab
+    axes('Parent',thistab); % somewhere to plot
     hold on
-    for i = 0:3
+    for i = 0:2
         p_k(y) = cPhi{i+1};
-        plot(x, subs(p_k(x)), 'DisplayName', [ 'k = ' num2str(i) ]);
+        plot(x, subs(p_k(x)), 'DisplayName', [ '$\phi_' num2str(i) '$' ]);
 
     end
     hold off
+    title('Eigenfunctions')
+    legend('Interpreter', 'latex', 'FontSize', 12, 'Location', 'best')
     legend show
 end
 %% Read mnist data
@@ -79,11 +84,9 @@ for k = 0:9
     mS(:, k+1) = (vTestLabels == k);
 end
 
-
-
 %% Stam functions
 N = 4000;
-x = linspace(-2, 2, N)';
+x = linspace(-2, 2, N)'; % [x_min x_max] should be small since gaussians decay to zero
 dx = abs(x(2) - x(1));
 % x = (-1:dx:1-dx)';
 % f = [sin(-10*x)  cos(-5*x)  exp(-x)  exp(x)];
@@ -94,8 +97,9 @@ nFuncs = size(f, 2);
 
 
 
-figure;
-hold on;
+thistab = uitab(tg, 'Title', 'Reconstruction'); % build tab
+axes('Parent',thistab); % somewhere to plot
+hold on
 for i = 1:nFuncs
     fi = f(:, i);
     mPhi = zeros(N, L);
@@ -104,18 +108,19 @@ for i = 1:nFuncs
         vPhikEval = single(subs(p_k(x)));
         mPhi(:, k+1) = vPhikEval;
     end
-    r = 100;
+    r = 0.025*N;
     R = 1:r:N; %randperm(r);
     vCr = pinv(mPhi(R, :)) * fi(R);
     vC = pinv(mPhi) * (fi);
     disp([vCr vC])
 
-    plot(x, mPhi * vCr, 'LineWidth', 2, 'DisplayName', ['\Phic with c from ' num2str(N/r) ' points']);
-    plot(x, mPhi * vC, 'DisplayName', ['\Phic with c from ' num2str(N) ' points']);
-    plot(x, fi, '-.','DisplayName', ['f_' num2str(i)]);
+    plot(x, mPhi * vCr, 'LineWidth', 2, 'DisplayName', ['$f_i \Phic \text{with c from ' num2str(N/r) ' points}$']);
+    plot(x, mPhi * vC, 'DisplayName', ['$\Phic \text{with c from ' num2str(N) ' points} $']);
+    plot(x, fi, '-.', 'DisplayName', ['$f_' num2str(i) '$']);
 end
-hold off;
-legend show;
+hold off
+legend('Interpreter', 'latex', 'FontSize', 12, 'Location', 'best')
+legend show
 
 
 %% SEeig (Squared Exponentional)

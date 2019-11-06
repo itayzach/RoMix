@@ -2,129 +2,114 @@
 clear; close all; clc;
 
 %% Parameters
+% kernel
 a = 1;
 b = 3;
-L = 10;
+mu = 0;
 
-b_verifyEigenfunctions = false;
-b_plotFigures = true;
-
-%% Eigenfunctions
-syms x y
-cPhi = cell(L, 1);
-cLambda = cell(L, 1);
-for i = 0:L-1
-    [phi_k, lambda_k] = SEeig(a, b, i, y);
-    cPhi{i+1} = phi_k;
-    cLambda{i+1} = lambda_k;
-end
-
-%% p(x)
+% p(x)
 sigma = 1/sqrt(4*a);
 l = 1/sqrt(2*b);
-p(y) = (1/sqrt(2*pi*sigma^2)) * exp( -y.^2/(2*sigma^2) );
 
-%% kernel(x,y)
-kernel(x,y) = exp(-(x-y)^2/(2*l^2));
+% num of eigenfunctions
+L = 10;
 
-%% Set values
+% simulation
+b_verifyEigenfunctions = true;
+b_plotEigenFigs = true;
+
+%% Check eigenfunctions
 dx = 0.01;
 x = -10:dx:10-dx;
 
-%% Substitue
-% phi_k0 = subs(phi_k0);
-% phi_k1 = subs(phi_k1);
-% phi_k2 = subs(phi_k2);
-% p = subs(p);
-
-%% Check eigenfunctions
-if b_verifyEigenfunctions
-    for i = 0:L-1
-        p_k(y) = cPhi{i+1};
-        rhs(y) = cLambda{i+1} * p_k(y);
-        lhs(y) = sum(kernel(x,y).*p_k(x).*p(x)*dx);
-
-        y0 = -2:0.5:2;
-        rhsEval = single(subs(rhs(y0)));
-        lhsEval = single(subs(lhs(y0)));
-        fprintf('k = %d\n', i)
-        disp([rhsEval; lhsEval])
-    %     norm(rhsEval - lhsEval)/(norm(rhsEval)*norm(lhsEval))
+if b_plotEigenFigs
+    if ~exist('fig', 'var')
+        fig = figure;
+        tg = uitabgroup; % tabgroup
     end
-end
-%% Plot
-figure;
-tg = uitabgroup; % tabgroup
-if b_plotFigures
-    x = -1:dx:1-dx;
     thistab = uitab(tg, 'Title', 'Eigenfunctions'); % build tab
     axes('Parent',thistab); % somewhere to plot
-    hold on
-    for i = 0:2
-        p_k(y) = cPhi{i+1};
-        plot(x, subs(p_k(x)), 'DisplayName', [ '$\phi_' num2str(i) '$' ]);
+end
+for k = 0:L-1
+    [phi_k_x, ~] = SEeig(a, b, k, x, mu);
 
+    if b_plotEigenFigs
+        if k <= 2
+            plot(x, phi_k_x, 'DisplayName', [ '$\phi_' num2str(k) '$' ]);
+            xlim([-5 5])
+            hold on
+        end
     end
+
+    if b_verifyEigenfunctions
+        y = -2+mu:0.5:2+mu;
+        [phi_k_y, lambda_k] = SEeig(a, b, k, y, mu);
+        rhs = lambda_k * phi_k_y;
+        lhs = zeros(1, length(y));
+        for j = 1:length(y)
+            lhs(j) = sum(kernel(x,y(j)-mu,l).*phi_k_x.*p(x,sigma)*dx);
+        end
+        fprintf('k = %d\n', k)
+        fprintf('lambda * phi = ')
+        fprintf('%.6f  ', rhs);
+        fprintf('\n');
+        fprintf('<k, phi>     = ')
+        fprintf('%.6f  ', lhs);
+        fprintf('\n');
+    end
+end
+if b_plotEigenFigs
     hold off
     title('Eigenfunctions')
     legend('Interpreter', 'latex', 'FontSize', 12, 'Location', 'best')
-    legend show
 end
+
 %% Read mnist data
-mnist = load('data/mnist.mat');
-mXTest = single(mnist.testX);
-vTestLabels = mnist.testY.';
-[nTestPoints, nPixels] = size(mXTest);
-N = nTestPoints;
+% mnist = load('data/mnist.mat');
+% mXTest = single(mnist.testX);
+% vTestLabels = mnist.testY.';
+% [nTestPoints, nPixels] = size(mXTest);
+% N = nTestPoints;
 
 %% Graph signals
-nDigits = 10;
-mS = zeros(N, nDigits);
-for k = 0:9
-    mS(:, k+1) = (vTestLabels == k);
-end
+% nDigits = 10;
+% mS = zeros(N, nDigits);
+% for k = 0:9
+%     mS(:, k+1) = (vTestLabels == k);
+% end
 
-%% Stam functions
-N = 4000;
-x = linspace(-2, 2, N)'; % [x_min x_max] should be small since gaussians decay to zero
-dx = abs(x(2) - x(1));
-% x = (-1:dx:1-dx)';
-% f = [sin(-10*x)  cos(-5*x)  exp(-x)  exp(x)];
-f = [cos(5*x) cos(2.5*x)];
+%% Reconstruct functions
+N = 1000;
+x = linspace(-1, 1, N)'; % [x_min x_max] should be small since gaussians decay to zero
+f = [sin(5*x) exp(-7*x).*sin(10*x) exp(-2*x).*sin(5*x)];
 nFuncs = size(f, 2);
-% f = [exp(-x)  exp(x)];
-% f = mS(:, 1);
 
-
-
-thistab = uitab(tg, 'Title', 'Reconstruction'); % build tab
-axes('Parent',thistab); % somewhere to plot
-hold on
+if ~exist('fig', 'var')
+    fig = figure;
+    tg = uitabgroup; % tabgroup
+end
 for i = 1:nFuncs
     fi = f(:, i);
     mPhi = zeros(N, L);
-    for k = 0:L-1
-        p_k(y) = cPhi{k+1};
-        vPhikEval = single(subs(p_k(x)));
-        mPhi(:, k+1) = vPhikEval;
+    for k = 0:L-1 
+        [phi_k_x, ~] = SEeig(a, b, k, x, mu);
+        mPhi(:, k+1) = phi_k_x;
     end
-    r = 0.025*N;
-    R = 1:r:N; %randperm(r);
-    vCr = pinv(mPhi(R, :)) * fi(R);
-    vC = pinv(mPhi) * (fi);
-    disp([vCr vC])
-
-    plot(x, mPhi * vCr, 'LineWidth', 2, 'DisplayName', ['$f_i \Phic \text{with c from ' num2str(N/r) ' points}$']);
-    plot(x, mPhi * vC, 'DisplayName', ['$\Phic \text{with c from ' num2str(N) ' points} $']);
-    plot(x, fi, '-.', 'DisplayName', ['$f_' num2str(i) '$']);
+    r = 0.1*N;
+    R = 1:r:N;
+    vCR = pinv(mPhi(R, :)) * fi(R);
+    thistab = uitab(tg, 'Title', 'Reconstruction');
+    axes('Parent',thistab);
+    p1 = plot(x, mPhi * vCR, 'LineWidth', 2, 'DisplayName', ['$f_' num2str(i) ' = \Phi c $ with ' num2str(N/r) ' points']);
+    hold on
+    p2 = plot(x, fi, '-.', 'DisplayName', ['$f_' num2str(i) '$']);
+    p3 = plot(x(R), fi(R), 'o');
+    hold off
+    legend([p1 p2], 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'best')
 end
-hold off
-legend('Interpreter', 'latex', 'FontSize', 12, 'Location', 'best')
-legend show
-
 
 %% SEeig (Squared Exponentional)
-function [phi_k, lambda_k] = SEeig(a, b, k, x)
+function [phi_k, lambda_k] = SEeig(a, b, k, x, mu)
 
 % Calculate parameters
 c = sqrt(a^2 + 2*a*b);
@@ -136,5 +121,13 @@ lambda_k = sqrt(2*a/A) * B^k;
 
 % k-th eigenfunction
 Hk = hermiteH(k, sqrt(2*c)*x);
-phi_k = simplify(exp( -(c-a)*x^2 ) * Hk);
+phi_k = exp( -(c-a)*(x - mu).^2 ) .* Hk;
+end
+
+function pr = p(y, sigma)
+pr = (1/sqrt(2*pi*sigma^2)) * exp( -y.^2/(2*sigma^2) );
+end
+
+function k = kernel(x,y,l) 
+k = exp(-(x-y).^2./(2*l^2));
 end

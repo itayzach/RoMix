@@ -5,7 +5,6 @@ clear; close all; clc;
 % kernel
 a = 1;
 b = 3;
-mu = 0;
 
 % p(x)
 sigma = 1/sqrt(4*a);
@@ -31,23 +30,30 @@ if b_plotEigenFigs
     axes('Parent',thistab); % somewhere to plot
 end
 for k = 0:L-1
-    [phi_k_x, ~] = SEeig(a, b, k, x, mu);
-
+    [vPhi_k_x, ~] = SqExpEig(a, b, k, x);
+    vP = p(x,sigma);
+    
     if b_plotEigenFigs
         if k <= 2
-            plot(x, phi_k_x, 'DisplayName', [ '$\phi_' num2str(k) '$' ]);
+            if k == 0
+                plot(x, vP, 'DisplayName', '$p(x)$');
+                xlim([-5 5])
+                hold on
+            end
+            plot(x, vPhi_k_x, 'DisplayName', [ '$\phi_' num2str(k) '(x)$' ]);
             xlim([-5 5])
-            hold on
+            xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
         end
     end
 
     if b_verifyEigenfunctions
-        y = -2+mu:0.5:2+mu;
-        [phi_k_y, lambda_k] = SEeig(a, b, k, y, mu);
+        y = -2:0.5:2;
+        [phi_k_y, lambda_k] = SqExpEig(a, b, k, y);
         rhs = lambda_k * phi_k_y;
         lhs = zeros(1, length(y));
         for j = 1:length(y)
-            lhs(j) = sum(kernel(x,y(j)-mu,l).*phi_k_x.*p(x,sigma)*dx);
+            vKernel = kernel(x,y(j),l);
+            lhs(j) = sum(vKernel.*vPhi_k_x.*vP*dx);
         end
         fprintf('k = %d\n', k)
         fprintf('lambda * phi = ')
@@ -78,10 +84,10 @@ end
 %     mS(:, k+1) = (vTestLabels == k);
 % end
 
-%% Reconstruct functions
+%% Extrapolate functions
 N = 1000;
 x = linspace(-1, 1, N)'; % [x_min x_max] should be small since gaussians decay to zero
-f = [sin(5*x) exp(-7*x).*sin(10*x) exp(-2*x).*sin(5*x)];
+f = [sin(5*x) exp(-x).*sin(2.5*x) exp(-2*x).*sin(5*x)];
 nFuncs = size(f, 2);
 
 if ~exist('fig', 'var')
@@ -92,15 +98,16 @@ for i = 1:nFuncs
     fi = f(:, i);
     mPhi = zeros(N, L);
     for k = 0:L-1 
-        [phi_k_x, ~] = SEeig(a, b, k, x, mu);
-        mPhi(:, k+1) = phi_k_x;
+        [vPhi_k_x, ~] = SqExpEig(a, b, k, x);
+        mPhi(:, k+1) = vPhi_k_x;
     end
     r = 0.1*N;
-    R = 1:r:N;
+    R = randperm(N,N/r);%    1:r:N;
     vCR = pinv(mPhi(R, :)) * fi(R);
-    thistab = uitab(tg, 'Title', 'Reconstruction');
+    thistab = uitab(tg, 'Title', ['Extrapolate f' num2str(i)]);
     axes('Parent',thistab);
     p1 = plot(x, mPhi * vCR, 'LineWidth', 2, 'DisplayName', ['$f_' num2str(i) ' = \Phi c $ with ' num2str(N/r) ' points']);
+    title(['Extrapolate $f_' num2str(i) '$'], 'Interpreter', 'latex', 'FontSize', 12)
     hold on
     p2 = plot(x, fi, '-.', 'DisplayName', ['$f_' num2str(i) '$']);
     p3 = plot(x(R), fi(R), 'o');
@@ -108,8 +115,9 @@ for i = 1:nFuncs
     legend([p1 p2], 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'best')
 end
 
-%% SEeig (Squared Exponentional)
-function [phi_k, lambda_k] = SEeig(a, b, k, x, mu)
+
+%% SqExpEig (Squared Exponentional)
+function [phi_k, lambda_k] = SqExpEig(a, b, k, x)
 
 % Calculate parameters
 c = sqrt(a^2 + 2*a*b);
@@ -121,7 +129,7 @@ lambda_k = sqrt(2*a/A) * B^k;
 
 % k-th eigenfunction
 Hk = hermiteH(k, sqrt(2*c)*x);
-phi_k = exp( -(c-a)*(x - mu).^2 ) .* Hk;
+phi_k = exp( -(c-a)*x.^2 ) .* Hk;
 end
 
 function pr = p(y, sigma)

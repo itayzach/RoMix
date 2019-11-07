@@ -1,6 +1,6 @@
 %% Restart run
 clear; close all; clc;
-
+rng(); % set seed
 %% Parameters
 % kernel
 a = 1;

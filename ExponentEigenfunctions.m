@@ -11,7 +11,7 @@ sigma = 1/sqrt(4*a);
 l = 1/sqrt(2*b);
 
 % num of eigenfunctions
-L = 10;
+M = 10;
 
 % simulation
 b_verifyEigenfunctions = true;
@@ -29,18 +29,18 @@ if b_plotEigenFigs
     thistab = uitab(tg, 'Title', 'Eigenfunctions'); % build tab
     axes('Parent',thistab); % somewhere to plot
 end
-for k = 0:L-1
-    [vPhi_k_x, ~] = SqExpEig(a, b, k, x);
-    vP = p(x,sigma);
+for m = 0:M-1
+    [vPhi_m_x, ~] = SqExpEig(a, b, m, x);
+    vP_x = p(x,sigma);
     
     if b_plotEigenFigs
-        if k <= 2
-            if k == 0
-                plot(x, vP, 'DisplayName', '$p(x)$');
+        if m <= 2
+            if m == 0
+                plot(x, vP_x, 'DisplayName', '$p(x)$');
                 xlim([-5 5])
                 hold on
             end
-            plot(x, vPhi_k_x, 'DisplayName', [ '$\phi_' num2str(k) '(x)$' ]);
+            plot(x, vPhi_m_x, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
             xlim([-5 5])
             xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
         end
@@ -48,14 +48,14 @@ for k = 0:L-1
 
     if b_verifyEigenfunctions
         y = -2:0.5:2;
-        [phi_k_y, lambda_k] = SqExpEig(a, b, k, y);
-        rhs = lambda_k * phi_k_y;
+        [phi_m_y, lambda_m] = SqExpEig(a, b, m, y);
+        rhs = lambda_m * phi_m_y;
         lhs = zeros(1, length(y));
         for j = 1:length(y)
-            vKernel = kernel(x,y(j),l);
-            lhs(j) = sum(vKernel.*vPhi_k_x.*vP*dx);
+            vKernel_x = kernel(x,y(j),l);
+            lhs(j) = sum(vKernel_x.*vPhi_m_x.*vP_x*dx);
         end
-        fprintf('k = %d\n', k)
+        fprintf('m = %d\n', m)
         fprintf('lambda * phi = ')
         fprintf('%.6f  ', rhs);
         fprintf('\n');
@@ -85,8 +85,17 @@ end
 % end
 
 %% Extrapolate functions
-N = 1000;
-x = linspace(-1, 1, N)'; % [x_min x_max] should be small since gaussians decay to zero
+% N = 1000;
+% x = linspace(-1, 1, N)'; % [x_min x_max] should be small since gaussians decay to zero
+
+dx = 0.002;
+x = (-1:dx:1-dx)';
+N = length(x);
+
+dt = 0.002;
+t = -10:dt:10-dt;
+vP_t = p(t,sigma);
+
 f = [sin(5*x) exp(-x).*sin(2.5*x) exp(-2*x).*sin(5*x)];
 nFuncs = size(f, 2);
 
@@ -96,17 +105,27 @@ if ~exist('fig', 'var')
 end
 for i = 1:nFuncs
     fi = f(:, i);
-    mPhi = zeros(N, L);
-    for k = 0:L-1 
-        [vPhi_k_x, ~] = SqExpEig(a, b, k, x);
-        mPhi(:, k+1) = vPhi_k_x;
+    mPhi = zeros(N, M);
+    for m = 0:M-1 
+        [vPhi_m_x, ~] = SqExpEig(a, b, m, x);
+        mPhi(:, m+1) = vPhi_m_x;
     end
     r = 0.1*N;
     R = randperm(N,N/r);%    1:r:N;
     vCR = pinv(mPhi(R, :)) * fi(R);
+    fi_hat = mPhi * vCR;
+    
+%     for m = 0:M-1 
+%         for j = 1:length(x)
+%             vKernel_t = kernel(t,x(j),l);
+%             [vPhi_m_t, ~] = SqExpEig(a, b, m, t);
+%             phi_m_x(j) = sum(vKernel_t.*vPhi_m_t.*vP_t*dt);
+%         end
+%     end
+    
     thistab = uitab(tg, 'Title', ['Extrapolate f' num2str(i)]);
     axes('Parent',thistab);
-    p1 = plot(x, mPhi * vCR, 'LineWidth', 2, 'DisplayName', ['$f_' num2str(i) ' = \Phi c $ with ' num2str(N/r) ' points']);
+    p1 = plot(x, fi_hat, 'LineWidth', 2, 'DisplayName', ['$f_' num2str(i) ' = \Phi c $ with ' num2str(N/r) ' points']);
     title(['Extrapolate $f_' num2str(i) '$'], 'Interpreter', 'latex', 'FontSize', 12)
     hold on
     p2 = plot(x, fi, '-.', 'DisplayName', ['$f_' num2str(i) '$']);
@@ -117,25 +136,25 @@ end
 
 
 %% SqExpEig (Squared Exponentional)
-function [phi_k, lambda_k] = SqExpEig(a, b, k, x)
+function [vPhi_m, lambda_m] = SqExpEig(a, b, m, x)
 
 % Calculate parameters
 c = sqrt(a^2 + 2*a*b);
 A = a + b + c;
 B = b/A;
 
-% k-th eigenvalue
-lambda_k = sqrt(2*a/A) * B^k;
+% m-th eigenvalue
+lambda_m = sqrt(2*a/A) * B^m;
 
-% k-th eigenfunction
-Hk = hermiteH(k, sqrt(2*c)*x);
-phi_k = exp( -(c-a)*x.^2 ) .* Hk;
+% m-th eigenfunction
+vHm = hermiteH(m, sqrt(2*c)*x);
+vPhi_m = exp( -(c-a)*x.^2 ) .* vHm;
 end
 
-function pr = p(y, sigma)
-pr = (1/sqrt(2*pi*sigma^2)) * exp( -y.^2/(2*sigma^2) );
+function vPr = p(y, sigma)
+vPr = (1/sqrt(2*pi*sigma^2)) * exp( -y.^2/(2*sigma^2) );
 end
 
-function k = kernel(x,y,l) 
-k = exp(-(x-y).^2./(2*l^2));
+function vKernel = kernel(x,y,l) 
+vKernel = exp(-(x-y).^2./(2*l^2));
 end

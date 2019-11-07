@@ -1,6 +1,6 @@
 %% Restart run
 clear; close all; clc;
-rng(); % set seed
+rng(0); % set seed
 %% Parameters
 % kernel
 a = 1;
@@ -92,7 +92,7 @@ dx = 0.002;
 x = (-1:dx:1-dx)';
 N = length(x);
 
-dt = 0.002;
+dt = 0.01;
 t = -10:dt:10-dt;
 vP_t = p(t,sigma);
 

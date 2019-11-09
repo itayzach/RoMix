@@ -65,7 +65,7 @@ end
 if b_plotEigenFigs
     hold off
 %     title('Eigenfunctions')
-    legend('Interpreter', 'latex', 'FontSize', 12, 'Location', 'northwest')
+    legend('Interpreter', 'latex', 'FontSize', 12, 'Location', 'northeast')
     print(fig1, ['figures' filesep 'fig1_eigenfunctions'], '-dpdf')
 end
 
@@ -93,7 +93,7 @@ t = x; %(-20:dt:20-dt)';
 vP_t = p(t,sigma);
 
 mF    = [sin(5*x) + exp(-x).*sin(2.5*x) exp(-2*x).*sin(5*x)];
-cFstr = {'\sin(5x)' 'e^{-x}\sin(2.5x)' 'e^{-2x}\sin(5x)'};
+cFstr = {'\sin(5x) + e^{-x}\sin(2.5x)' 'e^{-2x}\sin(5x)'};
 nFuncs = size(mF, 2);
 
 % x_eval = ([-5:0.1:5])';
@@ -140,7 +140,7 @@ for i = 1:nFuncs
     p3 = plot(x, vFi, '-.', 'DisplayName', ['$f_' num2str(i) ' = ' cFstr{i} '$']);
     p4 = plot(x(vR), vFi(vR), 'o');
     hold off
-    legend([p1 p3], 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'northwest')
+    legend([p1 p3], 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'northeast')
     print(cFigs{i}, ['figures' filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i) '.pdf'], '-dpdf')
 end
 

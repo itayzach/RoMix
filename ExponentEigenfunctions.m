@@ -6,8 +6,8 @@ outputFolder = 'figs';
 if ~exist(outputFolder, 'dir')
     mkdir(outputFolder)
 else
-    % Remove all pdf files
-    filePattern = fullfile(outputFolder, '*.pdf');
+    % Remove all epsc files
+    filePattern = fullfile(outputFolder, '*.eps');
     theFiles = dir(filePattern);
     for k = 1 : length(theFiles)
       baseFileName = theFiles(k).name;
@@ -59,7 +59,7 @@ if b_verifyEigenfunctions || b_plotEigenFigs
                 hold off
             %     title('Eigenfunctions')
                 legend('Interpreter', 'latex', 'FontSize', 12, 'Location', 'northeast')
-                print(fig1, [outputFolder filesep 'fig1_eigenfunctions'], '-dpdf')
+                print(fig1, [outputFolder filesep 'fig1_eigenfunctions'], '-depsc')
             end
         end
 
@@ -157,7 +157,7 @@ dt = 0.01;
 t = (-20:dt:20-dt)';
 vP_t = p(t,sigma);
 
-mF      = [10*exp(-x).*(sin(2.5*x) + sin(2*pi*x))   10*exp(-2*x).*sin(5*x) ];
+mF      = [ 10*exp(-x).*(sin(2.5*x) + sin(2*pi*x))   10*exp(-2*x).*sin(5*x) ];
 mF_awgn = [0.1*randn(N,1) 0.1*randn(N,1)];
 cFstr = {'10e^{-x}\big(\sin(2.5x) + \sin(2\pi x)\big)' '10e^{-2x}\sin(5x)'};
 nFuncs = size(mF, 2);
@@ -206,7 +206,7 @@ for i = 1:nFuncs
     p5 = plot(x(vR), vGi(vR), 'o');
     hold off
     legend([p1 p3 p4], 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'northeast')
-    print(cFigs{i}, [outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i) '.pdf'], '-dpdf')
+    print(cFigs{i}, [outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
 end
 
 

@@ -43,9 +43,9 @@ if b_verifyEigenfunctions || b_plotEigenFigs
         vP_x = p(x,sigma);
         
         if b_plotEigenFigs
-            nEigenFuncsToPlot = 3;
+            nEigenFuncsToPlot = 4;
             fig1 = figure(1);
-            if m <= nEigenFuncsToPlot
+            if m < nEigenFuncsToPlot
                 if m == 0
                     plot(x, vP_x, '-.', 'LineWidth', 2, 'DisplayName', '$p(x)$');
                     xlim([-5 5])
@@ -58,7 +58,7 @@ if b_verifyEigenfunctions || b_plotEigenFigs
             if m == nEigenFuncsToPlot + 1
                 hold off
             %     title('Eigenfunctions')
-                legend('Interpreter', 'latex', 'FontSize', 12, 'Location', 'northeast')
+                legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
                 print(fig1, [outputFolder filesep 'fig1_eigenfunctions'], '-depsc')
             end
         end
@@ -156,11 +156,18 @@ N = length(x);
 dt = 0.01;
 t = (-20:dt:20-dt)';
 vP_t = p(t,sigma);
+noiseVar = 0.1;
 
-mF      = [ 10*exp(-x).*(sin(2.5*x) + sin(2*pi*x))   10*exp(-2*x).*sin(5*x) ];
-mF_awgn = [0.1*randn(N,1) 0.1*randn(N,1)];
-cFstr = {'10e^{-x}\big(\sin(2.5x) + \sin(2\pi x)\big)' '10e^{-2x}\sin(5x)'};
-nFuncs = size(mF, 2);
+A1 = 2;
+B1 = 1;
+A = 10;
+% mF      = [ A*exp(-x).*(sin(2.5*x) + sin(2*pi*x))   A*exp(-2*x).*sin(5*x) ];
+[phi1, ~] = SqExpEig(a, b, 1, x);
+[phi2, ~] = SqExpEig(a, b, 2, x);
+mF      = [ A1*phi1 + B1*phi2   A*exp(-x).*(sin(2.5*x) + sin(2*pi*x)) ];
+mF_awgn = [sqrt(noiseVar)*randn(N,1) sqrt(noiseVar)*randn(N,1)];
+% cFstr   = {'10e^{-x}\big(\sin(2.5x) + \sin(2\pi x)\big)' '10e^{-2x}\sin(5x)'};
+nFuncs  = size(mF, 2);
 
 % x_eval = ([-1:0.1:1])';
 % vF_eval = [10*exp(-2*x).*sin(5*x)];
@@ -170,17 +177,23 @@ cFigs = cell(1, nFuncs);
 for i = 1:nFuncs
     vFi = mF(:, i);
     vFi_awgn = mF_awgn(:, i);
+    SNR = snr(vFi, vFi_awgn);
     vGi = vFi + vFi_awgn;
     mPhi = zeros(N, M);
     for m = 0:M-1 
         [vPhi_m_x, lambda_m] = SqExpEig(a, b, m, x);
         mPhi(:, m+1) = vPhi_m_x;
     end
-    r = 0.01*N;
-    vR = 1:r:N; %randperm(N,N/r); % 1:r:N;
+    step = 0.02*N;
+    r = N/step;
+    assert(M <= r, 'You cannot have less points than eigenfunctions!');
+    vR = 1:step:N; %randperm(N,N/r); % 1:r:N;
     vC = pinv(mPhi) * vGi;
     vCR = pinv(mPhi(vR, :)) * vGi(vR);
+    vCR_th = vCR.*(abs(vCR) > 1e-2);
+%     disp([(0:M-1)'  vCR_th])
     vFi_hat = mPhi * vCR;
+    accuracy = 100*(1 - norm(vFi_hat - vFi)/norm(vFi));
 %     % ---------------------------------------------------------------------
 %     % With kernel try
 %     vFi_eval = vF_eval(:, i);
@@ -197,16 +210,24 @@ for i = 1:nFuncs
 %     end
 %     % ---------------------------------------------------------------------
     cFigs{i} = figure(i+1);
-    p1 = plot(x, vFi_hat, 'LineWidth', 2, 'DisplayName', ['$f_' num2str(i) ' = \Phi c $ with ' num2str(N/r) ' points']);
+    p1 = plot(x, vGi, 'Color',       '#4DBEEE', ...
+                      'LineWidth',    2, ...
+                      'DisplayName', ['$g_' num2str(i) '(x)$']);
+%     title({['$f_' num2str(i) '(x)$ with SNR = ' num2str(SNR) ' [dB]']; num2str(accuracy)}, 'Interpreter', 'latex', 'FontSize', 14)
     hold on
-    title(['$f_' num2str(i) ' - \Phi c = ' num2str(norm(vFi_hat-vFi)) '$'], 'Interpreter', 'latex', 'FontSize', 12)
-%     p2 = plot(x_eval, vFi_hat2);
-    p3 = plot(x, vGi, '-.', 'LineWidth', 2, 'DisplayName', ['$f_' num2str(i) ' = ' cFstr{i} '$ + AWGN']);
-    p4 = plot(x, vFi, 'b--', 'LineWidth', 2, 'DisplayName', ['$f_' num2str(i) ' = ' cFstr{i} '$']);
-    p5 = plot(x(vR), vGi(vR), 'o');
+    p2 = plot(x, vFi, 'Color',       '#0072BD', ...
+                      'LineWidth',    3, ...
+                      'DisplayName', ['$f_' num2str(i) '(x)$']);
+    p3 = plot(x, vFi_hat, 'Color', '#D95319', ...
+                          'LineWidth', 3, ...
+                          'LineStyle', '-.', ...
+                          'DisplayName', ['$\hat{f}_' num2str(i) '(x)$']);
+
+    p4 = plot(x(vR), vGi(vR), 'ro');
     hold off
-    legend([p1 p3 p4], 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'northeast')
+    legend([p2 p1 p3], 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
     print(cFigs{i}, [outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
+    fprintf('f%d : r = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, r, M, SNR, accuracy);
 end
 
 

@@ -150,22 +150,24 @@ end
 
 %% Extrapolate functions
 dx = 0.01;
-x = (0:dx:5-dx)';
+x = (-5:dx:5-dx)';
 N = length(x);
 
-dt = 0.01;
-t = (-20:dt:20-dt)';
-vP_t = p(t,sigma);
-noiseVar = 0.1;
+noiseVar1 = 0.4;
+noiseVar2 = 0.4;
 
-A1 = 2;
-B1 = 1;
-A = 10;
+A1 = 5;
+B1 = 0.001;
+C1 = 0.001;
+A2 = 10;
+B2 = 7;
+C2 = 6;
 % mF      = [ A*exp(-x).*(sin(2.5*x) + sin(2*pi*x))   A*exp(-2*x).*sin(5*x) ];
 [phi1, ~] = SqExpEig(a, b, 1, x);
-[phi2, ~] = SqExpEig(a, b, 2, x);
-mF      = [ A1*phi1 + B1*phi2   A*exp(-x).*(sin(2.5*x) + sin(2*pi*x)) ];
-mF_awgn = [sqrt(noiseVar)*randn(N,1) sqrt(noiseVar)*randn(N,1)];
+[phi2, ~] = SqExpEig(a, b, 6, x);
+[phi3, ~] = SqExpEig(a, b, 10, x);
+mF      = [ A1*phi1 + B1*phi2 + C1*phi3   A2*exp(-0.2*x.^2).*sin(pi*x) + B2*exp(-0.5*x.^2).*sin(2*pi*x) + B2*exp(-0.3*x.^2).*sin(1*pi*x) ];
+mF_awgn = [sqrt(noiseVar1)*randn(N,1) sqrt(noiseVar2)*randn(N,1)];
 % cFstr   = {'10e^{-x}\big(\sin(2.5x) + \sin(2\pi x)\big)' '10e^{-2x}\sin(5x)'};
 nFuncs  = size(mF, 2);
 
@@ -212,20 +214,20 @@ for i = 1:nFuncs
     cFigs{i} = figure(i+1);
     p1 = plot(x, vGi, 'Color',       '#4DBEEE', ...
                       'LineWidth',    2, ...
-                      'DisplayName', ['$g_' num2str(i) '(x)$']);
+                      'DisplayName', ['$g(x)$']);
 %     title({['$f_' num2str(i) '(x)$ with SNR = ' num2str(SNR) ' [dB]']; num2str(accuracy)}, 'Interpreter', 'latex', 'FontSize', 14)
     hold on
     p2 = plot(x, vFi, 'Color',       '#0072BD', ...
                       'LineWidth',    3, ...
-                      'DisplayName', ['$f_' num2str(i) '(x)$']);
+                      'DisplayName', ['$f(x)$']);
     p3 = plot(x, vFi_hat, 'Color', '#D95319', ...
                           'LineWidth', 3, ...
                           'LineStyle', '-.', ...
-                          'DisplayName', ['$\hat{f}_' num2str(i) '(x)$']);
+                          'DisplayName', ['$\hat{f}(x)$']);
 
     p4 = plot(x(vR), vGi(vR), 'ro');
     hold off
-    legend([p2 p1 p3], 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
+    legend([p2 p1 p3], 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
     print(cFigs{i}, [outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
     fprintf('f%d : r = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, r, M, SNR, accuracy);
 end

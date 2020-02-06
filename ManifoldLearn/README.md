@@ -1,0 +1,1 @@
+ManifoldLearn code was taken from http://manifold.cs.uchicago.edu/manifold_regularization/software.html

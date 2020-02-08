@@ -2,3 +2,6 @@
 *.asv
 *.swp
 *.ini
+*.obj
+*.eps
+*.mex*

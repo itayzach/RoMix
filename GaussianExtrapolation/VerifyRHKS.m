@@ -29,12 +29,12 @@ for m = 0:sParams.M-1
 
         for j = 1:nPoints
             vKernel_y_x = kernel(y(j, d), x, sParams.l);
-            integral_d = sum(vKernel_y_x.*vPhi_m_x.*vP_x*dx);
-            lhs(j, d) = integral_d;
+            integral_1d = sum(vKernel_y_x.*vPhi_m_x.*vP_x*dx); %1-D integral over single y_{j,d}
+            lhs(j, d) = integral_1d;
         end
     end
     rhs_d = prod(rhs, 2);
-    lhs_d = prod(lhs, 2);
+    lhs_d = prod(lhs, 2); % multiply all D integrals
     fprintf('m = %d\n', m)
     fprintf('lambda * phi = ')
     fprintf('%.6f  ', rhs_d.');

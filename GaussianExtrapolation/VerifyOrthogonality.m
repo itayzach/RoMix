@@ -14,7 +14,12 @@ I = zeros(sParams.M);
 vP_x = p(x, sParams.sigma);
 for k = 0:sParams.M-1
     for m = 0:sParams.M-1
-        % Following line is <phi_m, phi_k> = integral_x( phi_m(x)phi_k(x)p(x)dx )
+        % Following line is 
+        %   <phi_m, phi_k> = 
+        %   integral_x1( phi_m(x1)phi_k(x1)p(x1)dx1 ) *
+        %   integral_x2( phi_m(x2)phi_k(x2)p(x2)dx2 ) * 
+        %   * ... *
+        %   integral_xd( phi_m(xd)phi_k(xd)p(xd)dxd ) *
         vPhim_Phik_d = sum(mPhi(:, :, m+1).*mPhi(:, :, k+1).*vP_x*dx);
         I(m+1,k+1) = prod(vPhim_Phik_d, 2);
         if abs(I(m+1,k+1)) < 1e-12

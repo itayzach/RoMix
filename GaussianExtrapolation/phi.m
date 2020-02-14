@@ -14,7 +14,6 @@ B = b/A;
 lambda_m = sqrt(2*a/A) * B^m;
 
 % m-th eigenfunction
-% vHm = hermiteH(m, sqrt(2*c)*x);
 vHm = hermite(m, sqrt(2*c)*x);
 vPhi_m = (1/sqrt(2^m*factorial(m)*sqrt(a/c))) * exp( -(c-a)*x.^2 ) .* vHm;
 

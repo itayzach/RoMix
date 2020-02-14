@@ -1,7 +1,7 @@
 function [sParams, sSimParams] = GetParameters()
 
 % dimensions
-sParams.dim = 1;
+sParams.dim = 2;
 
 % kernel
 sParams.a = 3;%4;

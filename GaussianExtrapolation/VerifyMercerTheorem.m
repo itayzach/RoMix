@@ -30,7 +30,7 @@ for i = 1:length(x)
                 [phi_x_d, lambda] = phi(sParams.a, sParams.b, m, x(i,d));
                 [phi_y_d, ~] = phi(sParams.a, sParams.b, m, y(j,d));
                 
-                vLambda_Phix_Phiy(d) = vLambda_Phix_Phiy(d) +lambda*phi_x_d*phi_y_d;
+                vLambda_Phix_Phiy(d) = vLambda_Phix_Phiy(d) + lambda*phi_x_d*phi_y_d;
             end
         end
         rhs(i,j) = prod(vLambda_Phix_Phiy, 2);

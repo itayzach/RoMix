@@ -39,6 +39,9 @@ end
 % end
 
 %% Extrapolate functions
-Extrapolate(sParams, sSimParams)
-
+if sParams.dim == 1
+    Extrapolate1D(sParams, sSimParams)
+elseif sParams.dim == 2
+    Extrapolate2D(sParams, sSimParams)
+end
 

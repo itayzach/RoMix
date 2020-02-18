@@ -3,7 +3,7 @@ function [] = Extrapolate2D(sParams, sSimParams)
 assert(sParams.M <= sParams.R, 'You cannot have less points than eigenfunctions!');
 assert(sParams.dim == 2, 'This function works only for 2-D')
 dx = 0.01;
-x = (-5:dx:5-dx)';
+x = (-2:dx:2-dx)';
 N = length(x);
 
 x1 = x.';
@@ -11,7 +11,7 @@ x2 = x.';
 [mX1, mX2] = meshgrid(x1, x2);
 
 %% F1
-A1 = 5;
+A1 = 3;
 A4 = 0.001;
 A6 = 0.0005;
 
@@ -23,22 +23,26 @@ phi1x = phi1x1' * phi1x1;
 phi4x = phi4x1' * phi4x1;
 phi6x = phi6x1' * phi6x1;
 
-vF1      = A1*phi1x(:) + A4*phi4x(:) + A6*phi6x(:);
+mF1      = A1*phi1x + A4*phi4x + A6*phi6x;
+vF1      = mF1(:);
 vF_awgn1 = sqrt(sSimParams.noiseVar1)*randn(N*N, 1);
 
 %% F2
-B1 = 10;
-B2 = 7;
-B3 = 6;
-vF2      = B1*exp(-0.2*mX1.^2).*exp(-0.2*mX2.^2).*sin(pi*mX1).*sin(pi*mX2); %+ B2*exp(-0.5*mX1.^2).*exp(-0.5*mX2.^2).*sin(2*pi*mX1).*sin(2*pi*mX2) + B3*exp(-0.3*mX1.^2).*exp(-0.3*mX2.^2).*sin(1*pi*mX1).*sin(1*pi*mX2);
-vF2 = vF2(:);
+B1 = 5;
+B2 = 5;
+B3 = 5;
+
+exp1 = B1*exp(-(x1-0.5*x2).^2); % + B3*exp(-0.3*x1.^2).*sin(1*pi*x1);
+
+mF2      = exp1.' * exp1; %+ B2*exp(-0.5*mX1.^2).*exp(-0.5*mX2.^2).*sin(2*pi*mX1).*sin(2*pi*mX2) + B3*exp(-0.3*mX1.^2).*exp(-0.3*mX2.^2).*sin(1*pi*mX1).*sin(1*pi*mX2);
+vF2 = mF2(:);
 vF_awgn2 = sqrt(sSimParams.noiseVar2)*randn(N*N, 1);
 
 mF      = [vF1 vF2];
 mF_awgn = [vF_awgn1 vF_awgn2];
 
 %% Extrapolate
-nFuncs  = 1; %size(mF, 2);
+nFuncs  = size(mF, 2);
 cFigs = cell(1, nFuncs);
 
 for i = 1:nFuncs
@@ -57,14 +61,16 @@ for i = 1:nFuncs
         mPhi(:, m+1) = mPhi_m_x1x2;
     end
     if sSimParams.b_randomStepSize
-        vR = sort(randi([1 N],sParams.R,1));
+        vR = sort(randi([1 N^2],sParams.R,1));
     else
-        step = 20000; N/sParams.R;
-        vR = 1:step:N*N;
+        step = floor(N^2/sParams.R);
+        vR = 1:step:N^2;
                 
     end
+    I = eye(sParams.M);
     
     mPhi_RM = mPhi(vR, :);
+    mGi = reshape(vGi,N,N);
     vGR = vGi(vR);
     vCR = (mPhi_RM.' * mPhi_RM) \ ( mPhi_RM.' * vGR );
 %     vCR = pinv(mPhi_RM) * vGR;
@@ -81,9 +87,11 @@ for i = 1:nFuncs
     cFigs{i} = figure(i+1);
     subplot(1,2,1);
     p1 = surf(mX1, mX2, reshape(vGi,N,N), 'edgecolor', 'none');
-    [row, col] = ind2sub([N N], vR);
-%     p4 = plot3(reshape(mX1(vR),N,N), reshape(mX2(vR),N,N), reshape(vGi(vR),N,N), 'rx');
-%     view(2)
+    xlabel('$x_1$', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel('$x_2$', 'Interpreter', 'latex', 'FontSize', 14);
+    hold on;
+    p4 = scatter3(mX1(vR), mX2(vR), mGi(vR), 'filled', 'ro');
+    view(2)
 %     view(90,0)
     title('$g({x})$', 'Interpreter', 'latex', 'FontSize', 14);
     colorbar;
@@ -91,10 +99,12 @@ for i = 1:nFuncs
     
     subplot(1,2,2);
     p2 = surf(mX1, mX2, reshape(vFi_hat,N,N), 'edgecolor', 'none');
-%     view(2)
+    view(2)
 %     view(90,0)
     title('$\hat{f}({x})$', 'Interpreter', 'latex', 'FontSize', 14);
     colorbar();
+    xlabel('$x_1$', 'Interpreter', 'latex', 'FontSize', 14);
+    ylabel('$x_2$', 'Interpreter', 'latex', 'FontSize', 14);
     c2 = caxis;
     
     

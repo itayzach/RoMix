@@ -8,16 +8,16 @@ N = length(x);
 
 A1 = 5;
 A6 = 0.001;
-A10 = 0.001;
+A8 = 0.001;
 B1 = 10;
 B2 = 7;
 B3 = 6;
 % mF      = [ A*exp(-x).*(sin(2.5*x) + sin(2*pi*x))   A*exp(-2*x).*sin(5*x) ];
 [phi_1, ~] = phi(sParams.a, sParams.b, 1, x);
 [phi_6, ~] = phi(sParams.a, sParams.b, 6, x);
-[phi_10, ~] = phi(sParams.a, sParams.b, 10, x);
-mF      = [ A1*phi_1 + A6*phi_6 + A10*phi_10   ...
-            B1*exp(-0.2*x.^2).*sin(pi*x) + B2*exp(-0.5*x.^2).*sin(2*pi*x) + B3*exp(-0.3*x.^2).*sin(1*pi*x) ];
+[phi_8, ~] = phi(sParams.a, sParams.b, 8, x);
+mF      = [ A1*phi_1 + A6*phi_6 + A8*phi_8   ...
+            B1*exp(-0.2*x.^2).*sin(pi*x) + B2*exp(-0.5*x.^2).*sin(0.4*pi*x) + B3*exp(-0.3*x.^2).*sin(1*pi*x) ];
 mF_awgn = [sqrt(sSimParams.noiseVar1)*randn(N,1) sqrt(sSimParams.noiseVar2)*randn(N,1)];
 % cFstr   = {'10e^{-x}\big(\sin(2.5x) + \sin(2\pi x)\big)' '10e^{-2x}\sin(5x)'};
 nFuncs  = size(mF, 2);
@@ -93,7 +93,7 @@ for i = 1:nFuncs
         vC = zeros(sParams.M, 1);
         vC(1+1) = A1;
         vC(6+1) = A6;
-        vC(10+1) = A10;
+        vC(8+1) = A8;
         fprintf('    vCR       vC \n')
         disp([vCR, vC]);
     end

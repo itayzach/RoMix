@@ -43,7 +43,7 @@ for m = 0:sParams.M-1
     fprintf('%.6f  ', lhs_d.');
     fprintf('\n');
     isalmostequal(rhs_d, lhs_d, 1e-12)
-    fprintf('(lhs) <Ky, phi_m> = lambda_m*phi_m_(y) (rhs) confirmed\n');
+    fprintf('(lhs) <Ky, phi_m> = lambda_m*phi_m(y) (rhs) confirmed\n');
     fprintf('\n');
 end
 

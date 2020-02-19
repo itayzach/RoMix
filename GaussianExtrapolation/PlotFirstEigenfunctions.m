@@ -23,7 +23,7 @@ for m = 0:sSimParams.nEigenFuncsToPlot-1
             hold off
             %     title('Eigenfunctions')
             legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
-            print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions'], '-depsc')
+            print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
         end
         pltIdx = pltIdx + 1;
     elseif sParams.dim == 2
@@ -41,6 +41,7 @@ for m = 0:sSimParams.nEigenFuncsToPlot-1
         xlabel('$x_1$', 'Interpreter', 'latex')
         ylabel('$x_2$', 'Interpreter', 'latex')
         zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
+        print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_2d'], '-depsc')
     else
         error('cannot plot for dim > 2')
     end

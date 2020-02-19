@@ -40,6 +40,6 @@ for i = 1:length(x)
 end
 
 
-isalmostequal(rhs, lhs, 1e-10);
+isalmostequal(rhs, lhs, 1e-10, sprintf('Mercer''s theorem failed. Perhaps M = %d is not enough?', sParams.M));
 fprintf('Mercer''s theorem confirmed\n');
 end

@@ -39,8 +39,13 @@ NORMALIZE=options.GraphNormalize;
 
 
 % calculate the adjacency matrix for DATA
-A = adjacency(DATA, TYPE, NN, DISTANCEFUNCTION);
-  
+if strcmp(TYPE, 'nn')
+    A = adjacency(DATA, TYPE, NN, DISTANCEFUNCTION);
+elseif strcmp(TYPE, 'kernel')
+    A = calckernel(options.Kernel,options.KernelParam,DATA);
+else
+    error('invalid option')
+end
 W = A;
 
 % disassemble the sparse matrix
@@ -65,7 +70,11 @@ case 'heat'
     for i = 1: size(A_i)  
        W(A_i(i), A_j(i)) = exp(-A_v(i)^2/(2*t*t));
     end;
-    
+case 'my_heat'
+    fprintf('*******\n')
+    fprintf('My heat means W = A = K which is the gaussian kernel gram matrix\n');    
+    fprintf('*******\n')
+        
 otherwise
     error('Unknown Weighttype');   
 end

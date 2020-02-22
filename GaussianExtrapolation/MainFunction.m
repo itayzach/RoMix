@@ -1,5 +1,7 @@
 %% Restart run
-clear; close all; clc;
+clear; 
+close all; 
+clc;
 rng(0); % set seed
 
 %% Parameters
@@ -9,25 +11,36 @@ rng(0); % set seed
 ClearPrevOutputs(sSimParams.outputFolder);
 
 %% Verify stuff
-if sSimParams.b_plotEigenFigs
-    PlotFirstEigenfunctions(sParams, sSimParams)
-    PlotSpectrum(sParams, sSimParams)
+
+if sSimParams.b_plotEigenFigs    
+
+    [ mPhi_A, vLambda_A ] = PlotNumericEigenvectors(sParams, sSimParams);
+    [mPhi_m_x, ~] = PlotAnalyticEigenfunctions(sParams, sSimParams);
+    
+    figure;
+    subplot(2,1,1)
+    vLambda = PlotSpectrum(sParams, sSimParams);
+    title('Analytic eigenvalues');
+    subplot(2,1,2)
+    stem(vLambda_A)
+    title('Numeric eigenvalues');
+
 end
 
 if sSimParams.b_verifyRKHS
-    VerifyRHKS(sParams)
+    VerifyRHKS(sParams);
 else
     warning('Not verifying RKHS');
 end
 
 if sSimParams.b_verifyEigOrth
-    VerifyOrthogonality(sParams)
+    VerifyOrthogonality(sParams);
 else
     warning('Not verifying orthogonality');
 end
 
 if sSimParams.b_verifyMercersTheorem
-    VerifyMercerTheorem(sParams)
+    VerifyMercerTheorem(sParams);
 else
     warning('Not verifying Mercer''s theorem');
 end
@@ -48,9 +61,9 @@ end
 %% Extrapolate functions
 if sSimParams.b_extrapolateEnable
     if sParams.dim == 1
-        Extrapolate1D(sParams, sSimParams)
+        Extrapolate1D(sParams, sSimParams);
     elseif sParams.dim == 2
-        Extrapolate2D(sParams, sSimParams)
+        Extrapolate2D(sParams, sSimParams);
     else
         error('Cannot extrapolate for more than 2D')
     end

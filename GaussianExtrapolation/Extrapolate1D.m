@@ -70,7 +70,7 @@ for i = 1:nFuncs
 %         res = 10*exp(-2*x_eval(j)).*sin(5*x_eval(j));
 %     end
 %     % ---------------------------------------------------------------------
-    cFigs{i} = figure(i+1);
+    cFigs{i} = figure();
     p1 = plot(x, vGi, 'Color',       '#4DBEEE', ...
                       'LineWidth',    2, ...
                       'DisplayName', ['$g(x)$']);

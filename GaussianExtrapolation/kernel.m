@@ -1,5 +1,9 @@
 function vKernel = kernel(x,y,l) 
-% vKernel = exp(-norm(x-y).^2./(2*l^2));
+
+if ~isvector(x)
+    error('x has to be a vector');
+end
+
 vKernel = exp(-(x-y).^2./(2*l^2));
 
 % n1 = size(x, 1);

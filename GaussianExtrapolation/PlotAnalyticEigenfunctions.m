@@ -1,31 +1,26 @@
-function [] = PlotFirstEigenfunctions(sParams, sSimParams)
-dx = 0.01;
+function [mPhi_m_x, vLambda] = PlotAnalyticEigenfunctions(sParams, sSimParams)
+dx = 0.1;
 x = (-5:dx:5-dx).';
-fig1 = figure(1);
+fig1 = figure;
 
-pltIdx = 1;
+mPhi_m_x = zeros(length(x), sSimParams.nEigenFuncsToPlot);
+vLambda = zeros(sSimParams.nEigenFuncsToPlot);
 for m = 0:sSimParams.nEigenFuncsToPlot-1  
-    if sParams.dim == 1  
-        if m == 0
-            vP_x = p(x, sParams.sigma);
-            
-            hold on
-            % subplot(floor(sSimParams.nEigenFuncsToPlot/2), floor(sSimParams.nEigenFuncsToPlot/2)+1, pltIdx)
-            plot(x, vP_x, '-.', 'LineWidth', 2, 'DisplayName', '$p(x)$');
-            pltIdx = pltIdx + 1;
-        end   
-        
-        [vPhi_m_x, ~] = phi(sParams.a, sParams.b, m, x);
+    if sParams.dim == 1        
+        [mPhi_m_x(:,m+1), ~] = phi(sParams.a, sParams.b, m, x);
         % subplot(floor(sSimParams.nEigenFuncsToPlot/2), floor(sSimParams.nEigenFuncsToPlot/2)+1, pltIdx)
-        plot(x, vPhi_m_x, 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
+        plot(x, mPhi_m_x(:,m+1), 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
+        hold on
         xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
         if m == sSimParams.nEigenFuncsToPlot - 1
+            vP_x = p(x, sParams.sigma);
+            % subplot(floor(sSimParams.nEigenFuncsToPlot/2), floor(sSimParams.nEigenFuncsToPlot/2)+1, pltIdx)
+            plot(x, vP_x, '-.', 'LineWidth', 2, 'DisplayName', '$p(x)$');
             hold off
-            %     title('Eigenfunctions')
+            title('Kernel (analytic) Eigenfunctions')
             legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
-            print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
+%             print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
         end
-        pltIdx = pltIdx + 1;
     elseif sParams.dim == 2
         x1 = x.';
         x2 = x.';
@@ -36,12 +31,14 @@ for m = 0:sSimParams.nEigenFuncsToPlot-1
         % outter product since phi(x1,x2)=phi(x1)phi(x2)
         mPhi_m_x1x2 = vPhi_m_x1.' * vPhi_m_x2; 
         
-        subplot(2,2,m+1);
+        subplot(2,sSimParams.nEigenFuncsToPlot/2,m+1);
         surf(mX1, mX2, mPhi_m_x1x2, 'edgecolor', 'none')
+        view(2)
+        colorbar()
         xlabel('$x_1$', 'Interpreter', 'latex')
         ylabel('$x_2$', 'Interpreter', 'latex')
         zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
-        print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_2d'], '-depsc')
+%         print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_2d'], '-depsc')
     else
         error('cannot plot for dim > 2')
     end

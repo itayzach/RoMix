@@ -29,12 +29,12 @@ vF_awgn1 = sqrt(sSimParams.noiseVar1)*randn(N*N, 1);
 
 %% F2
 B1 = 5;
-B2 = 5;
-B3 = 5;
+B2 = 30;
+B3 = 30;
 
-exp1 = B1*exp(-(x1-0.5*x2).^2); % + B3*exp(-0.3*x1.^2).*sin(1*pi*x1);
+exp1 = B3*exp(-0.3*x1.^2).*sin(1*pi*x1);
 
-mF2      = exp1.' * exp1; %+ B2*exp(-0.5*mX1.^2).*exp(-0.5*mX2.^2).*sin(2*pi*mX1).*sin(2*pi*mX2) + B3*exp(-0.3*mX1.^2).*exp(-0.3*mX2.^2).*sin(1*pi*mX1).*sin(1*pi*mX2);
+mF2      = B2*exp(-0.5*mX1.^2).*exp(-0.5*mX2.^2).*sin(0.5*pi*mX1).*sin(0.5*pi*mX2); % + B3*exp(-0.3*mX1.^2).*exp(-0.3*mX2.^2).*sin(1*pi*mX1).*sin(1*pi*mX2);
 vF2 = mF2(:);
 vF_awgn2 = sqrt(sSimParams.noiseVar2)*randn(N*N, 1);
 

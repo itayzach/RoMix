@@ -47,12 +47,12 @@ y1(neg(ineg(1:l)))=-1;
 %subplot(1,3,1); plot2D(x,y1,12);axis([-1.5 2.5 -1.5 2.5]);
 
 %% Figure setup
-fig = figure();
-fig_left_loc = -1500;
-fig_bottom_loc = 100;
-fig_width = 750;
-fig_height = 750;
-set(fig,'position',[fig_left_loc,fig_bottom_loc,fig_width,fig_height])
+fig = figure;
+% fig_left_loc = -1500;
+% fig_bottom_loc = 100;
+% fig_width = 750;
+% fig_height = 750;
+% set(fig,'position',[fig_left_loc,fig_bottom_loc,fig_width,fig_height])
 
 %% Set kernel sigma
 
@@ -110,6 +110,11 @@ options=ml_options('gamma_A',0.1, ...
                    'GraphWeightParam', kernel_sigma, ...
                    'GraphWeights', 'my_heat', ...
                    'GraphNormalize', false);
+
+options.a_k = 0.001;
+options.b_k = 1/(2*kernel_sigma^2);
+               
+               
 subplot(2,2,3);
 [alpha_laprls, XTrain_laprls] = experiment_moon(x,y1,xt,yt,'laprlsc',0.03125,1, options);
 hold on;  
@@ -127,7 +132,7 @@ options=ml_options('gamma_A',0.1, ...
                    'GraphWeights', 'my_heat', ...
                    'GraphNormalize', false);
                
-options.a_k = 105;
+options.a_k = 0.001;
 options.b_k = 1/(2*kernel_sigma^2);
 
 options.M = 15; 

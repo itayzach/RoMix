@@ -75,8 +75,8 @@ switch method
             if u~=0
                 % semi-supervised case
                 L=laplacian(X,'nn',options);
-                % fully supervised case
             else
+                % fully supervised case
                 pos=find(Y==1); neg=find(Y==-1);
                 L1=laplacian(X(pos,:),'nn',options);
                 L2=laplacian(X(neg,:),'nn',options);
@@ -107,13 +107,13 @@ switch method
                 % semi-supervised case
                 if strcmp(options.GraphWeights, 'heat') || strcmp(options.GraphWeights, 'my_heat')
                     fprintf('Generating Laplacian from Guassian kernel\n')
-                    L=laplacian(X,'kernel',options);
+                    L=laplacian(X,'kernel',options);              
                 elseif strcmp(options.GraphWeights, 'binary')
                     fprintf('Generating Laplacian with nearest-neighbor\n')
                     L=laplacian(X,'nn',options);
                 end
-                % fully supervised case
             else
+                % fully supervised case
                 pos=find(Y==1); neg=find(Y==-1);
                 L1=laplacian(X(pos,:),'nn',options);
                 L2=laplacian(X(neg,:),'nn',options);

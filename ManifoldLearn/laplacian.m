@@ -74,6 +74,35 @@ case 'my_heat'
     fprintf('*******\n')
     fprintf('My heat means W = A = K which is the gaussian kernel gram matrix\n');    
     fprintf('*******\n')
+    
+%     [mPhi_W, Lambda_W] = eig(W);
+                    
+                    
+%     fig1 = figure(2);
+%     x1 = DATA(:,1);
+%     x2 = DATA(:,2);
+%     [mX1, mX2] = meshgrid(x1, x2);
+%     for m = 0:3        
+%         [vPhi_m_x1, ~] = SqExpEig(options.a_k, options.b_k, m, DATA(:,1));
+%         [vPhi_m_x2, ~] = SqExpEig(options.a_k, options.b_k, m, DATA(:,2));
+%         
+%         % outter product since phi(x1,x2)=phi(x1)phi(x2)
+%         vPhi_m_x1x2 = vPhi_m_x1 .* vPhi_m_x2; 
+%         
+%         vPhi_W = mPhi_W(:,m+1);
+%         
+%         subplot(2,2,m+1);
+% %         surf(mX1, mX2, mPhi_m_x1x2, 'edgecolor', 'none')
+% %         hold on
+%         scatter3(DATA(:,1), DATA(:,2), vPhi_m_x1x2, 'filled', 'bo')
+%         hold on
+%         scatter3(DATA(:,1), DATA(:,2), vPhi_W, 'filled', 'ro')
+% %         view(2)
+% %         colorbar()
+% %         xlabel('$x_1$', 'Interpreter', 'latex')
+% %         ylabel('$x_2$', 'Interpreter', 'latex')
+% %         zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
+%     end 
         
 otherwise
     error('Unknown Weighttype');   

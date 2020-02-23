@@ -1,11 +1,11 @@
 function [sParams, sSimParams] = GetParameters()
 
 % dimensions
-sParams.dim = 2;
+sParams.dim = 1;
 
 % kernel
-sParams.a = 3;
-sParams.b = 1;
+sParams.a = 1;
+sParams.b = 3;
 
 % p(x)
 sParams.sigma = 1/sqrt(4*sParams.a);
@@ -22,17 +22,17 @@ sParams.R = 100; %2*M; %floor(N/step);
 
 % simulation
 sSimParams.outputFolder = 'figs';
-sSimParams.nEigenFuncsToPlot = 4;
+sSimParams.nEigenFuncsToPlot = 6;
 
 sSimParams.b_plotEigenFigs        = true;
-sSimParams.b_verifyRKHS           = true;
-sSimParams.b_verifyEigOrth        = true;
+sSimParams.b_verifyRKHS           = false;
+sSimParams.b_verifyEigOrth        = false;
 sSimParams.b_verifyMercersTheorem = false;
-sSimParams.b_extrapolateEnable    = true;
+sSimParams.b_extrapolateEnable    = false;
 
 sSimParams.b_randomStepSize       = true;
 
 % AWGN
-sSimParams.noiseVar1 = 0.1;
-sSimParams.noiseVar2 = 0.1;
+sSimParams.noiseVar1 = 0;%0.1;
+sSimParams.noiseVar2 = 0;%0.1;
 end

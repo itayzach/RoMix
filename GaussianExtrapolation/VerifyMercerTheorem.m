@@ -32,13 +32,8 @@ else
         
     else
         nxPoints = 200;
-        if sSimParams.twomoons_scale
-            xMax = 5;25;
-            xMin = -5;-13;
-        else
-            xMax = 3;
-            xMin = -2;
-        end
+        xMax = 8; %25;
+        xMin = -8; %-13;
         x = (xMax - xMin)*rand(nxPoints, 2) + xMin;
     end
     step = (xMax - xMin)/100;
@@ -58,9 +53,17 @@ tPhi_x = zeros(nxPoints, sParams.M, sParams.dim);
 tPhi_y = zeros(nyPoints, sParams.M, sParams.dim);
 vLambda = zeros(1, sParams.M);
 for m = 0:sParams.M-1
+    vLambda(m+1) = lambda(sParams.a, sParams.b, m);
+%     if vLambda(m+1) < 10e-16
+%         fprintf('VerifyMercerTheorem: lambda_m < 1e-20, breaking...\n');
+%         break
+%     end
+    assert(~any(isnan(vLambda(m+1))));
     for d = 1:sParams.dim
-        [tPhi_x(:,m+1,d), vLambda(m+1)] = phi(sParams.a, sParams.b, m, x(:,d));
-        [tPhi_y(:,m+1,d), ~] = phi(sParams.a, sParams.b, m, y(:,d));
+        tPhi_x(:,m+1,d) = phi(sParams.a, sParams.b, m, x(:,d));
+        assert(~any(isnan(squeeze(tPhi_x(:,m+1,d)))));
+        tPhi_y(:,m+1,d) = phi(sParams.a, sParams.b, m, y(:,d));
+        assert(~any(isnan(squeeze(tPhi_y(:,m+1,d)))));
     end
 end
 
@@ -87,6 +90,6 @@ if sParams.dim == 2
     title('mercer');
 end
 
-isalmostequal(rhs, lhs, 1e-10, sprintf('Mercer''s theorem failed. Perhaps M = %d is not enough?', sParams.M));
+isalmostequal(lhs, rhs, 1e-10, sprintf('Mercer''s theorem failed. Perhaps M = %d is not enough?', sParams.M));
 fprintf('Mercer''s theorem confirmed\n');
 end

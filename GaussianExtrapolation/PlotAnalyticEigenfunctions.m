@@ -8,7 +8,8 @@ vLambda = zeros(sSimParams.nEigenFuncsToPlot, 1);
 
 if sParams.dim == 1     
     for m = 0:sSimParams.nEigenFuncsToPlot-1  
-        [mPhi_m_x(:,m+1), vLambda(m+1)] = phi(sParams.a, sParams.b, m, x);
+        mPhi_m_x(:,m+1) = phi(sParams.a, sParams.b, m, x);
+        vLambda(m+1) = lambda(sParams.a, sParams.b, m);
         % subplot(floor(sSimParams.nEigenFuncsToPlot/2), floor(sSimParams.nEigenFuncsToPlot/2)+1, pltIdx)
         plot(x, mPhi_m_x(:,m+1), 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
         hold on
@@ -29,8 +30,8 @@ elseif sParams.dim == 2
     x2 = x.';
     [mX1, mX2] = meshgrid(x1, x2);
     for m = 0:sSimParams.nEigenFuncsToPlot-1  
-        [vPhi_m_x1, ~] = phi(sParams.a, sParams.b, m, x1);
-        [vPhi_m_x2, ~] = phi(sParams.a, sParams.b, m, x2);
+        vPhi_m_x1 = phi(sParams.a, sParams.b, m, x1);
+        vPhi_m_x2 = phi(sParams.a, sParams.b, m, x2);
 
         % outter product since phi(x1,x2)=phi(x1)phi(x2)
         mPhi_m_x1x2 = vPhi_m_x1.' * vPhi_m_x2; 

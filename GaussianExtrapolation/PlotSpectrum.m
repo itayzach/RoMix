@@ -1,15 +1,21 @@
-function vLambda = PlotSpectrum(sParams, sSimParams)
-dx = 0.01;
-x = (-5:dx:5-dx).';
+function vLambda = PlotSpectrum(sParams, vLambda_A)
 
 vLambda = zeros(sParams.M, 1);
 for m = 0:sParams.M-1
-    [~, vLambda(m+1)] = phi(sParams.a, sParams.b, m, x);
+    vLambda(m+1) = lambda(sParams.a, sParams.b, m);
 end
 
-% fig1 = figure();
+figure;
+subplot(2,1,1);
 stem(0:sParams.M-1, vLambda);
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('$\lambda_m$', 'Interpreter', 'latex', 'FontSize', 14)
-% print(fig1, [sSimParams.outputFolder filesep 'fig2_eigenvalues'], '-depsc')
+title('Analytic eigenvalues');
+
+
+subplot(2,1,2);
+stem(vLambda_A);
+xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14);
+ylabel('$\lambda_m$', 'Interpreter', 'latex', 'FontSize', 14);
+title('Numeric eigenvalues');
 end

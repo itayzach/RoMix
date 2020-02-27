@@ -4,9 +4,9 @@ function [sParams, sSimParams] = GetParameters()
 sParams.dim = 2;
 
 % kernel
-% sParams.a = 0.01;
+% sParams.a = 0.1;
 % sParams.l = 1/sqrt(2)/10;
-sParams.a = 1;
+sParams.a = 2;
 sParams.l = 1/sqrt(2);
 
 % p(x)
@@ -25,20 +25,21 @@ sParams.lambda_1 = sqrt(2*sParams.a/sParams.A) * sParams.B^1;
 sParams.gamma = 0; % regularization
 
 % num of eigenfunctions
-sParams.M = 170;
+sParams.M = 150;
+sParams.extrplM = 8;
 
 % num of sampled points to extrapolate from
-sParams.R = 100; %2*M; %floor(N/step);
+sParams.R = 30; %2*M; %floor(N/step);
 
 % simulation
 sSimParams.outputFolder = 'figs';
 sSimParams.nEigenFuncsToPlot = 4;
 
 sSimParams.b_plotEigenFigs        = true;
-sSimParams.b_verifyRKHS           = false;
+sSimParams.b_verifyRKHS           = true;
 sSimParams.b_verifyEigOrth        = false;
 sSimParams.b_verifyMercersTheorem = true;
-sSimParams.b_extrapolateEnable    = false;
+sSimParams.b_extrapolateEnable    = true;
 
 sSimParams.b_randomStepSize       = true;
 
@@ -49,4 +50,6 @@ sSimParams.twomoons_scale = true;
 % AWGN
 sSimParams.noiseVar1 = 0;%0.1;
 sSimParams.noiseVar2 = 0;%0.1;
+
+assert(sParams.extrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
 end

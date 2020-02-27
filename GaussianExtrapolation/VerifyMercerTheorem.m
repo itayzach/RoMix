@@ -24,13 +24,21 @@ else
     if sSimParams.twomoons_dataset
         twomoons = load('2moons.mat', 'x');
         x = twomoons.x;
+        if sSimParams.twomoons_scale
+            x = 10*x;
+        end
         xMax = max(max(x,[],1));
         xMin = min(min(x,[],1));
         
     else
         nxPoints = 200;
-        xMax = 3;
-        xMin = -2;
+        if sSimParams.twomoons_scale
+            xMax = 5;25;
+            xMin = -5;-13;
+        else
+            xMax = 3;
+            xMin = -2;
+        end
         x = (xMax - xMin)*rand(nxPoints, 2) + xMin;
     end
     step = (xMax - xMin)/100;

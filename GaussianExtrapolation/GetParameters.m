@@ -1,7 +1,7 @@
 function [sParams, sSimParams] = GetParameters()
 
 % dimensions
-sParams.dim = 1;
+sParams.dim = 2;
 
 % kernel
 % sParams.a = 0.01;
@@ -25,7 +25,7 @@ sParams.lambda_1 = sqrt(2*sParams.a/sParams.A) * sParams.B^1;
 sParams.gamma = 0; % regularization
 
 % num of eigenfunctions
-sParams.M = 80;
+sParams.M = 170;
 
 % num of sampled points to extrapolate from
 sParams.R = 100; %2*M; %floor(N/step);
@@ -43,7 +43,8 @@ sSimParams.b_extrapolateEnable    = false;
 sSimParams.b_randomStepSize       = true;
 
 % dataset
-sSimParams.twomoons_dataset = true;
+sSimParams.twomoons_dataset = false;
+sSimParams.twomoons_scale = true;
 
 % AWGN
 sSimParams.noiseVar1 = 0;%0.1;

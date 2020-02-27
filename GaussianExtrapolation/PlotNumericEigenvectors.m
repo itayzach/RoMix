@@ -1,4 +1,6 @@
 function [mPhi_A, Lambda_A] = PlotNumericEigenvectors(sParams, sSimParams)
+fig1 = figure;
+
 if sParams.dim == 1
     dx = 0.1;
     x = (-5:dx:5-dx).';
@@ -18,13 +20,12 @@ if sParams.dim == 1
     
     % sinc(x_i - x_j)
 %     X = repmat(x.',n,1) - repmat(x,1,n);
-%     A = sinc(X);
+%     A = sinc(2*X);
     
     [mPhi_A, Lambda_A] = eig(A);
     [Lambda_A, idx] = sort(diag(Lambda_A), 'descend');
     mPhi_A = mPhi_A(:,idx);
     
-    figure;
     for m = 0:sSimParams.nEigenFuncsToPlot-1
         plot(x, mPhi_A(:,m+1), 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
         hold on
@@ -33,10 +34,10 @@ if sParams.dim == 1
             hold off
             title('Eigenvectors of (numeric) A')
             legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
-%             print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
+            
         end
     end
-    
+    print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
 %     D = diag(sum(A,2));
 %     L = D - A;
 %     [mPhi_L, Lambda_L] = eig(L);
@@ -74,14 +75,14 @@ elseif sParams.dim == 2
     [Lambda_A, idx] = sort(diag(Lambda_A), 'descend');
     mPhi_A = mPhi_A(:,idx);
     
-    fig1 = figure;
+    sgtitle('Eigenvectors of (numeric) A')
     for m = 0:sSimParams.nEigenFuncsToPlot-1
         
         mPhi_Am = reshape(mPhi_A(:,m+1), length(x1), length(x2));
         
         subplot(2,sSimParams.nEigenFuncsToPlot/2,m+1);
         surf(mX1, mX2, mPhi_Am, 'edgecolor', 'none')
-        view(2)
+%         view(2)
         colorbar()
         xlabel('$x_1$', 'Interpreter', 'latex')
         ylabel('$x_2$', 'Interpreter', 'latex')

@@ -15,7 +15,7 @@ ClearPrevOutputs(sSimParams.outputFolder);
 if sSimParams.b_plotEigenFigs    
 
     [ mPhi_A, vLambda_A ] = PlotNumericEigenvectors(sParams, sSimParams);
-    [mPhi_m_x, ~] = PlotAnalyticEigenfunctions(sParams, sSimParams);
+    [ mPhi_K, vLambda_K ] = PlotAnalyticEigenfunctions(sParams, sSimParams);
     
     figure;
     subplot(2,1,1)
@@ -40,7 +40,7 @@ else
 end
 
 if sSimParams.b_verifyMercersTheorem
-    VerifyMercerTheorem(sParams);
+    VerifyMercerTheorem(sParams, sSimParams);
 else
     warning('Not verifying Mercer''s theorem');
 end

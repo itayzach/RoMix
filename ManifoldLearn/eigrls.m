@@ -1,5 +1,5 @@
 % function [alpha,b]=eigrls(Y,Phi, Lambda,gamma1,gamma2)
-function [alpha, b]=eigrls(L, Y, Phi, Lambda, gamma1,gamma2)
+function [alpha, b]=eigrls(Y, Phi, Lambda, gamma1,gamma2)
 
 n=size(Y,1); % total examples
 l=sum(abs(Y)); % labeled examples

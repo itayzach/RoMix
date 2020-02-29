@@ -128,6 +128,11 @@ switch method
         classifier= ...
             saveclassifier('laprlsc',options.Kernel,options.KernelParam, ...
             alpha,X,b,[options.gamma_A options.gamma_I]);
+        if isfield(options, 'a_k')
+            classifier.a_k = options.a_k;
+            classifier.b_k = options.b_k;
+            classifier.M = options.M;
+        end
     case 'eigrls'
         for m = 0:options.M-1 
             [vPhi_m_x1, lambda_m1] = SqExpEig(options.a_k, options.b_k, m, X(:,1));
@@ -141,7 +146,7 @@ switch method
         
 %         L=laplacian(X,'nn',options);
         L=[];
-        [alpha, b] = eigrls(L, Y, Phi, Lambda, options.gamma_A, options.gamma_I);
+        [alpha, b] = eigrls(Y, Phi, Lambda, options.gamma_A, options.gamma_I);
         classifier= ...
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
             alpha,X,b,[options.gamma_A options.gamma_I]);

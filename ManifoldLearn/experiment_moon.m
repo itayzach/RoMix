@@ -73,7 +73,7 @@ xmax=max(XTrain(:,1)); ymax=max(XTrain(:,2)); rmax=max(xmax,ymax)+0.2;
 steps=(rmax-rmin)/100;
 xrange=rmin:steps:rmax;
 yrange=rmin:steps:rmax;
-plotclassifiers(best_classifier, xrange, yrange);
+% plotclassifiers(best_classifier, xrange, yrange);
 
 alpha = best_classifier.alpha;
 XTrain = best_classifier.xtrain;

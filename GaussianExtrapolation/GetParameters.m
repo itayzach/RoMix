@@ -36,10 +36,10 @@ sSimParams.outputFolder = 'figs';
 sSimParams.nEigenFuncsToPlot = 4;
 
 sSimParams.b_plotEigenFigs        = true;
-sSimParams.b_verifyRKHS           = true;
+sSimParams.b_verifyRKHS           = false;
 sSimParams.b_verifyEigOrth        = false;
-sSimParams.b_verifyMercersTheorem = true;
-sSimParams.b_extrapolateEnable    = true;
+sSimParams.b_verifyMercersTheorem = false;
+sSimParams.b_extrapolateEnable    = false;
 
 sSimParams.b_randomStepSize       = true;
 

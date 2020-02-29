@@ -1,7 +1,7 @@
 function [mPhi_m_x, vLambda] = PlotAnalyticEigenfunctions(sParams, sSimParams)
 dx = 0.1;
 x = (-5:dx:5-dx).';
-fig1 = figure;
+fig = figure;
 
 mPhi_m_x = zeros(length(x), sSimParams.nEigenFuncsToPlot);
 vLambda = zeros(sSimParams.nEigenFuncsToPlot, 1);
@@ -21,7 +21,8 @@ if sParams.dim == 1
             hold off
             title('Kernel (analytic) Eigenfunctions')
             legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
-            print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
+%             print(fig, [sSimParams.outputFolder filesep 'fig_eigenfunctions_1d'], '-depsc')
+            saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenfunctions_1d.png']);
         end
     end
 elseif sParams.dim == 2
@@ -44,7 +45,8 @@ elseif sParams.dim == 2
         ylabel('$x_2$', 'Interpreter', 'latex')
         zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
     end
-    print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_2d'], '-depsc')
+%     print(fig, [sSimParams.outputFolder filesep 'fig_eigenfunctions_2d'], '-depsc')
+    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenfunctions_2d.png']);
 else
     error('cannot plot for dim > 2')
 end

@@ -8,14 +8,14 @@ rng(0); % set seed
 [sParams, sSimParams] = GetParameters();
 
 %% Clean previous outputs
-ClearPrevOutputs(sSimParams.outputFolder);
+% ClearPrevOutputs(sSimParams.outputFolder);
 
 %% Verify stuff
 if sSimParams.b_plotEigenFigs    
 
     [ mPhi_A, vLambda_A ] = PlotNumericEigenvectors(sParams, sSimParams);
     [ mPhi_K, vLambda_K ] = PlotAnalyticEigenfunctions(sParams, sSimParams);
-    PlotSpectrum(sParams, vLambda_A);
+    PlotSpectrum(sParams, sSimParams, vLambda_A);
 
 end
 

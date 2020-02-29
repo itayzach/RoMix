@@ -1,5 +1,5 @@
 function [mPhi_A, Lambda_A] = PlotNumericEigenvectors(sParams, sSimParams)
-fig1 = figure;
+fig = figure;
 
 if sParams.dim == 1
     dx = 0.1;
@@ -37,14 +37,15 @@ if sParams.dim == 1
             
         end
     end
-    print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
+%     print(fig, [sSimParams.outputFolder filesep 'fig_eigenfunctions_1d'], '-depsc')
+    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenfunctions_1d.png']);
 %     D = diag(sum(A,2));
 %     L = D - A;
 %     [mPhi_L, Lambda_L] = eig(L);
 %     [Lambda_L, idx] = sort(diag(Lambda_L), 'descend');
 %     mPhi_L = mPhi_L(:,idx);
 %     
-%     fig1 = figure;
+%     fig = figure;
 %     for m = 0:sSimParams.nEigenFuncsToPlot-1
 %         plot(x, mPhi_L(:,m+1), 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
 %         hold on;
@@ -53,7 +54,7 @@ if sParams.dim == 1
 %             hold off
 %             title('Eigenvectors of (numeric) L')
 %             legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
-%             print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
+%             print(fig, [sSimParams.outputFolder filesep 'fig1_eigenfunctions_1d'], '-depsc')
 %         end
 %     end
     
@@ -87,12 +88,13 @@ elseif sParams.dim == 2
         xlabel('$x_1$', 'Interpreter', 'latex')
         ylabel('$x_2$', 'Interpreter', 'latex')
         zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
-        print(fig1, [sSimParams.outputFolder filesep 'fig1_eigenvectors_2d'], '-depsc')
+%         print(fig, [sSimParams.outputFolder filesep 'fig_eigenvectors_2d'], '-depsc')
+        saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenvectors_2d.png']);
     end
 else
     error('Implement for more than 2-D!');
 end
 
-% fig1 = figure;
+% fig = figure;
 
 end

@@ -38,7 +38,7 @@ if sParams.dim == 1
         end
     end
 %     print(fig, [sSimParams.outputFolder filesep 'fig_eigenfunctions_1d'], '-depsc')
-    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenfunctions_1d.png']);
+    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenvectors_1d.png']);
 %     D = diag(sum(A,2));
 %     L = D - A;
 %     [mPhi_L, Lambda_L] = eig(L);

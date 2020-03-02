@@ -14,22 +14,22 @@ end
 rhs = zeros(size(y));
 lhs = zeros(size(y));
 
-for m = 0:sParams.M-1
-    lambda_m = lambda(sParams.a, sParams.b, m);
+for m = 0:sParams.RkhsM-1
+    lambda_m = lambda(sParams, m);
     if lambda_m < 1e-20
         fprintf('VerifyRKHS: lambda_m < 1e-20, breaking...\n');
         break;
     end
     for d = 1:sParams.dim
-        vPhi_m_x = phi(sParams.a, sParams.b, m, x);
-        vP_x = p(x, sParams.sigma);
+        vPhi_m_x = phi(sParams, m, x);
+        vP_x = p(sParams, x);
 
         % Make sure that phi_m is an eigenfunction of the kernel by:
         % (for a fixed y)
         %   rhs = lambda_m * phi_m_(y)
         %   lhs = <Ky, phi_m> = integral_x( Ky(x)phi_m(x)p(x)dx )
         
-        phi_m_y = phi(sParams.a, sParams.b, m, y(:, d));
+        phi_m_y = phi(sParams, m, y(:, d));
         rhs(:, d) = lambda_m * phi_m_y;
 
         for j = 1:nPoints

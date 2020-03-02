@@ -49,20 +49,20 @@ else
     rhs = zeros(nxPoints, nyPoints);
 end
 
-tPhi_x = zeros(nxPoints, sParams.M, sParams.dim);
-tPhi_y = zeros(nyPoints, sParams.M, sParams.dim);
-vLambda = zeros(1, sParams.M);
-for m = 0:sParams.M-1
-    vLambda(m+1) = lambda(sParams.a, sParams.b, m);
+tPhi_x = zeros(nxPoints, sParams.MercerM, sParams.dim);
+tPhi_y = zeros(nyPoints, sParams.MercerM, sParams.dim);
+vLambda = zeros(1, sParams.MercerM);
+for m = 0:sParams.MercerM-1
+    vLambda(m+1) = lambda(sParams, m);
 %     if vLambda(m+1) < 10e-16
 %         fprintf('VerifyMercerTheorem: lambda_m < 1e-20, breaking...\n');
 %         break
 %     end
     assert(~any(isnan(vLambda(m+1))));
     for d = 1:sParams.dim
-        tPhi_x(:,m+1,d) = phi(sParams.a, sParams.b, m, x(:,d));
+        tPhi_x(:,m+1,d) = phi(sParams, m, x(:,d));
         assert(~any(isnan(squeeze(tPhi_x(:,m+1,d)))));
-        tPhi_y(:,m+1,d) = phi(sParams.a, sParams.b, m, y(:,d));
+        tPhi_y(:,m+1,d) = phi(sParams, m, y(:,d));
         assert(~any(isnan(squeeze(tPhi_y(:,m+1,d)))));
     end
 end
@@ -90,6 +90,6 @@ if sParams.dim == 2
     title('mercer');
 end
 
-isalmostequal(lhs, rhs, 1e-10, sprintf('Mercer''s theorem failed. Perhaps M = %d is not enough?', sParams.M));
+isalmostequal(lhs, rhs, 1e-10, sprintf('Mercer''s theorem failed. Perhaps M = %d is not enough?', sParams.MercerM));
 fprintf('Mercer''s theorem confirmed\n');
 end

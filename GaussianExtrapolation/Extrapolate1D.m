@@ -1,6 +1,6 @@
 function [] = Extrapolate1D(sParams, sSimParams)
 
-assert(sParams.extrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
+assert(sParams.ExtrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
 assert(sParams.dim == 1, 'This function works only for 1-D')
 dx = 0.01;
 x = (-5:dx:5-dx)';
@@ -13,9 +13,9 @@ B1 = 10;
 B2 = 7;
 B3 = 6;
 % mF      = [ A*exp(-x).*(sin(2.5*x) + sin(2*pi*x))   A*exp(-2*x).*sin(5*x) ];
-phi_1 = phi(sParams.a, sParams.b, 1, x);
-phi_6 = phi(sParams.a, sParams.b, 6, x);
-phi_8 = phi(sParams.a, sParams.b, 8, x);
+phi_1 = phi(sParams, 1, x);
+phi_6 = phi(sParams, 6, x);
+phi_8 = phi(sParams, 8, x);
 mF      = [ A1*phi_1 + A6*phi_6 + A8*phi_8   ...
             B1*exp(-0.2*x.^2).*sin(pi*x) + B2*exp(-0.5*x.^2).*sin(0.4*pi*x) + B3*exp(-0.3*x.^2).*sin(1*pi*x) ];
 mF_awgn = [sqrt(sSimParams.noiseVar1)*randn(N,1) sqrt(sSimParams.noiseVar2)*randn(N,1)];
@@ -32,9 +32,9 @@ for i = 1:nFuncs
     vFi_awgn = mF_awgn(:, i);
     SNR = snr(vFi, vFi_awgn);
     vGi = vFi + vFi_awgn;
-    mPhi = zeros(N, sParams.extrplM);
-    for m = 0:sParams.extrplM-1 
-        vPhi_m_x = phi(sParams.a, sParams.b, m, x);
+    mPhi = zeros(N, sParams.ExtrplM);
+    for m = 0:sParams.ExtrplM-1 
+        vPhi_m_x = phi(sParams, m, x);
         mPhi(:, m+1) = vPhi_m_x;
     end
     if sSimParams.b_randomStepSize
@@ -43,7 +43,7 @@ for i = 1:nFuncs
         step = N/sParams.R;
         vR = 1:step:N;
     end
-    I = eye(sParams.extrplM);
+    I = eye(sParams.ExtrplM);
     
     mPhi_RM = mPhi(vR, :);
     vGR = vGi(vR);
@@ -88,9 +88,9 @@ for i = 1:nFuncs
     hold off
     legend([p2 p1 p3], 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
     print(cFigs{i}, [sSimParams.outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
-    fprintf('f%d : R = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, sParams.R, sParams.extrplM, SNR, accuracy);
+    fprintf('f%d : R = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, sParams.R, sParams.ExtrplM, SNR, accuracy);
     if i == 1
-        vC = zeros(sParams.extrplM, 1);
+        vC = zeros(sParams.ExtrplM, 1);
         vC(1+1) = A1;
         vC(6+1) = A6;
         vC(8+1) = A8;

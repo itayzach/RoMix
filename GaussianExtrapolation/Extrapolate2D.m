@@ -1,6 +1,6 @@
 function [] = Extrapolate2D(sParams, sSimParams)
 
-assert(sParams.extrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
+assert(sParams.ExtrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
 assert(sParams.dim == 2, 'This function works only for 2-D')
 
 dx = 0.01;
@@ -51,8 +51,8 @@ for i = 1:nFuncs
     vFi_awgn = mF_awgn(:, i);
     SNR = snr(vFi, vFi_awgn);
     vGi = vFi + vFi_awgn;
-    mPhi = zeros(N*N, sParams.extrplM);
-    for m = 0:sParams.extrplM-1 
+    mPhi = zeros(N*N, sParams.ExtrplM);
+    for m = 0:sParams.ExtrplM-1 
         vPhi_m_x1 = phi(sParams.a, sParams.b, m, x1);
         vPhi_m_x2 = phi(sParams.a, sParams.b, m, x2);
         
@@ -68,7 +68,7 @@ for i = 1:nFuncs
         vR = 1:step:N^2;
                 
     end
-    I = eye(sParams.extrplM);
+    I = eye(sParams.ExtrplM);
     
     mPhi_RM = mPhi(vR, :);
     mGi = reshape(vGi,N,N);
@@ -76,7 +76,7 @@ for i = 1:nFuncs
     vCR = (mPhi_RM.' * mPhi_RM) \ ( mPhi_RM.' * vGR );
 %     vCR = pinv(mPhi_RM) * vGR;
 
-%     vC = zeros(sParams.extrplM, 1);
+%     vC = zeros(sParams.ExtrplM, 1);
 %     vC(1+1) = A1;
 %     fprintf('    vCR       vC \n')
 %     disp([vCR, vC]);
@@ -133,6 +133,6 @@ for i = 1:nFuncs
 %     hold off
 %     legend([p2 p1 p3], 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
 %     print(cFigs{i}, [sSimParams.outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
-    fprintf('f%d : R = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, sParams.R, sParams.extrplM, SNR, accuracy);
+    fprintf('f%d : R = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, sParams.R, sParams.ExtrplM, SNR, accuracy);
 end
 end

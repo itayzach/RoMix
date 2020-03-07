@@ -3,7 +3,8 @@ function [] = Extrapolate1D(sParams, sSimParams)
 assert(sParams.ExtrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
 assert(sParams.dim == 1, 'This function works only for 1-D')
 dx = 0.01;
-x = (-5:dx:5-dx)';
+% x = (-5:dx:5-dx)';
+x = (sParams.xMin:dx:sParams.xMax-dx)';
 N = length(x);
 
 A1 = 5;
@@ -38,7 +39,12 @@ for i = 1:nFuncs
         mPhi(:, m+1) = vPhi_m_x;
     end
     if sSimParams.b_randomStepSize
-        vR = sort(randi([1 N],sParams.R,1));
+%         vR = sort(randi([1 N],sParams.R,1));
+        vR = zeros(sParams.R, 1);
+        x_rand = sort((sParams.sigma*randn(sParams.R, 1) + sParams.mu));
+        for r = 1:sParams.R
+            [ ~,  vR(r) ]= min(abs(x - x_rand(r)));
+        end
     else
         step = N/sParams.R;
         vR = 1:step:N;

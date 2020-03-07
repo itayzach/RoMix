@@ -7,8 +7,6 @@ end
 
 
 vLambda_An = (1/length(vLambda_A)) * vLambda_A(1:sParams.PlotSpectM);
-nom = abs(vLambda_K - vLambda_An);
-denom = abs(vLambda_K);
 
 fig = figure;
 subplot(2,1,1);
@@ -18,18 +16,15 @@ stem(0:sParams.PlotSpectM-1, vLambda_An, 'DisplayName', '$\lambda_m(A)$');
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'best');
 xlabel('$M$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('$\lambda_m$', 'Interpreter', 'latex', 'FontSize', 14)
-title('Analytic eigenvalues');
+title('Analytic vs. Numeric eigenvalues');
 
 
 subplot(2,1,2);
-% plot(0:sParams.PlotSpectM-1, nom./denom);
-% xlabel('$M$', 'Interpreter', 'latex', 'FontSize', 14);
-% ylabel('$E(\lambda(K), \lambda(A))$', 'Interpreter', 'latex', 'FontSize', 14);
-% title('Numeric eigenvalues');
-plot(0:sParams.PlotSpectM-1, log(vLambda_K), 'DisplayName', '$\log(\lambda_m(K))$');
+stem(0:sParams.PlotSpectM-1, log(vLambda_K),'LineStyle','none', 'DisplayName', '$\log(\lambda_m(K))$');
 hold on;
-plot(0:sParams.PlotSpectM-1, log(vLambda_An), 'DisplayName', '$\log(\lambda_m(A))$');
+stem(0:sParams.PlotSpectM-1, log(vLambda_An),'LineStyle','none', 'DisplayName', '$\log(\lambda_m(A))$');
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'best');
 % print(fig, [sSimParams.outputFolder filesep 'fig_eigenvalues_' num2str(sParams.dim) 'd'], '-depsc')
+title('Analytic vs. Numeric eigenvalues log scale');
 saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenvalues_' num2str(sParams.dim) 'd.png']);
 end

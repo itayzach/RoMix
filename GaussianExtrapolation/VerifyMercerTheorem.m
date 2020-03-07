@@ -91,5 +91,5 @@ if sParams.dim == 2
 end
 
 isalmostequal(lhs, rhs, 1e-10, sprintf('Mercer''s theorem failed. Perhaps M = %d is not enough?', sParams.MercerM));
-fprintf('Mercer''s theorem confirmed\n');
+fprintf('Mercer''s theorem confirmed for M = %d\n', sParams.MercerM);
 end

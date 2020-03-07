@@ -13,9 +13,9 @@ B1 = 10;
 B2 = 7;
 B3 = 6;
 % mF      = [ A*exp(-x).*(sin(2.5*x) + sin(2*pi*x))   A*exp(-2*x).*sin(5*x) ];
-phi_1 = phi(sParams, 1, x);
-phi_6 = phi(sParams, 6, x);
-phi_8 = phi(sParams, 8, x);
+phi_1 = phi(sParams, 1, x, 1);
+phi_6 = phi(sParams, 6, x, 1);
+phi_8 = phi(sParams, 8, x, 1);
 mF      = [ A1*phi_1 + A6*phi_6 + A8*phi_8   ...
             B1*exp(-0.2*x.^2).*sin(pi*x) + B2*exp(-0.5*x.^2).*sin(0.4*pi*x) + B3*exp(-0.3*x.^2).*sin(1*pi*x) ];
 mF_awgn = [sqrt(sSimParams.noiseVar1)*randn(N,1) sqrt(sSimParams.noiseVar2)*randn(N,1)];
@@ -34,7 +34,7 @@ for i = 1:nFuncs
     vGi = vFi + vFi_awgn;
     mPhi = zeros(N, sParams.ExtrplM);
     for m = 0:sParams.ExtrplM-1 
-        vPhi_m_x = phi(sParams, m, x);
+        vPhi_m_x = phi(sParams, m, x, 1);
         mPhi(:, m+1) = vPhi_m_x;
     end
     if sSimParams.b_randomStepSize
@@ -62,7 +62,7 @@ for i = 1:nFuncs
 %     vFi_hat2 = zeros(length(x_eval), 1);
 %     for j = 1:length(x_eval)
 %         for m = 0:M-1
-%             vKernel_x_t = kernel(x_eval(j),t,l);
+%             vKernel_x_t = kernel(sParams, x_eval(j), t);
 %             [vPhi_m_t, lambda_m] = phi(a, b, m, t);
 %             vPhi_m_x(m+1) = trapz(t, vKernel_x_t.*vPhi_m_t.*vP_t);
 %         end

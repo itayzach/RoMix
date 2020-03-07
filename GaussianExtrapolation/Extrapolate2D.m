@@ -16,9 +16,9 @@ A1 = 3;
 A4 = 0.001;
 A6 = 0.0005;
 
-phi1x1 = phi(sParams.a, sParams.b, 1, x1);
-phi4x1 = phi(sParams.a, sParams.b, 4, x1);
-phi6x1 = phi(sParams.a, sParams.b, 6, x1);
+phi1x1 = phi(sParams, 1, x1, 1);
+phi4x1 = phi(sParams, 4, x1, 1);
+phi6x1 = phi(sParams, 6, x1, 1);
 
 phi1x = phi1x1' * phi1x1;
 phi4x = phi4x1' * phi4x1;
@@ -53,8 +53,8 @@ for i = 1:nFuncs
     vGi = vFi + vFi_awgn;
     mPhi = zeros(N*N, sParams.ExtrplM);
     for m = 0:sParams.ExtrplM-1 
-        vPhi_m_x1 = phi(sParams.a, sParams.b, m, x1);
-        vPhi_m_x2 = phi(sParams.a, sParams.b, m, x2);
+        vPhi_m_x1 = phi(sParams, m, x1, 1);
+        vPhi_m_x2 = phi(sParams, m, x2, 2);
         
         % outter product since phi(x1,x2)=phi(x1)phi(x2)
         mPhi_m_x1x2 = vPhi_m_x1.' * vPhi_m_x2; 

@@ -5,7 +5,7 @@ x = (-1e3:dx:1e3-dx).';
 mPhi = zeros(length(x), sParams.dim, sParams.OrthM);
 for m = 0:sParams.OrthM-1
     for d = 1:sParams.dim
-        vPhi_m_x = phi(sParams, m, x);
+        vPhi_m_x = phi(sParams, m, x, d);
         mPhi(:, d, m+1) = vPhi_m_x;
     end
 end

@@ -60,6 +60,30 @@ end
 
 %% pdf
 sParams.pdf = 'gaussian';
+%% x-axis
+sParams.dx = 0.01;
+sParams.x = (sParams.xMin : sParams.dx : sParams.xMax-sParams.dx).';
+
+n = 5000;
+x_rand = zeros(n, sParams.dim);
+for d = 1:sParams.dim
+    if strcmp(sParams.pdf, 'gaussian')
+        x_rand(:, d) = sort((sParams.sigma*randn(n, 1) + sParams.mu));
+        sParams.xMin = max(sParams.xMin, min(x_rand));
+        sParams.xMax = min(sParams.xMax, max(x_rand));
+        warning('Note: sParams.xMin, sParams.xMax are changed');
+    elseif strcmp(sParams.pdf, 'uniform')
+        sParams.xMin = -0.5;
+        sParams.xMax = 0.5;
+        x_rand(:, d) = (sParams.xMax - sParams.xMin)*sort(rand(n, 1)) + sParams.xMin;
+        warning('Note: sParams.xMin, sParams.xMax are changed');
+    else
+        error('unknown pdf')
+    end
+end
+sParams.x_rand = x_rand;
+
+
 
 %% num of eigenfunctions
 sParams.PlotEigenFuncsM = 4;
@@ -71,15 +95,15 @@ sParams.ExtrplM = 10;
 
 %% extrapolation
 sParams.gamma = 0; % regularization
-sParams.R = 30;    % num of sampled points to extrapolate from
+sParams.R = 15;    % num of sampled points to extrapolate from
 
 %% simulation
 sSimParams.outputFolder = 'figs';
 
 sSimParams.b_plotEigenFigs        = true;
-sSimParams.b_verifyRKHS           = false;
-sSimParams.b_verifyEigOrth        = false;
-sSimParams.b_verifyMercersTheorem = false;
+sSimParams.b_verifyRKHS           = true;
+sSimParams.b_verifyEigOrth        = true;
+sSimParams.b_verifyMercersTheorem = true;
 sSimParams.b_extrapolateEnable    = true;
 
 sSimParams.b_randomStepSize       = true;

@@ -10,12 +10,14 @@ if sParams.dim == 1
         for d = 1:sParams.dim
             if strcmp(sParams.pdf, 'gaussian')
                 x(:, d) = sort((sParams.sigma*randn(n, 1) + sParams.mu));
-                xMin = min(x);
-                xMax = max(x);
+                sParams.xMin = max(sParams.xMin, min(x));
+                sParams.xMax = min(sParams.xMax, max(x));
+                warning('Note: sParams.xMin, sParams.xMax are changed');
             elseif strcmp(sParams.pdf, 'uniform')
-                xMin = -0.5;
-                xMax = 0.5;
-                x(:, d) = (xMax - xMin)*sort(rand(n, 1)) + xMin;
+                sParams.xMin = -0.5;
+                sParams.xMax = 0.5;
+                x(:, d) = (sParams.xMax - sParams.xMin)*sort(rand(n, 1)) + sParams.xMin;
+                warning('Note: sParams.xMin, sParams.xMax are changed');
             else
                 error('unknown pdf')
             end
@@ -29,7 +31,7 @@ if sParams.dim == 1
             % exp(-||x_i - x_j||^2 / 2\ell^2)
             P = sum(x.*x,2);
             if sParams.constsType == 1
-                A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(x*x'))/(2*sParams.l^2));
+                A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(x*x'))/(2*sParams.ell^2));
             elseif sParams.constsType == 2
                 A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(x*x'))/(2*sParams.omega^2));
             else
@@ -54,7 +56,7 @@ if sParams.dim == 1
         for m = 0:sParams.PlotEigenFuncsM-1            
             plot(x, mPhi_A(:,m+1), 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
             hold on
-            xlim([xMin xMax]);
+            xlim([sParams.xMin sParams.xMax]);
             xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
             if m == sParams.PlotEigenFuncsM - 1
                 histogram(x, 'Normalization', 'pdf', 'LineStyle', ':', 'DisplayStyle', 'stairs', 'LineWidth', 2, 'DisplayName', '$\hat{p}(x)$');
@@ -70,17 +72,30 @@ if sParams.dim == 1
     
     
 elseif sParams.dim == 2
-    dx = 0.1;
-    x1 = (-3:dx:3);
-    x2 = (-3:dx:3);
-    n = length(x1)*length(x2);
+%     dx = 0.1;
+%     x1 = (-3:dx:3);
+%     x2 = (-3:dx:3);
+    n = 500;
+    x = zeros(n, sParams.dim);
+    for d = 1:sParams.dim
+        if strcmp(sParams.pdf, 'gaussian')
+            x(:, d) = sort((sParams.sigma(d)*randn(n, 1) + sParams.mu(d)));
+        else
+            error('unknown pdf')
+        end
+    end
     
-    [mX1, mX2] = meshgrid(x1, x2);
-    X = [mX1(:) mX2(:)];
-    
+%     [mX1, mX2] = meshgrid(x(:, 1), x(:, 2));
+%     X = [mX1(:) mX2(:)];
+    X = [x(:, 1), x(:, 2)];
     P = sum(X.*X,2);
-    A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(X*X'))/(2*sParams.omega^2));
-    
+    if sParams.constsType == 1
+        A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(x*x'))/(2*sParams.ell^2));
+    elseif sParams.constsType == 2
+        A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(x*x'))/(2*sParams.omega^2));
+    else
+        error('Unknown constsType');
+    end
     [mPhi_A, Lambda_A] = eig(A);
     
     [Lambda_A, idx] = sort(diag(Lambda_A), 'descend');
@@ -89,7 +104,7 @@ elseif sParams.dim == 2
     sgtitle(sprintf('Eigenvectors of (numeric) A; n = %d', n))
     for m = 0:sParams.PlotEigenFuncsM-1
         
-        mPhi_Am = reshape(mPhi_A(:,m+1), length(x1), length(x2));
+        mPhi_Am = reshape(mPhi_A(:,m+1), length(x), length(x));
         
         subplot(2,sParams.PlotEigenFuncsM/2,m+1);
         surf(mX1, mX2, mPhi_Am, 'edgecolor', 'none')

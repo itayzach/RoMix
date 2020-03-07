@@ -4,7 +4,7 @@ if ~isvector(x)
     error('x has to be a vector');
 end
 if sParams.constsType == 1
-    vKernel = exp(-(x-y).^2./(2*sParams.l^2));
+    vKernel = exp(-(x-y).^2./(2*sParams.ell^2));
 elseif sParams.constsType == 2
     vKernel = exp(-(x-y).^2./(2*sParams.omega^2));
 else

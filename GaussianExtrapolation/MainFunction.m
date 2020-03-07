@@ -15,7 +15,8 @@ if sSimParams.b_plotEigenFigs
 
     [ mPhi_A, vLambda_A ] = PlotNumericEigenvectors(sParams, sSimParams);
     [ mPhi_K, vLambda_K ] = PlotAnalyticEigenfunctions(sParams, sSimParams);
-    PlotSpectrum(sParams, sSimParams, vLambda_A);
+    PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A);
+    PlotSpectrum(sParams, sSimParams, vLambda_K, vLambda_A);
 
 end
 

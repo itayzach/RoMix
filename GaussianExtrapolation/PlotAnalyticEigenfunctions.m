@@ -1,30 +1,18 @@
-function [mPhi_m_x, vLambda] = PlotAnalyticEigenfunctions(sParams, sSimParams)
-dx = 0.01;
-x = (sParams.xMin:dx:sParams.xMax-dx).';
-fig = figure;
+function [mPhi_K, vLambda_K] = PlotAnalyticEigenfunctions(sParams, sSimParams)
 
-mPhi_m_x = zeros(length(x), sParams.PlotEigenFuncsM);
-vLambda = zeros(sParams.PlotEigenFuncsM, 1);
+
+mPhi_K = zeros(length(sParams.x), sParams.PlotEigenFuncsM);
+vLambda_K = zeros(sParams.PlotEigenFuncsM, 1);
 
 if sParams.dim == 1     
     for m = 0:sParams.PlotEigenFuncsM-1  
-        mPhi_m_x(:,m+1) = phi(sParams, m, x, 1);
-        vLambda(m+1) = lambda(sParams, m);
-        % subplot(floor(sParams.PlotEigenFuncsM/2), floor(sParams.PlotEigenFuncsM/2)+1, pltIdx)
-        plot(x, mPhi_m_x(:,m+1), 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
-        hold on
-        xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
-        if m == sParams.PlotEigenFuncsM - 1
-            vP_x = p(sParams, x, 1);
-            % subplot(floor(sParams.PlotEigenFuncsM/2), floor(sParams.PlotEigenFuncsM/2)+1, pltIdx)
-            plot(x, vP_x, 'LineStyle', ':', 'LineWidth', 2, 'DisplayName', '$p(x)$');
-            hold off
-            title('Kernel (analytic) Eigenfunctions')
-            legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
-%             print(fig, [sSimParams.outputFolder filesep 'fig_eigenfunctions_1d'], '-depsc')
-            saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenfunctions_1d.png']);
-        end
+        mPhi_K(:,m+1) = phi(sParams, m, sParams.x, 1);
     end
+    vLambda_K = zeros(sParams.PlotSpectM, 1);
+    for m = 0:sParams.PlotSpectM-1
+        vLambda_K(m+1) = prod(lambda(sParams, m), 2);
+    end
+
 elseif sParams.dim == 2
     sgtitle('Kernel (analytic) Eigenfunctions')
     x1 = x.';

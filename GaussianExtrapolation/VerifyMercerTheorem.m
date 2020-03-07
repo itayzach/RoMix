@@ -51,18 +51,18 @@ end
 
 tPhi_x = zeros(nxPoints, sParams.MercerM, sParams.dim);
 tPhi_y = zeros(nyPoints, sParams.MercerM, sParams.dim);
-vLambda = zeros(1, sParams.MercerM);
+vLambda = zeros(1, sParams.MercerM, sParams.dim);
 for m = 0:sParams.MercerM-1
-    vLambda(m+1) = lambda(sParams, m);
+    vLambda(1, m+1, :) = lambda(sParams, m);
 %     if vLambda(m+1) < 10e-16
 %         fprintf('VerifyMercerTheorem: lambda_m < 1e-20, breaking...\n');
 %         break
 %     end
     assert(~any(isnan(vLambda(m+1))));
     for d = 1:sParams.dim
-        tPhi_x(:,m+1,d) = phi(sParams, m, x(:,d));
+        tPhi_x(:,m+1,d) = phi(sParams, m, x(:,d), d);
         assert(~any(isnan(squeeze(tPhi_x(:,m+1,d)))));
-        tPhi_y(:,m+1,d) = phi(sParams, m, y(:,d));
+        tPhi_y(:,m+1,d) = phi(sParams, m, y(:,d), d);
         assert(~any(isnan(squeeze(tPhi_y(:,m+1,d)))));
     end
 end
@@ -72,9 +72,9 @@ end
 
 for i = 1:length(x)
     for j = 1:length(y)
-        vLambda_Phix_Phiy = sum(vLambda.*tPhi_x(i,:,:).*tPhi_y(j,:,:), 2);
+        vLambda_Phix_Phiy = sum(vLambda(1,:,:).*tPhi_x(i,:,:).*tPhi_y(j,:,:), 2);
         rhs(i,j) = prod(vLambda_Phix_Phiy, 3);
-        k_d = kernel(x(i,:), y(j,:), sParams.l);
+        k_d = kernel(sParams, x(i,:), y(j,:));
         lhs(i,j) = prod(k_d, 2);
     end
 end

@@ -1,23 +1,23 @@
 function [mPhi_m_x, vLambda] = PlotAnalyticEigenfunctions(sParams, sSimParams)
-dx = 0.1;
-x = (-5:dx:5-dx).';
+dx = 0.01;
+x = (sParams.xMin:dx:sParams.xMax-dx).';
 fig = figure;
 
-mPhi_m_x = zeros(length(x), sSimParams.nEigenFuncsToPlot);
-vLambda = zeros(sSimParams.nEigenFuncsToPlot, 1);
+mPhi_m_x = zeros(length(x), sParams.PlotEigenFuncsM);
+vLambda = zeros(sParams.PlotEigenFuncsM, 1);
 
 if sParams.dim == 1     
-    for m = 0:sSimParams.nEigenFuncsToPlot-1  
-        mPhi_m_x(:,m+1) = phi(sParams, m, x);
+    for m = 0:sParams.PlotEigenFuncsM-1  
+        mPhi_m_x(:,m+1) = phi(sParams, m, x, 1);
         vLambda(m+1) = lambda(sParams, m);
-        % subplot(floor(sSimParams.nEigenFuncsToPlot/2), floor(sSimParams.nEigenFuncsToPlot/2)+1, pltIdx)
+        % subplot(floor(sParams.PlotEigenFuncsM/2), floor(sParams.PlotEigenFuncsM/2)+1, pltIdx)
         plot(x, mPhi_m_x(:,m+1), 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
         hold on
         xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
-        if m == sSimParams.nEigenFuncsToPlot - 1
-            vP_x = p(sParams, x);
-            % subplot(floor(sSimParams.nEigenFuncsToPlot/2), floor(sSimParams.nEigenFuncsToPlot/2)+1, pltIdx)
-            plot(x, vP_x, '-.', 'LineWidth', 2, 'DisplayName', '$p(x)$');
+        if m == sParams.PlotEigenFuncsM - 1
+            vP_x = p(sParams, x, 1);
+            % subplot(floor(sParams.PlotEigenFuncsM/2), floor(sParams.PlotEigenFuncsM/2)+1, pltIdx)
+            plot(x, vP_x, 'LineStyle', ':', 'LineWidth', 2, 'DisplayName', '$p(x)$');
             hold off
             title('Kernel (analytic) Eigenfunctions')
             legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
@@ -30,14 +30,14 @@ elseif sParams.dim == 2
     x1 = x.';
     x2 = x.';
     [mX1, mX2] = meshgrid(x1, x2);
-    for m = 0:sSimParams.nEigenFuncsToPlot-1  
-        vPhi_m_x1 = phi(sParams, m, x1);
-        vPhi_m_x2 = phi(sParams, m, x2);
+    for m = 0:sParams.PlotEigenFuncsM-1  
+        vPhi_m_x1 = phi(sParams, m, x1, 1);
+        vPhi_m_x2 = phi(sParams, m, x2, 2);
 
         % outter product since phi(x1,x2)=phi(x1)phi(x2)
         mPhi_m_x1x2 = vPhi_m_x1.' * vPhi_m_x2; 
 
-        subplot(2,sSimParams.nEigenFuncsToPlot/2,m+1);
+        subplot(2,sParams.PlotEigenFuncsM/2,m+1);
         surf(mX1, mX2, mPhi_m_x1x2, 'edgecolor', 'none')
     %         view(2)
         colorbar()

@@ -1,6 +1,4 @@
-function [mPhi_A, vLambda_A] = PlotNumericEigenvectors(sParams, sSimParams)
-fig = figure;
-
+function [mPhi_A, vLambda_A] = CalcNumericEigenvectors(sParams, sSimParams)
 if sParams.dim == 1
 
     if strcmp(sParams.kernelType, 'sinc')
@@ -38,10 +36,11 @@ elseif sParams.dim == 2
     %     dx = 0.1;
     %     x1 = (-3:dx:3);
     %     x2 = (-3:dx:3);
+    error('TODO from here')
     n = 500;
     x = zeros(n, sParams.dim);
     for d = 1:sParams.dim
-        if strcmp(sParams.pdf, 'gaussian')
+        if strcmp(sParams.dataDist, 'gaussian')
             x(:, d) = sort((sParams.sigma(d)*randn(n, 1) + sParams.mu(d)));
         else
             error('unknown pdf')
@@ -64,25 +63,8 @@ elseif sParams.dim == 2
     [vLambda_A, idx] = sort(diag(vLambda_A), 'descend');
     mPhi_A = mPhi_A(:,idx);
     
-    sgtitle(sprintf('Eigenvectors of (numeric) A; n = %d', n))
-    for m = 0:sParams.PlotEigenFuncsM-1
-        
-        mPhi_Am = reshape(mPhi_A(:,m+1), length(x), length(x));
-        
-        subplot(2,sParams.PlotEigenFuncsM/2,m+1);
-        surf(mX1, mX2, mPhi_Am, 'edgecolor', 'none')
-        %         view(2)
-        colorbar()
-        xlabel('$x_1$', 'Interpreter', 'latex')
-        ylabel('$x_2$', 'Interpreter', 'latex')
-        zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
-        %         print(fig, [sSimParams.outputFolder filesep 'fig_eigenvectors_2d'], '-depsc')
-        saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenvectors_2d.png']);
-    end
 else
     error('Implement for more than 2-D!');
 end
-
-% fig = figure;
 
 end

@@ -1,15 +1,16 @@
 function [sParams, sSimParams] = GetParameters()
 
+fprintf('*********************************************************\n');
 %% dimensions
 sParams.dim = 1;
-
+fprintf('*                      %d-D                             *\n', sParams.dim);
+fprintf('*********************************************************\n');
 %% kernel and eigenfunctions constants type
 sParams.kernelType = 'exp'; % exp only. sinc isn't yet supported
 sParams.constsType = 1;
 
 if sParams.constsType == 1
     %% first type consts
-    fprintf('*********************************************************\n');
     fprintf('*              Using a,b,ell constants                  *\n');
     fprintf('*********************************************************\n');
 
@@ -34,7 +35,6 @@ if sParams.constsType == 1
     fprintf('*********************************************************\n');
 elseif sParams.constsType == 2
     %% second type consts
-    fprintf('*********************************************************\n');
     fprintf('*            Using beta,omega constants                 *\n');
     fprintf('*********************************************************\n');
     
@@ -59,20 +59,25 @@ else
 end
 
 %% pdf
-sParams.pdf = 'gaussian';
+sParams.dataDist = 'gaussian';
 %% x-axis
 sParams.dx = 0.01;
-sParams.x = (sParams.xMin : sParams.dx : sParams.xMax-sParams.dx).';
 
+x = zeros((sParams.xMax(1) - sParams.xMin(1))/sParams.dx, sParams.dim);
+for d = 1:sParams.dim
+    x(:,d) = (sParams.xMin : sParams.dx : sParams.xMax-sParams.dx).';
+end
+sParams.x = x;
+%% random x-axis
 n = 5000;
 x_rand = zeros(n, sParams.dim);
 for d = 1:sParams.dim
-    if strcmp(sParams.pdf, 'gaussian')
-        x_rand(:, d) = sort((sParams.sigma*randn(n, 1) + sParams.mu));
+    if strcmp(sParams.dataDist, 'gaussian')
+        x_rand(:, d) = sort((sParams.sigma(d)*randn(n, 1) + sParams.mu(d)));
         sParams.xMin = max(sParams.xMin, min(x_rand));
         sParams.xMax = min(sParams.xMax, max(x_rand));
         warning('Note: sParams.xMin, sParams.xMax are changed');
-    elseif strcmp(sParams.pdf, 'uniform')
+    elseif strcmp(sParams.dataDist, 'uniform')
         sParams.xMin = -0.5;
         sParams.xMax = 0.5;
         x_rand(:, d) = (sParams.xMax - sParams.xMin)*sort(rand(n, 1)) + sParams.xMin;

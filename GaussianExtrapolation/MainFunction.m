@@ -13,8 +13,8 @@ rng(0); % set seed
 %% Verify stuff
 if sSimParams.b_plotEigenFigs    
 
-    [ mPhi_A, vLambda_A ] = PlotNumericEigenvectors(sParams, sSimParams);
-    [ mPhi_K, vLambda_K ] = PlotAnalyticEigenfunctions(sParams, sSimParams);
+    [ mPhi_A, vLambda_A ] = CalcNumericEigenvectors(sParams, sSimParams);
+    [ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams, sSimParams);
     PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A);
     PlotSpectrum(sParams, sSimParams, vLambda_K, vLambda_A);
 

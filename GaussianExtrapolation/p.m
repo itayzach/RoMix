@@ -1,6 +1,6 @@
 function vPr = p(sParams, y, d)
 
-if strcmp(sParams.pdf, 'gaussian')
+if strcmp(sParams.dataDist, 'gaussian')
     if exist('d', 'var')
         mu = sParams.mu(d);
         sigma = sParams.sigma(d);
@@ -10,7 +10,7 @@ if strcmp(sParams.pdf, 'gaussian')
     end
     
     vPr = (1./sqrt(2*pi*sigma.^2)) .* exp( -(y-mu).^2./(2*sigma.^2) );
-elseif strcmp(sParams.pdf, 'uniform')
+elseif strcmp(sParams.dataDist, 'uniform')
     vPr = zeros(size(y));
     vPr(y > -0.5 & y < 0.5) = 1;
 else

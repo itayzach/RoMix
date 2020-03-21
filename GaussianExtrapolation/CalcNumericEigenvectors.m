@@ -13,6 +13,8 @@ if sParams.dim == 1
             A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(sParams.x_rand*sParams.x_rand'))/(2*sParams.ell^2));
         elseif sParams.constsType == 2
             A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(sParams.x_rand*sParams.x_rand'))/(2*sParams.omega^2));
+        elseif sParams.constsType == 3
+            A = exp(-sParams.eps^2*(repmat(P',n,1) + repmat(P,1,n) - 2*(sParams.x_rand*sParams.x_rand')));
         else
             error('Unknown constsType');
         end
@@ -33,35 +35,29 @@ if sParams.dim == 1
     mPhi_A = sqrt(n)*mPhi_A(:,idx);
 
 elseif sParams.dim == 2
-    %     dx = 0.1;
-    %     x1 = (-3:dx:3);
-    %     x2 = (-3:dx:3);
-    error('TODO from here')
-    n = 500;
-    x = zeros(n, sParams.dim);
-    for d = 1:sParams.dim
-        if strcmp(sParams.dataDist, 'gaussian')
-            x(:, d) = sort((sParams.sigma(d)*randn(n, 1) + sParams.mu(d)));
-        else
-            error('unknown pdf')
-        end
-    end
-    
-    %     [mX1, mX2] = meshgrid(x(:, 1), x(:, 2));
-    %     X = [mX1(:) mX2(:)];
-    X = [x(:, 1), x(:, 2)];
+    X = sParams.x_rand;
     P = sum(X.*X,2);
+    n = length(sParams.x_rand);
     if sParams.constsType == 1
-        A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(x*x'))/(2*sParams.ell^2));
+        A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(X*X'))/(2*sParams.ell^2));
     elseif sParams.constsType == 2
-        A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(x*x'))/(2*sParams.omega^2));
+        A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(X*X'))/(2*sParams.omega^2));
+    elseif sParams.constsType == 3
+        A = exp(-(sParams.eps^2)*(repmat(P',n,1) + repmat(P,1,n) - 2*(X*X')));
+%         for i=1:size(X,1)
+%             for j=1:size(X,1)
+%                 A2(i,j) = exp(-(sParams.eps^2)*((X(i,1)-X(j,1))^2 + (X(i,2)-X(j,2))^2));
+%                 A3(i,j) = exp(-(sParams.eps^2)*norm(X(i,:) - X(j,:))^2);
+%             end
+%         end
     else
         error('Unknown constsType');
     end
     [mPhi_A, vLambda_A] = eig(A);
     
     [vLambda_A, idx] = sort(diag(vLambda_A), 'descend');
-    mPhi_A = mPhi_A(:,idx);
+    vLambda_A = (1/n) * vLambda_A(1:sParams.PlotSpectM);
+    mPhi_A = sqrt(n)*mPhi_A(:,idx);
     
 else
     error('Implement for more than 2-D!');

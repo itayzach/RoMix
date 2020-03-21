@@ -5,7 +5,7 @@ if ~isvector(x)
 end
 
 if sParams.constsType == 1
-    a = sParams.a;
+    a = sParams.a(d);
     b = sParams.b;
 
     % Calculate parameters
@@ -36,6 +36,21 @@ elseif sParams.constsType == 2
     normFactor = (1+2*beta)^(1/8)/sqrt(2^m*factorial(m));
     vHm = hermite(m, (1/4 + beta/2)^(1/4)*(x-mu)/sigma);
     vPhi_m = normFactor * exp( -((x-mu).^2/(2*sigma^2)) * ((sqrt(1+2*beta)-1)/2) ) .* vHm;
+elseif sParams.constsType == 3
+    if exist('d', 'var')
+        mu = sParams.mu(d);
+        sigma = sParams.sigma(d);     
+        alpha = sParams.alpha(d); % Should be here, or alpha(d)?
+    else
+        mu = sParams.mu;
+        sigma = sParams.sigma;
+    end    
+    eps = sParams.eps;
+    
+
+    normFactor = (1+(2*eps/alpha)^2)^(1/8) / sqrt(2^m*factorial(m));
+    vHm = hermite(m, (1+(2*eps/alpha)^2).^(1/4).*alpha.*x );
+    vPhi_m = normFactor * exp( -(sqrt(1+(2*eps/alpha)^2)-1)*alpha^2*x.^2/2 ) .* vHm;
 else
     error('Unknown constsType');
 end

@@ -1,7 +1,7 @@
 function [] = PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A)
 
-fig = figure;
 if sParams.dim == 1
+    fig = figure;
     %% 1-D Analytic
     subplot(2,1,1);
     for m = 0:sParams.PlotEigenFuncsM-1
@@ -20,7 +20,7 @@ if sParams.dim == 1
     %% 1-D Numeric
     subplot(2,1,2);
     for m = 0:sParams.PlotEigenFuncsM-1
-        plot(sParams.x_rand, mPhi_A(:,m+1), 'LineWidth', 2, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
+        plot(sParams.x_rand, mPhi_A(:,m+1), 'o', 'LineWidth', 1, 'DisplayName', [ '$\phi_' num2str(m) '(x)$' ]);
         hold on
         xlim([sParams.xMin sParams.xMax]);
         xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
@@ -37,38 +37,36 @@ if sParams.dim == 1
     saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenvectors_1d.png']);
 elseif sParams.dim == 2
     %% 2-D Analytic
+    fig = figure;
     sgtitle('Kernel (analytic) Eigenfunctions')
-    x1 = x.';
-    x2 = x.';
-    [mX1, mX2] = meshgrid(x1, x2);
+    [mX1, mX2] = meshgrid(sParams.x(:,1), sParams.x(:,2));
     for m = 0:sParams.PlotEigenFuncsM-1  
-        vPhi_m_x1 = phi(sParams, m, x1, 1);
-        vPhi_m_x2 = phi(sParams, m, x2, 2);
-
-        % outter product since phi(x1,x2)=phi(x1)phi(x2)
-        mPhi_m_x1x2 = vPhi_m_x1.' * vPhi_m_x2; 
-
-        subplot(2,1,m+1);
-        surf(mX1, mX2, mPhi_m_x1x2, 'edgecolor', 'none')
+        subplot(3,3,m+1);
+        surf(mX1, mX2, reshape(mPhi_K(:,m+1), size(sParams.x,1), size(sParams.x,1)), 'edgecolor', 'none');
         colorbar()
         xlabel('$x_1$', 'Interpreter', 'latex')
         ylabel('$x_2$', 'Interpreter', 'latex')
         zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
     end
+        set(gcf,'Position',[10 250 1900 700])
+    %     print(fig, [sSimParams.outputFolder filesep 'fig_eigenfunctions_2d'], '-depsc')
+    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenfunctions_2d.png']);
     %% 2-D Numeric
-    subplot(2,1,2);
-    sgtitle(sprintf('Eigenvectors of (numeric) A; n = %d', n))
+    fig = figure;
+    sgtitle(sprintf('Eigenvectors of (numeric) A; n = %d', size(sParams.x_rand,1)))
+%     [mX1_rand, mX2_rand] = meshgrid(sParams.x_rand(:,1), sParams.x_rand(:,2));
     for m = 0:sParams.PlotEigenFuncsM-1
-        subplot(2,2,m+1);
-        surf(mX1, mX2, mPhi_Am, 'edgecolor', 'none')
+%         subplot(2,sParams.PlotEigenFuncsM,sParams.PlotEigenFuncsM+m+1);
+        subplot(3,3,m+1);
+%         surf(mX1_rand, mX2_rand, mPhi_A(:,m+1), 'edgecolor', 'none')
+        scatter3(sParams.x_rand(:,1), sParams.x_rand(:,2), mPhi_A(:,m+1), [], mPhi_A(:,m+1), 'filled');
         colorbar()
         xlabel('$x_1$', 'Interpreter', 'latex')
         ylabel('$x_2$', 'Interpreter', 'latex')
         zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
     end
     
-    %% Save
-    set(gcf,'Position',[100 100 600 800])
+    set(gcf,'Position',[10 250 1900 700])
     %     print(fig, [sSimParams.outputFolder filesep 'fig_eigenfunctions_2d'], '-depsc')
     saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenvectors_2d.png']);
 else

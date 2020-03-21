@@ -32,8 +32,8 @@ else
         
     else
         nxPoints = 200;
-        xMax = 8; %25;
-        xMin = -8; %-13;
+        xMax = 1; %25;
+        xMin = -1; %-13;
         x = (xMax - xMin)*rand(nxPoints, 2) + xMin;
     end
     step = (xMax - xMin)/100;

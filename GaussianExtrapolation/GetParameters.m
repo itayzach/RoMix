@@ -1,7 +1,7 @@
 function [sParams, sSimParams] = GetParameters()
 
 %% dimensions
-sParams.dim = 2;
+sParams.dim = 1;
 fprintf('*********************************************************\n');
 fprintf('*                      %d-D                              *\n', sParams.dim);
 fprintf('*********************************************************\n');
@@ -28,8 +28,8 @@ if sParams.constsType == 1
     sParams.A = sParams.a + sParams.b + sParams.c;
     sParams.B = sParams.b./sParams.A;
     
-    sParams.xMax = sParams.mu + 6*sParams.sigma;
-    sParams.xMin = sParams.mu - 6*sParams.sigma;
+    sParams.xMax = sParams.mu + 3*sParams.sigma;
+    sParams.xMin = sParams.mu - 3*sParams.sigma;
     fprintf('a = %8.3f --> sigma (pdf width)    = %8.3f\n', sParams.a, sParams.sigma);
     fprintf('b = %8.3f --> ell   (kernel width) = %8.3f\n', sParams.b, sParams.ell); 
     fprintf('*********************************************************\n');
@@ -45,8 +45,8 @@ elseif sParams.constsType == 2
     % sParams.sigma = [0.9788    0.4815];
     % sParams.mu    = [0.6858    0.2503];
     
-    sParams.xMax = sParams.mu + 6*sParams.sigma;
-    sParams.xMin = sParams.mu - 6*sParams.sigma;
+    sParams.xMax = sParams.mu + 3*sParams.sigma;
+    sParams.xMin = sParams.mu - 3*sParams.sigma;
     
     sParams.omega = 1/sqrt(2); % kernel width
     sParams.beta = 2*sParams.sigma.^2/sParams.omega^2;
@@ -59,8 +59,8 @@ elseif sParams.constsType == 3
     fprintf('*            Using alpha,eps constants                  *\n');
     fprintf('*********************************************************\n');
     
-    sParams.eps = 1; %3; % 1/kernel width
-    sParams.alpha = 2/sqrt(2)*ones(1, sParams.dim);%6*ones(1, sParams.dim);
+    sParams.eps = 1; % 1/kernel width
+    sParams.alpha = 2/sqrt(2)*ones(1, sParams.dim);
     
     % p(x)
     sParams.sigma = 1./(sqrt(2)*sParams.alpha);
@@ -116,8 +116,8 @@ sParams.x_rand = x_rand;
 
 
 %% num of eigenfunctions
-sParams.PlotEigenFuncsM = 9;
-sParams.PlotSpectM = 4;
+sParams.PlotEigenFuncsM = 4;
+sParams.PlotSpectM = 30;
 sParams.RkhsM = 20;
 sParams.OrthM = 30;
 sParams.MercerM = 50;
@@ -131,10 +131,10 @@ sParams.R = 15;    % num of sampled points to extrapolate from
 sSimParams.outputFolder = 'figs';
 
 sSimParams.b_plotEigenFigs        = true;
-sSimParams.b_verifyRKHS           = false;
-sSimParams.b_verifyEigOrth        = false;
+sSimParams.b_verifyRKHS           = true;
+sSimParams.b_verifyEigOrth        = true;
 sSimParams.b_verifyMercersTheorem = true;
-sSimParams.b_extrapolateEnable    = false;
+sSimParams.b_extrapolateEnable    = true;
 
 sSimParams.b_randomStepSize       = true;
 

@@ -1,17 +1,17 @@
 function [] = VerifyOrthogonality(sParams)
 dx = 0.01;
-x = (-1e3:dx:1e3-dx).';
+x_1d_axis = (-1e3:dx:1e3-dx).';
 
-mPhi = zeros(length(x), sParams.dim, sParams.OrthM);
+mPhi = zeros(length(x_1d_axis), sParams.dim, sParams.OrthM);
 for m = 0:sParams.OrthM-1
     for d = 1:sParams.dim
-        vPhi_m_x = phi(sParams, m, x, d);
+        vPhi_m_x = phi_d(sParams, m, x_1d_axis, d);
         mPhi(:, d, m+1) = vPhi_m_x;
     end
 end
 
 I = zeros(sParams.OrthM);
-vP_x = p(sParams, x);
+vP_x = p(sParams, x_1d_axis);
 for k = 0:sParams.OrthM-1
     for m = 0:sParams.OrthM-1
         % Following line is 

@@ -60,9 +60,9 @@ for m = 0:sParams.MercerM-1
 %     end
     assert(~any(isnan(vLambda(m+1))));
     for d = 1:sParams.dim
-        tPhi_x(:,m+1,d) = phi(sParams, m, x(:,d), d);
+        tPhi_x(:,m+1,d) = phi_d(sParams, m, x(:,d), d);
         assert(~any(isnan(squeeze(tPhi_x(:,m+1,d)))));
-        tPhi_y(:,m+1,d) = phi(sParams, m, y(:,d), d);
+        tPhi_y(:,m+1,d) = phi_d(sParams, m, y(:,d), d);
         assert(~any(isnan(squeeze(tPhi_y(:,m+1,d)))));
     end
 end

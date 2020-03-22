@@ -134,15 +134,22 @@ switch method
             classifier.M = options.M;
         end
     case 'eigrls'
-        for m = 0:options.M-1 
-            [vPhi_m_x1, lambda_m1] = SqExpEig(options.a_k, options.b_k, m, X(:,1));
-            
-            [vPhi_m_x2, lambda_m2] = SqExpEig(options.a_k, options.b_k, m, X(:,2));
-            
-            lambda(m+1) = lambda_m1;
-            Phi(:, m+1) = vPhi_m_x1.*vPhi_m_x2;           
+        sParams.dim = 2;
+        sParams.constsType = 1;
+        sParams.a = options.a_k;
+        sParams.b = options.b_k;
+        sParams.ell = 1/sqrt(2*sParams.b); % kernel width
+        sParams.sigma = 1./(2*sParams.a);
+        sParams.mu = 0*ones(1, sParams.dim);
+        sParams.c = sqrt(sParams.a.^2 + 2*sParams.a.*sParams.b);
+        sParams.A = sParams.a + sParams.b + sParams.c;
+        sParams.B = sParams.b./sParams.A;
+        for i = 0:options.M-1 
+            m = OneDim2TwoDimIndex(i, sParams.dim);
+            lambda_m(i+1) = lambda(sParams, m);
+            Phi(:, i+1) = phi(sParams, m, X);           
         end
-        Lambda = diag(lambda);
+        Lambda = diag(lambda_m);
         
 %         L=laplacian(X,'nn',options);
         L=[];

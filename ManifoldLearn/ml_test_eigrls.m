@@ -29,19 +29,24 @@ a_k=classifier.a_k;
 b_k=classifier.b_k;
 alpha=classifier.alpha;
 M=classifier.M;
-xtrain=classifier.xtrain;
-ytrain=classifier.ytrain;
+% xtrain=classifier.xtrain;
+% ytrain=classifier.ytrain;
 
-for m = 0:M-1 
-    [vPhi_m_x1, lambda_m1] = SqExpEig(a_k, b_k, m, xtrain(:,1));
-    [vPhi_m_x2, lambda_m2] = SqExpEig(a_k, b_k, m, xtrain(:,2));
-    
-    Phi(:,m+1) = vPhi_m_x1 .* vPhi_m_x2; 
-%     subplot(2,2,m+1);
-%     surf(XX1,XX2,F)
-%     xlabel('$x_1$', 'Interpreter', 'latex')
-%     ylabel('$x_2$', 'Interpreter', 'latex')
-%     zlabel('$\phi(x_1,x_2)$', 'Interpreter', 'latex')
+sParams.dim = 2;
+sParams.constsType = 1;
+sParams.a = a_k;
+sParams.b = b_k;
+sParams.ell = 1/sqrt(2*sParams.b); % kernel width
+sParams.sigma = 1./(2*sParams.a);
+sParams.mu = 0*ones(1, sParams.dim);
+sParams.c = sqrt(sParams.a.^2 + 2*sParams.a.*sParams.b);
+sParams.A = sParams.a + sParams.b + sParams.c;
+sParams.B = sParams.b./sParams.A;
+
+Phi = zeros(size(XTest,1), M);
+for i = 0:M-1 
+    m = OneDim2TwoDimIndex(i, sParams.dim);
+    Phi(:,i+1) = phi(sParams, m, XTest);
 end
 f=Phi*alpha;
 labels=sign(f);

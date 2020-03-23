@@ -151,9 +151,8 @@ switch method
         end
         Lambda = diag(lambda_m);
         
-%         L=laplacian(X,'nn',options);
-        L=[];
-        [alpha, b] = eigrls(Y, Phi, Lambda, options.gamma_A, options.gamma_I);
+        L = laplacian(X,'kernel',options); % I tried using Phi.'*L*Phi, but Lambda gave better results.
+        [alpha, b] = eigrls(Y, Phi, Lambda, options.gamma_A, options.gamma_I, L);
         classifier= ...
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
             alpha,X,b,[options.gamma_A options.gamma_I]);

@@ -12,24 +12,24 @@ close all; clear; clc;
 rng(0);
 
 %% RLS params
-gamma_I_rls = 0.03125;
-gamma_A_rls = 0;
+gamma_A_rls = 0.03125;
+gamma_I_rls = 0;
 
 %% LapRLS params
-gamma_I_laprls = 0.03125;
-gamma_A_laprls = 1;
+gamma_A_laprls = 0.03125;
+gamma_I_laprls = 1;
 kernel_sigma_laprls = 1/sqrt(2)/10; 
 
 %% EigRLS params
-gamma_I_eigrls = 100;
-gamma_A_eigrls = 1000;
+gamma_A_eigrls = 0;
+gamma_I_eigrls = 10;
 
-a_k_eigrls = [ 0.01 0.01];
-kernel_sigma_eigrls = 1/sqrt(2); 
+a_k_eigrls = [ 0.001 0.001];
+kernel_sigma_eigrls = 1/sqrt(2)/10; 
 b_k_eigrls = 1/(2*kernel_sigma_eigrls^2);
 
 scale_factor = 1;
-M = 150;
+M = 15;
 %% old
 % a_k = [0.0001 0.0001];
 % kernel_sigma = 1/sqrt(2)/10; 
@@ -108,7 +108,7 @@ options_rls=ml_options('gamma_A',0.1, ...
                    'GraphWeights', 'binary', ...
                    'GraphNormalize', true);
 % subplot(2,2,1); 
-experiment_moon(x,y1,xt,yt,'rlsc',gamma_I_rls,gamma_A_rls, options_rls);
+experiment_moon(x,y1,xt,yt,'rlsc',gamma_A_rls,gamma_I_rls, options_rls);
 % plot2D(x,y1,15);
 fprintf('---------------------------------------------------\n')
 %subplot(2,3,3); decision_surface(x,y1,xt,yt,'rlsc',-5:0);
@@ -136,7 +136,7 @@ options_laprls_orig = ml_options('gamma_A', 0.1, ...
                      'GraphNormalize',true);    
              
 % subplot(2,2,2);
-experiment_moon(x,y1,xt,yt,'laprlsc',gamma_I_laprls,gamma_A_laprls, options_laprls_orig);
+experiment_moon(x,y1,xt,yt,'laprlsc',gamma_A_laprls,gamma_I_laprls, options_laprls_orig);
 % hold on;  
 % plot2D(x,y1,15);
 fprintf('---------------------------------------------------\n')
@@ -150,7 +150,7 @@ options_laprls=ml_options('gamma_A',0.1, ...
                    'GraphNormalize', false);
            
 % subplot(2,2,3);
-laprlsc_classifier = experiment_moon(x,y1,xt,yt,'laprlsc',gamma_I_laprls,gamma_A_laprls, options_laprls);
+laprlsc_classifier = experiment_moon(x,y1,xt,yt,'laprlsc',gamma_A_laprls,gamma_I_laprls, options_laprls);
 alpha_laprls = laprlsc_classifier.alpha;
 XTrain_laprls = laprlsc_classifier.xtrain;
 % hold on;  
@@ -171,7 +171,7 @@ options_eigrls.b_k = b_k_eigrls;
 options_eigrls.M = M;   
 
 % subplot(2,2,4);
-eigrls_classifier = experiment_moon(x,y1,xt,yt,'eigrls',gamma_I_eigrls,gamma_A_eigrls, options_eigrls);
+eigrls_classifier = experiment_moon(x,y1,xt,yt,'eigrls',gamma_A_eigrls,gamma_I_eigrls, options_eigrls);
 alpha_eigrls = eigrls_classifier.alpha;
 XTrain_eigrls = eigrls_classifier.xtrain;
 % hold on;  

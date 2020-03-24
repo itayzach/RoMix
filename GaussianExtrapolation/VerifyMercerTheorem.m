@@ -21,6 +21,8 @@ if sParams.dim == 1
     nyPoints = size(y,1);
     
 else
+    warning('VerifyMercerTheorem does not support multi-index yet...');
+    return;
     if sSimParams.twomoons_dataset
         twomoons = load('2moons.mat', 'x');
         x = twomoons.x;

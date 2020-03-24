@@ -1,4 +1,4 @@
-function [mPhi_A, vLambda_A] = CalcNumericEigenvectors(sParams, sSimParams)
+function [mPhi_A, vLambda_A] = CalcNumericEigenvectors(sParams)
 if sParams.dim == 1
 
     if strcmp(sParams.kernelType, 'sinc')

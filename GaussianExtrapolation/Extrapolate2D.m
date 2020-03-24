@@ -10,19 +10,15 @@ N = length(x);
 x1 = x.';
 x2 = x.';
 [mX1, mX2] = meshgrid(x1, x2);
-
+X = [mX1(:) mX2(:)];
 %% F1
 A1 = 3;
 A4 = 0.001;
 A6 = 0.0005;
 
-phi1x1 = phi(sParams, 1, x1, 1);
-phi4x1 = phi(sParams, 4, x1, 1);
-phi6x1 = phi(sParams, 6, x1, 1);
-
-phi1x = phi1x1' * phi1x1;
-phi4x = phi4x1' * phi4x1;
-phi6x = phi6x1' * phi6x1;
+phi1x = reshape(phi(sParams, [0 1], X), length(x), length(x));
+phi4x = reshape(phi(sParams, [2 0], X), length(x), length(x));
+phi6x = reshape(phi(sParams, [3 1], X), length(x), length(x));
 
 mF1      = A1*phi1x + A4*phi4x + A6*phi6x;
 vF1      = mF1(:);
@@ -52,14 +48,10 @@ for i = 1:nFuncs
     SNR = snr(vFi, vFi_awgn);
     vGi = vFi + vFi_awgn;
     mPhi = zeros(N*N, sParams.ExtrplM);
-    for m = 0:sParams.ExtrplM-1 
-        vPhi_m_x1 = phi(sParams, m, x1, 1);
-        vPhi_m_x2 = phi(sParams, m, x2, 2);
-        
-        % outter product since phi(x1,x2)=phi(x1)phi(x2)
-        mPhi_m_x1x2 = vPhi_m_x1.' * vPhi_m_x2; 
-        mPhi_m_x1x2 = mPhi_m_x1x2(:);
-        mPhi(:, m+1) = mPhi_m_x1x2;
+    for q = 0:sParams.ExtrplM-1 
+        m = OneDim2TwoDimIndex(q, sParams.dim);
+        vPhi_m_x = phi(sParams, m, X);
+        mPhi(:, q+1) = vPhi_m_x;
     end
     if sSimParams.b_randomStepSize
         vR = sort(randi([1 N^2],sParams.R,1));

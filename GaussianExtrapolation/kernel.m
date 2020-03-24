@@ -1,14 +1,11 @@
 function vKernel = kernel(sParams, x, y) 
 
-if ~isvector(x)
-    error('x has to be a vector');
-end
 if sParams.constsType == 1
-    vKernel = exp(-(x-y).^2./(2*sParams.ell^2));
+    vKernel = exp(-vecnorm(x-y, 2, 2).^2./(2*sParams.ell^2));
 elseif sParams.constsType == 2
-    vKernel = exp(-(x-y).^2./(2*sParams.omega^2));
+    vKernel = exp(-vecnorm(x-y, 2, 2).^2./(2*sParams.omega^2));
 elseif sParams.constsType == 3
-    vKernel = exp(-sParams.eps^2.*(x-y).^2);
+    vKernel = exp(-sParams.eps^2.*vecnorm(x-y, 2, 2).^2);
 else
     error('Unknown constsType');
 end

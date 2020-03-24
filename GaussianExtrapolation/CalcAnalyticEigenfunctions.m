@@ -1,4 +1,4 @@
-function [mPhi_K, vLambda_K] = CalcAnalyticEigenfunctions(sParams, sSimParams)
+function [mPhi_K, vLambda_K] = CalcAnalyticEigenfunctions(sParams)
 
 
 if sParams.dim == 1     

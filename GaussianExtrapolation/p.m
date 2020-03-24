@@ -9,7 +9,12 @@ if strcmp(sParams.dataDist, 'gaussian')
         sigma = sParams.sigma;
     end
     
-    vPr = (1./sqrt(2*pi*sigma.^2)) .* exp( -(y-mu).^2./(2*sigma.^2) );
+%     if sParams.dim == 1
+        vPr = (1./sqrt(2*pi*sigma.^2)) .* exp( -(y-mu).^2./(2*sigma.^2) );
+%     else
+%         C = 1/sqrt( ((2*pi)^sParams.dim)*det(sigma) );
+%         vPr = C * exp( -0.5*(y-mu)*((sigma)\(y-mu).') );
+%     end
 elseif strcmp(sParams.dataDist, 'uniform')
     vPr = zeros(size(y));
     vPr(y > -0.5 & y < 0.5) = 1;

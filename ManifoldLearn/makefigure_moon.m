@@ -22,40 +22,22 @@ kernel_sigma_laprls = 1/sqrt(2)/10;
 
 %% EigRLS params
 gamma_A_eigrls = 0;
-gamma_I_eigrls = 10;
-
-a_k_eigrls = [ 0.001 0.001];
-kernel_sigma_eigrls = 1/sqrt(2)/10; 
-b_k_eigrls = 1/(2*kernel_sigma_eigrls^2);
-
-scale_factor = 1;
-M = 15;
-%% old
-% a_k = [0.0001 0.0001];
-% kernel_sigma = 1/sqrt(2)/10; 
-% scale_factor = 1;
-% 
-% 
-% b_k = 1/(2*kernel_sigma^2);
-% M = 150;        
+gamma_I_eigrls = 1;  
 
 %% sParams
-sParams.dim = 2;
-sParams.constsType = 1;
-sParams.a = a_k_eigrls;
-sParams.ell = kernel_sigma_eigrls; % kernel width
-sParams.b = 1/(2*kernel_sigma_eigrls^2);
-sParams.sigma = 1./(2*sParams.a);
-sParams.mu = 0*ones(1, sParams.dim);
-sParams.c = sqrt(sParams.a.^2 + 2*sParams.a.*sParams.b);
-sParams.A = sParams.a + sParams.b + sParams.c;
-sParams.B = sParams.b./sParams.A;
+[sParams, sSimParams] = GetParameters();
+assert(sParams.dim == 2, 'dim should be 2.')
+kernel_sigma_eigrls = sParams.ell;
+
+[ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams);
+mPhi_A = [];
+PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A);
 
 %% Load dataset
 load 2moons.mat;
 
 l=10; % number of labeled examples
-
+scale_factor = 1;
 x = scale_factor*x;
 xt = scale_factor*xt;
 
@@ -70,35 +52,6 @@ y1=zeros(length(y),1);
 y1(pos(ipos(1:l)))=1;
 y1(neg(ineg(1:l)))=-1;
 
-
-% can run a search over best parameters below
-
-% earlier version
-% subplot(2,3,1); plot2D(x,y1,12);axis([-1.5 2.5 -1.5 2.5]);
-% subplot(2,3,2); decision_surface(x,y1,xt,yt,'svm',-5:0); hold on;
-%                 plot2D(x,y1,12);
-% subplot(2,3,3); decision_surface(x,y1,xt,yt,'rlsc',-5:0);
-%                 hold on;  plot2D(x,y1,10);
-% subplot(2,3,4); decision_surface(x,y1,xt,yt,'tsvm',-5:0);
-%                 hold on;  plot2D(x,y1,10);
-% subplot(2,3,5); decision_surface(x,y1,xt,yt,'lapsvm',[-5:0]);
-%                 hold on;  plot2D(x,y1,10);
-% subplot(2,3,6); decision_surface(x,y1,xt,yt,'laprlsc',[-5:0]);
-%                  hold on;  plot2D(x,y1,10);
-
-% new version
-%subplot(1,3,1); plot2D(x,y1,12);axis([-1.5 2.5 -1.5 2.5]);
-
-%% Figure setup
-% fig = figure;
-% fig_left_loc = -1500;
-% fig_bottom_loc = 100;
-% fig_width = 750;
-% fig_height = 750;
-% set(fig,'position',[fig_left_loc,fig_bottom_loc,fig_width,fig_height])
-
-
-
 %% RLS
 options_rls=ml_options('gamma_A',0.1, ...
                    'NN',6, ...
@@ -107,24 +60,9 @@ options_rls=ml_options('gamma_A',0.1, ...
                    'GraphWeightParam', 1, ...
                    'GraphWeights', 'binary', ...
                    'GraphNormalize', true);
-% subplot(2,2,1); 
+
 experiment_moon(x,y1,xt,yt,'rlsc',gamma_A_rls,gamma_I_rls, options_rls);
-% plot2D(x,y1,15);
 fprintf('---------------------------------------------------\n')
-%subplot(2,3,3); decision_surface(x,y1,xt,yt,'rlsc',-5:0);
-%               hold on;  plot2D(x,y1,10);
-
-% warning('For TSVM, Install SVMLight and a matlab interface to it. See http://www.cis.tugraz.at/igi/aschwaig/software.html');
-% Use below with Antons's code
-%subplot(2,3,2); experiment_moon(x,y1,xt,yt,'tsvm',0.125,0);
-%               hold on;  plot2D(x,y1,10);
-
-
-%% EigRLS
-% subplot(1,2,2);
-% experiment_moon(x,y1,xt,yt,'eigrls',0.03125,1);
-% hold on;  
-% plot2D(x,y1,15);
 
 %% LapRLS - original
 options_laprls_orig = ml_options('gamma_A', 0.1, ...
@@ -135,10 +73,7 @@ options_laprls_orig = ml_options('gamma_A', 0.1, ...
                      'GraphWeights', 'binary', ...
                      'GraphNormalize',true);    
              
-% subplot(2,2,2);
 experiment_moon(x,y1,xt,yt,'laprlsc',gamma_A_laprls,gamma_I_laprls, options_laprls_orig);
-% hold on;  
-% plot2D(x,y1,15);
 fprintf('---------------------------------------------------\n')
 %% LapRLS - Laplacian and f from the same kernel
 options_laprls=ml_options('gamma_A',0.1, ...
@@ -149,12 +84,7 @@ options_laprls=ml_options('gamma_A',0.1, ...
                    'GraphWeights', 'my_heat', ...
                    'GraphNormalize', false);
            
-% subplot(2,2,3);
 laprlsc_classifier = experiment_moon(x,y1,xt,yt,'laprlsc',gamma_A_laprls,gamma_I_laprls, options_laprls);
-alpha_laprls = laprlsc_classifier.alpha;
-XTrain_laprls = laprlsc_classifier.xtrain;
-% hold on;  
-% plot2D(x,y1,15);
 fprintf('---------------------------------------------------\n')
 
 %% EigRLS - Laplacian and f from the same kernel using eigenfunctions
@@ -166,19 +96,12 @@ options_eigrls=ml_options('gamma_A',0.1, ...
                    'GraphWeights', 'my_heat', ...
                    'GraphNormalize', false);
                
-options_eigrls.a_k = a_k_eigrls;
-options_eigrls.b_k = b_k_eigrls;
-options_eigrls.M = M;   
+options_eigrls.a_k = sParams.a;
+options_eigrls.b_k = sParams.b;
+options_eigrls.M = sParams.ExtrplM;   
 
-% subplot(2,2,4);
 eigrls_classifier = experiment_moon(x,y1,xt,yt,'eigrls',gamma_A_eigrls,gamma_I_eigrls, options_eigrls);
-alpha_eigrls = eigrls_classifier.alpha;
-XTrain_eigrls = eigrls_classifier.xtrain;
-% hold on;  
-% plot2D(x,y1,15);
 fprintf('---------------------------------------------------\n')
-
-
 
 %% Plot classifier using retreived alpahas
 step = (xMax - xMin)/100;
@@ -189,12 +112,16 @@ x2 = x1;
 X=[XX1(:) XX2(:)];
 
 %--------------------------------------------------------------------------
+% Plot LapRLS
+%--------------------------------------------------------------------------
+alpha_laprls = laprlsc_classifier.alpha;
+XTrain_laprls = laprlsc_classifier.xtrain;
 K = calckernel(options_laprls.Kernel,options_laprls.KernelParam, XTrain_laprls, X);
 Ka = K*alpha_laprls;
 mKa = reshape(Ka,length(x1),length(x2));
 
 figure;
-sgtitle(sprintf('LapRLS - Laplacian and f from the same kernel\n gamma_A = %.4f, gamma_I = %.4f\nTest error = %d', laprlsc_classifier.gammas(1), laprlsc_classifier.gammas(2), laprlsc_classifier.test_error));
+sgtitle(sprintf('LapRLS - Laplacian and f from the same kernel\n gamma_A = %.4f, gamma_I = %.4f\nTest error = %.1f%%', laprlsc_classifier.gammas(1), laprlsc_classifier.gammas(2), laprlsc_classifier.test_error));
 subplot(2,1,1)
     surf(XX1,XX2,mKa, 'edgecolor', 'none')
     xlabel('$x_1$', 'Interpreter', 'latex')
@@ -205,68 +132,11 @@ subplot(2,1,2)
     contourf(XX1,XX2,mKa,[0 0]);shading flat;
     hold on;
     plot2D(x,y1,15);
+set(gcf,'Position',[10+600 250 600 700])
 %--------------------------------------------------------------------------
-% dim = 2;
-% nxPoints = length(X);
-% nyPoints = length(XTrain_laprls);
-% 
-% 
-% tPhi_x = zeros(nxPoints, options.M, dim);
-% tPhi_y = zeros(nyPoints, options.M, dim);
-% vLambda = zeros(1, options.M);
-% for m = 0:options.M-1    
-%     [tPhi_x(:,m+1,1), vLambda(m+1)] = SqExpEig(a_k, b_k, m, X(:,1));
-%     [tPhi_y(:,m+1,1), ~] = SqExpEig(a_k, b_k, m, XTrain_laprls(:,1));
-%     [tPhi_x(:,m+1,2), ~] = SqExpEig(a_k, b_k, m, X(:,2));
-%     [tPhi_y(:,m+1,2), ~] = SqExpEig(a_k, b_k, m, XTrain_laprls(:,2));
-% 
-% end
-% 
-% 
-% k_mercer = zeros(nxPoints, nyPoints);
-% lhs =  zeros(nxPoints, nyPoints);
-% 
-% for i = 1:length(X)
-%     for j = 1:length(XTrain_laprls)
-%         vLambda_Phix_Phiy = sum(vLambda.*tPhi_x(i,:,:).*tPhi_y(j,:,:), 2);
-%         k_mercer(i,j) = prod(vLambda_Phix_Phiy, 3);
-%         k_d = kernel(X(i,:), XTrain_laprls(j,:), kernel_sigma);
-%         lhs(i,j) = prod(k_d, 2);
-%     end
-% end
-% 
-% figure;
-% subplot(2,1,1);
-% imagesc(lhs); colorbar;
-% title('kernel');
-% 
-% subplot(2,1,2);
-% imagesc(k_mercer); colorbar;
-% title('mercer');
-% 
-% % assert(all(all(k_mercer - lhs < 10e-8)));
-% % assert(all(all(k_mercer - K < 10e-8)));
-% 
-% %--------------------------------------------------------------------------
-% Ka = k_mercer*alpha_laprls;
-% mKa = reshape(Ka,length(x1),length(x2));
-% 
-% figure;
-% title('LapRLS - mercer instead of kernel');
-% subplot(2,1,1)
-%     surf(XX1,XX2,mKa, 'edgecolor', 'none')
-%     xlabel('$x_1$', 'Interpreter', 'latex')
-%     ylabel('$x_2$', 'Interpreter', 'latex')
-%     zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')
-%     colorbar;
-% subplot(2,1,2)
-%     contourf(XX1,XX2,mKa,[0 0]);shading flat;
-%     hold on;
-%     plot2D(x,y1,15);
-
+% Plot EigRLS
 %--------------------------------------------------------------------------
-
-
+alpha_eigrls = eigrls_classifier.alpha;
 Phi_c = zeros(length(x1),length(x2));
 Phi_c_test = zeros(length(xt),1);
 for i = 0:options_eigrls.M-1 
@@ -281,8 +151,7 @@ end
 
 
 figure;
-sgtitle(sprintf('EigRLS\n gamma_A = %.4f, gamma_I = %.4f\nTest error = %d', eigrls_classifier.gammas(1), eigrls_classifier.gammas(2), eigrls_classifier.test_error));
-
+sgtitle(sprintf('EigRLS\n gamma_A = %.4f, gamma_I = %.4f\nTest error = %.1f%%', eigrls_classifier.gammas(1), eigrls_classifier.gammas(2), eigrls_classifier.test_error));
 subplot(2,1,1)
     surf(XX1,XX2,Phi_c, 'edgecolor', 'none')
     hold on;
@@ -295,3 +164,4 @@ subplot(2,1,2)
     contourf(XX1,XX2,Phi_c,[0 0]);shading flat;
     hold on;
     plot2D(x,y1,15);
+set(gcf,'Position',[10+600+600 250 600 700])    

@@ -134,16 +134,9 @@ switch method
             classifier.M = options.M;
         end
     case 'eigrls'
-        sParams.dim = 2;
-        sParams.constsType = 1;
-        sParams.a = options.a_k;
-        sParams.b = options.b_k;
-        sParams.ell = 1/sqrt(2*sParams.b); % kernel width
-        sParams.sigma = 1./(2*sParams.a);
-        sParams.mu = 0*ones(1, sParams.dim);
-        sParams.c = sqrt(sParams.a.^2 + 2*sParams.a.*sParams.b);
-        sParams.A = sParams.a + sParams.b + sParams.c;
-        sParams.B = sParams.b./sParams.A;
+        [sParams, ~] = GetParameters();
+        assert(isequal(sParams.a,options.a_k));
+        assert(isequal(sParams.b,options.b_k));
         for i = 0:options.M-1 
             m = OneDim2TwoDimIndex(i, sParams.dim);
             lambda_m(i+1) = lambda(sParams, m);

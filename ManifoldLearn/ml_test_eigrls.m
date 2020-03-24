@@ -32,16 +32,10 @@ M=classifier.M;
 % xtrain=classifier.xtrain;
 % ytrain=classifier.ytrain;
 
-sParams.dim = 2;
-sParams.constsType = 1;
-sParams.a = a_k;
-sParams.b = b_k;
-sParams.ell = 1/sqrt(2*sParams.b); % kernel width
-sParams.sigma = 1./(2*sParams.a);
-sParams.mu = 0*ones(1, sParams.dim);
-sParams.c = sqrt(sParams.a.^2 + 2*sParams.a.*sParams.b);
-sParams.A = sParams.a + sParams.b + sParams.c;
-sParams.B = sParams.b./sParams.A;
+[sParams, ~] = GetParameters();
+assert(isequal(sParams.a,a_k));
+assert(isequal(sParams.b,b_k));
+
 
 Phi = zeros(size(XTest,1), M);
 for i = 0:M-1 

@@ -11,12 +11,10 @@ rng('default'); % For reproducibility
 
 %% Verify stuff
 if sSimParams.b_plotEigenFigs    
-
     [ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams);
     [ mPhi_A, vLambda_A ] = CalcNumericEigenvectors(sParams);
     PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A);
     PlotSpectrum(sParams, sSimParams, vLambda_K, vLambda_A);
-
 end
 
 if sSimParams.b_verifyRKHS

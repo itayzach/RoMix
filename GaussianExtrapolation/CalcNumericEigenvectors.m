@@ -44,19 +44,13 @@ elseif sParams.dim == 2
         A = exp(-(repmat(P',n,1) + repmat(P,1,n) - 2*(X*X'))/(2*sParams.omega^2));
     elseif sParams.constsType == 3
         A = exp(-(sParams.eps^2)*(repmat(P',n,1) + repmat(P,1,n) - 2*(X*X')));
-%         for i=1:size(X,1)
-%             for j=1:size(X,1)
-%                 A2(i,j) = exp(-(sParams.eps^2)*((X(i,1)-X(j,1))^2 + (X(i,2)-X(j,2))^2));
-%                 A3(i,j) = exp(-(sParams.eps^2)*norm(X(i,:) - X(j,:))^2);
-%             end
-%         end
     else
         error('Unknown constsType');
     end
-    [mPhi_A, vLambda_A] = eig(A);
+    [mPhi_A, vLambda_A] = eigs(A,sParams.PlotSpectM);
     
     [vLambda_A, idx] = sort(diag(vLambda_A), 'descend');
-    vLambda_A = (1/n) * vLambda_A(1:sParams.PlotSpectM);
+    vLambda_A = (1/n) * vLambda_A;
     mPhi_A = sqrt(n)*mPhi_A(:,idx);
     
 else

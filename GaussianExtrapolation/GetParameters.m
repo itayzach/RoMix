@@ -7,7 +7,7 @@ fprintf('*                      %d-D                              *\n', sParams.
 fprintf('*********************************************************\n');
 %% kernel and eigenfunctions constants type
 sParams.kernelType = 'exp'; % exp only. sinc isn't yet supported
-sParams.constsType = 1;
+sParams.constsType = 2;
 
 if sParams.constsType == 1
     %% first type consts
@@ -15,13 +15,13 @@ if sParams.constsType == 1
     fprintf('*********************************************************\n');
 
     % kernel width
-    sParams.ell = 1/sqrt(2)/10;
-%     sParams.ell = 1/sqrt(2*3);
+%     sParams.ell = 1/sqrt(2)/10;
+    sParams.ell = 1/sqrt(2);
     sParams.b = 1/(2*sParams.ell^2);
     
     % p(x)
-    sParams.sigma = 500*ones(1, sParams.dim);
-%     sParams.sigma = 0.5*ones(1, sParams.dim);
+%     sParams.sigma = 500*ones(1, sParams.dim);
+    sParams.sigma = 50*ones(1, sParams.dim);
     sParams.mu = 0*ones(1, sParams.dim);
     sParams.a = 1./(2*sParams.sigma);
 
@@ -29,8 +29,10 @@ if sParams.constsType == 1
     sParams.A = sParams.a + sParams.b + sParams.c;
     sParams.B = sParams.b./sParams.A;
     
-    fprintf('a = %8.3f --> sigma (pdf width)    = %8.3f\n', sParams.a, sParams.sigma);
-    fprintf('b = %8.3f --> ell   (kernel width) = %8.3f\n', sParams.b, sParams.ell); 
+    for d = 1:sParams.dim
+        fprintf('a(%d) = %8.3f --> sigma(%d) (pdf width)    = %8.3f\n', d, sParams.a(d), d, sParams.sigma(d));
+    end
+    fprintf('b     = %8.3f --> ell   (kernel width) = %8.3f\n', sParams.b, sParams.ell); 
     fprintf('*********************************************************\n');
 elseif sParams.constsType == 2
     %% second type consts
@@ -38,17 +40,30 @@ elseif sParams.constsType == 2
     fprintf('*********************************************************\n');
     
     % p(x)
-    sParams.sigma = 0.5*ones(1, sParams.dim);
-    sParams.mu    = 0*ones(1, sParams.dim);
-
-    % sParams.sigma = [0.9788    0.4815];
-    % sParams.mu    = [0.6858    0.2503];
-        
-    sParams.omega = 1/sqrt(2); % kernel width
+%     sParams.sigma = 0.5*ones(1, sParams.dim);
+%     sParams.mu    = 0*ones(1, sParams.dim);
+    sParams.cov =   [0.9581     -0.2121; 
+                    -0.2121      0.2318];
+                
+    [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
+    sParams.u = [1 0; 
+                 0 1];
+%     sParams.u = fliplr(sParams.u);    
+%     sParams.sigma = [sParams.sigma_eigv(2,2) sParams.sigma_eigv(1,1)];
+    
+    sParams.sigma = [0.9788    0.4815];  % no scaling two_moons ([muHat, sigmaHat] = normfit(x); [muHat; sigmaHat])
+    sParams.mu =    [0.6858    0.2503];  % no scaling two_moons ([muHat, sigmaHat] = normfit(x); [muHat; sigmaHat])
+    
+    sParams.omega = 1/sqrt(2)/4; % kernel width
     sParams.beta = 2*sParams.sigma.^2/sParams.omega^2;
-    fprintf('sigma (pdf width)    = %8.3f\n', sParams.sigma);
-    fprintf('omega (kernel width) = %8.3f\n', sParams.omega);
-    fprintf('--> beta             = %8.3f\n', sParams.beta);
+    for d = 1:sParams.dim
+        fprintf('sigma(%d) (pdf width)     = %8.3f\n', d, sParams.sigma(d));
+        fprintf('mu(%d)    (pdf mean)      = %8.3f\n', d, sParams.mu(d));
+    end
+        fprintf('omega    (kernel width)  = %8.3f\n', sParams.omega);
+    for d = 1:sParams.dim
+        fprintf('--> beta(%d)              = %8.3f\n', d, sParams.beta(d));
+    end
     fprintf('*********************************************************\n');
 elseif sParams.constsType == 3
     %% third type consts
@@ -64,10 +79,15 @@ elseif sParams.constsType == 3
 
     % sParams.sigma = [0.9788    0.4815];
     % sParams.mu    = [0.6858    0.2503];
-        
-    fprintf('alpha     = %8.3f\n', sParams.alpha);
-    fprintf('epsilon   = %8.3f\n', sParams.eps);
-    fprintf('--> sigma (pdf width)  = %8.3f\n', sParams.sigma);
+    
+    for d = 1:sParams.dim
+        fprintf('alpha(d)                  = %8.3f\n', d, sParams.alpha(d));
+    end
+    fprintf('eps (kernel width)        = %8.3f\n', sParams.eps);
+    for d = 1:sParams.dim
+        fprintf('--> sigma(%d) (pdf width)  = %8.3f\n', d, sParams.sigma(d));
+        fprintf('    mu(%d)    (pdf mean)   = %8.3f\n', d, sParams.mu(d));
+    end
     fprintf('*********************************************************\n');    
 else
     error('Unknown constsType')
@@ -112,31 +132,31 @@ sParams.x_rand = x_rand;
 
 
 %% num of eigenfunctions
-sParams.PlotEigenFuncsM = 9;
+sParams.PlotEigenFuncsM = 4;
 sParams.PlotSpectM = 30;
 sParams.RkhsM = 20;
 sParams.OrthM = 30;
-sParams.MercerM = 50;
-sParams.ExtrplM = 10;
+sParams.MercerM = 2500;
+sParams.ExtrplM = 2500;
 
 %% extrapolation
 sParams.gamma = 0; % regularization
-sParams.R = 50;    % num of sampled points to extrapolate from
+sParams.R = 5000;    % num of sampled points to extrapolate from
 
 %% simulation
 sSimParams.outputFolder = 'figs';
 
-sSimParams.b_plotEigenFigs        = true;
+sSimParams.b_plotEigenFigs        = false;
 sSimParams.b_verifyRKHS           = false;
-sSimParams.b_verifyEigOrth        = true;
-sSimParams.b_verifyMercersTheorem = false;
-sSimParams.b_extrapolateEnable    = true;
+sSimParams.b_verifyEigOrth        = false;
+sSimParams.b_verifyMercersTheorem = true;
+sSimParams.b_extrapolateEnable    = false;
 
 sSimParams.b_randomStepSize       = true;
 
 %% dataset
-sSimParams.twomoons_dataset = false;
-sSimParams.twomoons_scale = true;
+sSimParams.twomoons_dataset = true;
+sSimParams.twomoons_scale = false;
 
 %% AWGN
 sSimParams.noiseVar1 = 0; %0.1;

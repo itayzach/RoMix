@@ -43,7 +43,7 @@ elseif strcmp(method, 'eigrls')
             options.gamma_A=lambda1(i);
             options.gamma_I=lambda2(j);
             classifier=ml_train(XTrain,YTrain,options, method);
-            [f,labels,error]=ml_test_eigrls(classifier,XTest,YTest);
+            [f,labels,error]=ml_test(classifier,XTest,YTest);
             fprintf('%s\n', method);
             fprintf('lambda(i) = %.4f, error = %.4f, min_err = %.4f\n', lambda1(i), error, min_err);
             if error <= min_err

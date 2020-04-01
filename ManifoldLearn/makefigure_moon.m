@@ -18,25 +18,30 @@ gamma_I_rls = 0;
 %% LapRLS params
 gamma_A_laprls = 0.03125;
 gamma_I_laprls = 1;
-kernel_sigma_laprls = 1/sqrt(2)/10; 
+kernel_sigma_laprls = 1/sqrt(2)/4; 
 
 %% EigRLS params
-gamma_A_eigrls = 0;
+gamma_A_eigrls = 0.03125;
 gamma_I_eigrls = 1;  
 
 %% sParams
 [sParams, sSimParams] = GetParameters();
 assert(sParams.dim == 2, 'dim should be 2.')
-kernel_sigma_eigrls = sParams.ell;
+kernel_sigma_eigrls = sParams.omega;
 
-[ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams);
-mPhi_A = [];
-PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A);
+if kernel_sigma_laprls ~= kernel_sigma_eigrls
+    error('LapRLS and EigRLS kernel width is different');
+end
+if sSimParams.b_plotEigenFigs
+    [ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams);
+    mPhi_A = [];
+    PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A);
+end
 
 %% Load dataset
 load 2moons.mat;
 
-l=10; % number of labeled examples
+l=2; % number of labeled examples
 scale_factor = 1;
 x = scale_factor*x;
 xt = scale_factor*xt;
@@ -96,14 +101,27 @@ options_eigrls=ml_options('gamma_A',0.1, ...
                    'GraphWeights', 'my_heat', ...
                    'GraphNormalize', false);
                
-options_eigrls.a_k = sParams.a;
-options_eigrls.b_k = sParams.b;
-options_eigrls.M = sParams.ExtrplM;   
-
 eigrls_classifier = experiment_moon(x,y1,xt,yt,'eigrls',gamma_A_eigrls,gamma_I_eigrls, options_eigrls);
+fprintf('Using %d eigenfunctions\n', sParams.ExtrplM);
 fprintf('---------------------------------------------------\n')
 
 %% Plot classifier using retreived alpahas
+%--------------------------------------------------------------------------
+% Plot alpha difference
+%--------------------------------------------------------------------------
+figure;
+plot(abs(laprlsc_classifier.alpha - eigrls_classifier.alpha))
+ylim([-0.05 0.05]);
+title('$|\alpha(LapRLS)-\alpha(EigRLS)|$', 'Interpreter', 'latex');
+
+%--------------------------------------------------------------------------
+% Plot test error difference
+%--------------------------------------------------------------------------
+fprintf([newline newline 'Test error diff: ' num2str(abs(laprlsc_classifier.test_error - eigrls_classifier.test_error)) '\n'])
+
+%--------------------------------------------------------------------------
+% Generate axis
+%--------------------------------------------------------------------------
 step = (xMax - xMin)/100;
 x1 = xMin:step:xMax;
 x2 = x1;
@@ -137,31 +155,46 @@ set(gcf,'Position',[10+600 250 600 700])
 % Plot EigRLS
 %--------------------------------------------------------------------------
 alpha_eigrls = eigrls_classifier.alpha;
-Phi_c = zeros(length(x1),length(x2));
-Phi_c_test = zeros(length(xt),1);
-for i = 0:options_eigrls.M-1 
-    m = OneDim2TwoDimIndex(i, sParams.dim);
-    vPhi_m_x = phi(sParams,m,X);
-    vPhi_m_x = reshape(vPhi_m_x, length(x1),length(x2));
-    Phi_c = Phi_c + alpha_eigrls(i+1) * vPhi_m_x ;
-    
-    vPhi_m_xt = phi(sParams,m,xt);
-    Phi_c_test = Phi_c_test + alpha_eigrls(i+1) * vPhi_m_xt;
+mPhi_m_x = zeros(length(x), sParams.ExtrplM);
+mPhi_m_X = zeros(length(X), sParams.ExtrplM);
+mPhi_m_xt = zeros(length(xt),sParams.ExtrplM);
+vLambda = zeros(1, sParams.ExtrplM);
+for i = 0:sParams.ExtrplM-1 
+    m = OneDim2TwoDimIndex(i);
+    mPhi_m_X(:, i+1) = phi(sParams,m,X);
+    vLambda(i+1) = lambda(sParams,m);
+    mPhi_m_x(:, i+1) = phi(sParams,m,x);
+    mPhi_m_xt(:, i+1) = phi(sParams,m,xt);
 end
+mPLP_X_x = mPhi_m_X*diag(vLambda)*mPhi_m_x.';
+mPLP_xt_x = mPhi_m_xt*diag(vLambda)*mPhi_m_x.';
+vPLPa_X_x = mPLP_X_x * alpha_eigrls;
+vPLPa_X_xt = mPLP_xt_x * alpha_eigrls;
+mPLPa_X_x = reshape(vPLPa_X_x, length(x1),length(x2));
 
+isalmostequal(mPLP_X_x, K, 1e-10, '', false);
+figure;
+subplot(2,1,1);
+    imagesc(K); colorbar;
+    title('kernel');
 
+subplot(2,1,2);
+    imagesc(mPLP_X_x); colorbar;
+    title('mercer');
+            
+            
 figure;
 sgtitle(sprintf('EigRLS\n gamma_A = %.4f, gamma_I = %.4f\nTest error = %.1f%%', eigrls_classifier.gammas(1), eigrls_classifier.gammas(2), eigrls_classifier.test_error));
 subplot(2,1,1)
-    surf(XX1,XX2,Phi_c, 'edgecolor', 'none')
+    surf(XX1,XX2,mPLPa_X_x, 'edgecolor', 'none')
     hold on;
-    scatter3(xt(:,1), xt(:,2), Phi_c_test, 'filled');
+    scatter3(xt(:,1), xt(:,2), vPLPa_X_xt, 'filled');
     xlabel('$x_1$', 'Interpreter', 'latex')
     ylabel('$x_2$', 'Interpreter', 'latex')
     zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')
     colorbar;
 subplot(2,1,2)
-    contourf(XX1,XX2,Phi_c,[0 0]);shading flat;
+    contourf(XX1,XX2,mPLPa_X_x,[0 0]);shading flat;
     hold on;
     plot2D(x,y1,15);
 set(gcf,'Position',[10+600+600 250 600 700])    

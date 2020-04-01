@@ -23,17 +23,49 @@ function [f,labels,error]=ml_test(classifier,X,Y)
 %          June 2004
 %------------------------------------------------------------------------------%
 
-
-% read classifier
-Kernel=classifier.Kernel;
-KernelParam=classifier.KernelParam;
 alpha=classifier.alpha;
 b=classifier.b;
 xtrain=classifier.xtrain;
 
-% compute test kernel
-K=calckernel(Kernel,KernelParam,xtrain,X);
-f=K*alpha - b;
+if strcmp(classifier.Name, 'eigrls')
+    [sParams, ~] = GetParameters();
+
+    Phi_xtrain = zeros(size(xtrain,1), sParams.ExtrplM);
+    Phi_xtest = zeros(size(X,1), sParams.ExtrplM);
+    lambda_m = zeros(sParams.ExtrplM, 1);
+    for i = 0:sParams.ExtrplM-1 
+        m = OneDim2TwoDimIndex(i);
+        lambda_m(i+1) = lambda(sParams, m);
+        Phi_xtrain(:,i+1) = phi(sParams, m, xtrain);
+        Phi_xtest(:,i+1) = phi(sParams, m, X);
+    end
+    PLP = Phi_xtest*diag(lambda_m)*Phi_xtrain.';
+    f=PLP*alpha;
+    
+    Kernel=classifier.Kernel;
+    KernelParam=classifier.KernelParam;
+    K=calckernel(Kernel,KernelParam,xtrain,X);
+    
+    
+%     figure;
+%     subplot(2,1,1);
+%         imagesc(K); colorbar;
+%         title('kernel');
+%     
+%     subplot(2,1,2);
+%         imagesc(PLP); colorbar;
+%         title('mercer');
+    isalmostequal(K,PLP,1e-10,'',false);
+else
+    % read classifier
+    Kernel=classifier.Kernel;
+    KernelParam=classifier.KernelParam;
+
+
+    % compute test kernel
+    K=calckernel(Kernel,KernelParam,xtrain,X);
+    f=K*alpha - b;
+end
 labels=sign(f);
 
 % compute error rate over labeled part of test set

@@ -128,30 +128,34 @@ switch method
         classifier= ...
             saveclassifier('laprlsc',options.Kernel,options.KernelParam, ...
             alpha,X,b,[options.gamma_A options.gamma_I]);
-        if isfield(options, 'a_k')
-            classifier.a_k = options.a_k;
-            classifier.b_k = options.b_k;
-            classifier.M = options.M;
-        end
     case 'eigrls'
         [sParams, ~] = GetParameters();
-        assert(isequal(sParams.a,options.a_k));
-        assert(isequal(sParams.b,options.b_k));
-        for i = 0:options.M-1 
-            m = OneDim2TwoDimIndex(i, sParams.dim);
+        for i = 0:sParams.ExtrplM-1 
+            m = OneDim2TwoDimIndex(i);
             lambda_m(i+1) = lambda(sParams, m);
             Phi(:, i+1) = phi(sParams, m, X);           
         end
         Lambda = diag(lambda_m);
+        K=calckernel(options.Kernel,options.KernelParam,X);
+        K2=Phi*diag(lambda_m)*Phi.';
+        figure;
+        subplot(2,1,1);
+            imagesc(K); colorbar;
+            title('kernel');
+
+        subplot(2,1,2);
+            imagesc(K2); colorbar;
+            title('mercer');
+        isalmostequal(K,K2,1e-10, '', false)
+        fprintf('last eigenvalue is vLambda(%d) = %.12f\n', length(lambda_m), lambda_m(end));
+
         
-        L = laplacian(X,'kernel',options); % I tried using Phi.'*L*Phi, but Lambda gave better results.
+        
+        L = laplacian(X,'kernel',options);
         [alpha, b] = eigrls(Y, Phi, Lambda, options.gamma_A, options.gamma_I, L);
         classifier= ...
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
             alpha,X,b,[options.gamma_A options.gamma_I]);
-        classifier.a_k = options.a_k;
-        classifier.b_k = options.b_k;
-        classifier.M = options.M;
         classifier.ytrain=Y;
 
     otherwise

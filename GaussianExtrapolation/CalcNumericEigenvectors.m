@@ -29,9 +29,9 @@ if sParams.dim == 1
     %     A_normalized = diag(D1)^(-1/2) * A * diag(D1)^(-1/2);
     %     [mPhi_A, Lambda_A] = eig(A_normalized);
     
-    [mPhi_A, vLambda_A] = eig(A);
+    [mPhi_A, vLambda_A] = eigs(A, sParams.PlotSpectM);
     [vLambda_A, idx] = sort(diag(vLambda_A), 'descend');
-    vLambda_A = (1/length(vLambda_A)) * vLambda_A(1:sParams.PlotSpectM);
+    vLambda_A = (1/n) * vLambda_A;
     mPhi_A = sqrt(n)*mPhi_A(:,idx);
 
 elseif sParams.dim == 2
@@ -47,7 +47,7 @@ elseif sParams.dim == 2
     else
         error('Unknown constsType');
     end
-    [mPhi_A, vLambda_A] = eigs(A,sParams.PlotSpectM);
+    [mPhi_A, vLambda_A] = eigs(A, sParams.PlotSpectM);
     
     [vLambda_A, idx] = sort(diag(vLambda_A), 'descend');
     vLambda_A = (1/n) * vLambda_A;

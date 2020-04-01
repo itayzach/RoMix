@@ -1,6 +1,7 @@
-function m = OneDim2TwoDimIndex(I, D)
+function m = OneDim2TwoDimIndex(I)
 
 i = 0;
+D = 2;
 m = zeros(1, D);
 totalSum = 0;
 

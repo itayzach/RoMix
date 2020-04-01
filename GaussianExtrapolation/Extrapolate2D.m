@@ -49,7 +49,7 @@ for i = 1:nFuncs
     vGi = vFi + vFi_awgn;
     mPhi = zeros(N*N, sParams.ExtrplM);
     for q = 0:sParams.ExtrplM-1 
-        m = OneDim2TwoDimIndex(q, sParams.dim);
+        m = OneDim2TwoDimIndex(q);
         vPhi_m_x = phi(sParams, m, X);
         mPhi(:, q+1) = vPhi_m_x;
     end
@@ -75,6 +75,7 @@ for i = 1:nFuncs
     
         
     vFi_hat = mPhi * vCR;
+    warning('Extrapolation is incorrect! we should use the phi(x_train) and phi(x) ')
     accuracy = 100*(1 - norm(vFi_hat - vFi)/norm(vFi));
     
     cFigs{i} = figure(i+1);

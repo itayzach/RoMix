@@ -16,6 +16,7 @@ if sParams.constsType == 1
         % factorial(171) = Inf, but hermite() is more efficient than hermiteH...
         vHm = hermite(m, sqrt(2*c)*x);
     else
+        warning('m > 170, using hermiteH instead of factorial hermite')
         vHm = hermiteH(m, sqrt(2*c)*x);
     end
 

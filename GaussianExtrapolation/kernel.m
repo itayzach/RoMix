@@ -9,6 +9,9 @@ elseif sParams.constsType == 3
 else
     error('Unknown constsType');
 end
+
+warning('better change kernel to matrix form')
+
 % n1 = size(x, 1);
 % n2 = size(y, 1);
 % vKernel = exp(-(repmat(sum(x.*x,2)',n2,1) + repmat(sum(y.*y,2),1,n1) - 2*y*x')/(2*l^2));

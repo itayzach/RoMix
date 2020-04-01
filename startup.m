@@ -6,3 +6,5 @@ addpath(genpath('ManifoldLearn'));
 addpath('data');
 fprintf('[%s] Ready.\n', scriptName);
 clear scriptName
+
+start_ManifoldLearn;

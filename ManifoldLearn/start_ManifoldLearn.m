@@ -1,8 +1,11 @@
-fprintf('Starting ManifoldLearn...\n')
-addpath('data');
+[~, scriptName, ~] = fileparts(mfilename('fullpath'));
+fprintf('[%s] Starting...\n', scriptName);
+cd ManifoldLearn
 if isempty(dir('*.mex*'))
-    fprintf('Compiling mex files for SVM...\n')
+    fprintf('[%s] Compiling mex files for SVM...\n', scriptName)
     mex -O -c svmprecomputed.cpp
     mex -O mexGramSVMTrain.cpp  svmprecomputed.obj
 end
-fprintf('ManifoldLearn is ready\n')
+fprintf('[%s] Ready.\n', scriptName);
+clear scriptName
+cd ..

@@ -109,9 +109,10 @@ fprintf('---------------------------------------------------\n')
 %--------------------------------------------------------------------------
 % Plot alpha difference
 %--------------------------------------------------------------------------
+alpha_err_diff = abs(laprlsc_classifier.alpha - eigrls_classifier.alpha);
 figure;
-plot(abs(laprlsc_classifier.alpha - eigrls_classifier.alpha))
-ylim([-0.05 0.05]);
+plot(alpha_err_diff)
+ylim([0 max(alpha_err_diff)]);
 title('$|\alpha(LapRLS)-\alpha(EigRLS)|$', 'Interpreter', 'latex');
 
 %--------------------------------------------------------------------------

@@ -10,7 +10,7 @@ else
     error('Unknown constsType');
 end
 
-warning('better change kernel to matrix form')
+% warning('better change kernel to matrix form')
 
 % n1 = size(x, 1);
 % n2 = size(y, 1);

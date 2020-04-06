@@ -1,4 +1,4 @@
-function [] = Extrapolate1D(sParams, sSimParams)
+function [] = Extrapolate1D(sParams)
 
 assert(sParams.ExtrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
 assert(sParams.dim == 1, 'This function works only for 1-D')
@@ -19,7 +19,7 @@ phi_6 = phi_d(sParams, 6, x, 1);
 phi_8 = phi_d(sParams, 8, x, 1);
 mF      = [ A1*phi_1 + A6*phi_6 + A8*phi_8   ...
             B1*exp(-0.2*x.^2).*sin(pi*x) + B2*exp(-0.5*x.^2).*sin(0.4*pi*x) + B3*exp(-0.3*x.^2).*sin(1*pi*x) ];
-mF_awgn = [sqrt(sSimParams.noiseVar1)*randn(N,1) sqrt(sSimParams.noiseVar2)*randn(N,1)];
+mF_awgn = [sqrt(sParams.sSim.noiseVar1)*randn(N,1) sqrt(sParams.sSim.noiseVar2)*randn(N,1)];
 % cFstr   = {'10e^{-x}\big(\sin(2.5x) + \sin(2\pi x)\big)' '10e^{-2x}\sin(5x)'};
 nFuncs  = size(mF, 2);
 
@@ -38,7 +38,7 @@ for i = 1:nFuncs
         vPhi_m_x = phi_d(sParams, m, x, 1);
         mPhi(:, m+1) = vPhi_m_x;
     end
-    if sSimParams.b_randomStepSize
+    if sParams.sSim.b_randomStepSize
 %         vR = sort(randi([1 N],sParams.R,1));
         vR = zeros(sParams.R, 1);
         x_rand = sort((sParams.sigma*randn(sParams.R, 1) + sParams.mu));
@@ -93,7 +93,7 @@ for i = 1:nFuncs
     p4 = plot(x(vR), vGi(vR), 'ro');
     hold off
     legend([p2 p1 p3], 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
-    print(cFigs{i}, [sSimParams.outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
+    print(cFigs{i}, [sParams.sSim.outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
     fprintf('f%d : R = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, sParams.R, sParams.ExtrplM, SNR, accuracy);
     if i == 1
         vC = zeros(sParams.ExtrplM, 1);

@@ -1,4 +1,4 @@
-function [] = VerifyMercerTheorem(sParams, sSimParams)
+function [] = VerifyMercerTheorem(sParams)
 % Verify k(x,y) = sum_{m=0}^inf ~ sum_{m=0}^M( lambda_m*phi_m(x)*phi_m(y) )
 
 if sParams.dim == 1
@@ -21,10 +21,9 @@ if sParams.dim == 1
     nyPoints = size(y,1);
     
 else
-    if sSimParams.twomoons_dataset
-        twomoons = load('2moons.mat', 'x');
-        x = twomoons.x;
-        if sSimParams.twomoons_scale
+    if sParams.sSim.twomoons_dataset
+        x = sParams.sDataset.x;
+        if sParams.sSim.twomoons_scale
             x = 10*x;
         end
         xMax = max(max(x,[],1));

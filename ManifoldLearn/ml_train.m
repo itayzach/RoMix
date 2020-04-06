@@ -129,7 +129,7 @@ switch method
             saveclassifier('laprlsc',options.Kernel,options.KernelParam, ...
             alpha,X,b,[options.gamma_A options.gamma_I]);
     case 'eigrls'
-        [sParams, ~] = GetParameters();
+        sParams = GetParameters();
         for i = 0:sParams.ExtrplM-1 
             m = OneDim2TwoDimIndex(i);
             lambda_m(i+1) = lambda(sParams, m);

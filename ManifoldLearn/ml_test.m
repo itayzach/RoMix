@@ -28,7 +28,7 @@ b=classifier.b;
 xtrain=classifier.xtrain;
 
 if strcmp(classifier.Name, 'eigrls')
-    [sParams, ~] = GetParameters();
+    sParams = GetParameters();
 
     Phi_xtrain = zeros(size(xtrain,1), sParams.ExtrplM);
     Phi_xtest = zeros(size(X,1), sParams.ExtrplM);

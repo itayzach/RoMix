@@ -9,7 +9,7 @@
 
 %% Restart run
 close all; clear; clc;
-rng(0);
+rng(1);
 
 %% RLS params
 gamma_A_rls = 0.03125;
@@ -18,33 +18,38 @@ gamma_I_rls = 0;
 %% LapRLS params
 gamma_A_laprls = 0.03125;
 gamma_I_laprls = 1;
-kernel_sigma_laprls = 1/sqrt(2)/4; 
+kernel_sigma_laprls = 1/(6*sqrt(2)); 
 
 %% EigRLS params
 gamma_A_eigrls = 0.03125;
 gamma_I_eigrls = 1;  
 
 %% sParams
-[sParams, sSimParams] = GetParameters();
+sParams = GetParameters();
 assert(sParams.dim == 2, 'dim should be 2.')
 kernel_sigma_eigrls = sParams.omega;
 
 if kernel_sigma_laprls ~= kernel_sigma_eigrls
     error('LapRLS and EigRLS kernel width is different');
 end
-if sSimParams.b_plotEigenFigs
+if sParams.sSim.b_plotEigenFigs
     [ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams);
     mPhi_A = [];
-    PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A);
+    PlotEigenfunctionsEigenvectors(sParams, mPhi_K, mPhi_A);
 end
 
 %% Load dataset
-load 2moons.mat;
-
-l=2; % number of labeled examples
+l=1; % number of labeled examples
 scale_factor = 1;
-x = scale_factor*x;
-xt = scale_factor*xt;
+x = scale_factor*sParams.sDataset.x;
+xt = scale_factor*sParams.sDataset.xt;
+y = sParams.sDataset.y;
+yt = sParams.sDataset.yt;
+
+% load 2moons.mat
+% 
+% x = scale_factor*x;
+% xt = scale_factor*xt;
 
 xMax = max(max(x,[],1));
 xMin = min(min(x,[],1));

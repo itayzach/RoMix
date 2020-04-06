@@ -1,4 +1,4 @@
-function [] = PlotEigenfunctionsEigenvectors(sParams, sSimParams, mPhi_K, mPhi_A)
+function [] = PlotEigenfunctionsEigenvectors(sParams, mPhi_K, mPhi_A)
 
 if sParams.dim == 1
     fig = figure;
@@ -33,7 +33,7 @@ if sParams.dim == 1
     end
     %% Save
     set(gcf,'Position',[100 100 600 800])
-    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenvectors_1d.png']);
+    saveas(fig,[sParams.sSim.outputFolder filesep 'fig_eigenvectors_1d.png']);
 elseif sParams.dim == 2
     %% 2-D Analytic
     fig = figure;
@@ -48,7 +48,7 @@ elseif sParams.dim == 2
         zlabel(['$\phi_' num2str(m) '(x_1,x_2)$'], 'Interpreter', 'latex')
     end
     set(gcf,'Position',[10 250 1900 700])
-    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenfunctions_2d.png']);
+    saveas(fig,[sParams.sSim.outputFolder filesep 'fig_eigenfunctions_2d.png']);
     
     vP_x = p(sParams, sParams.x(:,1));
     vP_x = vP_x * vP_x.';
@@ -74,7 +74,7 @@ elseif sParams.dim == 2
         end
 
         set(gcf,'Position',[10 250 1900 700])
-        saveas(fig,[sSimParams.outputFolder filesep 'fig_eigenvectors_2d.png']);
+        saveas(fig,[sParams.sSim.outputFolder filesep 'fig_eigenvectors_2d.png']);
     end
 else
     error('Not supporting plots for more than 2-D')

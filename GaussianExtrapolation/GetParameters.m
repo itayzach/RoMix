@@ -1,30 +1,50 @@
-function [sParams, sSimParams] = GetParameters()
+function [sParams] = GetParameters()
 
 %% dimensions
 sParams.dim = 2;
 fprintf('*********************************************************\n');
 fprintf('*                      %d-D                              *\n', sParams.dim);
 fprintf('*********************************************************\n');
+%% Dataset
+if sParams.dim == 2
+    sParams.sSim.twomoons_dataset = true;
+    sParams.sSim.twomoons_scale = false;
+    sParams.sDataset = load('2moons.mat');
+end
+
 %% kernel and eigenfunctions constants type
 sParams.kernelType = 'exp'; % exp only. sinc isn't yet supported
 sParams.constsType = 2;
+
+%% p(x)
+if isfield(sParams, 'sDataset')
+    GMModel = fitgmdist([sParams.sDataset.x; sParams.sDataset.xt],1);
+    sParams.cov = GMModel.Sigma;
+    [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
+    if sParams.cov(1,1) > sParams.cov(2,2)
+        warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
+        sParams.u = fliplr(sParams.u);    
+        sParams.sigma = [sParams.sigma_eigv(2,2) sParams.sigma_eigv(1,1)];
+    else
+        sParams.sigma = [sParams.sigma_eigv(1,1) sParams.sigma_eigv(2,2)];
+    end
+    sParams.mu = GMModel.mu;
+else
+    sParams.sigma = 0.5*ones(1, sParams.dim);
+    sParams.mu    = 0*ones(1, sParams.dim);
+    sParams.u     = eye(sParams.dim);
+end
 
 if sParams.constsType == 1
     %% first type consts
     fprintf('*              Using a,b,ell constants                  *\n');
     fprintf('*********************************************************\n');
 
-    % kernel width
-%     sParams.ell = 1/sqrt(2)/10;
-    sParams.ell = 1/sqrt(2);
+    sParams.ell = 1/sqrt(2); % kernel width
+    
+    sParams.a = 1./(2*sParams.sigma);
     sParams.b = 1/(2*sParams.ell^2);
     
-    % p(x)
-%     sParams.sigma = 500*ones(1, sParams.dim);
-    sParams.sigma = 50*ones(1, sParams.dim);
-    sParams.mu = 0*ones(1, sParams.dim);
-    sParams.a = 1./(2*sParams.sigma);
-
     sParams.c = sqrt(sParams.a.^2 + 2*sParams.a.*sParams.b);
     sParams.A = sParams.a + sParams.b + sParams.c;
     sParams.B = sParams.b./sParams.A;
@@ -39,23 +59,9 @@ elseif sParams.constsType == 2
     fprintf('*            Using beta,omega constants                 *\n');
     fprintf('*********************************************************\n');
     
-    % p(x)
-%     sParams.sigma = 0.5*ones(1, sParams.dim);
-%     sParams.mu    = 0*ones(1, sParams.dim);
-    sParams.cov =   [0.9581     -0.2121; 
-                    -0.2121      0.2318];
-                
-    [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
-    sParams.u = [1 0; 
-                 0 1];
-%     sParams.u = fliplr(sParams.u);    
-%     sParams.sigma = [sParams.sigma_eigv(2,2) sParams.sigma_eigv(1,1)];
-    
-    sParams.sigma = [0.9788    0.4815];  % no scaling two_moons ([muHat, sigmaHat] = normfit(x); [muHat; sigmaHat])
-    sParams.mu =    [0.6858    0.2503];  % no scaling two_moons ([muHat, sigmaHat] = normfit(x); [muHat; sigmaHat])
-    
-    sParams.omega = 1/sqrt(2)/4; % kernel width
+    sParams.omega = 1/(6*sqrt(2)); % kernel width
     sParams.beta = 2*sParams.sigma.^2/sParams.omega^2;
+    
     for d = 1:sParams.dim
         fprintf('sigma(%d) (pdf width)     = %8.3f\n', d, sParams.sigma(d));
         fprintf('mu(%d)    (pdf mean)      = %8.3f\n', d, sParams.mu(d));
@@ -71,14 +77,7 @@ elseif sParams.constsType == 3
     fprintf('*********************************************************\n');
     
     sParams.eps = 1; % 1/kernel width
-    sParams.alpha = 2/sqrt(2)*ones(1, sParams.dim);
-    
-    % p(x)
-    sParams.sigma = 1./(sqrt(2)*sParams.alpha);
-    sParams.mu    = 0*ones(1, sParams.dim);
-
-    % sParams.sigma = [0.9788    0.4815];
-    % sParams.mu    = [0.6858    0.2503];
+    sParams.alpha = 1./(sqrt(2)*sParams.sigma);
     
     for d = 1:sParams.dim
         fprintf('alpha(d)                  = %8.3f\n', d, sParams.alpha(d));
@@ -144,23 +143,20 @@ sParams.gamma = 0; % regularization
 sParams.R = 5000;    % num of sampled points to extrapolate from
 
 %% simulation
-sSimParams.outputFolder = 'figs';
+sParams.sSim.outputFolder = 'figs';
 
-sSimParams.b_plotEigenFigs        = false;
-sSimParams.b_verifyRKHS           = false;
-sSimParams.b_verifyEigOrth        = false;
-sSimParams.b_verifyMercersTheorem = true;
-sSimParams.b_extrapolateEnable    = false;
+sParams.sSim.b_plotEigenFigs        = false;
+sParams.sSim.b_verifyRKHS           = false;
+sParams.sSim.b_verifyEigOrth        = false;
+sParams.sSim.b_verifyMercersTheorem = true;
+sParams.sSim.b_extrapolateEnable    = false;
 
-sSimParams.b_randomStepSize       = true;
+sParams.sSim.b_randomStepSize       = true;
 
-%% dataset
-sSimParams.twomoons_dataset = true;
-sSimParams.twomoons_scale = false;
 
 %% AWGN
-sSimParams.noiseVar1 = 0; %0.1;
-sSimParams.noiseVar2 = 0; %0.1;
+sParams.sSim.noiseVar1 = 0; %0.1;
+sParams.sSim.noiseVar2 = 0; %0.1;
 
 assert(sParams.ExtrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
 end

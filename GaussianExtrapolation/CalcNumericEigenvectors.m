@@ -1,13 +1,16 @@
 function [mPhi_A, vLambda_A] = CalcNumericEigenvectors(sParams)
+x = sParams.x_rand;
+n = length(x);
 
-n = length(sParams.x_rand);
 if strcmp(sParams.kernelType, 'sinc')
     % sinc(x_i - x_j)
-    X = repmat(sParams.x_rand.',n,1) - repmat(sParams.x_rand,1,n);
-    A = sinc(2*X);
+    dist = pdist2(x, x);
+%     X = repmat(x.',n,1) - repmat(x,1,n);
+    A = sin(sParams.a*dist)./(pi*dist);
+    A(dist == 0) = sParams.a;
 elseif strcmp(sParams.kernelType, 'exp')
     % exp(-||x_i - x_j||^2 / 2\ell^2)
-    dist = pdist2(sParams.x_rand, sParams.x_rand);
+    dist = pdist2(x, x);
     if sParams.constsType == 1
         A = exp(-dist.^2/(2*sParams.ell^2));
     elseif sParams.constsType == 2
@@ -17,6 +20,11 @@ elseif strcmp(sParams.kernelType, 'exp')
     else
         error('Unknown constsType');
     end
+% elseif strcmp(sParams.kernelType, 'brownian')
+%     x = sParams.x_rand;
+%     n = length(x);
+%     dist = pdist2(x, x);
+%     A = sParams.a^2 - x*x.' -0.5*dist;
 else
     error('Unknown kernelType')
 end

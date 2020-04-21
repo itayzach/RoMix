@@ -17,7 +17,8 @@ if strcmp(sParams.dataDist, 'gaussian')
 %     end
 elseif strcmp(sParams.dataDist, 'uniform')
     vPr = zeros(size(y));
-    vPr(y > -0.5 & y < 0.5) = 1;
+    vPr(y > -sParams.a & y < sParams.a) = 1/(2*sParams.a);
+%     vPr(y > 0 & y < sParams.a) = 1/sParams.a;
 else
     error('unknown pdf')
 end

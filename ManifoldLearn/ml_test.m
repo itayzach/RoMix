@@ -23,9 +23,8 @@ function [f,labels,error]=ml_test(classifier,X,Y)
 %          June 2004
 %------------------------------------------------------------------------------%
 
-alpha=classifier.alpha;
-b=classifier.b;
-xtrain=classifier.xtrain;
+alpha = classifier.alpha;
+xtrain = classifier.xtrain;
 
 if strcmp(classifier.Name, 'eigrls')
     sParams = GetParameters();
@@ -40,11 +39,20 @@ if strcmp(classifier.Name, 'eigrls')
         Phi_xtest(:,i+1) = phi(sParams, m, X);
     end
     PLP = Phi_xtest*diag(lambda_m)*Phi_xtrain.';
-    f=PLP*alpha;
+    f_PLP_alpha=PLP*alpha;
+
+    c = classifier.c;
+    c_from_alpha = diag(lambda_m)*Phi_xtrain.'*alpha;
+    isalmostequal(c,c_from_alpha,1e-10,'',false);
+    f_Pc_from_alpha = Phi_xtest*c_from_alpha;
+    f_Pc = Phi_xtest*c;
     
     Kernel=classifier.Kernel;
     KernelParam=classifier.KernelParam;
     K=calckernel(Kernel,KernelParam,xtrain,X);
+    f_alpha = K*alpha;
+    
+    isalmostequal(K,PLP,1e-10,'',false);
     
     
 %     figure;
@@ -55,7 +63,9 @@ if strcmp(classifier.Name, 'eigrls')
 %     subplot(2,1,2);
 %         imagesc(PLP); colorbar;
 %         title('mercer');
-    isalmostequal(K,PLP,1e-10,'',false);
+    f = f_Pc;
+    isalmostequal(f,f_alpha,1e-10,'',false);
+    
 else
     % read classifier
     Kernel=classifier.Kernel;
@@ -64,7 +74,7 @@ else
 
     % compute test kernel
     K=calckernel(Kernel,KernelParam,xtrain,X);
-    f=K*alpha - b;
+    f=K*alpha;
 end
 labels=sign(f);
 

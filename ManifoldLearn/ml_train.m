@@ -49,7 +49,7 @@ if l==0 | strcmp(method,'clustering')% unsupervised case
     alpha=V(:,2);
     classifier= ...
         saveclassifier('clustering',options.Kernel,options.KernelParam, ...
-        alpha,X,0,[options.gamma_A options.gamma_I]);
+        alpha,X,[options.gamma_A options.gamma_I]);
     result=0;
     return;
 end
@@ -63,7 +63,7 @@ switch method
         Xlab=X(lab,:);
         classifier= ...
             saveclassifier('svm',options.Kernel,options.KernelParam, ...
-            alpha(svs+1),Xlab(svs+1,:),b,[options.gamma_A 0]);
+            alpha(svs+1),Xlab(svs+1,:),[options.gamma_A 0]);
         
     case 'tsvm' % use with Antons code
         classifier=tsvm(X,Y,options.Kernel,options.KernelParam,options.gamma_A);
@@ -91,14 +91,14 @@ switch method
         [alpha,b]=lapsvm(K,Y,L,options.gamma_A,options.gamma_I);
         classifier= ...
             saveclassifier('lapsvm',options.Kernel,options.KernelParam, ...
-            alpha,X,b,[options.gamma_A options.gamma_I]);
+            alpha,X,[options.gamma_A options.gamma_I]);
         
     case 'rlsc'
         K=calckernel(options.Kernel,options.KernelParam,X(lab,:));
         [alpha,b]=rlsc(K,Y(lab),options.gamma_A);
         classifier= ...
             saveclassifier('rlsc',options.Kernel,options.KernelParam,alpha,...
-            X(lab,:),b,[options.gamma_A 0]);
+            X(lab,:),[options.gamma_A 0]);
         
     case 'laprlsc'
         K=calckernel(options.Kernel,options.KernelParam,X);
@@ -127,7 +127,7 @@ switch method
         [alpha,b]=laprlsc(K,Y,L,options.gamma_A,options.gamma_I);
         classifier= ...
             saveclassifier('laprlsc',options.Kernel,options.KernelParam, ...
-            alpha,X,b,[options.gamma_A options.gamma_I]);
+            alpha,X,[options.gamma_A options.gamma_I]);
     case 'eigrls'
         sParams = GetParameters();
         for i = 0:sParams.ExtrplM-1 
@@ -152,10 +152,10 @@ switch method
         
         
         L = laplacian(X,'kernel',options);
-        [alpha, b] = eigrls(Y, Phi, Lambda, options.gamma_A, options.gamma_I, L);
+        [alpha, c] = eigrls(Y, Phi, Lambda, options.gamma_A, options.gamma_I, L);
         classifier= ...
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
-            alpha,X,b,[options.gamma_A options.gamma_I]);
+            alpha,X,[options.gamma_A options.gamma_I],c);
         classifier.ytrain=Y;
 
     otherwise

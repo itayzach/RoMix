@@ -1,4 +1,4 @@
-function classifier=saveclassifier(name,kerneltype,kernelparam,alpha,xtrain,b,lambda)
+function classifier=saveclassifier(name,kerneltype,kernelparam,alpha,xtrain,lambda,c)
 
 % SAVECLASSIFIER Generates a classifier structure containg details of a classifier
 % ----------------------------------------------------------------------------------%
@@ -24,6 +24,8 @@ classifier.Name=name;
 classifier.Kernel=kerneltype;
 classifier.KernelParam=kernelparam;
 classifier.alpha=alpha;
-classifier.b=b;
 classifier.xtrain=xtrain;
 classifier.gammas=lambda;
+if exist('c', 'var')
+    classifier.c=c;
+end

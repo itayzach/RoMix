@@ -157,10 +157,12 @@ subplot(2,1,2)
     hold on;
     plot2D(x,y1,15);
 set(gcf,'Position',[10+600 250 600 700])
+
+
 %--------------------------------------------------------------------------
 % Plot EigRLS
 %--------------------------------------------------------------------------
-alpha_eigrls = eigrls_classifier.alpha;
+c = eigrls_classifier.c;
 mPhi_m_x = zeros(length(x), sParams.ExtrplM);
 mPhi_m_X = zeros(length(X), sParams.ExtrplM);
 mPhi_m_xt = zeros(length(xt),sParams.ExtrplM);
@@ -172,10 +174,38 @@ for i = 0:sParams.ExtrplM-1
     mPhi_m_x(:, i+1) = phi(sParams,m,x);
     mPhi_m_xt(:, i+1) = phi(sParams,m,xt);
 end
+
+
+vPhi_X_c = mPhi_m_X*c;
+vPhi_xt_c = mPhi_m_xt*c;
+mPhi_X_c = reshape(vPhi_X_c,length(x1),length(x2));
+% mPhi_xt_c = reshape(vPhi_xt_c,length(x1),length(x2));
+
+figure;
+sgtitle(sprintf('EigRLS (Phi c) \n gamma_A = %.4f, gamma_I = %.4f\nTest error = %.1f%%', eigrls_classifier.gammas(1), eigrls_classifier.gammas(2), eigrls_classifier.test_error));
+subplot(2,1,1)
+    surf(XX1,XX2,mPhi_X_c, 'edgecolor', 'none')
+    hold on;
+    scatter3(xt(:,1), xt(:,2), vPhi_xt_c, 'filled');
+    xlabel('$x_1$', 'Interpreter', 'latex')
+    ylabel('$x_2$', 'Interpreter', 'latex')
+    zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')
+    colorbar;
+subplot(2,1,2)
+    contourf(XX1,XX2,mPhi_X_c,[0 0]);shading flat;
+    hold on;
+    plot2D(x,y1,15);
+set(gcf,'Position',[10+600+600 250 600 700]) 
+
+%--------------------------------------------------------------------------
+% Plot EigRLS
+%--------------------------------------------------------------------------
+alpha_eigrls = eigrls_classifier.alpha;
+
 mPLP_X_x = mPhi_m_X*diag(vLambda)*mPhi_m_x.';
 mPLP_xt_x = mPhi_m_xt*diag(vLambda)*mPhi_m_x.';
 vPLPa_X_x = mPLP_X_x * alpha_eigrls;
-vPLPa_X_xt = mPLP_xt_x * alpha_eigrls;
+vPLPa_xt_x = mPLP_xt_x * alpha_eigrls;
 mPLPa_X_x = reshape(vPLPa_X_x, length(x1),length(x2));
 
 isalmostequal(mPLP_X_x, K, 1e-10, '', false);
@@ -190,11 +220,11 @@ subplot(2,1,2);
             
             
 figure;
-sgtitle(sprintf('EigRLS\n gamma_A = %.4f, gamma_I = %.4f\nTest error = %.1f%%', eigrls_classifier.gammas(1), eigrls_classifier.gammas(2), eigrls_classifier.test_error));
+sgtitle(sprintf('EigRLS (Phi*Lambda*Phi'')alpha\n gamma_A = %.4f, gamma_I = %.4f\nTest error = %.1f%%', eigrls_classifier.gammas(1), eigrls_classifier.gammas(2), eigrls_classifier.test_error));
 subplot(2,1,1)
     surf(XX1,XX2,mPLPa_X_x, 'edgecolor', 'none')
     hold on;
-    scatter3(xt(:,1), xt(:,2), vPLPa_X_xt, 'filled');
+    scatter3(xt(:,1), xt(:,2), vPLPa_xt_x, 'filled');
     xlabel('$x_1$', 'Interpreter', 'latex')
     ylabel('$x_2$', 'Interpreter', 'latex')
     zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')
@@ -203,4 +233,12 @@ subplot(2,1,2)
     contourf(XX1,XX2,mPLPa_X_x,[0 0]);shading flat;
     hold on;
     plot2D(x,y1,15);
-set(gcf,'Position',[10+600+600 250 600 700])    
+set(gcf,'Position',[10+600+600 250 600 700])  
+
+
+%--------------------------------------------------------------------------
+% Plot f difference
+%--------------------------------------------------------------------------
+figure; 
+stem(abs(Ka - vPhi_X_c));
+title('$ | K \alpha - \Phi c |$', 'Interpreter', 'latex');

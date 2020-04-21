@@ -17,8 +17,8 @@ if sParams.sSim.b_plotEigenFigs
     PlotSpectrum(sParams, vLambda_K, vLambda_A);
 end
 
-if sParams.sSim.b_verifyRKHS
-    VerifyRHKS(sParams);
+if sParams.sSim.b_verifyKernelEigen
+    VerifyKernelEigenfunctions(sParams);
 else
     warning('Not verifying RKHS');
 end

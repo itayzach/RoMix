@@ -2,11 +2,10 @@ function [] = VerifyKernelEigenfuncs(sParams)
 
 assert(sParams.dim <= 2);
 %% Check eigenfunctions
-dx = 0.05;
-xAxis1d = (-1e3:dx:1e3-dx).';
+
 nPoints = 10;
-yMax = 3;
-yMin = -3;
+yMax = sParams.xMax;
+yMin = sParams.xMin;
 
 y = zeros(nPoints, sParams.dim);
 % x = zeros(length(xAxis1d), sParams.dim);
@@ -69,7 +68,7 @@ for i = 0:sParams.RkhsM-1
     fprintf('lambda * phi = ')
     fprintf('%.6f  ', rhs.');
     fprintf('\n');
-    fprintf('<Ky, phi>     = ')
+    fprintf('<Ky, phi>    = ')
     fprintf('%.6f  ', lhs.');
     fprintf('\n');
     isalmostequal(rhs, lhs, 1e-12, sprintf('m = %d failed...', i))

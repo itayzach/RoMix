@@ -1,4 +1,4 @@
-function [] = VerifyRHKS(sParams)
+function [] = VerifyKernelEigenfuncs(sParams)
 
 assert(sParams.dim <= 2);
 %% Check eigenfunctions

@@ -8,8 +8,10 @@ fprintf('*********************************************************\n');
 %% Dataset
 if sParams.dim == 2
     sParams.sSim.twomoons_dataset = true;
-    sParams.sSim.twomoons_scale = false;
-    sParams.sDataset = load('2moons.mat');
+    if sParams.sSim.twomoons_dataset
+        sParams.sDataset = load('2moons.mat');
+        sParams.sSim.twomoons_scale = false;
+    end
 end
 
 %% kernel and eigenfunctions constants type
@@ -31,6 +33,7 @@ if isfield(sParams, 'sDataset')
     sParams.mu = GMModel.mu;
 else
     sParams.sigma = 0.5*ones(1, sParams.dim);
+    sParams.cov   = diag(sParams.sigma);
     sParams.mu    = 0*ones(1, sParams.dim);
     sParams.u     = eye(sParams.dim);
 end
@@ -145,11 +148,11 @@ sParams.R = 5000;    % num of sampled points to extrapolate from
 %% simulation
 sParams.sSim.outputFolder = 'figs';
 
-sParams.sSim.b_plotEigenFigs        = false;
-sParams.sSim.b_verifyRKHS           = false;
-sParams.sSim.b_verifyEigOrth        = false;
-sParams.sSim.b_verifyMercersTheorem = true;
-sParams.sSim.b_extrapolateEnable    = false;
+sParams.sSim.b_plotEigenFigs          = false;
+sParams.sSim.b_verifyKernelEigenfuncs = false;
+sParams.sSim.b_verifyEigOrth          = false;
+sParams.sSim.b_verifyMercersTheorem   = true;
+sParams.sSim.b_extrapolateEnable      = false;
 
 sParams.sSim.b_randomStepSize       = true;
 

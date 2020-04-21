@@ -13,7 +13,7 @@ if sParams.dim == 1
             plot(sParams.x, vP_x, 'LineStyle', ':', 'LineWidth', 2, 'DisplayName', '$p(x)$');
             hold off
             title('Eigenfunctions of (analytic) kernel operator')
-            legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
+            legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
         end
     end
     
@@ -28,7 +28,7 @@ if sParams.dim == 1
             histogram(sParams.x_rand, 'Normalization', 'pdf', 'LineStyle', ':', 'DisplayStyle', 'stairs', 'LineWidth', 2, 'DisplayName', '$\hat{p}(x)$');
             hold off
             title('Eigenvectors of (numeric) Gram matrix A')
-            legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
+            legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
         end
     end
     %% Save

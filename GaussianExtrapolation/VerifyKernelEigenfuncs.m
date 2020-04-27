@@ -65,11 +65,14 @@ for i = 0:sParams.RkhsM-1
         lhs = prod(lhs_d, 2); % multiply all D integrals
     end
     fprintf('m = %d\n', i)
+    fprintf('y            = ')
+    fprintf('%10.6f  ', y.');
+    fprintf('\n');
     fprintf('lambda * phi = ')
-    fprintf('%.6f  ', rhs.');
+    fprintf('%10.6f  ', rhs.');
     fprintf('\n');
     fprintf('<Ky, phi>    = ')
-    fprintf('%.6f  ', lhs.');
+    fprintf('%10.6f  ', lhs.');
     fprintf('\n');
     isalmostequal(rhs, lhs, 1e-12, sprintf('m = %d failed...', i))
     fprintf('(lhs) <Ky, phi_m> = lambda_m*phi_m(y) (rhs) confirmed\n');

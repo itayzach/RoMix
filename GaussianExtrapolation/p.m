@@ -7,14 +7,18 @@ if strcmp(sParams.dataDist, 'gaussian')
     else
         mu = sParams.mu;
         sigma = sParams.sigma;
+        conv = sParams.cov;
     end
     
-%     if sParams.dim == 1
+    if sParams.dim == 1
         vPr = (1./sqrt(2*pi*sigma.^2)) .* exp( -(y-mu).^2./(2*sigma.^2) );
-%     else
-%         C = 1/sqrt( ((2*pi)^sParams.dim)*det(sigma) );
-%         vPr = C * exp( -0.5*(y-mu)*((sigma)\(y-mu).') );
-%     end
+    else
+        C = 1/sqrt( ((2*pi)^sParams.dim)*det(conv) );
+        vPr = zeros(length(y),1);
+        for i = 1:length(y)
+            vPr(i) = C * exp( -0.5*(y(i,:)-mu)*(conv)^(-1)*(y(i,:)-mu).' );
+        end
+    end
 elseif strcmp(sParams.dataDist, 'uniform')
     vPr = zeros(size(y));
     vPr(y > -sParams.a & y < sParams.a) = 1/(2*sParams.a);

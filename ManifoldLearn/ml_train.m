@@ -130,7 +130,7 @@ switch method
             alpha,X,[options.gamma_A options.gamma_I]);
     case 'eigrls'
         sParams = GetParameters();
-        for i = 0:sParams.ExtrplM-1 
+        for i = sParams.FirstM:sParams.ExtrplM-1 
             m = OneDim2TwoDimIndex(i);
             lambda_m(i+1) = lambda(sParams, m);
             Phi(:, i+1) = phi(sParams, m, X);           

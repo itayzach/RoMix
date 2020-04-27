@@ -29,10 +29,10 @@ xtrain = classifier.xtrain;
 if strcmp(classifier.Name, 'eigrls')
     sParams = GetParameters();
 
-    Phi_xtrain = zeros(size(xtrain,1), sParams.ExtrplM);
-    Phi_xtest = zeros(size(X,1), sParams.ExtrplM);
-    lambda_m = zeros(sParams.ExtrplM, 1);
-    for i = 0:sParams.ExtrplM-1 
+    Phi_xtrain = zeros(size(xtrain,1), sParams.ExtrplM-sParams.FirstM);
+    Phi_xtest = zeros(size(X,1), sParams.ExtrplM-sParams.FirstM);
+    lambda_m = zeros(sParams.ExtrplM-sParams.FirstM, 1);
+    for i = sParams.FirstM:sParams.ExtrplM-1 
         m = OneDim2TwoDimIndex(i);
         lambda_m(i+1) = lambda(sParams, m);
         Phi_xtrain(:,i+1) = phi(sParams, m, xtrain);

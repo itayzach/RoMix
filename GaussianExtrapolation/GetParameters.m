@@ -20,24 +20,27 @@ if strcmp(sParams.dataDist, 'gaussian')
     if isfield(sParams, 'sDataset')
         GMModel = fitgmdist([sParams.sDataset.x; sParams.sDataset.xt],1);
         sParams.cov = GMModel.Sigma;
-        [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
-        if sParams.cov(1,1) > sParams.cov(2,2)
-            warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
-            sParams.u = fliplr(sParams.u);    
-            sParams.sigma = [sParams.sigma_eigv(2,2) sParams.sigma_eigv(1,1)];
-        else
-            sParams.sigma = [sParams.sigma_eigv(1,1) sParams.sigma_eigv(2,2)];
-        end
-        sParams.mu = GMModel.mu;
+        mu = GMModel.mu;
     else
-        sParams.sigma = 0.5*ones(1, sParams.dim);
-        sParams.cov   = diag(sParams.sigma);
-        sParams.mu    = 0*ones(1, sParams.dim);
-        sParams.u     = eye(sParams.dim);
+        sParams.cov   = [0.5   0; 
+                         0   0.5];
+        [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
+        sParams.sigma = diag(sParams.cov).';
+        mu            = [-10 2];
     end
+    [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
+    if sParams.cov(1,1) > sParams.cov(2,2)
+        warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
+        sParams.u = fliplr(sParams.u);    
+        sParams.sigma = [sParams.sigma_eigv(2,2) sParams.sigma_eigv(1,1)];
+    else
+        sParams.sigma = [sParams.sigma_eigv(1,1) sParams.sigma_eigv(2,2)];
+    end
+%     sParams.mu = mu * sParams.u; % <mu,u_i>
+    sParams.mu = mu;
     
-    sParams.xMax = sParams.mu + 3*sParams.sigma;
-    sParams.xMin = sParams.mu - 3*sParams.sigma;
+    sParams.xMax = sParams.mu + 1.5*sParams.sigma;
+    sParams.xMin = sParams.mu - 1.5*sParams.sigma;
     if sParams.xMax - sParams.xMin > 10
         sParams.xMax = sParams.mu + 5;
         sParams.xMin = sParams.mu - 5;
@@ -54,10 +57,7 @@ end
 %% random x-axis
 n = 5000;
 if strcmp(sParams.dataDist, 'gaussian')
-    x_rand = sParams.sigma.*randn(n, sParams.dim) + sParams.mu;
-    sParams.xMin = max(sParams.xMin, min(x_rand));
-    sParams.xMax = min(sParams.xMax, max(x_rand));
-    warning('Note: sParams.xMin, sParams.xMax are changed');
+    x_rand = mvnrnd(sParams.mu, sParams.cov, n);
 elseif strcmp(sParams.dataDist, 'uniform')
     x_rand = (sParams.xMax - sParams.xMin)*rand(n, sParams.dim) + sParams.xMin;
 else
@@ -66,12 +66,11 @@ end
 sParams.x_rand = x_rand;
 
 %% x-axis
-sParams.n_x_axis = 1000;
-sParams.dx = (sParams.xMax(1) - sParams.xMin(1))/sParams.n_x_axis;
-
+sParams.n_x_axis = 100;
+sParams.dx = (sParams.xMax - sParams.xMin)/sParams.n_x_axis;
 x = zeros(sParams.n_x_axis, sParams.dim);
 for d = 1:sParams.dim
-    x(:,d) = (sParams.xMin : sParams.dx : sParams.xMax-sParams.dx).';
+    x(:,d) = (sParams.xMin(d) : sParams.dx(d) : sParams.xMax(d)-sParams.dx(d)).';
 end
 sParams.x = x;
 
@@ -105,6 +104,7 @@ if strcmp(sParams.dataDist, 'gaussian')
 
         sParams.omega = 1/(6*sqrt(2)); % kernel width
         sParams.beta = 2*sParams.sigma.^2/sParams.omega^2;
+        sParams.t = 0.5*sParams.omega^2;
 
         for d = 1:sParams.dim
             fprintf('sigma(%d) (pdf width)     = %8.3f\n', d, sParams.sigma(d));
@@ -143,13 +143,13 @@ end
 
 
 %% num of eigenfunctions
-sParams.PlotEigenFuncsM = 4;
+sParams.PlotEigenFuncsM = 8;
 sParams.PlotSpectM = 30;
 sParams.RkhsM = 20;
 sParams.OrthM = 30;
 sParams.MercerM = 2500;
 sParams.ExtrplM = 2500;
-sParams.FirstM = 2000;
+sParams.FirstM = 0;
 
 %% extrapolation
 sParams.gamma = 0; % regularization
@@ -158,14 +158,14 @@ sParams.R = 5000;    % num of sampled points to extrapolate from
 %% simulation
 sParams.sSim.outputFolder = 'figs';
 
-sParams.sSim.b_plotEigenFigs          = false;
+sParams.sSim.b_plotEigenFigs          = true;
 sParams.sSim.b_verifyKernelEigenfuncs = true;
 sParams.sSim.b_verifyEigOrth          = false;
 sParams.sSim.b_verifyMercersTheorem   = false;
 sParams.sSim.b_extrapolateEnable      = false;
 
 sParams.sSim.b_randomStepSize       = true;
-
+sParams.sSim.b_plot_contourf = false;
 
 %% AWGN
 sParams.sSim.noiseVar1 = 0; %0.1;

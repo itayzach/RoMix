@@ -47,11 +47,6 @@ xTest = scale_factor*sParams.sDataset.xt;
 yTrain = sParams.sDataset.y(1:end);
 yTest = sParams.sDataset.yt;
 
-% load 2moons.mat
-% 
-% x = scale_factor*x;
-% xt = scale_factor*xt;
-
 xMax = max(max(xTrain,[],1));
 xMin = min(min(xTrain,[],1));
 

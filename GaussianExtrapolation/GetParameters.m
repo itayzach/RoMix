@@ -20,24 +20,21 @@ if strcmp(sParams.dataDist, 'gaussian')
     if isfield(sParams, 'sDataset')
         GMModel = fitgmdist([sParams.sDataset.x; sParams.sDataset.xt],1);
         sParams.cov = GMModel.Sigma;
-        mu = GMModel.mu;
+        sParams.mu  = GMModel.mu;
     else
-        sParams.cov   = [0.5   0; 
-                         0   0.5];
-        [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
-        sParams.sigma = diag(sParams.cov).';
-        mu            = [-10 2];
+        sParams.cov = [0.5    0; 
+                       0   0.5];
+        sParams.mu  = [-10 2];
     end
     [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
+    sParams.sigma = diag(sqrt(sParams.sigma_eigv)).';
     if sParams.cov(1,1) > sParams.cov(2,2)
         warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
         sParams.u = fliplr(sParams.u);    
-        sParams.sigma = [sParams.sigma_eigv(2,2) sParams.sigma_eigv(1,1)];
-    else
-        sParams.sigma = [sParams.sigma_eigv(1,1) sParams.sigma_eigv(2,2)];
-    end
-%     sParams.mu = mu * sParams.u; % <mu,u_i>
-    sParams.mu = mu;
+        sParams.sigma = fliplr(sParams.sigma);
+    end   
+%     sParams.mu = sParams.mu*sParams.u;
+    isalmostequal(sParams.u*diag(sParams.sigma.^2)*sParams.u.', sParams.cov, 1e-15)
     
     sParams.xMax = sParams.mu + 1.5*sParams.sigma;
     sParams.xMin = sParams.mu - 1.5*sParams.sigma;
@@ -159,7 +156,7 @@ sParams.R = 5000;    % num of sampled points to extrapolate from
 sParams.sSim.outputFolder = 'figs';
 
 sParams.sSim.b_plotEigenFigs          = true;
-sParams.sSim.b_verifyKernelEigenfuncs = true;
+sParams.sSim.b_verifyKernelEigenfuncs = false;
 sParams.sSim.b_verifyEigOrth          = false;
 sParams.sSim.b_verifyMercersTheorem   = false;
 sParams.sSim.b_extrapolateEnable      = false;

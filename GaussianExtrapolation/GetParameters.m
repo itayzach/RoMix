@@ -22,20 +22,31 @@ if strcmp(sParams.dataDist, 'gaussian')
         sParams.cov = GMModel.Sigma;
         sParams.mu  = GMModel.mu;
     else
-        sParams.cov = [0.5    0; 
-                       0   0.5];
-        sParams.mu  = [-10 2];
+        if sParams.dim == 2
+            sParams.cov = [0.25    0; 
+                           0   0.25];
+            sParams.mu  = [0 0];
+        elseif sParams.dim == 1
+            sParams.cov = 0.5;
+            sParams.mu = 100;
+        else
+            error('generate random data for more than 2D')
+        end
     end
     [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
+%     [sParams.u, sParams.sigma_eigv] = svd(sParams.cov);
     sParams.sigma = diag(sqrt(sParams.sigma_eigv)).';
-    if sParams.cov(1,1) > sParams.cov(2,2)
-        warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
-        sParams.u = fliplr(sParams.u);    
-        sParams.sigma = fliplr(sParams.sigma);
-    end   
-%     sParams.mu = sParams.mu*sParams.u;
+    if sParams.dim == 2
+        if sParams.cov(1,1) > sParams.cov(2,2)
+            warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
+            sParams.u = fliplr(sParams.u);    
+            sParams.sigma = fliplr(sParams.sigma);
+        end   
+        sParams.u = [-sParams.u(:,1) -sParams.u(:,2)];    
+    end
+    sParams.mu_1D = sParams.mu*sParams.u;
     isalmostequal(sParams.u*diag(sParams.sigma.^2)*sParams.u.', sParams.cov, 1e-15)
-    
+
     sParams.xMax = sParams.mu + 1.5*sParams.sigma;
     sParams.xMin = sParams.mu - 1.5*sParams.sigma;
     if sParams.xMax - sParams.xMin > 10
@@ -52,14 +63,18 @@ else
     error('unknown pdf')
 end
 %% random x-axis
-n = 5000;
-if strcmp(sParams.dataDist, 'gaussian')
-    x_rand = mvnrnd(sParams.mu, sParams.cov, n);
-elseif strcmp(sParams.dataDist, 'uniform')
-    x_rand = (sParams.xMax - sParams.xMin)*rand(n, sParams.dim) + sParams.xMin;
-else
-    error('unknown pdf')
-end
+% if sParams.sSim.twomoons_dataset
+%     x_rand = [sParams.sDataset.x; sParams.sDataset.xt];
+% else
+    n = 5000;
+    if strcmp(sParams.dataDist, 'gaussian')
+        x_rand = mvnrnd(sParams.mu, sParams.cov, n);
+    elseif strcmp(sParams.dataDist, 'uniform')
+        x_rand = (sParams.xMax - sParams.xMin)*rand(n, sParams.dim) + sParams.xMin;
+    else
+        error('unknown pdf')
+    end
+% end
 sParams.x_rand = x_rand;
 
 %% x-axis
@@ -138,16 +153,14 @@ else
     error('unknown pdf')
 end
 
-
 %% num of eigenfunctions
 sParams.PlotEigenFuncsM = 8;
 sParams.PlotSpectM = 30;
 sParams.RkhsM = 20;
 sParams.OrthM = 30;
-sParams.MercerM = 2500;
-sParams.ExtrplM = 2500;
+sParams.MercerM = 100;
+sParams.ExtrplM = 100;
 sParams.FirstM = 0;
-
 %% extrapolation
 sParams.gamma = 0; % regularization
 sParams.R = 5000;    % num of sampled points to extrapolate from
@@ -168,5 +181,15 @@ sParams.sSim.b_plot_contourf = false;
 sParams.sSim.noiseVar1 = 0; %0.1;
 sParams.sSim.noiseVar2 = 0; %0.1;
 
-assert(sParams.ExtrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
+%% Get correct order of eigenvalues (for 1D indexing from multindexing)
+if sParams.dim == 2
+    vLambda_K = zeros(max(sParams.PlotSpectM,sParams.MercerM),1);
+    for i = 0:max(sParams.PlotSpectM,sParams.MercerM)-1
+        m = OneDim2TwoDimIndex(i);
+        vLambda_K(i+1) = lambda(sParams, m);
+    end
+end
+[sParams.vLambda_K, sParams.multindexToSingleIndexMap] = sort(vLambda_K, 'descend');
+
+
 end

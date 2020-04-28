@@ -26,11 +26,11 @@ if strcmp(sParams.kernelType, 'exp')
 
     elseif sParams.constsType == 2
         if exist('d', 'var')
-            mu = sParams.mu(d);
+            mu = sParams.mu_1D(d);
             sigma = sParams.sigma(d);
             beta = sParams.beta(d);
         else
-            mu = sParams.mu;
+            mu = sParams.mu_1D;
             sigma = sParams.sigma;
             beta = sParams.beta;
         end

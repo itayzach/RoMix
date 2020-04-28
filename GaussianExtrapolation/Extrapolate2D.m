@@ -49,7 +49,7 @@ for i = 1:nFuncs
     vGi = vFi + vFi_awgn;
     mPhi = zeros(N*N, sParams.ExtrplM);
     for q = 0:sParams.ExtrplM-1 
-        m = OneDim2TwoDimIndex(q);
+        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(q+1)-1);
         vPhi_m_x = phi(sParams, m, X);
         mPhi(:, q+1) = vPhi_m_x;
     end

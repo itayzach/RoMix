@@ -1,4 +1,4 @@
-function plot_data(X,Y,markersize)
+function plot2D(X,Y,markersize)
 
 % plot2D(X,Y)
 % plots a binary classification dataset of 2 dimensions 

@@ -89,7 +89,7 @@ options_laprls=ml_options('gamma_A',0.1, ...
                    'GraphWeightParam', kernel_sigma_laprls, ...
                    'GraphWeights', 'my_heat', ...
                    'GraphNormalize', false);
-           
+
 laprlsc_classifier = experiment_moon(xTrain,y1,xTest,yTest,'laprlsc',gamma_A_laprls,gamma_I_laprls, options_laprls);
 fprintf('---------------------------------------------------\n')
 
@@ -102,19 +102,20 @@ options_eigrls=ml_options('gamma_A',0.1, ...
                    'GraphWeights', 'my_heat', ...
                    'GraphNormalize', false);
                
+options_eigrls.sParams = sParams;
 eigrls_classifier = experiment_moon(xTrain,y1,xTest,yTest,'eigrls',gamma_A_eigrls,gamma_I_eigrls, options_eigrls);
 fprintf('Using %d eigenfunctions\n', sParams.ExtrplM-sParams.FirstM);
 fprintf('---------------------------------------------------\n')
 
 %% Plot classifier using retreived alpahas
-%--------------------------------------------------------------------------
-% Plot alpha difference
-%--------------------------------------------------------------------------
-alpha_err_diff = abs(laprlsc_classifier.alpha - eigrls_classifier.alpha);
-figure;
-plot(alpha_err_diff)
-ylim([0 max(alpha_err_diff)]);
-title('$|\alpha(LapRLS)-\alpha(EigRLS)|$', 'Interpreter', 'latex');
+% %--------------------------------------------------------------------------
+% % Plot alpha difference
+% %--------------------------------------------------------------------------
+% alpha_err_diff = abs(laprlsc_classifier.alpha - eigrls_classifier.alpha);
+% figure;
+% plot(alpha_err_diff)
+% ylim([0 max(alpha_err_diff)]);
+% title('$|\alpha(LapRLS)-\alpha(EigRLS)|$', 'Interpreter', 'latex');
 
 %--------------------------------------------------------------------------
 % Plot test error difference
@@ -136,70 +137,102 @@ X=[XX1(:) XX2(:)];
 %--------------------------------------------------------------------------
 alpha_laprls = laprlsc_classifier.alpha;
 XTrain_laprls = laprlsc_classifier.xtrain;
-K = calckernel(options_laprls.Kernel,options_laprls.KernelParam, XTrain_laprls, X);
-Ka = K*alpha_laprls;
-mKa = reshape(Ka,length(x1),length(x2));
+mK_xTrain_X = calckernel(options_laprls.Kernel,options_laprls.KernelParam, XTrain_laprls, X);
+mK_xTrain_xTrain = calckernel(options_laprls.Kernel,options_laprls.KernelParam, XTrain_laprls, XTrain_laprls);
+vKa = mK_xTrain_X*alpha_laprls;
+vKa_train = mK_xTrain_xTrain*alpha_laprls;
+mKa = reshape(vKa,length(x1),length(x2));
 
-figure;
-sgtitle(sprintf('LapRLS - Laplacian and f from the same kernel\n gamma_A = %.4f, gamma_I = %.4f\nTest error = %.1f%%', laprlsc_classifier.gammas(1), laprlsc_classifier.gammas(2), laprlsc_classifier.test_error));
+fig = figure;
+sgtitle(['LapRLS: $f(x) = \sum_{i=1}^{n} \alpha^*_i K(x_i,x)$, $n$ = ' num2str(length(laprlsc_classifier.alpha)) newline ...
+    '$\gamma_A = ' num2str(laprlsc_classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(laprlsc_classifier.gammas(2), '%.4f') '$' newline ...
+    'Test error = ' num2str(laprlsc_classifier.test_error, '%.1f'), '$\%$' ], ...
+    'Interpreter', 'latex', 'FontSize', 14);
 subplot(2,1,1)
     surf(XX1,XX2,mKa, 'edgecolor', 'none')
+    hold on;
+    pos=find(y1==1);
+    neg=find(y1==-1);
+    unlab=find(y1==0);
+    scatter3(XTrain_laprls(unlab,1), XTrain_laprls(unlab,2), vKa_train(unlab), 'ks');
+    scatter3(XTrain_laprls(pos,1),XTrain_laprls(pos,2), vKa_train(pos),200, 'rd','MarkerFaceColor','r','MarkerEdgeColor','k'); hold on;
+    scatter3(XTrain_laprls(neg,1),XTrain_laprls(neg,2), vKa_train(neg),200, 'bo' ,'MarkerFaceColor','b','MarkerEdgeColor','k'); hold on;
+    
     xlabel('$x_1$', 'Interpreter', 'latex')
     ylabel('$x_2$', 'Interpreter', 'latex')
     zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')
     colorbar;
+    set(gca,'FontSize', 14);
 subplot(2,1,2)
     contourf(XX1,XX2,mKa,[0 0]);shading flat;
     hold on;
     plot2D(xTrain,y1,15);
+    set(gca,'FontSize', 14);
 set(gcf,'Position',[10+600 250 600 700])
-
+saveas(fig,[sParams.sSim.outputFolder filesep 'laprls.png']);
 
 %--------------------------------------------------------------------------
 % Plot EigRLS (Phi*c)
 %--------------------------------------------------------------------------
 c = eigrls_classifier.c;
-mPhi_m_x = zeros(length(xTrain), sParams.ExtrplM-sParams.FirstM);
+mPhi_m_xTrain = zeros(length(xTrain), sParams.ExtrplM-sParams.FirstM);
 mPhi_m_X = zeros(length(X), sParams.ExtrplM-sParams.FirstM);
-mPhi_m_xt = zeros(length(xTest),sParams.ExtrplM-sParams.FirstM);
+mPhi_m_xTest = zeros(length(xTest),sParams.ExtrplM-sParams.FirstM);
 vLambda = zeros(1, sParams.ExtrplM-sParams.FirstM);
 for i = sParams.FirstM:sParams.ExtrplM-1 
-    m = OneDim2TwoDimIndex(i);
+    m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
     mPhi_m_X(:, i+1) = phi(sParams,m,X);
     vLambda(i+1) = lambda(sParams,m);
-    mPhi_m_x(:, i+1) = phi(sParams,m,xTrain);
-    mPhi_m_xt(:, i+1) = phi(sParams,m,xTest);
+    mPhi_m_xTrain(:, i+1) = phi(sParams,m,xTrain);
+    mPhi_m_xTest(:, i+1) = phi(sParams,m,xTest);
 end
 
 
 vPhi_X_c = mPhi_m_X*c;
-vPhi_xt_c = mPhi_m_xt*c;
+vPhi_xTrain_c = mPhi_m_xTrain*c;
 mPhi_X_c = reshape(vPhi_X_c,length(x1),length(x2));
 % mPhi_xt_c = reshape(vPhi_xt_c,length(x1),length(x2));
 
-figure;
-sgtitle(sprintf('EigRLS (Phi c) \n gamma_A = %.4f, gamma_I = %.4f\nTest error = %.1f%%', eigrls_classifier.gammas(1), eigrls_classifier.gammas(2), eigrls_classifier.test_error));
+fig = figure;
+sgtitle(['EigRLS: $f(x) = \sum_{m=0}^{M-1} c^*_m\phi_m(x)$, $M$ = ' num2str(sParams.ExtrplM-sParams.FirstM) newline ...
+    '$\gamma_A = ' num2str(eigrls_classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(eigrls_classifier.gammas(2), '%.4f') '$' newline ...
+    'Test error = ' num2str(eigrls_classifier.test_error, '%.1f'), '$\%$' ], ...
+    'Interpreter', 'latex', 'FontSize', 14);
 subplot(2,1,1)
     surf(XX1,XX2,mPhi_X_c, 'edgecolor', 'none')
     hold on;
-    scatter3(xTest(:,1), xTest(:,2), vPhi_xt_c, 'filled');
+    pos=find(y1==1);
+    neg=find(y1==-1);
+    unlab=find(y1==0);
+    scatter3(xTrain(unlab,1), xTrain(unlab,2), vPhi_xTrain_c(unlab), 'ks');
+    scatter3(xTrain(pos,1),xTrain(pos,2), vPhi_xTrain_c(pos),200, 'rd','MarkerFaceColor','r','MarkerEdgeColor','k'); hold on;
+    scatter3(xTrain(neg,1),xTrain(neg,2), vPhi_xTrain_c(neg),200, 'bo' ,'MarkerFaceColor','b','MarkerEdgeColor','k'); hold on;
     xlabel('$x_1$', 'Interpreter', 'latex')
     ylabel('$x_2$', 'Interpreter', 'latex')
     zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')
     colorbar;
+    set(gca,'FontSize', 14);
 subplot(2,1,2)
     contourf(XX1,XX2,mPhi_X_c,[0 0]);shading flat;
     hold on;
     plot2D(xTrain,y1,15);
+    set(gca,'FontSize', 14);
 set(gcf,'Position',[10+600+600 250 600 700]) 
+saveas(fig,[sParams.sSim.outputFolder filesep 'eigrls.png']);
 
-%--------------------------------------------------------------------------
-% Plot c
-%--------------------------------------------------------------------------
-figure; 
-stem(c);
-title('$c$', 'Interpreter', 'latex');
-c_backup = c;
+% %--------------------------------------------------------------------------
+% % Plot c
+% %--------------------------------------------------------------------------
+% figure; 
+% stem(c);
+% hold on;
+% small_c_idx = find(abs(c) < 1e-5);
+% scatter(small_c_idx, c(small_c_idx));
+% title('$c$', 'Interpreter', 'latex');
+% subplot(2,1,2)
+%     stem(abs(c));   
+%     title('$|c|$', 'Interpreter', 'latex');
+% c_backup = c;
 % c(c < 1e-3) = 0;
 % %--------------------------------------------------------------------------
 % % Plot EigRLS (Phi*Lambda*Phi')alpha
@@ -238,12 +271,10 @@ c_backup = c;
 %     hold on;
 %     plot2D(x,y1,15);
 % set(gcf,'Position',[10+600+600 250 600 700])  
-
-
-%--------------------------------------------------------------------------
-% Plot f difference
-%--------------------------------------------------------------------------
-figure; 
-contourf(XX1,XX2,(abs(mKa - mPhi_X_c)));
-colorbar;
-title('$ | K \alpha - \Phi c |$', 'Interpreter', 'latex');
+% %--------------------------------------------------------------------------
+% % Plot f difference
+% %--------------------------------------------------------------------------
+% figure; 
+% contourf(XX1,XX2,(abs(mKa - mPhi_X_c)));
+% colorbar;
+% title('$ | K \alpha - \Phi c |$', 'Interpreter', 'latex');

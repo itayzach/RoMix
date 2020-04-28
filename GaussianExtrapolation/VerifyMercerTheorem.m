@@ -53,7 +53,7 @@ for i = 0:sParams.MercerM-1
     if sParams.dim == 1
         m = i;
     elseif sParams.dim == 2
-        m = OneDim2TwoDimIndex(i);
+        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
     else
         error('conversion from i to m d-dim index is not implemented');
     end

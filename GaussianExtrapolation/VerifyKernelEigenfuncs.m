@@ -16,7 +16,7 @@ end
 
 for i = 0:sParams.RkhsM-1
     if sParams.dim == 2
-        m = OneDim2TwoDimIndex(i);
+        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
     else
         m = i;
     end

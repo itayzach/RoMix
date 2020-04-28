@@ -13,8 +13,6 @@ sParams = GetParameters();
 if sParams.sSim.b_plotEigenFigs    
     [ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams);
     [ mPhi_A, vLambda_A ] = CalcNumericEigenvectors(sParams);
-%     PlotEigenfunctionsEigenvectors(sParams, mPhi_K, mPhi_L);
-%     PlotSpectrum(sParams, vLambda_AnaL, vLambda_NumL);
     PlotEigenfunctionsEigenvectors(sParams, mPhi_K, mPhi_A, vLambda_K, vLambda_A);
     PlotSpectrum(sParams, vLambda_K, vLambda_A);
 end

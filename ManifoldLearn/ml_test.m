@@ -27,13 +27,12 @@ alpha = classifier.alpha;
 xtrain = classifier.xtrain;
 
 if strcmp(classifier.Name, 'eigrls')
-    sParams = GetParameters();
-
+    sParams = classifier.sParams;
     Phi_xtrain = zeros(size(xtrain,1), sParams.ExtrplM-sParams.FirstM);
     Phi_xtest = zeros(size(X,1), sParams.ExtrplM-sParams.FirstM);
     lambda_m = zeros(sParams.ExtrplM-sParams.FirstM, 1);
     for i = sParams.FirstM:sParams.ExtrplM-1 
-        m = OneDim2TwoDimIndex(i);
+        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
         lambda_m(i+1) = lambda(sParams, m);
         Phi_xtrain(:,i+1) = phi(sParams, m, xtrain);
         Phi_xtest(:,i+1) = phi(sParams, m, X);

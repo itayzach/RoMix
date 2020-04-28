@@ -129,9 +129,9 @@ switch method
             saveclassifier('laprlsc',options.Kernel,options.KernelParam, ...
             alpha,X,[options.gamma_A options.gamma_I]);
     case 'eigrls'
-        sParams = GetParameters();
+        sParams = options.sParams;
         for i = sParams.FirstM:sParams.ExtrplM-1 
-            m = OneDim2TwoDimIndex(i);
+        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
             lambda_m(i+1) = lambda(sParams, m);
             Phi(:, i+1) = phi(sParams, m, X);           
         end
@@ -157,7 +157,7 @@ switch method
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
             alpha,X,[options.gamma_A options.gamma_I],c);
         classifier.ytrain=Y;
-
+        classifier.sParams = options.sParams;
     otherwise
         error('no method was selected...')
 end

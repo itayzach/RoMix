@@ -28,42 +28,15 @@ xtrain = classifier.xtrain;
 
 if strcmp(classifier.Name, 'eigrls')
     sParams = classifier.sParams;
-    Phi_xtrain = zeros(size(xtrain,1), sParams.ExtrplM-sParams.FirstM);
     Phi_xtest = zeros(size(X,1), sParams.ExtrplM-sParams.FirstM);
-    lambda_m = zeros(sParams.ExtrplM-sParams.FirstM, 1);
     for i = sParams.FirstM:sParams.ExtrplM-1 
         m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
-        lambda_m(i+1) = lambda(sParams, m);
-        Phi_xtrain(:,i+1) = phi(sParams, m, xtrain);
-        Phi_xtest(:,i+1) = phi(sParams, m, X);
+        Phi_xtest(:,i-sParams.FirstM+1) = phi(sParams, m, X);
     end
-    PLP = Phi_xtest*diag(lambda_m)*Phi_xtrain.';
-    f_PLP_alpha=PLP*alpha;
 
     c = classifier.c;
-    c_from_alpha = diag(lambda_m)*Phi_xtrain.'*alpha;
-    isalmostequal(c,c_from_alpha,1e-10,'',false);
-    f_Pc_from_alpha = Phi_xtest*c_from_alpha;
     f_Pc = Phi_xtest*c;
-    
-    Kernel=classifier.Kernel;
-    KernelParam=classifier.KernelParam;
-    K=calckernel(Kernel,KernelParam,xtrain,X);
-    f_alpha = K*alpha;
-    
-    isalmostequal(K,PLP,1e-10,'',false);
-    
-    
-%     figure;
-%     subplot(2,1,1);
-%         imagesc(K); colorbar;
-%         title('kernel');
-%     
-%     subplot(2,1,2);
-%         imagesc(PLP); colorbar;
-%         title('mercer');
     f = f_Pc;
-    isalmostequal(f,f_alpha,1e-10,'',false);
     
 else
     % read classifier

@@ -49,7 +49,7 @@ if l==0 | strcmp(method,'clustering')% unsupervised case
     alpha=V(:,2);
     classifier= ...
         saveclassifier('clustering',options.Kernel,options.KernelParam, ...
-        alpha,X,[options.gamma_A options.gamma_I]);
+        alpha,X,[],[options.gamma_A options.gamma_I]);
     result=0;
     return;
 end
@@ -91,14 +91,14 @@ switch method
         [alpha,b]=lapsvm(K,Y,L,options.gamma_A,options.gamma_I);
         classifier= ...
             saveclassifier('lapsvm',options.Kernel,options.KernelParam, ...
-            alpha,X,[options.gamma_A options.gamma_I]);
+            alpha,X,Y,[options.gamma_A options.gamma_I]);
         
     case 'rlsc'
         K=calckernel(options.Kernel,options.KernelParam,X(lab,:));
         [alpha,b]=rlsc(K,Y(lab),options.gamma_A);
         classifier= ...
             saveclassifier('rlsc',options.Kernel,options.KernelParam,alpha,...
-            X(lab,:),[options.gamma_A 0]);
+            X(lab,:),Y(lab),[options.gamma_A 0]);
         
     case 'laprlsc'
         K=calckernel(options.Kernel,options.KernelParam,X);
@@ -123,40 +123,31 @@ switch method
         else
             L=[];
         end
-        
+        figure; imagesc(L); title('LapRLS');
         [alpha,b]=laprlsc(K,Y,L,options.gamma_A,options.gamma_I);
         classifier= ...
             saveclassifier('laprlsc',options.Kernel,options.KernelParam, ...
-            alpha,X,[options.gamma_A options.gamma_I]);
+            alpha,X,Y,[options.gamma_A options.gamma_I]);
     case 'eigrls'
         sParams = options.sParams;
+        mPhi_m_xTrain = zeros(length(X) ,sParams.ExtrplM-sParams.FirstM);
         for i = sParams.FirstM:sParams.ExtrplM-1 
-        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
-            lambda_m(i+1) = lambda(sParams, m);
-            Phi(:, i+1) = phi(sParams, m, X);           
+            m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
+            mPhi_m_xTrain(:, i-sParams.FirstM+1) = phi(sParams, m, X);           
         end
-        Lambda = diag(lambda_m);
-        K=calckernel(options.Kernel,options.KernelParam,X);
-        K2=Phi*diag(lambda_m)*Phi.';
-        figure;
-        subplot(2,1,1);
-            imagesc(K); colorbar;
-            title('kernel');
-
-        subplot(2,1,2);
-            imagesc(K2); colorbar;
-            title('mercer');
-        isalmostequal(K,K2,1e-10, '', false)
-        fprintf('last eigenvalue is vLambda(%d) = %.12f\n', length(lambda_m), lambda_m(end));
-
-        
-        
-        L = laplacian(X,'kernel',options);
-        [alpha, c] = eigrls(Y, Phi, Lambda, options.gamma_A, options.gamma_I, L);
+        mLambda = diag(sParams.vLambda_K(sParams.FirstM+1:sParams.ExtrplM));
+        fprintf('last eigenvalue is vLambda(%d) = %.12f\n', sParams.ExtrplM-1, sParams.vLambda_K(end));
+        dist = pdist2(X, X);
+        W = exp(-dist.^2/(2*sParams.omega^2));
+        D = diag(sum(W,1));
+        L = D - W;
+%         options.GraphWeights = 'binary';
+%         L = laplacian(X,'kernel',options);
+        figure; imagesc(L); title('EigRLS');
+        [alpha, c] = eigrls(Y, mPhi_m_xTrain, mLambda, options.gamma_A, options.gamma_I, L);
         classifier= ...
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
-            alpha,X,[options.gamma_A options.gamma_I],c);
-        classifier.ytrain=Y;
+            alpha,X,Y,[options.gamma_A options.gamma_I],c);
         classifier.sParams = options.sParams;
     otherwise
         error('no method was selected...')

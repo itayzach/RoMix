@@ -87,7 +87,7 @@ elseif sParams.dim == 2
         end
         xlim([ min(sParams.x(:,1)) max(sParams.x(:,1))])
         ylim([ min(sParams.x(:,2)) max(sParams.x(:,2))])
-        title(['$\phi_' num2str(m) '(x),$ $\lambda_' num2str(m)  ' = ' num2str(vLambda_K(m+1), '%.4f') '$'], ...
+        title(['$\phi_{' num2str(m) '}(x),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda_K(m+1), '%.4f') '$'], ...
             'Interpreter', 'latex', 'FontSize', 14)
         set(gca,'FontSize', 14);
     end
@@ -130,7 +130,7 @@ elseif sParams.dim == 2
 %             end
             xlim([ min(sParams.x(:,1)) max(sParams.x(:,1))])
             ylim([ min(sParams.x(:,2)) max(sParams.x(:,2))])
-            title(['$\hat{\phi}_' num2str(m) '(x),$ $\hat{\lambda}_' num2str(m)  ' = ' num2str(vLambda_A(m+1), '%.4f') '$'], ...
+            title(['$\hat{\phi}_{' num2str(m) '}(x),$ $\hat{\lambda}_{' num2str(m)  '} = ' num2str(vLambda_A(m+1), '%.4f') '$'], ...
                 'Interpreter', 'latex', 'FontSize', 14)
             set(gca,'FontSize', 14);
         end

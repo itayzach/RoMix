@@ -18,7 +18,7 @@ sParams.dataDist = 'gaussian';
 
 if strcmp(sParams.dataDist, 'gaussian')
     if isfield(sParams, 'sDataset')
-        GMModel = fitgmdist([sParams.sDataset.x; sParams.sDataset.xt],1);
+        GMModel = fitgmdist(sParams.sDataset.x,1);
         sParams.cov = GMModel.Sigma;
         sParams.mu  = GMModel.mu;
     else
@@ -114,7 +114,7 @@ if strcmp(sParams.dataDist, 'gaussian')
         fprintf('*            Using beta,omega constants                 *\n');
         fprintf('*********************************************************\n');
 
-        sParams.omega = 1/(6*sqrt(2)); % kernel width
+        sParams.omega = 0.15; % kernel width
         sParams.beta = 2*sParams.sigma.^2/sParams.omega^2;
         sParams.t = 0.5*sParams.omega^2;
 
@@ -154,12 +154,14 @@ else
 end
 
 %% num of eigenfunctions
-sParams.PlotEigenFuncsM = 8;
+sParams.PlotEigenFuncsM = 24;
 sParams.PlotSpectM = 30;
 sParams.RkhsM = 20;
 sParams.OrthM = 30;
-sParams.MercerM = 100;
-sParams.ExtrplM = 100;
+sParams.MercerM = 0;
+
+sParams.ExtrplM = 20;
+
 sParams.FirstM = 0;
 %% extrapolation
 sParams.gamma = 0; % regularization
@@ -168,13 +170,13 @@ sParams.R = 5000;    % num of sampled points to extrapolate from
 %% simulation
 sParams.sSim.outputFolder = 'figs';
 
-sParams.sSim.b_plotEigenFigs          = true;
+sParams.sSim.b_plotEigenFigs          = false;
 sParams.sSim.b_verifyKernelEigenfuncs = false;
 sParams.sSim.b_verifyEigOrth          = false;
 sParams.sSim.b_verifyMercersTheorem   = false;
 sParams.sSim.b_extrapolateEnable      = false;
 
-sParams.sSim.b_randomStepSize       = true;
+sParams.sSim.b_randomStepSize = true;
 sParams.sSim.b_plot_contourf = false;
 
 %% AWGN
@@ -183,8 +185,8 @@ sParams.sSim.noiseVar2 = 0; %0.1;
 
 %% Get correct order of eigenvalues (for 1D indexing from multindexing)
 if sParams.dim == 2
-    vLambda_K = zeros(max(sParams.PlotSpectM,sParams.MercerM),1);
-    for i = 0:max(sParams.PlotSpectM,sParams.MercerM)-1
+    vLambda_K = zeros(max(sParams.PlotSpectM,sParams.ExtrplM),1);
+    for i = 0:max(sParams.PlotSpectM,sParams.ExtrplM)-1
         m = OneDim2TwoDimIndex(i);
         vLambda_K(i+1) = lambda(sParams, m);
     end

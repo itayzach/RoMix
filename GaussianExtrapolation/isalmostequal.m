@@ -5,9 +5,9 @@ if ~exist('do_assert', 'var')
 end
 if do_assert
     if exist('msg', 'var')
-        assert(all(all(abs(A - B) <= threshold)), [newline msg newline newline 'You got error of: ' num2str(abs(sum(sum(A - B))))]);
+        assert(all(all(abs(A - B) <= threshold)), [newline msg newline newline 'You got error of: ' num2str(sum(sum(abs(A - B))))]);
     else
-        assert(all(all(abs(A - B) <= threshold)), [newline newline 'You got error of: ' num2str(abs(sum(sum(A - B))))]);
+        assert(all(all(abs(A - B) <= threshold)), [newline newline 'You got error of: ' num2str(sum(sum(abs(A - B))))]);
     end
 else
     fprintf([newline newline 'You got error of: ' num2str(abs(sum(sum(A - B)))) '\n'])

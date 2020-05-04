@@ -79,17 +79,17 @@ elseif strcmp(classifier.Name, 'eigrls')
     run_time = toc;
     fprintf('Phi time = %f\n', run_time);
     
-    mPhi_m_xTrain = zeros(length(xTrain_eigrls), sParams.ExtrplM-sParams.FirstM);    
-%     mPhi_m_xTest = zeros(length(xTest),sParams.ExtrplM-sParams.FirstM);
-    vLambda = zeros(1, sParams.ExtrplM-sParams.FirstM);
-    for i = sParams.FirstM:sParams.ExtrplM-1
-        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
-        vLambda(i-sParams.FirstM+1) = lambda(sParams,m);
-        mPhi_m_xTrain(:, i-sParams.FirstM+1) = phi(sParams,m,xTrain_eigrls);
-%         mPhi_m_xTest(:, i+1) = phi(sParams,m,xTest);
-    end
+%     mPhi_m_xTrain = zeros(length(xTrain_eigrls), sParams.ExtrplM-sParams.FirstM);    
+% %     mPhi_m_xTest = zeros(length(xTest),sParams.ExtrplM-sParams.FirstM);
+% %     vLambda = zeros(1, sParams.ExtrplM-sParams.FirstM);
+%     for i = sParams.FirstM:sParams.ExtrplM-1
+%         m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
+% %         vLambda(i-sParams.FirstM+1) = lambda(sParams,m);
+%         mPhi_m_xTrain(:, i-sParams.FirstM+1) = phi(sParams,m,xTrain_eigrls);
+% %         mPhi_m_xTest(:, i+1) = phi(sParams,m,xTest);
+%     end
     
-    
+    mPhi_m_xTrain = classifier.mPhi_m_xTrain;
     
     vPhi_X_c = mPhi_m_X*c;
     vPhi_xTrain_c = mPhi_m_xTrain*c;
@@ -97,7 +97,7 @@ elseif strcmp(classifier.Name, 'eigrls')
     % mPhi_xt_c = reshape(vPhi_xt_c,length(x1),length(x2));
     
     fig = figure;
-    sgtitle(['SpectralRLS: $f(x) = \sum_{m=0}^{M-1} c^*_m\phi_m(x)$;   $M$ = ' num2str(sParams.ExtrplM-sParams.FirstM) newline ...
+    sgtitle(['EigRLS: $f(x) = \sum_{m=0}^{M-1} c^*_m\phi_m(x)$;   $M$ = ' num2str(sParams.ExtrplM-sParams.FirstM) newline ...
         '$\omega = $ ' num2str(sParams.omega) ';   $\gamma_A = ' num2str(classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(classifier.gammas(2), '%.4f') '$' newline ...
         'Test error = ' num2str(classifier.test_error, '%.1f'), '$\%$' ], ...
         'Interpreter', 'latex', 'FontSize', 14);
@@ -122,7 +122,7 @@ elseif strcmp(classifier.Name, 'eigrls')
     plot2D(xTest,yTest,15,'k*');
     set(gca,'FontSize', 14);
     set(gcf,'Position',[10+600+600 250 600 700])
-    saveas(fig,[output_folder filesep 'eigrls.png']);
+    saveas(fig,[output_folder filesep 'eigrls_M_' num2str(sParams.ExtrplM) '.png']);
 else
     error('unknown classifier name')
 end

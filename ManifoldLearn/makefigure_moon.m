@@ -12,7 +12,7 @@ close all; clear; clc;
 rng(1);
 
 %% number of labeled examples
-l=10; 
+l=1; 
 
 %% RLS params
 gamma_A_rls = 0.03125;
@@ -24,8 +24,8 @@ gamma_I_laprls = 1;
 kernel_sigma_laprls = 1/(6*sqrt(2)); 
 
 %% EigRLS params
-gamma_A_eigrls = 0.03125;
-gamma_I_eigrls = 1;  
+gamma_A_eigrls = 0;
+gamma_I_eigrls = 0.1;  
 
 %% sParams
 sParams = GetParameters();
@@ -68,17 +68,37 @@ y1(neg(ineg(1:l)))=-1;
 % experiment_moon(xTrain,y1,xTest,yTest,'rlsc',gamma_A_rls,gamma_I_rls, options_rls);
 % fprintf('---------------------------------------------------\n')
 
-%% LapRLS - original
-options_laprls_orig = ml_options('gamma_A', 0.1, ...
-                     'NN',6, ...
-                     'Kernel','rbf',...
-                     'KernelParam',kernel_sigma_laprls, ...0.35...
-                     'GraphWeightParam',1, ...
-                     'GraphWeights', 'binary', ...
-                     'GraphNormalize',true);    
-             
-orig_laprlsc_classifier = experiment_moon(xTrain,y1,xTest,yTest,'laprlsc',gamma_A_laprls,gamma_I_laprls, options_laprls_orig);
-fprintf('---------------------------------------------------\n')
+% %% LapRLS - original
+% options_laprls_orig = ml_options('gamma_A', 0.1, ...
+%                      'NN',6, ...
+%                      'Kernel','rbf',...
+%                      'KernelParam',kernel_sigma_laprls, ...0.35...
+%                      'GraphWeightParam',1, ...
+%                      'GraphWeights', 'binary', ...
+%                      'GraphNormalize',true);    
+%              
+% orig_laprlsc_classifier = experiment_moon(xTrain,y1,xTest,yTest,'laprlsc',gamma_A_laprls,gamma_I_laprls, options_laprls_orig);
+% fprintf('---------------------------------------------------\n')
+% 
+% % Plot classifier using retreived alpahas
+% fprintf([newline newline 'Test error diff: ' num2str(abs(orig_laprlsc_classifier.test_error - eigrls_classifier.test_error)) '\n'])
+% plot_classifier(orig_laprlsc_classifier, sParams.sSim.outputFolder, xTest, zeros(size(yTest)))
+% % plot_classifier(laprlsc_classifier, sParams.sSim.outputFolder)
+% 
+% %--------------------------------------------------------------------------
+% % Plot alpha
+% %--------------------------------------------------------------------------
+% alpha = orig_laprlsc_classifier.alpha;
+% figure; 
+% stem(alpha);
+% hold on;
+% small_alpha_idx = find(abs(alpha) < 1e-5);
+% pos=find(y1==1);
+% neg=find(y1==-1);
+% scatter([pos; neg], alpha([pos; neg]), 'filled');
+% % yline(1e-5, 'r-', 'Threshold')
+% title('$\alpha$', 'Interpreter', 'latex');
+
 %% LapRLS - Laplacian and f from the same kernel
 % options_laprls=ml_options('gamma_A',0.1, ...
 %                    'NN',6, ...
@@ -105,25 +125,7 @@ eigrls_classifier = experiment_moon(xTrain,y1,xTest,yTest,'eigrls',gamma_A_eigrl
 fprintf('Using %d eigenfunctions\n', sParams.ExtrplM-sParams.FirstM);
 fprintf('---------------------------------------------------\n')
 
-%% Plot classifier using retreived alpahas
-fprintf([newline newline 'Test error diff: ' num2str(abs(orig_laprlsc_classifier.test_error - eigrls_classifier.test_error)) '\n'])
-plot_classifier(orig_laprlsc_classifier, sParams.sSim.outputFolder, xTest, zeros(size(yTest)))
-% plot_classifier(laprlsc_classifier, sParams.sSim.outputFolder)
 plot_classifier(eigrls_classifier, sParams.sSim.outputFolder, xTest, zeros(size(yTest)))
-
-%--------------------------------------------------------------------------
-% Plot alpha
-%--------------------------------------------------------------------------
-alpha = orig_laprlsc_classifier.alpha;
-figure; 
-stem(alpha);
-hold on;
-small_alpha_idx = find(abs(alpha) < 1e-5);
-pos=find(y1==1);
-neg=find(y1==-1);
-scatter([pos; neg], alpha([pos; neg]), 'filled');
-% yline(1e-5, 'r-', 'Threshold')
-title('$\alpha$', 'Interpreter', 'latex');
 
 %--------------------------------------------------------------------------
 % Plot c

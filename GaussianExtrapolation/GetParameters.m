@@ -11,6 +11,16 @@ if sParams.dim == 2
     if sParams.sSim.twomoons_dataset
         sParams.sDataset = load('2moons.mat');
         sParams.sSim.twomoons_scale = false;
+        
+        pos=find(sParams.sDataset.y==1);
+        neg=find(sParams.sDataset.y==-1);
+        sParams.sDataset.x(pos,:) = sParams.sDataset.x(pos,:) + [ 0 0.25 ];
+        sParams.sDataset.x(neg,:) = sParams.sDataset.x(neg,:) - [ 0 0.25 ];
+        
+        pos=find(sParams.sDataset.yt==1);
+        neg=find(sParams.sDataset.yt==-1);
+        sParams.sDataset.xt(pos,:) = sParams.sDataset.xt(pos,:) + [ 0 0.25 ];
+        sParams.sDataset.xt(neg,:) = sParams.sDataset.xt(neg,:) - [ 0 0.25 ];
     end
 end
 %% p(x)
@@ -114,7 +124,7 @@ if strcmp(sParams.dataDist, 'gaussian')
         fprintf('*            Using beta,omega constants                 *\n');
         fprintf('*********************************************************\n');
 
-        sParams.omega = 0.15; % kernel width
+        sParams.omega = 0.3;1/(6*sqrt(2)); % kernel width
         sParams.beta = 2*sParams.sigma.^2/sParams.omega^2;
         sParams.t = 0.5*sParams.omega^2;
 
@@ -154,7 +164,7 @@ else
 end
 
 %% num of eigenfunctions
-sParams.PlotEigenFuncsM = 24;
+sParams.PlotEigenFuncsM = 23;
 sParams.PlotSpectM = 30;
 sParams.RkhsM = 20;
 sParams.OrthM = 30;

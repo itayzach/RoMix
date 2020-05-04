@@ -123,7 +123,7 @@ switch method
         else
             L=[];
         end
-        figure; imagesc(L); title('LapRLS');
+        figure; imagesc(L); title('LapRLS'); colorbar();
         [alpha,b]=laprlsc(K,Y,L,options.gamma_A,options.gamma_I);
         classifier= ...
             saveclassifier('laprlsc',options.Kernel,options.KernelParam, ...
@@ -143,12 +143,13 @@ switch method
         L = D - W;
 %         options.GraphWeights = 'binary';
 %         L = laplacian(X,'kernel',options);
-        figure; imagesc(L); title('EigRLS');
+        figure; imagesc(L); title('EigRLS'); colorbar();
         [alpha, c] = eigrls(Y, mPhi_m_xTrain, mLambda, options.gamma_A, options.gamma_I, L);
         classifier= ...
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
             alpha,X,Y,[options.gamma_A options.gamma_I],c);
         classifier.sParams = options.sParams;
+        classifier.mPhi_m_xTrain = mPhi_m_xTrain;
     otherwise
         error('no method was selected...')
 end

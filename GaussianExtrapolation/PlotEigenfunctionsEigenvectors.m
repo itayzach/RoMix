@@ -38,17 +38,27 @@ if sParams.dim == 1
 elseif sParams.dim == 2
     %% 2-D Analytic
     x0     = 10;
-    y0     = 250;
-    width  = 1000;
-    height = 700;
+    y0     = 50;
+    width  = 1800;
+    height = 900;
     fig = figure;
 %     sgtitle('Kernel (analytic) Eigenfunctions')
     [mX1, mX2] = meshgrid(sParams.x(:,1), sParams.x(:,2));
+    
+    nRows = ceil(sqrt(sParams.PlotEigenFuncsM+1));
+    if nRows > 4
+        remainder = nRows - 4;
+        nRows = 4;
+        nCols = remainder + ceil(sqrt(sParams.PlotEigenFuncsM+1));
+    else
+        nCols = ceil(sqrt(sParams.PlotEigenFuncsM+1));
+    end
+    
     for m = 0:sParams.PlotEigenFuncsM-1  
         if m == 0
             vP_x = p(sParams, [mX1(:) mX2(:)]);
             mP_x = reshape(vP_x, size(sParams.x,1), size(sParams.x,1));
-            subplot(ceil(sqrt(sParams.PlotEigenFuncsM+1)),ceil(sqrt(sParams.PlotEigenFuncsM+1)),1);
+            subplot(nRows, nCols,1);
             if sParams.sSim.b_plot_contourf
                 contourf(mX1, mX2, mP_x);
             else
@@ -68,7 +78,7 @@ elseif sParams.dim == 2
             set(gca,'FontSize', 14);
         end
         
-        subplot(ceil(sqrt(sParams.PlotEigenFuncsM+1)),ceil(sqrt(sParams.PlotEigenFuncsM+1)),m+2);
+        subplot(nRows, nCols,m+2);
         if sParams.sSim.b_plot_contourf
             contourf(mX1, mX2, reshape(mPhi_K(:,m+1), size(sParams.x,1), size(sParams.x,1)));
         else
@@ -100,7 +110,7 @@ elseif sParams.dim == 2
 %         sgtitle(sprintf('Eigenvectors of (numeric) A; n = %d', size(sParams.x_rand,1)))
         for m = 0:sParams.PlotEigenFuncsM-1
             if m == 0
-                subplot(ceil(sqrt(sParams.PlotEigenFuncsM+1)),ceil(sqrt(sParams.PlotEigenFuncsM+1)),1);
+                subplot(nRows, nCols,1);
                 hist3(sParams.x_rand,'CdataMode','auto', 'Nbins', [30 30], 'edgecolor', 'flat');
                 colormap(gca, 'hot')
                 colorbar()
@@ -116,7 +126,7 @@ elseif sParams.dim == 2
 %                     'VerticalAlignment', 'bottom', 'Interpreter', 'latex', 'FontSize', 14)
             end
             
-            subplot(ceil(sqrt(sParams.PlotEigenFuncsM+1)),ceil(sqrt(sParams.PlotEigenFuncsM+1)),m+2);
+            subplot(nRows, nCols,m+2);
             scatter3(sParams.x_rand(:,1), sParams.x_rand(:,2), mPhi_A(:,m+1), [], mPhi_A(:,m+1), 'filled');
             colormap(gca, 'default')
             colorbar()
@@ -135,7 +145,7 @@ elseif sParams.dim == 2
             set(gca,'FontSize', 14);
         end
 
-        set(gcf,'Position', [x0+width y0 width height])
+        set(gcf,'Position', [x0 y0 width height])
         saveas(fig,[sParams.sSim.outputFolder filesep 'fig_eigenvectors_2d.png']);
     end
 else

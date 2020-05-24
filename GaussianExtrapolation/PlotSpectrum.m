@@ -23,5 +23,5 @@ title('Analytic $(\lambda_m)$ vs. Numeric $(\hat{\lambda}_m)$ eigenvalues', ...
     'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 set(gcf,'Position',[100 100 600 500])
-saveas(fig,[sParams.sSim.outputFolder filesep 'fig_eigenvalues_' num2str(sParams.dim) 'd.png']);
+saveas(fig,[sParams.sSim.outputFolder filesep 'fig_eigenvalues_' num2str(sParams.dim) 'd'], 'epsc');
 end

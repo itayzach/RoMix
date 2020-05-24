@@ -33,8 +33,8 @@ if strcmp(sParams.dataDist, 'gaussian')
         sParams.mu  = GMModel.mu;
     else
         if sParams.dim == 2
-            sParams.cov = [0.25    0; 
-                           0   0.25];
+            sParams.cov = [0.25    0.01; 
+                           0.01   0.25];
             sParams.mu  = [0 0];
         elseif sParams.dim == 1
             sParams.cov = 0.5;
@@ -164,7 +164,7 @@ else
 end
 
 %% num of eigenfunctions
-sParams.PlotEigenFuncsM = 23;
+sParams.PlotEigenFuncsM = 20;
 sParams.PlotSpectM = 30;
 sParams.RkhsM = 20;
 sParams.OrthM = 30;
@@ -180,7 +180,7 @@ sParams.R = 5000;    % num of sampled points to extrapolate from
 %% simulation
 sParams.sSim.outputFolder = 'figs';
 
-sParams.sSim.b_plotEigenFigs          = false;
+sParams.sSim.b_plotEigenFigs          = true;
 sParams.sSim.b_verifyKernelEigenfuncs = false;
 sParams.sSim.b_verifyEigOrth          = false;
 sParams.sSim.b_verifyMercersTheorem   = false;
@@ -195,13 +195,20 @@ sParams.sSim.noiseVar2 = 0; %0.1;
 
 %% Get correct order of eigenvalues (for 1D indexing from multindexing)
 if sParams.dim == 2
-    vLambda_K = zeros(max(sParams.PlotSpectM,sParams.ExtrplM),1);
+    vLambda_K_before_sort = zeros(max(sParams.PlotSpectM,sParams.ExtrplM),1);
     for i = 0:max(sParams.PlotSpectM,sParams.ExtrplM)-1
         m = OneDim2TwoDimIndex(i);
-        vLambda_K(i+1) = lambda(sParams, m);
+        vLambda_K_before_sort(i+1) = lambda(sParams, m);
     end
 end
-[sParams.vLambda_K, sParams.multindexToSingleIndexMap] = sort(vLambda_K, 'descend');
+[sParams.vLambda_K, sParams.multindexToSingleIndexMap] = sort(vLambda_K_before_sort, 'descend');
 
+fprintf(' Before  |  After    |   Multi  | Eigenvalue\n');
+fprintf('  sort   |  sort     |   index  | before sort\n');
+fprintf('----------------------------------------------\n');
+for i = 0:max(sParams.PlotSpectM,sParams.ExtrplM)-1
+    m = OneDim2TwoDimIndex(i);
+    fprintf('\t%d \t |\t %d\t\t| \t[%d %d]\t|  %f\n', i, sParams.multindexToSingleIndexMap(i+1)-1,  m(1), m(2), vLambda_K_before_sort(i+1));        
+end
 
 end

@@ -1,5 +1,9 @@
 function [] = plot_classifier(classifier, output_folder, xTest, yTest)
 
+x0     = 10;
+y0     = 250;
+width  = 550;
+height = 700;
 if strcmp(classifier.Name, 'laprlsc') || strcmp(classifier.Name, 'clustering')
     %--------------------------------------------------------------------------
     % Plot LapRLS
@@ -25,7 +29,7 @@ if strcmp(classifier.Name, 'laprlsc') || strcmp(classifier.Name, 'clustering')
     mKa = reshape(vKa,length(x1),length(x2));
     
     fig = figure;
-    sgtitle(['LapRLS: $f(x) = \sum_{i=1}^{n} \alpha^*_i K(x_i,x)$, $n$ = ' num2str(length(classifier.alpha)) newline ...
+    sgtitle(['LapRLS with $n$ = ' num2str(length(classifier.alpha)) newline ...
         '$\gamma_A = ' num2str(classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(classifier.gammas(2), '%.4f') '$' newline ...
         'Test error = ' num2str(classifier.test_error, '%.1f'), '$\%$' ], ...
         'Interpreter', 'latex', 'FontSize', 14);
@@ -50,8 +54,8 @@ if strcmp(classifier.Name, 'laprlsc') || strcmp(classifier.Name, 'clustering')
     plot2D(xTrain_laprls,yTrain_laprls,15,'ks');
     plot2D(xTest,yTest,15,'k*');
     set(gca,'FontSize', 14);
-    set(gcf,'Position',[10+600 250 600 700])
-    saveas(fig,[output_folder filesep classifier.Name '.png']);
+    set(gcf,'Position',[x0+width y0 width height])
+    saveas(fig,[output_folder filesep 'fig_' classifier.Name], 'epsc');
     
 elseif strcmp(classifier.Name, 'eigrls')
     %--------------------------------------------------------------------------
@@ -97,7 +101,7 @@ elseif strcmp(classifier.Name, 'eigrls')
     % mPhi_xt_c = reshape(vPhi_xt_c,length(x1),length(x2));
     
     fig = figure;
-    sgtitle(['EigRLS: $f(x) = \sum_{m=0}^{M-1} c^*_m\phi_m(x)$;   $M$ = ' num2str(sParams.ExtrplM-sParams.FirstM) newline ...
+    sgtitle(['EigRLS with $M$ = ' num2str(sParams.ExtrplM-sParams.FirstM) newline ...
         '$\omega = $ ' num2str(sParams.omega) ';   $\gamma_A = ' num2str(classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(classifier.gammas(2), '%.4f') '$' newline ...
         'Test error = ' num2str(classifier.test_error, '%.1f'), '$\%$' ], ...
         'Interpreter', 'latex', 'FontSize', 14);
@@ -121,8 +125,8 @@ elseif strcmp(classifier.Name, 'eigrls')
     plot2D(xTrain_eigrls,yTrain_eigrls,15,'ks');
     plot2D(xTest,yTest,15,'k*');
     set(gca,'FontSize', 14);
-    set(gcf,'Position',[10+600+600 250 600 700])
-    saveas(fig,[output_folder filesep 'eigrls_M_' num2str(sParams.ExtrplM) '.png']);
+    set(gcf,'Position',[x0+width+width y0 width height])
+    saveas(fig,[output_folder filesep 'fig_eigrls_M_' num2str(sParams.ExtrplM)], 'epsc');
 else
     error('unknown classifier name')
 end

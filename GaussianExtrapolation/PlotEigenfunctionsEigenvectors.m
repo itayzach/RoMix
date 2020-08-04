@@ -14,7 +14,7 @@ if sParams.dim == 1
             plot(sParams.x, vP_x, 'LineStyle', ':', 'LineWidth', 2, 'DisplayName', '$p(x)$');
             hold off
             title('Eigenfunctions of (analytic) kernel operator')
-            legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast')
+            legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
         end
     end
     

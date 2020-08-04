@@ -1,4 +1,4 @@
-function [sParams] = GetParameters()
+function [sParams] = GetParameters(b_useTwoMoonsDataset, nysRatio)
 
 %% dimensions
 sParams.dim = 2;
@@ -7,20 +7,27 @@ fprintf('*                      %d-D                              *\n', sParams.
 fprintf('*********************************************************\n');
 %% Dataset
 if sParams.dim == 2
-    sParams.sSim.twomoons_dataset = true;
+    if ~exist('b_useTwoMoonsDataset', 'var')
+        sParams.sSim.twomoons_dataset = true;
+    else
+        sParams.sSim.twomoons_dataset = b_useTwoMoonsDataset;
+    end
     if sParams.sSim.twomoons_dataset
-        sParams.sDataset = load('2moons.mat');
+%         sParams.sDataset = load('2moons.mat');
+        nTrain = 4000;
+        nTest = 1000;
+        sParams.sDataset = GenerateTwoMoonsDataset(nTrain, nTest);
         sParams.sSim.twomoons_scale = false;
         
         pos=find(sParams.sDataset.y==1);
         neg=find(sParams.sDataset.y==-1);
-        sParams.sDataset.x(pos,:) = sParams.sDataset.x(pos,:) + [ 0 0.25 ];
-        sParams.sDataset.x(neg,:) = sParams.sDataset.x(neg,:) - [ 0 0.25 ];
+        sParams.sDataset.x(pos,:) = sParams.sDataset.x(pos,:);
+        sParams.sDataset.x(neg,:) = sParams.sDataset.x(neg,:);
         
         pos=find(sParams.sDataset.yt==1);
         neg=find(sParams.sDataset.yt==-1);
-        sParams.sDataset.xt(pos,:) = sParams.sDataset.xt(pos,:) + [ 0 0.25 ];
-        sParams.sDataset.xt(neg,:) = sParams.sDataset.xt(neg,:) - [ 0 0.25 ];
+        sParams.sDataset.xt(pos,:) = sParams.sDataset.xt(pos,:);
+        sParams.sDataset.xt(neg,:) = sParams.sDataset.xt(neg,:);
     end
 end
 %% p(x)
@@ -44,7 +51,6 @@ if strcmp(sParams.dataDist, 'gaussian')
         end
     end
     [sParams.u, sParams.sigma_eigv] = eig(sParams.cov);
-%     [sParams.u, sParams.sigma_eigv] = svd(sParams.cov);
     sParams.sigma = diag(sqrt(sParams.sigma_eigv)).';
     if sParams.dim == 2
         if sParams.cov(1,1) > sParams.cov(2,2)
@@ -73,19 +79,27 @@ else
     error('unknown pdf')
 end
 %% random x-axis
-% if sParams.sSim.twomoons_dataset
-%     x_rand = [sParams.sDataset.x; sParams.sDataset.xt];
-% else
-    n = 5000;
+if sParams.sSim.twomoons_dataset
+    x_rand = [sParams.sDataset.x; sParams.sDataset.xt];
+    nRandPoints = length(x_rand);
+else
+    nRandPoints = 5000;
     if strcmp(sParams.dataDist, 'gaussian')
-        x_rand = mvnrnd(sParams.mu, sParams.cov, n);
+        x_rand = mvnrnd(sParams.mu, sParams.cov, nRandPoints);
     elseif strcmp(sParams.dataDist, 'uniform')
-        x_rand = (sParams.xMax - sParams.xMin)*rand(n, sParams.dim) + sParams.xMin;
+        x_rand = (sParams.xMax - sParams.xMin)*rand(nRandPoints, sParams.dim) + sParams.xMin;
     else
         error('unknown pdf')
     end
-% end
+end
+sParams.nRandPoints = nRandPoints;
 sParams.x_rand = x_rand;
+if ~exist('nysRatio', 'var')
+    sParams.nysRatio = 0.8;
+else
+    sParams.nysRatio = nysRatio;
+end
+sParams.nPointsNystrom = floor(sParams.nysRatio*nRandPoints);
 
 %% x-axis
 sParams.n_x_axis = 100;
@@ -165,7 +179,7 @@ end
 
 %% num of eigenfunctions
 sParams.PlotEigenFuncsM = 20;
-sParams.PlotSpectM = 30;
+sParams.PlotSpectM = 50;
 sParams.RkhsM = 20;
 sParams.OrthM = 30;
 sParams.MercerM = 0;

@@ -11,10 +11,16 @@ sParams = GetParameters();
 
 %% Verify stuff
 if sParams.sSim.b_plotEigenFigs    
-    [ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams);
-    [ mPhi_A, vLambda_A ] = CalcNumericEigenvectors(sParams);
-    PlotEigenfunctionsEigenvectors(sParams, mPhi_K, mPhi_A, vLambda_K, vLambda_A);
-    PlotSpectrum(sParams, vLambda_K, vLambda_A);
+    [ mPhi_K, vLambda_K ]     = CalcAnalyticEigenfunctions(sParams, sParams.x_rand);
+    [ mPhi_A, vLambda_A ]     = CalcNumericEigenvectors(sParams);
+    [ mPhi_Nys, vLambda_Nys ] = CalcNystromEigenvectors(sParams);
+%     PlotEigenfunctionsEigenvectors(sParams, mPhi_K, mPhi_A, vLambda_K, vLambda_A);
+%     PlotSpectrum(sParams, vLambda_K, vLambda_A);
+    PlotHistogram(sParams);
+    PlotEigenDiffs(sParams, mPhi_K, mPhi_A, mPhi_Nys)
+    PlotEigenfuncvecScatter(sParams, mPhi_K, vLambda_K, 'Analytic')
+    PlotEigenfuncvecScatter(sParams, mPhi_A, vLambda_A, 'Numeric')
+    PlotEigenfuncvecScatter(sParams, mPhi_Nys, vLambda_Nys, 'Nystrom')
 end
 
 if sParams.sSim.b_verifyKernelEigenfuncs
@@ -34,20 +40,6 @@ if sParams.sSim.b_verifyMercersTheorem
 else
     warning('Not verifying Mercer''s theorem');
 end
-%% Read mnist data
-% mnist = load('data/mnist.mat');
-% mXTest = single(mnist.testX);
-% vTestLabels = mnist.testY.';
-% [nTestPoints, nPixels] = size(mXTest);
-% N = nTestPoints;
-
-%% Graph signals
-% nDigits = 10;
-% mS = zeros(N, nDigits);
-% for k = 0:9
-%     mS(:, k+1) = (vTestLabels == k);
-% end
-
 %% Extrapolate functions
 if sParams.sSim.b_extrapolateEnable
     if sParams.dim == 1

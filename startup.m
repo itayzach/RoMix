@@ -3,7 +3,7 @@ clear; close all; clc;
 fprintf('[%s] Adding paths...\n', scriptName);
 addpath(genpath('GaussianExtrapolation'));
 addpath(genpath('ManifoldLearn'));
-addpath('data');
+addpath(genpath('data'));
 fprintf('[%s] Ready.\n', scriptName);
 clear scriptName
 

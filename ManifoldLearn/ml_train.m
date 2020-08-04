@@ -129,16 +129,16 @@ switch method
             saveclassifier('laprlsc',options.Kernel,options.KernelParam, ...
             alpha,X,Y,[options.gamma_A options.gamma_I]);
     case 'eigrls'
-        sParams = options.sParams;
-        mPhi_m_xTrain = zeros(length(X) ,sParams.ExtrplM-sParams.FirstM);
-        for i = sParams.FirstM:sParams.ExtrplM-1 
-            m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
-            mPhi_m_xTrain(:, i-sParams.FirstM+1) = phi(sParams, m, X);           
+        sSimParams = options.sSimParams;
+        mPhi_m_xTrain = zeros(length(X) ,sSimParams.ExtrplM-sSimParams.FirstM);
+        for i = sSimParams.FirstM:sSimParams.ExtrplM-1 
+            m = OneDim2TwoDimIndex(sSimParams.multindexToSingleIndexMap(i+1)-1);
+            mPhi_m_xTrain(:, i-sSimParams.FirstM+1) = phi(sSimParams, m, X);           
         end
-        mLambda = diag(sParams.vLambda_K(sParams.FirstM+1:sParams.ExtrplM));
-        fprintf('last eigenvalue is vLambda(%d) = %.12f\n', sParams.ExtrplM-1, sParams.vLambda_K(end));
+        mLambda = diag(sSimParams.vLambda_K(sSimParams.FirstM+1:sSimParams.ExtrplM));
+        fprintf('last eigenvalue is vLambda(%d) = %.12f\n', sSimParams.ExtrplM-1, sSimParams.vLambda_K(end));
         dist = pdist2(X, X);
-        W = exp(-dist.^2/(2*sParams.omega^2));
+        W = exp(-dist.^2/(2*sSimParams.omega^2));
         D = diag(sum(W,1));
         L = D - W;
 %         options.GraphWeights = 'binary';
@@ -148,7 +148,7 @@ switch method
         classifier= ...
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
             alpha,X,Y,[options.gamma_A options.gamma_I],c);
-        classifier.sParams = options.sParams;
+        classifier.sSimParams = options.sSimParams;
         classifier.mPhi_m_xTrain = mPhi_m_xTrain;
     otherwise
         error('no method was selected...')

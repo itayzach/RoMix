@@ -24,29 +24,29 @@ gamma_I_laprls = 1;
 kernel_sigma_laprls = 1/(6*sqrt(2)); 
 
 %% EigRLS params
-gamma_A_eigrls = 0.01;
+gamma_A_eigrls = 0;0.01;
 gamma_I_eigrls = 0.1;  
 
-%% sParams
-sParams = GetParameters();
-assert(sParams.dim == 2, 'dim should be 2.')
-kernel_sigma_eigrls = sParams.omega;
+%% sSimParams
+sSimParams = GetParameters();
+assert(sSimParams.dim == 2, 'dim should be 2.')
+kernel_sigma_eigrls = sSimParams.omega;
 
 % if kernel_sigma_laprls ~= kernel_sigma_eigrls
 %     error('LapRLS and EigRLS kernel width is different');
 % end
-if sParams.sSim.b_plotEigenFigs
-    [ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sParams);
-    [ mPhi_A, vLambda_A ] = CalcNumericEigenvectors(sParams);
-    PlotEigenfunctionsEigenvectors(sParams, mPhi_K, mPhi_A, vLambda_K, vLambda_A);
-    PlotSpectrum(sParams, vLambda_K, vLambda_A);
+if sSimParams.b_plotEigenFigs
+    [ mPhi_K, vLambda_K ] = CalcAnalyticEigenfunctions(sSimParams);
+    [ mPhi_A, vLambda_A ] = CalcNumericEigenvectors(sSimParams);
+    PlotEigenfunctionsEigenvectors(sSimParams, mPhi_K, mPhi_A, vLambda_K, vLambda_A);
+    PlotSpectrum(sSimParams, vLambda_K, vLambda_A);
 end
 
 %% Load dataset
-xTrain = sParams.sDataset.x(1:end,:);
-xTest = sParams.sDataset.xt;
-yTrain = sParams.sDataset.y(1:end);
-yTest = sParams.sDataset.yt;
+xTrain = sSimParams.sDataset.x(1:end,:);
+xTest = sSimParams.sDataset.xt;
+yTrain = sSimParams.sDataset.y(1:end);
+yTest = sSimParams.sDataset.yt;
 
 pos=find(yTrain==1);
 neg=find(yTrain==-1);
@@ -70,7 +70,7 @@ xlabel('$x_1$', 'Interpreter', 'latex')
 ylabel('$x_2$', 'Interpreter', 'latex')
 set(gca,'FontSize', 14);
 set(gcf,'Position',[x0 y0 width height])
-saveas(fig,[sParams.sSim.outputFolder filesep 'fig_two_moons'], 'epsc');
+saveas(fig,[sSimParams.outputFolder filesep 'fig_two_moons'], 'epsc');
 
 %% RLS
 % options_rls=ml_options('gamma_A',0.1, ...
@@ -95,11 +95,11 @@ options_laprls_orig = ml_options('gamma_A', 0.1, ...
              
 orig_laprlsc_classifier = experiment_moon(xTrain,y1,xTest,yTest,'laprlsc',gamma_A_laprls,gamma_I_laprls, options_laprls_orig);
 fprintf('---------------------------------------------------\n')
-plot_classifier(orig_laprlsc_classifier, sParams.sSim.outputFolder, xTest, zeros(size(yTest)))
+plot_classifier(orig_laprlsc_classifier, sSimParams.outputFolder, xTest, zeros(size(yTest)))
 
 % Plot classifier using retreived alpahas
 % fprintf([newline newline 'Test error diff: ' num2str(abs(orig_laprlsc_classifier.test_error - eigrls_classifier.test_error)) '\n'])
-% plot_classifier(laprlsc_classifier, sParams.sSim.outputFolder)
+% plot_classifier(laprlsc_classifier, sSimParams.outputFolder)
 % 
 % %--------------------------------------------------------------------------
 % % Plot alpha
@@ -136,17 +136,17 @@ options_eigrls=ml_options('gamma_A',0.1, ...
                    'GraphWeights', 'my_heat', ...
                    'GraphNormalize', false);
                
-options_eigrls.sParams = sParams;
+options_eigrls.sSimParams = sSimParams;
 eigrls_classifier = experiment_moon(xTrain,y1,xTest,yTest,'eigrls',gamma_A_eigrls,gamma_I_eigrls, options_eigrls);
-fprintf('Using %d eigenfunctions\n', sParams.ExtrplM-sParams.FirstM);
+fprintf('Using %d eigenfunctions\n', sSimParams.ExtrplM-sSimParams.FirstM);
 fprintf('---------------------------------------------------\n')
 
-plot_classifier(eigrls_classifier, sParams.sSim.outputFolder, xTest, zeros(size(yTest)))
+plot_classifier(eigrls_classifier, sSimParams.outputFolder, xTest, zeros(size(yTest)))
 
 %--------------------------------------------------------------------------
 % Plot c
 %--------------------------------------------------------------------------
-lambda = sParams.vLambda_K(1:sParams.ExtrplM);
+lambda = sSimParams.vLambda_K(1:sSimParams.ExtrplM);
 fig = figure; 
 plot(lambda, 'LineWidth', 2, 'DisplayName', '$\lambda_m$');
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14);
@@ -161,7 +161,7 @@ set(gca,'FontSize', 14);
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'linear');
 set(gcf,'Position', [x0 y0 600 400])
-saveas(fig,[sParams.sSim.outputFolder filesep 'fig_rkhs_norm_decay'], 'epsc');
+saveas(fig,[sSimParams.outputFolder filesep 'fig_rkhs_norm_decay'], 'epsc');
 % %--------------------------------------------------------------------------
 % % Plot f difference
 % %--------------------------------------------------------------------------

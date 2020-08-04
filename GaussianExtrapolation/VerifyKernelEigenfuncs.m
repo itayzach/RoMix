@@ -1,62 +1,62 @@
-function [] = VerifyKernelEigenfuncs(sParams)
+function [] = VerifyKernelEigenfuncs(sSimParams)
 
-assert(sParams.dim <= 2);
+assert(sSimParams.dim <= 2);
 %% Check eigenfunctions
 
 nPoints = 10;
-yMax = sParams.xMax;
-yMin = sParams.xMin;
+yMax = sSimParams.xMax;
+yMin = sSimParams.xMin;
 
-y = zeros(nPoints, sParams.dim);
-% x = zeros(length(xAxis1d), sParams.dim);
-for d = 1:sParams.dim
+y = zeros(nPoints, sSimParams.dim);
+% x = zeros(length(xAxis1d), sSimParams.dim);
+for d = 1:sSimParams.dim
     y(:, d) = (yMax - yMin)*rand(nPoints, 1) + yMin;
 %     x(:, d) = xAxis1d;
 end
 
-for i = 0:sParams.RkhsM-1
-    if sParams.dim == 2
-        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
+for i = 0:sSimParams.RkhsM-1
+    if sSimParams.dim == 2
+        m = OneDim2TwoDimIndex(sSimParams.multindexToSingleIndexMap(i+1)-1);
     else
         m = i;
     end
     
     %% rhs
-    lambda_m = lambda(sParams, m);
+    lambda_m = lambda(sSimParams, m);
     if lambda_m < 1e-20
         fprintf('VerifyRKHS: lambda_m < 1e-20, breaking...\n');
         break;
     end
     
-    vPhi_m_y = phi(sParams, m, y);
+    vPhi_m_y = phi(sSimParams, m, y);
     rhs = lambda_m * vPhi_m_y;
     
     %% lhs
-    if sParams.dim == 1
+    if sSimParams.dim == 1
         lhs = zeros(nPoints,1);
         for j = 1:nPoints
-            integrand = @(x) kernel(sParams, y(j), x).*phi(sParams, m, x).*p(sParams, x);
+            integrand = @(x) kernel(sSimParams, y(j), x).*phi(sSimParams, m, x).*p(sSimParams, x);
             lhs(j) = integral(integrand,-1e3,1e3,'ArrayValued',true);
         end
     else
         warning('VerifyRKHS does not support multi-index yet...')
         return;
-        lhs_d = zeros(nPoints,sParams.dim);
-        rhs_d = zeros(nPoints,sParams.dim);
-        for d = 1:sParams.dim
-            vPhi_m_x = phi_d(sParams, i, xAxis1d, d);
-            vP_x = p(sParams, xAxis1d, d);
+        lhs_d = zeros(nPoints,sSimParams.dim);
+        rhs_d = zeros(nPoints,sSimParams.dim);
+        for d = 1:sSimParams.dim
+            vPhi_m_x = phi_d(sSimParams, i, xAxis1d, d);
+            vP_x = p(sSimParams, xAxis1d, d);
 
             % Make sure that phi_m is an eigenfunction of the kernel by:
             % (for a fixed y)
             %   rhs = lambda_m * phi_m_(y)
             %   lhs = <Ky, phi_m> = integral_x( Ky(x)phi_m(x)p(x)dx )
 
-            vPhi_m_y = phi_d(sParams, i, y(:, d), d);
+            vPhi_m_y = phi_d(sSimParams, i, y(:, d), d);
             rhs_d(:, d) = lambda_m * vPhi_m_y;
 
             for j = 1:nPoints
-                vKernel_y_x = kernel(sParams, y(j, d), xAxis1d);
+                vKernel_y_x = kernel(sSimParams, y(j, d), xAxis1d);
                 integral_1d = sum(vKernel_y_x.*vPhi_m_x.*vP_x*dx); %1-D integral over single y_{j,d}
                 lhs_d(j, d) = integral_1d;
             end

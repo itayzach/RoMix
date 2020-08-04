@@ -1,7 +1,7 @@
-function [] = VerifyMercerTheorem(sParams)
+function [] = VerifyMercerTheorem(sSimParams)
 % Verify k(x,y) = sum_{m=0}^inf ~ sum_{m=0}^M( lambda_m*phi_m(x)*phi_m(y) )
 
-if sParams.dim == 1
+if sSimParams.dim == 1
     nyPoints = 1000;
     yMax = 3;
     yMin = -2;
@@ -10,9 +10,9 @@ if sParams.dim == 1
     xMax = 3;
     xMin = -2;
     
-    y = zeros(nyPoints, sParams.dim);
-    x = zeros(nxPoints, sParams.dim);
-    for d = 1:sParams.dim
+    y = zeros(nyPoints, sSimParams.dim);
+    x = zeros(nxPoints, sSimParams.dim);
+    for d = 1:sSimParams.dim
         y(:, d) = (yMax - yMin)*rand(nyPoints, 1) + yMin;
         x(:, d) = (xMax - xMin)*rand(nxPoints, 1) + xMin;
     end
@@ -21,9 +21,9 @@ if sParams.dim == 1
     nyPoints = size(y,1);
     
 else
-    if sParams.sSim.twomoons_dataset
-        x = sParams.sDataset.x;
-        if sParams.sSim.twomoons_scale
+    if sSimParams.twomoons_dataset
+        x = sSimParams.sDataset.x;
+        if sSimParams.twomoons_scale
             x = 10*x;
         end
         xMax = max(max(x,[],1));
@@ -46,21 +46,21 @@ else
     nyPoints = length(y);
 end
 
-mPhi_x = zeros(nxPoints, sParams.MercerM);
-mPhi_y = zeros(nyPoints, sParams.MercerM);
-vLambda = zeros(1, sParams.MercerM);
-for i = 0:sParams.MercerM-1
-    if sParams.dim == 1
+mPhi_x = zeros(nxPoints, sSimParams.MercerM);
+mPhi_y = zeros(nyPoints, sSimParams.MercerM);
+vLambda = zeros(1, sSimParams.MercerM);
+for i = 0:sSimParams.MercerM-1
+    if sSimParams.dim == 1
         m = i;
-    elseif sParams.dim == 2
-        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
+    elseif sSimParams.dim == 2
+        m = OneDim2TwoDimIndex(sSimParams.multindexToSingleIndexMap(i+1)-1);
     else
         error('conversion from i to m d-dim index is not implemented');
     end
-    vLambda(i+1) = lambda(sParams, m);
-    mPhi_x(:, i+1) = phi(sParams, m, x);
-    mPhi_y(:, i+1) = phi(sParams, m, y);
-%     if sParams.dim == 2
+    vLambda(i+1) = lambda(sSimParams, m);
+    mPhi_x(:, i+1) = phi(sSimParams, m, x);
+    mPhi_y(:, i+1) = phi(sSimParams, m, y);
+%     if sSimParams.dim == 2
 %         if m(2) == 0
 %             fprintf('-------------------------------------------------\n');
 %         end
@@ -69,10 +69,10 @@ for i = 0:sParams.MercerM-1
 end
 fprintf('last eigenvalue is vLambda(%d) = %.12f\n', length(vLambda), vLambda(end));
 
-if sParams.constsType == 1
-    lhs = calckernel('rbf', sParams.ell, y, x);
-elseif sParams.constsType == 2
-    lhs = calckernel('rbf', sParams.omega, y, x);
+if sSimParams.constsType == 1
+    lhs = calckernel('rbf', sSimParams.ell, y, x);
+elseif sSimParams.constsType == 2
+    lhs = calckernel('rbf', sSimParams.omega, y, x);
 else
     error('');
 end
@@ -88,6 +88,6 @@ subplot(2,1,2);
     title('mercer');
 
 
-isalmostequal(lhs, rhs, 1e-10, sprintf('Mercer''s theorem failed. Perhaps M = %d is not enough?', sParams.MercerM));
-fprintf('Mercer''s theorem confirmed for M = %d\n', sParams.MercerM);
+isalmostequal(lhs, rhs, 1e-10, sprintf('Mercer''s theorem failed. Perhaps M = %d is not enough?', sSimParams.MercerM));
+fprintf('Mercer''s theorem confirmed for M = %d\n', sSimParams.MercerM);
 end

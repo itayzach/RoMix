@@ -1,13 +1,13 @@
 %% phi (Squared Exponentional)
-function [vPhi_m] = phi_d(sParams, m, x, d)
+function [vPhi_m] = phi_d(sKernelParams, m, x, d)
 if ~isvector(x)
     error('x has to be a vector');
 end
 
-if strcmp(sParams.kernelType, 'exp')
-    if sParams.constsType == 1
-        a = sParams.a(d);
-        b = sParams.b;
+if strcmp(sKernelParams.kernelType, 'exp')
+    if sKernelParams.constsType == 1
+        a = sKernelParams.a(d);
+        b = sKernelParams.b;
 
         % Calculate parameters
         c = sqrt(a^2 + 2*a*b);
@@ -24,30 +24,30 @@ if strcmp(sParams.kernelType, 'exp')
         normFactor = (1/sqrt(2^m*factorial(m)*sqrt(a/c)));
         vPhi_m = normFactor * exp( -(c-a)*x.^2 ) .* vHm;
 
-    elseif sParams.constsType == 2
+    elseif sKernelParams.constsType == 2
         if exist('d', 'var')
-            mu = sParams.mu_1D(d);
-            sigma = sParams.sigma(d);
-            beta = sParams.beta(d);
+            mu = sKernelParams.sDistParams.mu_1D(d);
+            sigma = sKernelParams.sDistParams.sigma(d);
+            beta = sKernelParams.beta(d);
         else
-            mu = sParams.mu_1D;
-            sigma = sParams.sigma;
-            beta = sParams.beta;
+            mu = sKernelParams.sDistParams.mu_1D;
+            sigma = sKernelParams.sDistParams.sigma;
+            beta = sKernelParams.beta;
         end
 
         normFactor = (1+2*beta)^(1/8)/sqrt(2^m*factorial(m));
         vHm = hermite(m, (1/4 + beta/2)^(1/4)*(x-mu)/sigma);
         vPhi_m = normFactor * exp( -((x-mu).^2/(2*sigma^2)) * ((sqrt(1+2*beta)-1)/2) ) .* vHm;
-    elseif sParams.constsType == 3
+    elseif sKernelParams.constsType == 3
         if exist('d', 'var')
-            mu = sParams.mu(d);
-            sigma = sParams.sigma(d);     
-            alpha = sParams.alpha(d); % Should be here, or alpha(d)?
+            mu = sKernelParams.mu(d);
+            sigma = sKernelParams.sDistParams.sigma(d);     
+            alpha = sKernelParams.alpha(d); % Should be here, or alpha(d)?
         else
-            mu = sParams.mu;
-            sigma = sParams.sigma;
+            mu = sKernelParams.mu;
+            sigma = sKernelParams.sDistParams.sigma;
         end    
-        eps = sParams.eps;
+        eps = sKernelParams.eps;
 
 
         normFactor = (1+(2*eps/alpha)^2)^(1/8) / sqrt(2^m*factorial(m));
@@ -56,7 +56,7 @@ if strcmp(sParams.kernelType, 'exp')
     else
         error('Unknown constsType');
     end
-elseif strcmp(sParams.kernelType, 'sinc')
+elseif strcmp(sKernelParams.kernelType, 'sinc')
 %     vPhi_m = real(sqrt(pi./(2*sParams.a*x)) .* besselj(m+0.5, sParams.a*x));
 %     vPhi_m(x < 0) = -vPhi_m(x < 0);
 %     if m == 0
@@ -64,7 +64,7 @@ elseif strcmp(sParams.kernelType, 'sinc')
 %     else
 %         vPhi_m(x == 0) = 0;
 %     end
-    vPhi_m = besselj(m, sParams.a*x);
+    vPhi_m = besselj(m, sKernelParams.a*x);
 else
     error('unknown kernelType');
 end

@@ -62,7 +62,7 @@ elseif strcmp(classifier.Name, 'eigrls')
     % Plot EigRLS (Phi*c)
     %--------------------------------------------------------------------------
     c = classifier.c;
-    sParams = classifier.sParams;
+    sSimParams = classifier.sSimParams;
     xTrain_eigrls = classifier.xtrain;
     yTrain_eigrls = classifier.ytrain;
     xMax = max(max(xTrain_eigrls,[],1));
@@ -73,24 +73,24 @@ elseif strcmp(classifier.Name, 'eigrls')
     [XX1,XX2] = meshgrid(x1,x2);
 
     X=[XX1(:) XX2(:)];    
-    mPhi_m_X = zeros(length(X), sParams.ExtrplM-sParams.FirstM);
+    mPhi_m_X = zeros(length(X), sSimParams.ExtrplM-sSimParams.FirstM);
     
     tic;
-    for i = sParams.FirstM:sParams.ExtrplM-1
-        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
-        mPhi_m_X(:, i-sParams.FirstM+1) = phi(sParams,m,X);
+    for i = sSimParams.FirstM:sSimParams.ExtrplM-1
+        m = OneDim2TwoDimIndex(sSimParams.multindexToSingleIndexMap(i+1)-1);
+        mPhi_m_X(:, i-sSimParams.FirstM+1) = phi(sSimParams,m,X);
     end
     run_time = toc;
     fprintf('Phi time = %f\n', run_time);
     
-%     mPhi_m_xTrain = zeros(length(xTrain_eigrls), sParams.ExtrplM-sParams.FirstM);    
-% %     mPhi_m_xTest = zeros(length(xTest),sParams.ExtrplM-sParams.FirstM);
-% %     vLambda = zeros(1, sParams.ExtrplM-sParams.FirstM);
-%     for i = sParams.FirstM:sParams.ExtrplM-1
-%         m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
-% %         vLambda(i-sParams.FirstM+1) = lambda(sParams,m);
-%         mPhi_m_xTrain(:, i-sParams.FirstM+1) = phi(sParams,m,xTrain_eigrls);
-% %         mPhi_m_xTest(:, i+1) = phi(sParams,m,xTest);
+%     mPhi_m_xTrain = zeros(length(xTrain_eigrls), sSimParams.ExtrplM-sSimParams.FirstM);    
+% %     mPhi_m_xTest = zeros(length(xTest),sSimParams.ExtrplM-sSimParams.FirstM);
+% %     vLambda = zeros(1, sSimParams.ExtrplM-sSimParams.FirstM);
+%     for i = sSimParams.FirstM:sSimParams.ExtrplM-1
+%         m = OneDim2TwoDimIndex(sSimParams.multindexToSingleIndexMap(i+1)-1);
+% %         vLambda(i-sSimParams.FirstM+1) = lambda(sSimParams,m);
+%         mPhi_m_xTrain(:, i-sSimParams.FirstM+1) = phi(sSimParams,m,xTrain_eigrls);
+% %         mPhi_m_xTest(:, i+1) = phi(sSimParams,m,xTest);
 %     end
     
     mPhi_m_xTrain = classifier.mPhi_m_xTrain;
@@ -101,8 +101,8 @@ elseif strcmp(classifier.Name, 'eigrls')
     % mPhi_xt_c = reshape(vPhi_xt_c,length(x1),length(x2));
     
     fig = figure;
-    sgtitle(['EigRLS with $M$ = ' num2str(sParams.ExtrplM-sParams.FirstM) newline ...
-        '$\omega = $ ' num2str(sParams.omega) ';   $\gamma_A = ' num2str(classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(classifier.gammas(2), '%.4f') '$' newline ...
+    sgtitle(['EigRLS with $M$ = ' num2str(sSimParams.ExtrplM-sSimParams.FirstM) newline ...
+        '$\omega = $ ' num2str(sSimParams.omega) ';   $\gamma_A = ' num2str(classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(classifier.gammas(2), '%.4f') '$' newline ...
         'Test error = ' num2str(classifier.test_error, '%.1f'), '$\%$' ], ...
         'Interpreter', 'latex', 'FontSize', 14);
     subplot(2,1,1)
@@ -126,7 +126,7 @@ elseif strcmp(classifier.Name, 'eigrls')
     plot2D(xTest,yTest,15,'k*');
     set(gca,'FontSize', 14);
     set(gcf,'Position',[x0+width+width y0 width height])
-    saveas(fig,[output_folder filesep 'fig_eigrls_M_' num2str(sParams.ExtrplM)], 'epsc');
+    saveas(fig,[output_folder filesep 'fig_eigrls_M_' num2str(sSimParams.ExtrplM)], 'epsc');
 else
     error('unknown classifier name')
 end

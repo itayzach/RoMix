@@ -1,19 +1,19 @@
-function [] = VerifyOrthogonality(sParams)
+function [] = VerifyOrthogonality(sSimParams)
 dx = 0.01;
 x_1d_axis = (-1e3:dx:1e3-dx).';
 
-mPhi = zeros(length(x_1d_axis), sParams.dim, sParams.OrthM);
-for m = 0:sParams.OrthM-1
-    for d = 1:sParams.dim
-        vPhi_m_x = phi_d(sParams, m, x_1d_axis, d);
+mPhi = zeros(length(x_1d_axis), sSimParams.dim, sSimParams.OrthM);
+for m = 0:sSimParams.OrthM-1
+    for d = 1:sSimParams.dim
+        vPhi_m_x = phi_d(sSimParams, m, x_1d_axis, d);
         mPhi(:, d, m+1) = vPhi_m_x;
     end
 end
 
-I = zeros(sParams.OrthM);
-vP_x = p(sParams, x_1d_axis);
-for k = 0:sParams.OrthM-1
-    for m = 0:sParams.OrthM-1
+I = zeros(sSimParams.OrthM);
+vP_x = p(sSimParams, x_1d_axis);
+for k = 0:sSimParams.OrthM-1
+    for m = 0:sSimParams.OrthM-1
         % Following line is 
         %   <phi_m, phi_k> = 
         %   integral_x1( phi_m(x1)phi_k(x1)p(x1)dx1 ) *
@@ -30,6 +30,6 @@ for k = 0:sParams.OrthM-1
         end
     end
 end
-isalmostequal(I, eye(sParams.OrthM), 0, 'eigenfunctions are not orthonormal');
-fprintf('All %d eigenfunctions are orthonormal\n', sParams.OrthM);
+isalmostequal(I, eye(sSimParams.OrthM), 0, 'eigenfunctions are not orthonormal');
+fprintf('All %d eigenfunctions are orthonormal\n', sSimParams.OrthM);
 end

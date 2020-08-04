@@ -1,30 +1,27 @@
-function [] = PlotHistogram(sParams)
+function [] = PlotHistogram(sSimParams, sDataset)
 
 x0     = 10;
 y0     = 50;
 width  = 600;
 height = 400;
 
+x = [sDataset.mData.x; sDataset.mData.xt];
+
 fig = figure;
-hist3(sParams.x_rand,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'flat');
+hist3(x,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'flat');
 colormap(gca, 'hot')
 colorbar()
 view(2)
-xlim([ min(sParams.x_rand(:,1)) max(sParams.x_rand(:,1))])
-ylim([ min(sParams.x_rand(:,2)) max(sParams.x_rand(:,2))])
+xlim([ min(x(:,1)) max(x(:,1))])
+ylim([ min(x(:,2)) max(x(:,2))])
 title('$\hat{p}({\bf x})$', 'Interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
 set(gcf,'Position', [x0 y0 width height])
 
 %% Save
-if sParams.sSim.twomoons_dataset
-    simPrefix = strcat('Two_moons');
-else
-    simPrefix = strcat('Gaussian');
-end
-if ~exist(sParams.sSim.outputFolder, 'dir')
-    mkdir(sParams.sSim.outputFolder)
+if ~exist(sSimParams.outputFolder, 'dir')
+    mkdir(sSimParams.outputFolder)
 end
 
-saveas(fig,strcat(sParams.sSim.outputFolder, filesep, simPrefix, '_histogram_2d'), 'epsc');
+saveas(fig,strcat(sSimParams.outputFolder, filesep, sDataset.actualDataDist, '_histogram_2d'), 'epsc');
 end

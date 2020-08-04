@@ -6,10 +6,10 @@ vM = 0:length(vAnaVsNum)-1;
 %% Plot
 fig = figure;
 plot(vM, vAnaVsNum, 'LineWidth', 2, ...
-    'DisplayName',  '$\sqrt{\frac{1}{T} \sum_{t=1}^T \big\| \phi_m^{Ana}(t) - \phi_m^{Num}(t) \big\|^2_2}$' );
+    'DisplayName',  'RMSE$\big(\phi_m^{Ana}(t),  \phi_m^{Num}(t)\big)$' );
 hold on
 plot(vM, vNysVsNum, 'LineWidth', 2, ...
-    'DisplayName',  '$\sqrt{\frac{1}{T} \sum_{t=1}^T \big\| \phi_m^{Nys}(t) - \phi_m^{Num}(t) \big\|_2}$' );
+    'DisplayName',  'RMSE$\big(\phi_m^{Nys}(t),  \phi_m^{Num}(t)\big)$' );
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('RMSE', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')

@@ -18,9 +18,9 @@ for simIdx = 1:2
         actualDataDist = 'Two_moons';
     end
     for nysRatio = vNysRatio
-        tPhiAnalytic = zeros(T, nTrain, sSimParams.PlotEigenFuncsM);
-        tPhiNumeric  = zeros(T, nTrain, sSimParams.PlotEigenFuncsM);
-        tPhiNystrom  = zeros(T, nTrain, sSimParams.PlotEigenFuncsM);
+        tPhiAnalytic = zeros(T, nTrain, sSimParams.CalcEigenFuncsM);
+        tPhiNumeric  = zeros(T, nTrain, sSimParams.CalcEigenFuncsM);
+        tPhiNystrom  = zeros(T, nTrain, sSimParams.CalcEigenFuncsM);
         for t = 1:T
             sDataset = GenerateDataset(actualDataDist, nTrain, nTest);
             sDistParams = EstimateDistributionParameters(sDataset);
@@ -40,11 +40,25 @@ for simIdx = 1:2
                 PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), vLambdaAnalytic, 'Analytic')
                 PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNumeric(1,:,:)), vLambdaNumeric, 'Numeric')
                 PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNystrom(1,:,:)), vLambdaNystrom, 'Nystrom')
+                
+                if strcmp(actualDataDist, 'Two_moons') && nysRatio == 0.05
+                    firsfirstEigenIdxToPlot = 30;
+                    lastEigIdxToPlot = 49;
+                    PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), vLambdaAnalytic, 'Analytic')
+                    PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNumeric(1,:,:)), vLambdaNumeric, 'Numeric')
+                    PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNystrom(1,:,:)), vLambdaNystrom, 'Nystrom')
+                
+                end
             end
         end
         
-        vRMSEAnaVsNum = CalcRMSE(sSimParams, T, tPhiAnalytic, tPhiNumeric);
-        vRMSENysVsNum = CalcRMSE(sSimParams, T, tPhiNystrom, tPhiNumeric);
+        if strcmp(actualDataDist, 'Two_moons') && nysRatio == 0.05
+            vRMSEAnaVsNum = CalcRMSE(sSimParams, tPhiAnalytic(1:8,:,:), tPhiNumeric(1:8,:,:));
+            vRMSENysVsNum = CalcRMSE(sSimParams, tPhiNystrom(1:8,:,:), tPhiNumeric(1:8,:,:));
+        else
+            vRMSEAnaVsNum = CalcRMSE(sSimParams, tPhiAnalytic, tPhiNumeric);
+            vRMSENysVsNum = CalcRMSE(sSimParams, tPhiNystrom, tPhiNumeric);
+        end
         PlotEigenDiffs(sSimParams, sDataset, nysRatio, vRMSEAnaVsNum, vRMSENysVsNum);
         
     end

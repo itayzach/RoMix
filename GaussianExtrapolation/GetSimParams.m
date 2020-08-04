@@ -1,9 +1,9 @@
 function sSimParams = GetSimParams()
 
 %% num of eigenfunctions
-% sSimParams.ExtrplM = 20;
+sSimParams.CalcEigenFuncsM = 50;
 sSimParams.PlotEigenFuncsM = 20;
-sSimParams.PlotSpectM = 20;
+sSimParams.PlotSpectM = 50;
 
 %% simulation
 sSimParams.outputFolder = 'figs';

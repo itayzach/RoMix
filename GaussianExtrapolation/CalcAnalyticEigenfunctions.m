@@ -3,8 +3,8 @@ function [mPhi_K, vLambda_K] = CalcAnalyticEigenfunctions(sSimParams, sKernelPar
 dim = size(mData, 2);
 
 if dim == 1     
-    mPhi_K = zeros(length(x), sSimParams.PlotEigenFuncsM);
-    for m = 0:sSimParams.PlotEigenFuncsM-1  
+    mPhi_K = zeros(length(x), sSimParams.CalcEigenFuncsM);
+    for m = 0:sSimParams.CalcEigenFuncsM-1  
         mPhi_K(:,m+1) = phi_d(sSimParams, m, x, 1);
     end
     
@@ -16,8 +16,8 @@ if dim == 1
 
 elseif dim == 2
 
-    mPhi_K = zeros(length(mData), sSimParams.PlotEigenFuncsM);
-    for i = 0:sSimParams.PlotEigenFuncsM-1
+    mPhi_K = zeros(length(mData), sSimParams.CalcEigenFuncsM);
+    for i = 0:sSimParams.CalcEigenFuncsM-1
         m = OneDim2TwoDimIndex(sKernelParams.vMultindexToSingleIndexMap(i+1)-1);
         mPhi_K(:,i+1) = phi(sKernelParams, m, mData);
     end

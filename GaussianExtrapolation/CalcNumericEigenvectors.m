@@ -22,7 +22,7 @@ mPhi_A = sqrt(n)*mPhi_A(:,idx);
 % % [vLambda_L, idx] = sort(diag(vLambda_L), 'descend');
 % vLambda_L = diag(vLambda_L);
 % vLambda_L = vLambda_L(1:sSimParams.PlotSpectM);
-% mPhi_L = (n)*mPhi_L(:,1:sSimParams.PlotEigenFuncsM);
+% mPhi_L = (n)*mPhi_L(:,1:sSimParams.CalcEigenFuncsM);
 
 
 end

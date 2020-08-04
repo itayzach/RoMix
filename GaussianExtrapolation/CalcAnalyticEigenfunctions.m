@@ -1,34 +1,32 @@
-function [mPhi_K, vLambda_K] = CalcAnalyticEigenfunctions(sParams, X)
+function [mPhi_K, vLambda_K] = CalcAnalyticEigenfunctions(sSimParams, sKernelParams, mData)
 
-if ~exist('X', 'var')
-    x = sParams.x;
-    [mX1, mX2] = meshgrid(x(:,1), x(:,2));
-    X = [mX1(:) mX2(:)];    
-end
+dim = size(mData, 2);
 
-if sParams.dim == 1     
-    mPhi_K = zeros(length(x), sParams.PlotEigenFuncsM);
-    for m = 0:sParams.PlotEigenFuncsM-1  
-        mPhi_K(:,m+1) = phi_d(sParams, m, x, 1);
+if dim == 1     
+    mPhi_K = zeros(length(x), sSimParams.PlotEigenFuncsM);
+    for m = 0:sSimParams.PlotEigenFuncsM-1  
+        mPhi_K(:,m+1) = phi_d(sSimParams, m, x, 1);
     end
     
-    vLambda_K = zeros(sParams.PlotSpectM, 1);
-    for m = 0:max(sParams.PlotSpectM,sParams.MercerM)-1
-        vLambda_K(m+1) = lambda(sParams, m);
+    vLambda_K = zeros(sSimParams.PlotSpectM, 1);
+    for m = 0:max(sSimParams.PlotSpectM,sSimParams.MercerM)-1
+        vLambda_K(m+1) = lambda(sSimParams, m);
     end
-    vLambda_K = vLambda_K(1:sParams.PlotSpectM);
+    vLambda_K = vLambda_K(1:sSimParams.PlotSpectM);
 
-elseif sParams.dim == 2
+elseif dim == 2
 
-    mPhi_K = zeros(length(X), sParams.PlotEigenFuncsM);
-    for i = 0:sParams.PlotSpectM-1
-        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(i+1)-1);
-        mPhi_K(:,i+1) = phi(sParams, m, X);
+    mPhi_K = zeros(length(mData), sSimParams.PlotEigenFuncsM);
+    for i = 0:sSimParams.PlotEigenFuncsM-1
+        m = OneDim2TwoDimIndex(sKernelParams.vMultindexToSingleIndexMap(i+1)-1);
+        mPhi_K(:,i+1) = phi(sKernelParams, m, mData);
     end
     
-    vLambda_K = sParams.vLambda_K(1:sParams.PlotSpectM);
+    vLambda_K = sKernelParams.vLambdaAnaytic(1:sSimParams.PlotSpectM);
     
 else
     error('cannot plot for dim > 2')
 end
+
+
 end

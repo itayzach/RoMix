@@ -1,7 +1,7 @@
-function [] = Extrapolate2D(sParams)
+function [] = Extrapolate2D(sSimParams)
 
-assert(sParams.ExtrplM <= sParams.R, 'You cannot have less points than eigenfunctions!');
-assert(sParams.dim == 2, 'This function works only for 2-D')
+assert(sSimParams.ExtrplM <= sSimParams.R, 'You cannot have less points than eigenfunctions!');
+assert(sSimParams.dim == 2, 'This function works only for 2-D')
 
 dx = 0.01;
 x = (-2:dx:2-dx)';
@@ -16,13 +16,13 @@ A1 = 3;
 A4 = 0.001;
 A6 = 0.0005;
 
-phi1x = reshape(phi(sParams, [0 1], X), length(x), length(x));
-phi4x = reshape(phi(sParams, [2 0], X), length(x), length(x));
-phi6x = reshape(phi(sParams, [3 1], X), length(x), length(x));
+phi1x = reshape(phi(sSimParams, [0 1], X), length(x), length(x));
+phi4x = reshape(phi(sSimParams, [2 0], X), length(x), length(x));
+phi6x = reshape(phi(sSimParams, [3 1], X), length(x), length(x));
 
 mF1      = A1*phi1x + A4*phi4x + A6*phi6x;
 vF1      = mF1(:);
-vF_awgn1 = sqrt(sParams.sSim.noiseVar1)*randn(N*N, 1);
+vF_awgn1 = sqrt(sSimParams.sSim.noiseVar1)*randn(N*N, 1);
 
 %% F2
 B1 = 5;
@@ -33,7 +33,7 @@ exp1 = B3*exp(-0.3*x1.^2).*sin(1*pi*x1);
 
 mF2      = B2*exp(-0.5*mX1.^2).*exp(-0.5*mX2.^2).*sin(0.5*pi*mX1).*sin(0.5*pi*mX2); % + B3*exp(-0.3*mX1.^2).*exp(-0.3*mX2.^2).*sin(1*pi*mX1).*sin(1*pi*mX2);
 vF2 = mF2(:);
-vF_awgn2 = sqrt(sParams.sSim.noiseVar2)*randn(N*N, 1);
+vF_awgn2 = sqrt(sSimParams.sSim.noiseVar2)*randn(N*N, 1);
 
 mF      = [vF1 vF2];
 mF_awgn = [vF_awgn1 vF_awgn2];
@@ -47,20 +47,20 @@ for i = 1:nFuncs
     vFi_awgn = mF_awgn(:, i);
     SNR = snr(vFi, vFi_awgn);
     vGi = vFi + vFi_awgn;
-    mPhi = zeros(N*N, sParams.ExtrplM);
-    for q = 0:sParams.ExtrplM-1 
-        m = OneDim2TwoDimIndex(sParams.multindexToSingleIndexMap(q+1)-1);
-        vPhi_m_x = phi(sParams, m, X);
+    mPhi = zeros(N*N, sSimParams.ExtrplM);
+    for q = 0:sSimParams.ExtrplM-1 
+        m = OneDim2TwoDimIndex(sSimParams.multindexToSingleIndexMap(q+1)-1);
+        vPhi_m_x = phi(sSimParams, m, X);
         mPhi(:, q+1) = vPhi_m_x;
     end
-    if sParams.sSim.b_randomStepSize
-        vR = sort(randi([1 N^2],sParams.R,1));
+    if sSimParams.sSim.b_randomStepSize
+        vR = sort(randi([1 N^2],sSimParams.R,1));
     else
-        step = floor(N^2/sParams.R);
+        step = floor(N^2/sSimParams.R);
         vR = 1:step:N^2;
                 
     end
-    I = eye(sParams.ExtrplM);
+    I = eye(sSimParams.ExtrplM);
     
     mPhi_RM = mPhi(vR, :);
     mGi = reshape(vGi,N,N);
@@ -68,7 +68,7 @@ for i = 1:nFuncs
     vCR = (mPhi_RM.' * mPhi_RM) \ ( mPhi_RM.' * vGR );
 %     vCR = pinv(mPhi_RM) * vGR;
 
-%     vC = zeros(sParams.ExtrplM, 1);
+%     vC = zeros(sSimParams.ExtrplM, 1);
 %     vC(1+1) = A1;
 %     fprintf('    vCR       vC \n')
 %     disp([vCR, vC]);
@@ -125,7 +125,7 @@ for i = 1:nFuncs
 %     p4 = plot(x(vR), vGi(vR), 'ro');
 %     hold off
 %     legend([p2 p1 p3], 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
-%     print(cFigs{i}, [sParams.sSim.outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
-    fprintf('f%d : R = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, sParams.R, sParams.ExtrplM, SNR, accuracy);
+%     print(cFigs{i}, [sSimParams.sSim.outputFolder filesep 'fig' num2str(i+1) '_extrapolate_f' num2str(i)], '-depsc')
+    fprintf('f%d : R = %d; M = %d; SNR = %.2f; Accuracy = %.2f%%\n', i, sSimParams.R, sSimParams.ExtrplM, SNR, accuracy);
 end
 end

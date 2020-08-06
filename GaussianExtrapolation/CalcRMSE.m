@@ -1,10 +1,17 @@
-function vRMSE = CalcRMSE(sSimParams, tPhi1, tPhi2)
+function vRMSE = CalcRMSE(tPhiToCompare, tPhiNumeric, compareTo)
 
-T = size(tPhi1, 1);
+[T, nPoints, nEigenFuncs] = size(tPhiToCompare);
 
-mSqNorm = zeros(T, sSimParams.CalcEigenFuncsM);
-
+mSqNorm = zeros(T, nEigenFuncs);
 for t = 1:T
-    mSqNorm(t,:) = (vecnorm(tPhi1(t,:,:) - tPhi2(t,:,:))./vecnorm(tPhi2(t,:,:))).^2;
+    for m = 1:nEigenFuncs
+        if strcmp(compareTo, 'Analytic')
+            mSqNorm(t,m) = norm(tPhiToCompare(t,:,m).' - sqrt(nPoints)*tPhiNumeric(t,:,m).')/sqrt(nPoints);
+        elseif strcmp(compareTo, 'Nystrom')
+            mSqNorm(t,m) = norm(tPhiToCompare(t,:,m).' - tPhiNumeric(t,:,m).');
+        else
+            error('unknown type')
+        end
+    end
 end
 vRMSE = sqrt(sum(mSqNorm,1)/T);

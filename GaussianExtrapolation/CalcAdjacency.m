@@ -1,4 +1,4 @@
-function A = CalcAdjacency(sKernelParams, x, y)
+function A = CalcAdjacency(sKernelParams, n, x, y)
 
 if ~exist('y', 'var')
     y = x;

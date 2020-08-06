@@ -1,16 +1,19 @@
-function [mPhi_A, vLambda_A] = CalcNumericEigenvectors(sSimParams, sKernelParams, mData)
+function [mPhiNumeric, vLambdaNumeric] = CalcNumericEigenvectors(sSimParams, sKernelParams, mData)
 
-n = length(mData);
+nTotal = length(mData);
 
 %% CalcAdjacency
-A = CalcAdjacency(sKernelParams,mData);
+A = CalcAdjacency(sKernelParams, nTotal, mData);
 
 %% EVD
-[mPhi_A, vLambda_A] = eigs(A, sSimParams.PlotSpectM);
-[vLambda_A, idx] = sort(diag(vLambda_A), 'descend');
-vLambda_A = (1/n) * vLambda_A;
-mPhi_A = sqrt(n)*mPhi_A(:,idx);
+[mPhiNumeric, mLambdaNumeric] = eigs(A, sSimParams.PlotSpectM);
+[vLambdaNumeric, idx] = sort(diag(mLambdaNumeric), 'descend');
 
+% Normalize
+vLambdaNumeric = (1/nTotal) * vLambdaNumeric;
+mPhiNumeric = sqrt(nTotal)*mPhiNumeric(:,idx);
+
+% mPhi_A = mPhi_A(:,idx);
 %% Laplacian
 % D = diag(A*ones(n,1));
 % t = sSimParams.t;

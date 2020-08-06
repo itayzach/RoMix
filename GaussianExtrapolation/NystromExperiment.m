@@ -4,19 +4,15 @@ close all;
 clc;
 rng('default'); % For reproducibility
 %% Parameters
-vNysRatio = [0.05, 0.4, 0.8];
+vActualDataDist = [ "Gaussian", "Two_moons" ];
+vNysRatio = [0.8, 0.05, 0.4];
 sSimParams = GetSimParams();
 
 %% Run
 T = 50;
 nTrain = 5000;
 nTest = 0;
-for simIdx = 1:2
-    if simIdx == 1
-        actualDataDist = 'Gaussian';
-    else
-        actualDataDist = 'Two_moons';
-    end
+for actualDataDist = vActualDataDist
     for nysRatio = vNysRatio
         tPhiAnalytic = zeros(T, nTrain, sSimParams.CalcEigenFuncsM);
         tPhiNumeric  = zeros(T, nTrain, sSimParams.CalcEigenFuncsM);
@@ -32,9 +28,12 @@ for simIdx = 1:2
             
             [ tPhiNumeric, tPhiNystrom ] = FlipSign(sSimParams, tPhiAnalytic, tPhiNumeric, tPhiNystrom);
             
-            if t == 1
+            if t == 1 && sSimParams.b_plotEigenfunctions
                 % Plot histogram and eigenvectors of the first iteration
-                PlotHistogram(sSimParams, sDataset)
+                PlotHistogram(sSimParams, sDataset);
+%                 PlotInnerProductMatrix(sSimParams, squeeze(tPhiAnalytic(1,:,:)), 'Analytic');
+                PlotInnerProductMatrix(sSimParams, sDataset, nysRatio, squeeze(tPhiNumeric(1,:,:)), 'Numeric');
+                PlotInnerProductMatrix(sSimParams, sDataset, nysRatio, squeeze(tPhiNystrom(1,:,:)), 'Nystrom');
                 firsfirstEigenIdxToPlot = 0;
                 lastEigIdxToPlot = 19;
                 PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), vLambdaAnalytic, 'Analytic')
@@ -47,17 +46,16 @@ for simIdx = 1:2
                     PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), vLambdaAnalytic, 'Analytic')
                     PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNumeric(1,:,:)), vLambdaNumeric, 'Numeric')
                     PlotEigenfuncvecScatter(sSimParams, sDataset, nysRatio, firsfirstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNystrom(1,:,:)), vLambdaNystrom, 'Nystrom')
-                
                 end
             end
         end
         
         if strcmp(actualDataDist, 'Two_moons') && nysRatio == 0.05
-            vRMSEAnaVsNum = CalcRMSE(sSimParams, tPhiAnalytic(1:8,:,:), tPhiNumeric(1:8,:,:));
-            vRMSENysVsNum = CalcRMSE(sSimParams, tPhiNystrom(1:8,:,:), tPhiNumeric(1:8,:,:));
+            vRMSEAnaVsNum = CalcRMSE(tPhiAnalytic(:,:,1:10), tPhiNumeric(:,:,1:10), 'Analytic');
+            vRMSENysVsNum = CalcRMSE(tPhiNystrom(:,:,1:10), tPhiNumeric(:,:,1:10), 'Nystrom');
         else
-            vRMSEAnaVsNum = CalcRMSE(sSimParams, tPhiAnalytic, tPhiNumeric);
-            vRMSENysVsNum = CalcRMSE(sSimParams, tPhiNystrom, tPhiNumeric);
+            vRMSEAnaVsNum = CalcRMSE(tPhiAnalytic, tPhiNumeric, 'Analytic');
+            vRMSENysVsNum = CalcRMSE(tPhiNystrom, tPhiNumeric, 'Nystrom');
         end
         PlotEigenDiffs(sSimParams, sDataset, nysRatio, vRMSEAnaVsNum, vRMSENysVsNum);
         

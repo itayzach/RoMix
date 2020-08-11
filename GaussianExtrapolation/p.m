@@ -1,27 +1,27 @@
-function vPr = p(sKernelParams, y, d)
+function vDensity = p(sDistParams, y, d)
 
-if strcmp(sKernelParams.dataDist, 'gaussian')
+if strcmp(sDistParams.estDataDist, 'Gaussian')
     if exist('d', 'var')
-        mu = sKernelParams.mu(d);
-        sigma = sKernelParams.sigma(d);
+        mu = sDistParams.mu(d);
+        sigma = sDistParams.sigma(d);
     else
-        mu = sKernelParams.mu;
-        sigma = sKernelParams.sigma;
-        conv = sKernelParams.cov;
+        mu = sDistParams.mu;
+        sigma = sDistParams.sigma;
+        conv = sDistParams.cov;
     end
     
-    if sKernelParams.dim == 1
-        vPr = (1./sqrt(2*pi*sigma.^2)) .* exp( -(y-mu).^2./(2*sigma.^2) );
+    if sDistParams.dim == 1
+        vDensity = (1./sqrt(2*pi*sigma.^2)) .* exp( -(y-mu).^2./(2*sigma.^2) );
     else
-        C = 1/sqrt( ((2*pi)^sKernelParams.dim)*det(conv) );
-        vPr = zeros(length(y),1);
+        C = 1/sqrt( ((2*pi)^sDistParams.dim)*det(conv) );
+        vDensity = zeros(length(y),1);
         for i = 1:length(y)
-            vPr(i) = C * exp( -0.5*(y(i,:)-mu)*(conv)^(-1)*(y(i,:)-mu).' );
+            vDensity(i) = C * exp( -0.5*(y(i,:)-mu)*(conv)^(-1)*(y(i,:)-mu).' );
         end
     end
-elseif strcmp(sKernelParams.dataDist, 'uniform')
-    vPr = zeros(size(y));
-    vPr(y > -sKernelParams.a & y < sKernelParams.a) = 1/(2*sKernelParams.a);
+elseif strcmp(sDistParams.dataDist, 'uniform')
+    vDensity = zeros(size(y));
+    vDensity(y > -sDistParams.a & y < sDistParams.a) = 1/(2*sDistParams.a);
 %     vPr(y > 0 & y < sParams.a) = 1/sParams.a;
 else
     error('unknown pdf')

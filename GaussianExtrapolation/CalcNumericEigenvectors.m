@@ -10,10 +10,12 @@ A = CalcAdjacency(sKernelParams, nTotal, mData);
 [vLambdaNumeric, idx] = sort(diag(mLambdaNumeric), 'descend');
 
 % Normalize
-vLambdaNumeric = (1/nTotal) * vLambdaNumeric;
-mPhiNumeric = sqrt(nTotal)*mPhiNumeric(:,idx);
+% vLambdaNumeric = (1/nTotal) * vLambdaNumeric;
+% mPhiNumeric = sqrt(nTotal)*mPhiNumeric(:,idx);
 
-% mPhi_A = mPhi_A(:,idx);
+vLambdaNumeric = (1/nTotal)*vLambdaNumeric;
+mPhiNumeric = mPhiNumeric(:,idx);
+
 %% Laplacian
 % D = diag(A*ones(n,1));
 % t = sSimParams.t;

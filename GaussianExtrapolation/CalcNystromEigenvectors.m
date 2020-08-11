@@ -10,21 +10,23 @@ mRightUpperBlock = mData(nysRatio*nTotal+1:end,:);
 A = CalcAdjacency(sKernelParams,nTotal,mLeftUpperBlock);
 B = CalcAdjacency(sKernelParams,nTotal,mLeftUpperBlock, mRightUpperBlock);
 
-%% EVD with no orthogonalization
+%% EVD with no orthogonalization and Nystrom
 [mPhi, mLambdaNys] = eigs(A, sSimParams.PlotSpectM);
 [vLambdaNys, idx] = sort(diag(mLambdaNys), 'descend');
 mPhi = mPhi(:,idx);
-
-%% Nystrom
 mPhiExt = B.'*mPhi*diag(1./vLambdaNys);
 
 % Normalize
-mPhiNys = sqrt(nTotal)*[mPhi; mPhiExt];
-vLambdaNys = (1/nTotal) * vLambdaNys;
+% vLambdaNys = (1/nTotal) * vLambdaNys;
+% mPhiNys = sqrt(nTotal)*[mPhi; mPhiExt];
 
-% mPhiNys = [mPhi; mPhiExt];
+vLambdaNys = (1/nTotal)*vLambdaNys;
+mPhiNys = [mPhi; mPhiExt];
 
-%% EVD with orthgonalization
+%% EVD with orthgonalization (from Fowlkes)
+% **************************************
+% *** Pretty heavy computationaly... ***
+% **************************************
 % n = nysRatio*nTotal;
 % m = round((1-nysRatio)*nTotal);
 % d1 = sum([A;B.'],1);

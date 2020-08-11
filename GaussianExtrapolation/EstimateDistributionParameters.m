@@ -1,6 +1,10 @@
 function sDistParams = EstimateDistributionParameters(sDataset)
+
+sDistParams.estDataDist = sDataset.estDataDist;
+sDistParams.dim = sDataset.dim;
+
 if strcmp(sDataset.estDataDist, 'Gaussian')
-    GMModel = fitgmdist(sDataset.mData.x,1);
+    GMModel = fitgmdist(sDataset.sData.x,1);
     sDistParams.cov = GMModel.Sigma;
     sDistParams.mu  = GMModel.mu;
 
@@ -24,6 +28,17 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         sDistParams.xMin = sDistParams.mu - 5;
         warning('3sigma is too large...');
     end
+    
+    % Caluclate the probability for each data point x
+    if sDataset.dim == 1
+        [ xTotalSorted, vSortedIdx ] = sort(sDataset.sData.x);
+        [~, vInvSortIdx] = sort(vSortedIdx);
+        vDiffsSorted = [0; diff(xTotalSorted)];
+        vDiffs = vDiffsSorted(vInvSortIdx);
+        vDensity = p(sDistParams, sDataset.sData.x, sDataset.dim);
+        sDistParams.vPr = vDensity .* vDiffs;
+    end
+    
 elseif strcmp(sDataset.estDataDist, 'Uniform')
     sDistParams.a    = 2.5;
     sDistParams.u    = eye(sDistParams.dim);

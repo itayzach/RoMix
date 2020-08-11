@@ -1,4 +1,4 @@
-function sKernelParams = GetKernelParamsAndCalcEigenvalues(sSimParams, sDataset, sDistParams)
+function sKernelParams = GetKernelParams(sDataset, sDistParams)
 %% kernel and eigenfunctions constants type
 if strcmp(sDataset.estDataDist, 'Gaussian')
     sKernelParams.kernelType = 'exp';
@@ -68,8 +68,6 @@ end
 
 %% Save distParams
 sKernelParams.sDistParams = sDistParams;
-%% Calculate eigenvalues
-[sKernelParams.vLambdaAnaytic, sKernelParams.vMultindexToSingleIndexMap] = CalcAnalyticEigenvalues(sSimParams, sKernelParams, sDataset.dim);
 
 
 end

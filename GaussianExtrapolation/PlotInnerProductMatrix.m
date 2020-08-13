@@ -1,11 +1,12 @@
-function [] = PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, nysRatio, mPhi, figName)
+function fig = PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, nysRatio, mPhi, figName)
 
 x0     = 10;
 y0     = 50;
 width  = 600;
 height = 400;
 
-fig = figure;
+fig = figure('Name', sprintf('%s IP matrix', figName));
+
 if strcmp(figName, 'Numeric')
     mInnerProduct = mPhi.'*mPhi;
     pltTitle = [figName ' - $V^T V$'];
@@ -28,6 +29,6 @@ set(gcf,'Position', [x0 y0 width height])
 if ~exist(sSimParams.outputFolder, 'dir')
     mkdir(sSimParams.outputFolder)
 end
-simPrefix = strcat(sDataset.actualDataDist, '_', num2str(nysRatio*100, '%d'), 'prec');
+simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
 saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix,  '_inner_product_matrix_', figName), 'epsc');
 end

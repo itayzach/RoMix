@@ -7,7 +7,7 @@ if sDataset.dim == 1
     y0     = 50;
     width  = 1800;
     height = 900;
-    fig = figure;
+    fig = figure('Name', '1D Scatter');
     for m = firstEigenIdx:lastEigIdx
         if strcmp(figName, 'Analytic')
             dispName = ['$\phi^{Ana}_{' num2str(m) '}({\bf x}),$ $\lambda^{Ana}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
@@ -38,7 +38,7 @@ elseif sDataset.dim == 2
     end
     nCols = ceil(sSimParams.PlotEigenFuncsM/nRows);
     %% Plot
-    fig = figure;
+    fig = figure('Name', '2D Scatter');
     for m = firstEigenIdx:lastEigIdx
         subplot(nRows, nCols,m-firstEigenIdx+1);
         scatter3(sDataset.sData.x(:,1), sDataset.sData.x(:,2), mPhi(:,m+1), [], mPhi(:,m+1), 'filled');
@@ -68,8 +68,8 @@ end
 if ~exist(sSimParams.outputFolder, 'dir')
     mkdir(sSimParams.outputFolder)
 end
-simPrefix = strcat(sDataset.actualDataDist, '_', num2str(nysRatio*100, '%d'), 'prec');
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_eigenvectors_2d_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
+simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
 
 
 end

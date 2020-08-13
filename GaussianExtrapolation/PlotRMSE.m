@@ -4,7 +4,7 @@ function [] = PlotRMSE(sSimParams, sDataset, nysRatio, vAnaVsNum, vNysVsNum)
 vM = 0:length(vAnaVsNum)-1;
 
 %% Plot
-fig = figure;
+fig = figure('Name', 'RMSE');
 plot(vM, vAnaVsNum, 'LineWidth', 2, ...
     'DisplayName',  'RMSE$(\phi_m,  v_m)$' );
 hold on
@@ -22,8 +22,8 @@ set(gca,'FontSize', 14);
 if ~exist(sSimParams.outputFolder, 'dir')
     mkdir(sSimParams.outputFolder)
 end
-simPrefix = strcat(sDataset.actualDataDist, '_', num2str(nysRatio*100, '%d'), 'prec');
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_RMSE_N_', num2str(sDataset.nTrain), '_nNys_', num2str(nysRatio*sDataset.nTrain), '_', num2str(length(vAnaVsNum))), 'epsc');
+simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_RMSE_N_', num2str(sDataset.nTrain), '_nNys_', num2str(nysRatio*sDataset.nTrain), '_', 'eigs_', num2str(length(vAnaVsNum))), 'epsc');
 
 
 end

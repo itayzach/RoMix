@@ -29,6 +29,10 @@ set(gcf,'Position', [x0 y0 width height])
 if ~exist(sSimParams.outputFolder, 'dir')
     mkdir(sSimParams.outputFolder)
 end
-simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+if isempty(nysRatio)
+    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
+else
+    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+end
 saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix,  '_inner_product_matrix_', figName), 'epsc');
 end

@@ -1,7 +1,7 @@
 function [] = PlotEigenfunctionsEigenvectors(sSimParams, sDataset, nysRatio, firstEigenIdx, lastEigIdx, mPhiToCompare, mPhiNumeric, figName)
 
 if sDataset.dim == 1
-    fig = figure;
+    fig = figure('Name', 'Eigenfuncs/vecs');
     %% 1-D To Compare
     subplot(2,2,1);
     for m = firstEigenIdx:lastEigIdx
@@ -43,7 +43,7 @@ end
 if ~exist(sSimParams.outputFolder, 'dir')
     mkdir(sSimParams.outputFolder)
 end
-simPrefix = strcat(sDataset.actualDataDist, '_', num2str(nysRatio*100, '%d'), 'prec');
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_eigenvectors_1d_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
+simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
 
 end

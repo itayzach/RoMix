@@ -1,7 +1,7 @@
 function [] = PlotEigenSamePlot(sSimParams, sDataset, nysRatio, firstEigenIdx, lastEigIdx, mPhiAnalytic, mPhiNumeric, mPhiNystrom)
 
 if sDataset.dim == 1
-    fig = figure;
+    fig = figure('Name', 'Eigenfuncs/vecs');
     %% Plot params
     x0     = 10;
     y0     = 50;
@@ -19,7 +19,6 @@ if sDataset.dim == 1
         hold on
         plot(sDataset.sData.x, mPhiNumeric(:,m+1), '.', 'DisplayName', [ '$v_{' num2str(m) '}$' ]);
         plot(sDataset.sData.x, mPhiNystrom(:,m+1), '.', 'DisplayName', [ '$\hat{v}_{' num2str(m) '}$' ]);
-%         title(['Blue: ' '$\phi_{' num2str(m) '}$' '; Red: $v_{' num2str(m) '}$; Yellow:  - $\hat{v}_{' num2str(m) '}$'], 'Interpreter', 'latex', 'FontSize', 14)
         xlim([min(sDataset.sData.x) max(sDataset.sData.x)]);
         xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
         legend('Location', 'best', 'Interpreter', 'latex', 'FontSize', 14)
@@ -34,7 +33,7 @@ end
 if ~exist(sSimParams.outputFolder, 'dir')
     mkdir(sSimParams.outputFolder)
 end
-simPrefix = strcat(sDataset.actualDataDist, '_', num2str(nysRatio*100, '%d'), 'prec');
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_same_plot_eigenvectors_1d_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'epsc');
+simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_same_plot_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'epsc');
 
 end

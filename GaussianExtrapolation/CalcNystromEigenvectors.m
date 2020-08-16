@@ -7,8 +7,8 @@ mLeftUpperBlock = mData(1:nysRatio*nTotal,:);
 mRightUpperBlock = mData(nysRatio*nTotal+1:end,:);
 
 %% CalcAdjacency
-A = CalcAdjacency(sKernelParams,nTotal,mLeftUpperBlock);
-B = CalcAdjacency(sKernelParams,nTotal,mLeftUpperBlock, mRightUpperBlock);
+A = CalcAdjacency(sKernelParams, mLeftUpperBlock);
+B = CalcAdjacency(sKernelParams, mLeftUpperBlock, mRightUpperBlock);
 
 %% EVD with no orthogonalization and Nystrom
 [mPhi, mLambdaNys] = eigs(A, sSimParams.PlotSpectM);

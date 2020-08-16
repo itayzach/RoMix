@@ -4,10 +4,12 @@ close all;
 clc;
 rng('default'); % For reproducibility
 set(0,'DefaultFigureWindowStyle','normal')
-set(0,'DefaultFigureVisible','off')
+set(0,'DefaultFigureVisible','on')
 %% Parameters
 vActualDataDist = [ "Gaussian", "Two_moons" ];
 vNysRatio = [0.8 0.4 0.05];
+actualNumComponents = 1;
+estNumComponents = 1;
 sSimParams = GetSimParams();
 vDataDim = [1 2];
 %% Run
@@ -24,11 +26,11 @@ for dataDim = vDataDim
         tPhiNumeric  = zeros(T, nTrain, sSimParams.CalcEigenFuncsM);
         tPhiNystrom  = zeros(R, T, nTrain, sSimParams.CalcEigenFuncsM);
         for t = 1:T
-            sDataset = GenerateDataset(actualDataDist, dataDim, nTrain, nTest);
-            sDistParams = EstimateDistributionParameters(sDataset);
+            sDataset = GenerateDataset(actualDataDist, dataDim, actualNumComponents, nTrain, nTest);
+            sDistParams = EstimateDistributionParameters(sDataset, estNumComponents);
             sKernelParams = GetKernelParams(sDataset, sDistParams);
-            [sKernelParams.vLambdaAnaytic, sKernelParams.vMultindexToSingleIndexMap] = CalcAnalyticEigenvalues(sSimParams, sKernelParams, sDataset.dim);
-
+            [sKernelParams.vLambdaAnaytic, sKernelParams.vMultindexToSingleIndexMap, sKernelParams.vInd2subRow, sKernelParams.vInd2subCol] ...
+                = CalcAnalyticEigenvalues(sSimParams, sKernelParams, sDataset.dim);
             [ tPhiAnalytic(t,:,:), vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams, sKernelParams, sDataset.sData.x);
             [ tPhiNumeric(t,:,:), vLambdaNumeric ]   = CalcNumericEigenvectors(sSimParams, sKernelParams, sDataset.sData.x);
             tPhiNumeric(t,:,:) = FlipSign(sSimParams, squeeze(tPhiAnalytic(t,:,:)), squeeze(tPhiNumeric(t,:,:)));

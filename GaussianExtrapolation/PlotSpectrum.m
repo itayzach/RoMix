@@ -6,9 +6,11 @@ subplot(2,1,1);
 stem(0:sSimParams.PlotSpectM-1, vLambdaAnalytic, 'x', 'DisplayName', '$\lambda^{\phi}_m$');
 hold on;
 stem(0:sSimParams.PlotSpectM-1, vLambdaNumeric, 'DisplayName', '$\lambda^{v}_m$');
-for r = 1:length(vNysRatio)
-    nysRatio = vNysRatio(r);
-    stem(0:sSimParams.PlotSpectM-1, mLambdaNystrom(r,:), '*', 'DisplayName', ['$\lambda^{\hat{v}}_m$' ' (' num2str(nysRatio*100, '%d') '\%)']);
+if ~isempty(vNysRatio)
+    for r = 1:length(vNysRatio)
+        nysRatio = vNysRatio(r);
+        stem(0:sSimParams.PlotSpectM-1, mLambdaNystrom(r,:), '*', 'DisplayName', ['$\lambda^{\hat{v}}_m$' ' (' num2str(nysRatio*100, '%d') '\%)']);
+    end
 end
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast');
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
@@ -21,9 +23,11 @@ subplot(2,1,2);
 stem(0:sSimParams.PlotSpectM-1, log(vLambdaAnalytic),'x', 'LineStyle','none', 'DisplayName', '$\log(\lambda^{\phi}_m)$');
 hold on;
 stem(0:sSimParams.PlotSpectM-1, log(vLambdaNumeric),'LineStyle','none', 'DisplayName', '$\log(\lambda^{v}_m)$');
-for r = 1:length(vNysRatio)
-    nysRatio = vNysRatio(r);
-    stem(0:sSimParams.PlotSpectM-1, log(mLambdaNystrom(r,:)),'*', 'LineStyle','none', 'DisplayName', ['$\log(\lambda^{\hat{v}}_m)$' ' (' num2str(nysRatio*100, '%d') '\%)']);
+if ~isempty(vNysRatio)
+    for r = 1:length(vNysRatio)
+        nysRatio = vNysRatio(r);
+        stem(0:sSimParams.PlotSpectM-1, log(mLambdaNystrom(r,:)),'*', 'LineStyle','none', 'DisplayName', ['$\log(\lambda^{\hat{v}}_m)$' ' (' num2str(nysRatio*100, '%d') '\%)']);
+    end
 end
 
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast');
@@ -35,10 +39,13 @@ set(gca,'FontSize', 14);
 set(gcf,'Position',[100 100 600 500])
 
 %% Save
-if ~exist(sSimParams.outputFolder, 'dir')
-    mkdir(sSimParams.outputFolder)
-end
+try
+    if ~exist(sSimParams.outputFolder, 'dir')
+        mkdir(sSimParams.outputFolder)
+    end
 
-simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_spectrum'), 'epsc');
+    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_spectrum'), 'epsc');
+catch
+end
 end

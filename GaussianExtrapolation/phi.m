@@ -1,4 +1,3 @@
-%% phi (Squared Exponentional)
 function [vPhi_m] = phi(sKernelParams, m, x)
     assert(length(m) == size(x,2))
     vPhi_m = ones(size(x,1),1); 

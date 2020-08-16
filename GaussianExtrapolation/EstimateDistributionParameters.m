@@ -1,10 +1,11 @@
-function sDistParams = EstimateDistributionParameters(sDataset)
+function sDistParams = EstimateDistributionParameters(sDataset, estNumComponents)
 
 sDistParams.estDataDist = sDataset.estDataDist;
 sDistParams.dim = sDataset.dim;
 
 if strcmp(sDataset.estDataDist, 'Gaussian')
-    GMModel = fitgmdist(sDataset.sData.x,1);
+    GMModel = fitgmdist(sDataset.sData.x, estNumComponents);
+    sDistParams.estNumComponents = estNumComponents;
     sDistParams.cov = GMModel.Sigma;
     sDistParams.mu  = GMModel.mu;
 

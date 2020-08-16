@@ -3,7 +3,7 @@ function [mPhiNumeric, vLambdaNumeric] = CalcNumericEigenvectors(sSimParams, sKe
 nTotal = length(mData);
 
 %% CalcAdjacency
-A = CalcAdjacency(sKernelParams, nTotal, mData);
+A = CalcAdjacency(sKernelParams, mData);
 
 %% EVD
 [mPhiNumeric, mLambdaNumeric] = eigs(A, sSimParams.PlotSpectM);

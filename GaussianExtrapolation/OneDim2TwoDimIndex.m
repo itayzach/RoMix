@@ -21,8 +21,5 @@ while i < I
     totalSum = totalSum+1;
 end
 
-
-
-
 end
 

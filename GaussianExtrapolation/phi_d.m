@@ -1,4 +1,3 @@
-%% phi (Squared Exponentional)
 function [vPhi_m] = phi_d(sKernelParams, m, x, d)
 if ~isvector(x)
     error('x has to be a vector');

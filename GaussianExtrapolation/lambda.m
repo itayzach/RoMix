@@ -2,7 +2,7 @@ function [lambda_m] = lambda(sKernelParams, m)
 
 dim = length(m);
 
-if strcmp(sKernelParams.kernelType, 'exp')
+if strcmp(sKernelParams.kernelType, 'gaussian')
     vLambda_m = zeros(dim, 1);
     for d = 1:dim
         if sKernelParams.constsType == 1

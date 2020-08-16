@@ -1,5 +1,0 @@
-function [] = VerifyLaplacianEigenfunctions(sParams)
-
-
-
-end

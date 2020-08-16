@@ -1,7 +1,7 @@
 function sKernelParams = GetKernelParams(sDataset, sDistParams)
 %% kernel and eigenfunctions constants type
 if strcmp(sDataset.estDataDist, 'Gaussian')
-    sKernelParams.kernelType = 'exp';
+    sKernelParams.kernelType = 'gaussian';
     sKernelParams.constsType = 2;
     if sKernelParams.constsType == 1
         %% first type consts

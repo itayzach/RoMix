@@ -1,6 +1,6 @@
 function vKernel = kernel(sKernelParams, x, y) 
 
-if strcmp(sKernelParams.kernelType, 'exp')
+if strcmp(sKernelParams.kernelType, 'gaussian')
     if sKernelParams.constsType == 1
         vKernel = exp(-vecnorm(x-y, 2, 2).^2./(2*sKernelParams.ell^2));
     elseif sKernelParams.constsType == 2

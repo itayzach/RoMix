@@ -4,7 +4,7 @@ if ~isvector(x)
     error('x has to be a vector');
 end
 
-if strcmp(sKernelParams.kernelType, 'exp')
+if strcmp(sKernelParams.kernelType, 'gaussian')
     if sKernelParams.constsType == 1
         a = sKernelParams.a(d);
         b = sKernelParams.b;

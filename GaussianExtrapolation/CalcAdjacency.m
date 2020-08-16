@@ -9,7 +9,7 @@ if strcmp(sKernelParams.kernelType, 'sinc')
     dist = pdist2(x, y);
     A = sin(sKernelParams.a*dist)./(pi*dist);
     A(dist == 0) = sKernelParams.a;
-elseif strcmp(sKernelParams.kernelType, 'exp')
+elseif strcmp(sKernelParams.kernelType, 'gaussian')
     % exp(-||x_i - x_j||^2 / 2\ell^2)
     dist = pdist2(x, y);
     if sKernelParams.constsType == 1

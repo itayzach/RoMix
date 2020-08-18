@@ -1,13 +1,13 @@
-function vDensity = p(sDistParams, y, d)
+function vDensity = p(sDistParams, c, y, d)
 
 if strcmp(sDistParams.estDataDist, 'Gaussian')
     if exist('d', 'var')
-        mu = sDistParams.mu(d);
-        sigma = sDistParams.sigma(d);
+        mu = sDistParams.mu{c}(d);
+        sigma = sDistParams.sigma{c}(d);
     else
-        mu = sDistParams.mu;
-        sigma = sDistParams.sigma;
-        conv = sDistParams.cov;
+        mu = sDistParams.mu{c};
+        sigma = sDistParams.sigma{c};
+        conv = sDistParams.cov{c};
     end
     
     if sDistParams.dim == 1

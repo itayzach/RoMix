@@ -15,11 +15,27 @@ if strcmp(actualDataDist, 'Two_moons')
 else
     if strcmp(actualDataDist, 'Gaussian')
         if dim == 2
-            assert(nComponents == 1);
-            cov = [0.25    0.01; 
-                   0.01   0.25];
-            mu  = [0 0];
-            xTotal = mvnrnd(mu, cov, nTotal);
+            if nComponents == 1
+                cov = [0.25    0.01; 
+                       0.01   0.25];
+                mu  = [0; 0];
+                xTotal = mvnrnd(mu, cov, nTotal);
+            elseif nComponents == 2
+                cov1 = [0.25    0.01; 
+                        0.01   0.5];
+                mu1  = [0; 0];
+                x1 = mvnrnd(mu1, cov1, nTotal);
+                
+                cov2 = [0.7    -0.1; 
+                        -0.1   0.1];
+                mu2  = [5; 5];
+                x2 = mvnrnd(mu2, cov2, nTotal);
+                
+                vSel = rand(nTotal, 1) < 0.5;
+                xTotal = (1-vSel).*x1 + vSel.*x2;
+            else
+                error('not supported')
+            end
         elseif dim == 1
             if nComponents == 1
                 sigma = 0.5;
@@ -32,8 +48,8 @@ else
 
                 xTotal = sigma*randn(nTotal, 1) + mu;
             elseif nComponents == 2
-                sigma = [0.5; 0.5];
-                mu = [2; 5];
+                mu = [2; 5];       % Means
+                sigma = [0.4 0.3]; % Covariances
                 vSel = rand(nTotal, 1) < 0.5;
                 xTotal = (1-vSel).*(sigma(1)*randn(nTotal, 1) + mu(1)) + ...
                            vSel.*(sigma(2)*randn(nTotal, 1) + mu(2));

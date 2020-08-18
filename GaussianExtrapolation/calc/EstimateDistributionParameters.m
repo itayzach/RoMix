@@ -4,40 +4,40 @@ sDistParams.estDataDist = sDataset.estDataDist;
 sDistParams.dim = sDataset.dim;
 
 if strcmp(sDataset.estDataDist, 'Gaussian')
-    GMModel = fitgmdist(sDataset.sData.x, estNumComponents);
-    sDistParams.estNumComponents = estNumComponents;
-    sDistParams.cov = GMModel.Sigma;
-    sDistParams.mu  = GMModel.mu;
-
-    [sDistParams.u, sDistParams.sigma_eigv] = eig(sDistParams.cov);
-    sDistParams.sigma = diag(sqrt(sDistParams.sigma_eigv)).';
-    if sDataset.dim == 2
-        if sDistParams.cov(1,1) > sDistParams.cov(2,2)
-            warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
-            sDistParams.u = fliplr(sDistParams.u);    
-            sDistParams.sigma = fliplr(sDistParams.sigma);
-        end   
-        sDistParams.u = [-sDistParams.u(:,1) -sDistParams.u(:,2)];    
-    end
-    sDistParams.mu_1D = sDistParams.mu*sDistParams.u;
-    isalmostequal(sDistParams.u*diag(sDistParams.sigma.^2)*sDistParams.u.', sDistParams.cov, 1e-15)
-
-    sDistParams.xMax = sDistParams.mu + 1.5*sDistParams.sigma;
-    sDistParams.xMin = sDistParams.mu - 1.5*sDistParams.sigma;
-    if sDistParams.xMax - sDistParams.xMin > 10
-        sDistParams.xMax = sDistParams.mu + 5;
-        sDistParams.xMin = sDistParams.mu - 5;
-        warning('3sigma is too large...');
+    try
+        GMModel = fitgmdist(sDataset.sData.x, estNumComponents, 'RegularizationValue', 0.1);
+    catch exception
+        sprintf('GM error: %s\n', exception.message)
     end
     
-    % Caluclate the probability for each data point x
-    if sDataset.dim == 1
-        [ xTotalSorted, vSortedIdx ] = sort(sDataset.sData.x);
-        [~, vInvSortIdx] = sort(vSortedIdx);
-        vDiffsSorted = [0; diff(xTotalSorted)];
-        vDiffs = vDiffsSorted(vInvSortIdx);
-        vDensity = p(sDistParams, sDataset.sData.x, sDataset.dim);
-        sDistParams.vPr = vDensity .* vDiffs;
+    sDistParams.estNumComponents = estNumComponents;
+    
+    for c = 1:estNumComponents
+        sDistParams.cov{c} = GMModel.Sigma(:,:,c);
+        sDistParams.mu{c} = GMModel.mu(c,:);
+        [sDistParams.u{c}, sDistParams.sigma_eigv{c}] = eig(sDistParams.cov{c});
+        sDistParams.sigma{c} = diag(sqrt(sDistParams.sigma_eigv{c})).';
+        if sDataset.dim == 2
+            if sDistParams.cov{c}(1,1) > sDistParams.cov{c}(2,2)
+                warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
+                sDistParams.u{c} = fliplr(sDistParams.u{c});    
+                sDistParams.sigma{c} = fliplr(sDistParams.sigma{c});
+            end   
+            sDistParams.u{c} = [-sDistParams.u{c}(:,1) -sDistParams.u{c}(:,2)];    
+        end
+        sDistParams.mu_1D{c} = sDistParams.mu{c}*sDistParams.u{c};
+        isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-15)
+
+        % Caluclate the probability for each data point x
+        if sDataset.dim == 1
+            [ xTotalSorted, vSortedIdx ] = sort(sDataset.sData.x);
+            [~, vInvSortIdx] = sort(vSortedIdx);
+            vDiffsSorted = [0; diff(xTotalSorted)];
+            vDiffs = vDiffsSorted(vInvSortIdx);
+            warning('TODO: I should fix the calculation for Pr with several components')
+            vDensity = p(sDistParams, c, sDataset.sData.x, sDataset.dim);
+            sDistParams.vPr = vDensity .* vDiffs;
+        end
     end
     
 elseif strcmp(sDataset.estDataDist, 'Uniform')

@@ -7,6 +7,17 @@ end
 [sTwoMoons.x, sTwoMoons.y] = GenerateTwoMoons(nTrain, noiseSigma);
 [sTwoMoons.xt, sTwoMoons.yt] = GenerateTwoMoons(nTest, noiseSigma);
 
+ell = 1;
+pos = find(sTwoMoons.y==1);
+neg = find(sTwoMoons.y==-1);
+ipos = randperm(length(pos));
+ineg = randperm(length(neg));
+y1 = zeros(length(sTwoMoons.y),1);
+y1(pos(ipos(1:ell)))=1;
+y1(neg(ineg(1:ell)))=-1;
+sTwoMoons.y = y1;
+
+
 function [data, labels] = GenerateTwoMoons(n, noiseSigma)
 % moon 1
 N1 = floor(n/2);

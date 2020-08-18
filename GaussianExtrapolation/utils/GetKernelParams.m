@@ -28,16 +28,18 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         fprintf('*********************************************************\n');
 
         sKernelParams.omega = 0.3; 1/(6*sqrt(2)); % kernel width
-        sKernelParams.beta = 2*sDistParams.sigma.^2/sKernelParams.omega^2;
         sKernelParams.t = 0.5*sKernelParams.omega^2;
+        for c = 1:sDistParams.estNumComponents
+            sKernelParams.beta{c} = 2*sDistParams.sigma{c}.^2/sKernelParams.omega^2;
 
-        for d = 1:sDataset.dim
-            fprintf('sigma(%d) (pdf width)     = %8.3f\n', d, sDistParams.sigma(d));
-            fprintf('mu(%d)    (pdf mean)      = %8.3f\n', d, sDistParams.mu(d));
-        end
-            fprintf('omega    (kernel width)  = %8.3f\n', sKernelParams.omega);
-        for d = 1:sDataset.dim
-            fprintf('--> beta(%d)              = %8.3f\n', d, sKernelParams.beta(d));
+            for d = 1:sDataset.dim
+                fprintf('sigma(%d) (pdf width)     = %8.3f\n', d, sDistParams.sigma{c}(d));
+                fprintf('mu(%d)    (pdf mean)      = %8.3f\n', d, sDistParams.mu{c}(d));
+            end
+                fprintf('omega    (kernel width)  = %8.3f\n', sKernelParams.omega);
+            for d = 1:sDataset.dim
+                fprintf('--> beta(%d)              = %8.3f\n', d, sKernelParams.beta{c}(d));
+            end
         end
         fprintf('*********************************************************\n');
     elseif sKernelParams.constsType == 3

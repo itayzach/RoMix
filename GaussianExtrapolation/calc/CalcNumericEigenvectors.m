@@ -1,7 +1,7 @@
 function [mPhiNumeric, vLambdaNumeric] = CalcNumericEigenvectors(sSimParams, sKernelParams, mData)
 
 nTotal = length(mData);
-
+nComponents = sKernelParams.sDistParams.estNumComponents;
 %% CalcAdjacency
 A = CalcAdjacency(sKernelParams, mData);
 
@@ -13,7 +13,7 @@ A = CalcAdjacency(sKernelParams, mData);
 % vLambdaNumeric = (1/nTotal) * vLambdaNumeric;
 % mPhiNumeric = sqrt(nTotal)*mPhiNumeric(:,idx);
 
-vLambdaNumeric = (1/nTotal)*vLambdaNumeric;
+vLambdaNumeric = (nComponents/nTotal)*vLambdaNumeric;
 mPhiNumeric = mPhiNumeric(:,idx);
 
 %% Laplacian

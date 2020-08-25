@@ -9,7 +9,7 @@ x = [sDataset.sData.x; sDataset.sData.xt];
 
 fig = figure('Name', sprintf('%d-D histogram', sDataset.dim));
 if sDataset.dim == 1
-    histogram(x);
+    histogram(x, 100);
 elseif sDataset.dim == 2
     hist3(x,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'flat');
     colormap(gca, 'hot')

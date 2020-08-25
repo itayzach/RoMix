@@ -1,4 +1,4 @@
-function [lambda_m] = lambda(sKernelParams, m)
+function [lambda_m] = lambda(sKernelParams, c, m)
 
 dim = length(m);
 
@@ -17,7 +17,7 @@ if strcmp(sKernelParams.kernelType, 'gaussian')
             % m-th eigenvalue
             vLambda_m(d) = sqrt(2*a/A) * B^m(d);
         elseif sKernelParams.constsType == 2
-            beta = sKernelParams.beta(d);
+            beta = sKernelParams.beta{c}(d);
             vLambda_m(d) = sqrt(2/(1+beta+sqrt(1+2*beta))) * (beta/(1+beta+sqrt(1+2*beta)))^m(d);
         elseif sKernelParams.constsType == 3
             eps = sKernelParams.eps;

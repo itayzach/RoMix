@@ -1,4 +1,4 @@
-function [vPhi_m] = phi_d(sKernelParams, m, x, d)
+function [vPhi_m] = phi_d(sKernelParams, c, m, x, d)
 if ~isvector(x)
     error('x has to be a vector');
 end
@@ -25,13 +25,13 @@ if strcmp(sKernelParams.kernelType, 'gaussian')
 
     elseif sKernelParams.constsType == 2
         if exist('d', 'var')
-            mu = sKernelParams.sDistParams.mu_1D(d);
-            sigma = sKernelParams.sDistParams.sigma(d);
-            beta = sKernelParams.beta(d);
+            mu = sKernelParams.sDistParams.mu_1D{c}(d);
+            sigma = sKernelParams.sDistParams.sigma{c}(d);
+            beta = sKernelParams.beta{c}(d);
         else
-            mu = sKernelParams.sDistParams.mu_1D;
-            sigma = sKernelParams.sDistParams.sigma;
-            beta = sKernelParams.beta;
+            mu = sKernelParams.sDistParams.mu_1D{c};
+            sigma = sKernelParams.sDistParams.sigma{c};
+            beta = sKernelParams.beta{c};
         end
 
         normFactor = (1+2*beta)^(1/8)/sqrt(2^m*factorial(m));

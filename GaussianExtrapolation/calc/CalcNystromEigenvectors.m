@@ -1,7 +1,7 @@
 function [ mPhiNys, vLambdaNys ] = CalcNystromEigenvectors(sSimParams, sKernelParams, mData, nysRatio)
 
 nTotal = length(mData);
-
+nComponents = sKernelParams.sDistParams.estNumComponents;
 %% Split data matrix into blocks
 mLeftUpperBlock = mData(1:nysRatio*nTotal,:);
 mRightUpperBlock = mData(nysRatio*nTotal+1:end,:);
@@ -20,7 +20,7 @@ mPhiExt = B.'*mPhi*diag(1./vLambdaNys);
 % vLambdaNys = (1/nTotal) * vLambdaNys;
 % mPhiNys = sqrt(nTotal)*[mPhi; mPhiExt];
 
-vLambdaNys = (1/nTotal)*vLambdaNys;
+vLambdaNys = (nComponents/nTotal)*vLambdaNys;
 mPhiNys = [mPhi; mPhiExt];
 
 %% EVD with orthgonalization (from Fowlkes)

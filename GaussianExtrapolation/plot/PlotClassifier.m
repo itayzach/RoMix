@@ -17,9 +17,9 @@ if strcmp(sClassifier.name, 'eigrls')
     pos=find(sDataset.sData.y==1);
     neg=find(sDataset.sData.y==-1);
     unlab=find(sDataset.sData.y==0);
-    scatter3(sDataset.sData.xt(unlab,1), sDataset.sData.xt(unlab,2), sClassifier.vPhi_xTrain_c(unlab), 'ks');
-    scatter3(sDataset.sData.xt(pos,1),sDataset.sData.xt(pos,2), sClassifier.vPhi_xTrain_c(pos),200, 'rd','MarkerFaceColor','r','MarkerEdgeColor','k'); hold on;
-    scatter3(sDataset.sData.xt(neg,1),sDataset.sData.xt(neg,2), sClassifier.vPhi_xTrain_c(neg),200, 'bo' ,'MarkerFaceColor','b','MarkerEdgeColor','k'); hold on;
+    scatter3(sDataset.sData.x(unlab,1), sDataset.sData.x(unlab,2), sClassifier.vPhi_xTrain_c(unlab), 'ks');
+    scatter3(sDataset.sData.x(pos,1),sDataset.sData.x(pos,2), sClassifier.vPhi_xTrain_c(pos),200, 'rd','MarkerFaceColor','r','MarkerEdgeColor','k'); hold on;
+    scatter3(sDataset.sData.x(neg,1),sDataset.sData.x(neg,2), sClassifier.vPhi_xTrain_c(neg),200, 'bo' ,'MarkerFaceColor','b','MarkerEdgeColor','k'); hold on;
     xlabel('$x_1$', 'Interpreter', 'latex')
     ylabel('$x_2$', 'Interpreter', 'latex')
     zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')

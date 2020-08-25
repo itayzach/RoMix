@@ -20,11 +20,11 @@ mu1 = 1; sigma1 = omega;
 mu2 = 3; sigma2 = omega;
 x_orig = [mu1 + sigma1*randn(floor(N/2),1); mu2 + sigma2*randn(ceil(N/2),1) ]; 
 
-% first 500 points are nodes close to the point mu1. last 500 points are
+% first N/2 points are nodes close to the point mu1. last N/2 points are
 % nodes close to mu2.
 % also note that sigma1=sigma2=omega, since I want the Gaussian kernel to
 % reflect correctly the closeness of points on the original manifold
-used_ind = 1:250;
+used_ind = 1:N/4;
 v = x_orig(used_ind, :);
 
 d = pdist(v, 'euclidean');
@@ -90,7 +90,7 @@ legend();
 % think how to compute that.
 
 %% show numerical eigenvectors of the full set and analytical eigefunctions:
-all_ind = 1:500; %use first cluster
+all_ind = 1:N/2; %use first cluster
 z_all = abs((x_orig(all_ind,:)-x_orig(all_ind,:)').^2)/(2*omega^2);
 W=exp(-z_all);
 M = 5;
@@ -98,9 +98,11 @@ M = 5;
 figure(5); clf;
 subplot(311); plot(x_orig(all_ind,1),V,'.'); title('numerical');
 
-% calc analytical expressions (only on the first 250 entries here)
+% calc analytical expressions (only on the first N/4 entries here)
 [Phi_a, lambda_a] = CalcAnalytical(v_tilde, mu, sigma, omega);
 p_of_x = normpdf(v_tilde, mu, omega);
+
+
 R = Phi_a'*Phi_a,
 % normalization issue...
 [rV, rLa] = eig(R); minusSqrtR=rV*diag(1./sqrt(diag(rLa)));
@@ -130,9 +132,9 @@ legend('original graph signal', 'measured noisy version', 'cleaned using full nu
 h(1).MarkerSize=7;
 
 % clean using the new eigenvectors
-f_cleaned2 = tV*(tV'*noisy_f(1:250));
+f_cleaned2 = tV*(tV'*noisy_f(1:N/4));
 hold on;
-plot(x_orig(1:250), f_cleaned2, '.', 'DisplayName', 'cleaned by projecting onto W-tilde numerical and whitened vectors'); legend;
+plot(x_orig(1:N/4), f_cleaned2, '.', 'DisplayName', 'cleaned by projecting onto W-tilde numerical and whitened vectors'); legend;
 
 function A = ModelPolyMatrix(pos, PolyOrder)
 A = zeros(length(pos), PolyOrder+1);

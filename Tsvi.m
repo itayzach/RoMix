@@ -134,7 +134,8 @@ h(1).MarkerSize=7;
 % clean using the new eigenvectors
 f_cleaned2 = tV*(tV'*noisy_f(1:N/4));
 hold on;
-plot(x_orig(1:N/4), f_cleaned2, '.', 'DisplayName', 'cleaned by projecting onto W-tilde numerical and whitened vectors'); legend;
+f_cleaned3 = nPhi_a*(nPhi_a'*noisy_f(1:N/4));
+plot(x_orig(1:N/4), f_cleaned3, '.', 'DisplayName', 'cleaned by projecting onto W-tilde analytical and whitened vectors'); legend;
 
 function A = ModelPolyMatrix(pos, PolyOrder)
 A = zeros(length(pos), PolyOrder+1);
@@ -162,6 +163,6 @@ for m=0:M-1
     Hm(:,m+1) = hermiteH(m, hermite_arg);
     normFactor = (1+2*beta)^(1/8)/sqrt(2^m*factorial(m));
     Phi_a(:,m+1) = normFactor * exp_term .* Hm(:,m+1);
-    lambda_a = sqrt(2/(1+beta+sqrt(1+2*beta))) * (beta/(1+beta+sqrt(1+2*beta)))^m;
+    lambda_a(m+1) = sqrt(2/(1+beta+sqrt(1+2*beta))) * (beta/(1+beta+sqrt(1+2*beta)))^m;
 end
 end

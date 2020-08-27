@@ -34,12 +34,12 @@ for dataDim = vDataDim
                 = CalcAnalyticEigenvalues(sSimParams, sKernelParams, sDataset.dim, estNumComponents);
             [ tPhiAnalytic(t,:,:), vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams, sKernelParams, sDataset.sData.x, b_normalize);
             [ tPhiNumeric(t,:,:), vLambdaNumeric ]   = CalcNumericEigenvectors(sSimParams, sKernelParams, sDataset.sData.x);
-            tPhiNumeric(t,:,:) = FlipSign(sSimParams, squeeze(tPhiAnalytic(t,:,:)), squeeze(tPhiNumeric(t,:,:)));
+            tPhiNumeric(t,:,:) = FlipSign(squeeze(tPhiAnalytic(t,:,:)), squeeze(tPhiNumeric(t,:,:)));
             mLambdaNystrom = zeros(R, sSimParams.CalcEigenFuncsM);
             for r = 1:R
                 nysRatio = vNysRatio(r);
                 [ tPhiNystrom(r,t,:,:), mLambdaNystrom(r,:) ]   = CalcNystromEigenvectors(sSimParams, sKernelParams, sDataset.sData.x, nysRatio);
-                tPhiNystrom(r,t,:,:) = FlipSign(sSimParams, squeeze(tPhiAnalytic(t,:,:)), squeeze(tPhiNystrom(r,t,:,:)));
+                tPhiNystrom(r,t,:,:) = FlipSign(squeeze(tPhiAnalytic(t,:,:)), squeeze(tPhiNystrom(r,t,:,:)));
             end
 
             if t == 1 && sSimParams.b_plotEigenfunctions
@@ -47,13 +47,11 @@ for dataDim = vDataDim
                 PlotHistogram(sSimParams, sDataset);
                 PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambdaAnalytic, vLambdaNumeric, mLambdaNystrom);
 
-                if dataDim == 1
-                    PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, [], squeeze(tPhiAnalytic(1,:,:)), 'Analytic');
-                    PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, [], squeeze(tPhiNumeric(1,:,:)), 'Numeric');
-                    for r = 1:R
-                        nysRatio = vNysRatio(r);
-                        PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, nysRatio, squeeze(tPhiNystrom(r,1,:,:)), 'Nystrom');
-                    end
+                PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, [], squeeze(tPhiAnalytic(1,:,:)), 'Analytic');
+                PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, [], squeeze(tPhiNumeric(1,:,:)), 'Numeric');
+                for r = 1:R
+                    nysRatio = vNysRatio(r);
+                    PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, nysRatio, squeeze(tPhiNystrom(r,1,:,:)), 'Nystrom');
                 end
                 if dataDim == 1
                     firstEigenIdxToPlot = 0;

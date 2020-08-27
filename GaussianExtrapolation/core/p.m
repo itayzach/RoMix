@@ -7,16 +7,16 @@ if strcmp(sDistParams.estDataDist, 'Gaussian')
     else
         mu = sDistParams.mu{c};
         sigma = sDistParams.sigma{c};
-        conv = sDistParams.cov{c};
+        cov = sDistParams.cov{c};
     end
     
     if sDistParams.dim == 1
         vDensity = (1./sqrt(2*pi*sigma.^2)) .* exp( -(y-mu).^2./(2*sigma.^2) );
     else
-        C = 1/sqrt( ((2*pi)^sDistParams.dim)*det(conv) );
+        C = 1/sqrt( ((2*pi)^sDistParams.dim)*det(cov) );
         vDensity = zeros(length(y),1);
         for i = 1:length(y)
-            vDensity(i) = C * exp( -0.5*(y(i,:)-mu)*(conv)^(-1)*(y(i,:)-mu).' );
+            vDensity(i) = C * exp( -0.5*(y(i,:)-mu)*(cov)^(-1)*(y(i,:)-mu).' );
         end
     end
 elseif strcmp(sDistParams.dataDist, 'uniform')

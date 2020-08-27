@@ -61,7 +61,7 @@ mPhiNumeric = mPhiNumeric(:,idx);
 
 PlotSpectrum(sSimParams, [], [], vLambdaAnalytic, vLambdaNumeric, []);
 %% Flip sign
-mPhiNumeric = FlipSign(sSimParams, mPhiAnalytic, mPhiNumeric);
+mPhiNumeric = FlipSign(mPhiAnalytic, mPhiNumeric);
 
 %% RMSE
 tPhiAnalyticRMSE(1,:,:) = mPhiAnalytic;

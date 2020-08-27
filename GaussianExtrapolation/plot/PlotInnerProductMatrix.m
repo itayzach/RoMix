@@ -12,7 +12,7 @@ if strcmp(figName, 'Numeric')
     pltTitle = [figName ' - $V^T V$'];
 elseif strcmp(figName, 'Analytic')
     n = length(sDataset.sData.x);
-    mInnerProduct = n * (mPhi.' * diag(sDistParams.vPr)* mPhi);
+    mInnerProduct = n^sDistParams.dim * (mPhi.' * diag(sDistParams.vPr)* mPhi);
     pltTitle = [figName ' - $\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$'];
 elseif strcmp(figName, 'Nystrom')
     mInnerProduct = mPhi.'*mPhi;

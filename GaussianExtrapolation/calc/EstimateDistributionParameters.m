@@ -11,7 +11,7 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
     end
     
     sDistParams.estNumComponents = estNumComponents;
-    
+    sDistParams.componentProportion = GMModel.ComponentProportion;
     for c = 1:estNumComponents
         sDistParams.cov{c} = GMModel.Sigma(:,:,c);
         sDistParams.mu{c} = GMModel.mu(c,:);
@@ -27,18 +27,23 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         end
         sDistParams.mu_1D{c} = sDistParams.mu{c}*sDistParams.u{c};
         isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-15)
-
-        % Caluclate the probability for each data point x
-        if sDataset.dim == 1
-            [ xTotalSorted, vSortedIdx ] = sort(sDataset.sData.x);
+    end
+    
+    % Caluclate the probability for each data point x
+    sDistParams.vPr = zeros(length(sDataset.sData.x),1);
+    for c = 1:estNumComponents
+        prop = sDistParams.componentProportion(c);
+        vDensity = prop*p(sDistParams, c, sDataset.sData.x);
+        vDiffs = ones(length(sDataset.sData.x),1);
+        for d = 1:sDistParams.dim
+            [ xTotalSorted, vSortedIdx ] = sort(sDataset.sData.x(:,d));
             [~, vInvSortIdx] = sort(vSortedIdx);
             vDiffsSorted = [0; diff(xTotalSorted)];
-            vDiffs = vDiffsSorted(vInvSortIdx);
-            warning('TODO: I should fix the calculation for Pr with several components')
-            vDensity = p(sDistParams, c, sDataset.sData.x, sDataset.dim);
-            sDistParams.vPr = vDensity .* vDiffs;
+            vDiffs = vDiffs .* vDiffsSorted(vInvSortIdx);
         end
+        sDistParams.vPr = sDistParams.vPr + (vDensity .* vDiffs);
     end
+    
     
 elseif strcmp(sDataset.estDataDist, 'Uniform')
     sDistParams.a    = 2.5;

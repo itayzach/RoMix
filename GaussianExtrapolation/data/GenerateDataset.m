@@ -14,6 +14,8 @@ nTotal = nTrain + nTest;
 %% Generate data
 if strcmp(actualDataDist, 'Two_moons')
     sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile);
+elseif strcmp(actualDataDist, 'Two_spirals')
+    sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
 else
     if strcmp(actualDataDist, 'Gaussian')
         if dim == 2
@@ -43,10 +45,7 @@ else
                 sigma = 0.5;
                 mu = 100;
 
-                % x = linspace(mu-5*sigma,mu+5*sigma, nTotal+1)';
-                % [f, pos] = ecdf(x);
-                % xTotal = icdf('Normal',f, mu, sigma);
-                % xTotal = xTotal(2:end-1); % first and last samples are -Inf and Inf after icdf
+                % xTotal = sigma*chi2rnd(1, nTotal, 1) + mu;
 
                 xTotal = sigma*randn(nTotal, 1) + mu;
             elseif nComponents == 2

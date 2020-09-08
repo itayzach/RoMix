@@ -28,12 +28,17 @@ for dataDim = vDataDim
         tPhiNystrom  = zeros(R, T, nTrain, sSimParams.CalcEigenFuncsM);
         for t = 1:T
             sDataset = GenerateDataset(actualDataDist, dataDim, actualNumComponents, nTrain, nTest);
-            sDistParams = EstimateDistributionParameters(sDataset, estNumComponents);
+            if strcmp(actualDataDist, "Two_moons")
+                GMMRegVal = 0.1;
+            else
+                GMMRegVal = 0;
+            end
+            sDistParams = EstimateDistributionParameters(sDataset, estNumComponents, GMMRegVal);
             sKernelParams = GetKernelParams(sDataset, sDistParams);
             [sKernelParams.vLambdaAnaytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-                = CalcAnalyticEigenvalues(sSimParams, sKernelParams, sDataset.dim, estNumComponents);
-            [ tPhiAnalytic(t,:,:), vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams, sKernelParams, sDataset.sData.x, b_normalize);
-            [ tPhiNumeric(t,:,:), vLambdaNumeric ]   = CalcNumericEigenvectors(sSimParams, sKernelParams, sDataset.sData.x);
+                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, estNumComponents);
+            [ tPhiAnalytic(t,:,:), vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x, b_normalize);
+            [ tPhiNumeric(t,:,:), vLambdaNumeric ]   = CalcNumericEigenvectors(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x);
             tPhiNumeric(t,:,:) = FlipSign(squeeze(tPhiAnalytic(t,:,:)), squeeze(tPhiNumeric(t,:,:)));
             mLambdaNystrom = zeros(R, sSimParams.CalcEigenFuncsM);
             for r = 1:R

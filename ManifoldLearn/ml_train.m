@@ -144,7 +144,7 @@ switch method
 %         options.GraphWeights = 'binary';
 %         L = laplacian(X,'kernel',options);
         figure; imagesc(L); title('EigRLS'); colorbar();
-        [alpha, c] = eigrls(Y, mPhi_m_xTrain, mLambda, options.gamma_A, options.gamma_I, L);
+        c = eigrls(Y, mPhi_m_xTrain, mLambda, options.gamma_A, options.gamma_I, L);
         classifier= ...
             saveclassifier('eigrls',options.Kernel,options.KernelParam, ...
             alpha,X,Y,[options.gamma_A options.gamma_I],c);

@@ -1,13 +1,18 @@
-function sDistParams = EstimateDistributionParameters(sDataset, estNumComponents)
+function sDistParams = EstimateDistributionParameters(sDataset, estNumComponents, RegularizationValue)
 
 sDistParams.estDataDist = sDataset.estDataDist;
 sDistParams.dim = sDataset.dim;
 
 if strcmp(sDataset.estDataDist, 'Gaussian')
+    lastwarn('')
     try
-        GMModel = fitgmdist(sDataset.sData.x, estNumComponents, 'RegularizationValue', 0.1);
+        GMModel = fitgmdist(sDataset.sData.x, estNumComponents, 'RegularizationValue', RegularizationValue);
     catch exception
         sprintf('GM error: %s\n', exception.message)
+    end
+    [warnMsg, ~] = lastwarn;
+    if ~isempty(warnMsg)
+        sprintf('GM error: %s\n', warnMsg)
     end
     
     sDistParams.estNumComponents = estNumComponents;

@@ -15,12 +15,7 @@ for d = 1:sSimParams.dim
 end
 
 for i = 0:sSimParams.RkhsM-1
-    if sSimParams.dim == 2
-        m = OneDim2TwoDimIndex(sSimParams.multindexToSingleIndexMap(i+1)-1);
-    else
-        m = i;
-    end
-    
+    m = OneDim2TwoDimIndex(sSimParams.multindexToSingleIndexMap(i+1)-1,sSimParams.dim);
     %% rhs
     lambda_m = lambda(sSimParams, m);
     if lambda_m < 1e-20

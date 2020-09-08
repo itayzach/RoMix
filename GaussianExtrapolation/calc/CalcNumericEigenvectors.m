@@ -1,4 +1,4 @@
-function [mPhiNumeric, vLambdaNumeric] = CalcNumericEigenvectors(sSimParams, sKernelParams, mData)
+function [mPhiNumeric, vLambdaNumeric] = CalcNumericEigenvectors(nEigs, sKernelParams, mData)
 
 nTotal = length(mData);
 nComponents = sKernelParams.sDistParams.estNumComponents;
@@ -6,7 +6,7 @@ nComponents = sKernelParams.sDistParams.estNumComponents;
 A = CalcAdjacency(sKernelParams, mData);
 
 %% EVD
-[mPhiNumeric, mLambdaNumeric] = eigs(A, sSimParams.PlotSpectM);
+[mPhiNumeric, mLambdaNumeric] = eigs(A, nEigs);
 [vLambdaNumeric, idx] = sort(diag(mLambdaNumeric), 'descend');
 
 % Normalize

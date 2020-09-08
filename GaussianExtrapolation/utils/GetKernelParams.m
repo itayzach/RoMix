@@ -1,4 +1,4 @@
-function sKernelParams = GetKernelParams(sDataset, sDistParams)
+function sKernelParams = GetKernelParams(sDataset, sDistParams, omega)
 %% kernel and eigenfunctions constants type
 if strcmp(sDataset.estDataDist, 'Gaussian')
     sKernelParams.kernelType = 'gaussian';
@@ -26,8 +26,12 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         %% second type consts
         fprintf('*            Using beta,omega constants                 *\n');
         fprintf('*********************************************************\n');
-
-        sKernelParams.omega = 0.3; 1/(6*sqrt(2)); % kernel width
+        
+        if ~exist('omega', 'var')
+            sKernelParams.omega = 0.3; 1/(6*sqrt(2)); % kernel width
+        else
+            sKernelParams.omega = omega;
+        end
         sKernelParams.t = 0.5*sKernelParams.omega^2;
         for c = 1:sDistParams.estNumComponents
             sKernelParams.beta{c} = 2*sDistParams.sigma{c}.^2/sKernelParams.omega^2;

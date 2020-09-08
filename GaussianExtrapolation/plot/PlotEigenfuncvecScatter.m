@@ -1,4 +1,4 @@
-function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, firstEigenIdx, lastEigIdx, mPhi, vLambda, figName)
+function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, firstEigenIdx, lastEigIdx, mPhi, vLambda, figName, c)
 
 dim = size(mData, 2);
 assert(dim <= 2, 'Not supported')
@@ -50,17 +50,18 @@ elseif dim == 2
         xlim([ min(mData(:,1)) max(mData(:,1))])
         ylim([ min(mData(:,2)) max(mData(:,2))])
         if strcmp(figName, 'Analytic')
-            title(['$\phi_{' num2str(m) '}({\bf x_i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'], ...
-                'Interpreter', 'latex', 'FontSize', 14)
+            dispName = ['$\phi_{' num2str(m) '}({\bf x_i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
+            if exist('c', 'var') && ~isempty(c)
+                dispName = strcat(dispName, ', $c = ', num2str(c(m+1), '%.4f'), '$');
+            end
         elseif strcmp(figName, 'Numeric')
-            title(['$v_{' num2str(m) '}({\bf i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'], ...
-                'Interpreter', 'latex', 'FontSize', 14)
+            dispName = ['$v_{' num2str(m) '}({\bf i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
         elseif strcmp(figName, 'Nystrom')
-            title(['$\hat{v}_{' num2str(m) '}({\bf i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'], ...
-                'Interpreter', 'latex', 'FontSize', 14)
+            dispName = [ '$\hat{v}_{' num2str(m) '}({\bf i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
         else
             assert('invalid option')
         end
+        title(dispName,  'Interpreter', 'latex', 'FontSize', 14)
         set(gca,'FontSize', 14);
     end
     set(gcf,'Position', [x0 y0 width height])

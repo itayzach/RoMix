@@ -1,18 +1,21 @@
-function m = OneDim2TwoDimIndex(I)
+function m = OneDim2MultiDimIndex(I, d)
 
-d = 2;
-i = 0;
-totalSum = 0;
-while true
-    [howMuch, mMatrix] = nsumk(d, totalSum);
-    for j = 1:howMuch
-        m = mMatrix(j,:);
-        if i == I
-            return
+if d == 1
+    m = I;
+else
+    i = 0;
+    totalSum = 0;
+    while true
+        [howMuch, mMatrix] = nsumk(d, totalSum);
+        for j = 1:howMuch
+            m = mMatrix(j,:);
+            if i == I
+                return
+            end
+            i = i+1;
         end
-        i = i+1;
+        totalSum = totalSum+1;
     end
-    totalSum = totalSum+1;
 end
 
 

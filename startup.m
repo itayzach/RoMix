@@ -1,5 +1,5 @@
 clear; close all; clc;
-[~, scriptName, ~] = fileparts(mfilename('fullpath'));
+[filepath, scriptName, ~] = fileparts(mfilename('fullpath'));
 fprintf('[%s] Adding paths...\n', scriptName);
 addpath(genpath('GaussianExtrapolation'));
 addpath(genpath('ManifoldLearn'));
@@ -8,3 +8,8 @@ fprintf('[%s] Ready.\n', scriptName);
 clear scriptName
 
 start_ManifoldLearn;
+
+cd('../Downloaded/gspbox-git/');
+gsp_start;
+cd(filepath);
+clear;

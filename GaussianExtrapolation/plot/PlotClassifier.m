@@ -29,7 +29,7 @@ if strcmp(sClassifier.name, 'eigrls')
     contourf(sClassifier.XX1,sClassifier.XX2,sClassifier.mPhi_X_c,[0 0]);shading flat;
     hold on;
     plot2D(sDataset.sData.x,sDataset.sData.y,15,'ks');
-    plot2D(sDataset.sData.xt,zeros(length(sDataset.sData.xt),1),15,'k*');
+    plot2D(sDataset.sData.xt,zeros(size(sDataset.sData.xt,1),1),15,'k*');
     set(gca,'FontSize', 14);
     set(gcf,'Position',[x0+width+width y0 width height])
     saveas(fig,[sSimParams.outputFolder filesep 'fig_eigrls_M_' num2str(sSimParams.CalcEigenFuncsM)], 'epsc');

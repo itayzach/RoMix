@@ -19,8 +19,8 @@ if b_gaussianDataset
     GMMRegVal = 0;
 else
     N = 500;
-%     N = round(sqrt(N))^2; G_tmp = gsp_2dgrid(sqrt(N),sqrt(N));
-    G_tmp = gsp_sensor(N);
+    N = round(sqrt(N))^2; G_tmp = gsp_2dgrid(sqrt(N),sqrt(N));
+%     G_tmp = gsp_sensor(N);
 %     G_tmp = gsp_bunny(); N = G_tmp.N;
 %     G_tmp = gsp_minnesota(); N = G_tmp.N;
 %     G_tmp = gsp_david_sensor_network(); N =G_tmp.N;
@@ -250,13 +250,15 @@ fprintf('GSP interpolation error: %.3f\n', norm(f - gsp_interp_signal)/norm(f));
 fprintf('Our interpolation error: %.3f\n', norm(f - my_interp_signal)/norm(f));
 
 %% Transform
-% newDim = 3;
+% % "Random projection"
+% newDim = 2;
 % R = randn(dataDim,newDim); % Random projection matrix
 % for i = 1:dataDim
 %    R(i,:) = R(i,:)/norm(R(i,:)); % Normalization
 % end
 % v_tilde = v*R; % Projection
 
+% Linear combination of Gaussians
 R = randn(N, N);
 % for i = 1:N
 %    R(:,i) = R(:,i)/norm(R(:,i)); % Normalization
@@ -265,6 +267,9 @@ for i = 1:N
    R(i,:) = R(i,:)/norm(R(i,:)); % Normalization
 end
 v_tilde = R*v;
+
+% % Whitening matrix
+% [v_tilde, R, invR] = whiten(v,1e-5);
 
 figure; 
 subplot(dataDim+1,2,1)
@@ -300,9 +305,8 @@ end
 set(gcf,'Position', [100 200 1200 800])
 
 % Distances
-ii = 10; jj = 20;
-pdist2(v(ii,:),v(jj,:))
-pdist2(v_tilde(ii,:),v_tilde(jj,:))
+ii = 5; jj = 60;
+[pdist2(v(ii,:),v(jj,:)) pdist2(v_tilde(ii,:),v_tilde(jj,:))]
 
 sDatasetTilde.sData.x = v_tilde;
 sDatasetTilde.estDataDist = 'Gaussian';
@@ -326,54 +330,72 @@ if b_normlizedLaplacian
 end
 
 [mPhiTildeAnalytic, vLambdaTildeAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParamsTilde, v_tilde, true);
-[V_tilde, vLambdaTildeNumeric] = CalcNumericEigenvectors(nEigs, sKernelParamsTilde, v_tilde);
+[~, vLambdaTildeNumeric] = CalcNumericEigenvectors(nEigs, sKernelParamsTilde, v_tilde);
 
 % Spectrum
 PlotSpectrum(sSimParams, sDatasetTilde, [], vLambdaTildeAnalytic, vLambdaTildeNumeric, []);
 
-% Graph matrices
-% figure; 
-% subplot(131)
-%     imagesc(G_tilde.W); 
-%     colorbar; 
-%     title('Kerel (weights) matrix', 'Interpreter', 'latex', 'FontSize', 14)
-%     set(gca,'FontSize', 14);
-% subplot(132); 
-%     imagesc(diag(G_tilde.d)); 
-%     colorbar; 
-%     title('Degree matrix', 'Interpreter', 'latex', 'FontSize', 14)
-%     set(gca,'FontSize', 14);      
-% subplot(133); 
-%     imagesc(G_tilde.L); 
-%     colorbar; 
-%     if b_normlizedLaplacian
-%         title('Normalized Laplacian matrix', 'Interpreter', 'latex', 'FontSize', 14)
-%     else
-%         title('Laplacian matrix', 'Interpreter', 'latex', 'FontSize', 14)
-%     end
-%     set(gca,'FontSize', 14);    
-% set(gcf,'Position', [100 200 1800 400])
+%% Find coeffs for graph-signal
+% This:
+% tilde_gamma_A_eigrls = 0;
+% tilde_gamma_I_eigrls = 0;
+% c_tilde = eigrls(R*f, mPhiTildeAnalytic, vLambdaTildeAnalytic, tilde_gamma_A_eigrls, tilde_gamma_I_eigrls, G_tilde.L);
 
-% Maybe this works?
-tilde_gamma_A_eigrls = 0;
-tilde_gamma_I_eigrls = 1;
-c_tilde = eigrls(R*f, mPhiTildeAnalytic, vLambdaTildeAnalytic, tilde_gamma_A_eigrls, tilde_gamma_I_eigrls, G_tilde.L);
+% % ...Is the same as this, with gammas = 0:
+% c_tilde = (mPhiTildeAnalytic.'*mPhiTildeAnalytic)\(mPhiTildeAnalytic.'*(R*f));
+
+% ... and this:
+c_tilde = lsqminnorm(mPhiTildeAnalytic,R*f);
 
 f_tilde = mPhiTildeAnalytic*c_tilde;
 
-f_reconstructed = R^(-1)*mPhiTildeAnalytic*c_tilde;
 
-plot_v_indexes = 10;
-v_numers_cells = cellstr(num2str((1:plot_v_indexes)'))';
+%% Reconstruction
+%This is the same: [mPhiTildeAnalytic.'*f_tilde mPhiTildeAnalytic.'*R*f]
+keyboard;
+
+
+c_rec = (mPhiAnalytic.'*mPhiAnalytic)\(mPhiAnalytic.'*(R^(-1)*f_tilde));
+f_reconstructed = mPhiAnalytic*c_rec;
+% f_reconstructed = pinv(mPhiTildeAnalytic.'*R)*mPhiTildeAnalytic.'*f_tilde;
+% invR = inv(R);
+% f_reconstructed = (invR.'*invR)\(invR.'*f_tilde);
+
+
+v_rec = R^(-1)*v_tilde;
+sDatasetRec.sData.x = v_rec;
+sDatasetRec.estDataDist = 'Gaussian';
+sDatasetRec.dim = size(v_rec,2);
+GMMRegVal = 0;
+nComponents = 1;
+% Estimate distribution and get kernel parameters
+sDistParamsRec = EstimateDistributionParameters(sDatasetRec, nComponents, GMMRegVal);
+sKernelParamsRec = GetKernelParams(sDatasetRec, sDistParamsRec, omega);
+[sKernelParamsRec.vLambdaAnaytic, sKernelParamsRec.vComponentIndex, sKernelParamsRec.vEigIndex] ...
+    = CalcAnalyticEigenvalues(nEigs, sKernelParamsRec, sDatasetRec.dim, nComponents);
+% Adjacency (gaussian kernel)
+W_rec = sparse(CalcAdjacency(sKernelParamsRec, v_rec));
+
+
+% Graph
+G_rec = gsp_graph(W_rec, v_rec);
+if b_normlizedLaplacian
+    G_rec.lap_type = 'normalized';
+    G_rec = gsp_graph_default_parameters(G_rec);
+end
+
+%% Plot
+plot_v_indexes = (1:3:20)';
+v_numers_cells = cellstr(num2str(plot_v_indexes))';
 figure;
 subplot(131); 
     gsp_plot_signal(G,f,param); 
-    title(sprintf('Original graph-signal\n f^T L f = %.3f\n', f'*G.L*f));
+    title(['Original graph-signal' newline '$f^T L f$ = ' num2str(f'*G.L*f, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
     hold on;
     if dataDim == 3
-        text(v(1:plot_v_indexes,1), v(1:plot_v_indexes,2), v(1:3,3), v_numers_cells,'FontWeight','bold')
+        text(v(plot_v_indexes,1), v(plot_v_indexes,2), v(1:3,3), v_numers_cells,'FontWeight','bold','Color', 'black')
     else
-        text(v(1:plot_v_indexes,1), v(1:plot_v_indexes,2), v_numers_cells,'FontWeight','bold')
+        text(v(plot_v_indexes,1), v(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
     end
     view(0,90)
 % subplot(132); 
@@ -381,16 +403,25 @@ subplot(131);
 %     title(sprintf('Transformed graph-signal\n f^T L f = %.3f\n', f_tilde'*G_tilde.L*f_tilde));
 subplot(132); 
     gsp_plot_signal(G_tilde,f_tilde,param); 
-    title(sprintf('Transformed graph-signal\n f^T L f = %.3f\n', f_tilde'*G_tilde.L*f_tilde));
+    title(['Transformed graph-signal' newline '$\tilde{f}^T \tilde{L} \tilde{f}$ = ' num2str(f_tilde'*G_tilde.L*f_tilde, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
     hold on;
     if dataDim == 3
-        text(v_tilde(1:plot_v_indexes,1), v_tilde(1:plot_v_indexes,2), v_tilde(1:3,3), v_numers_cells,'FontWeight','bold')
+        text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_tilde(1:3,3), v_numers_cells,'FontWeight','bold','Color', 'black')
     else
-        text(v_tilde(1:plot_v_indexes,1), v_tilde(1:plot_v_indexes,2), v_numers_cells,'FontWeight','bold')
+        text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
     end
     view(0,90)
 subplot(133); 
-    gsp_plot_signal(G,f_reconstructed,param); 
-    title(sprintf('Transformed graph-signal\n f^T L f = %.3f\n', f_reconstructed'*G.L*f_reconstructed));    
-    view(0,90)
+    gsp_plot_signal(G_rec,f_reconstructed,param); 
+    title(['Reconstructed graph-signal' newline '$\hat{f}^T L \hat{f}$ = ' num2str(f_reconstructed'*G.L*f_reconstructed, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
+ 
+%     gsp_plot_graph(G_rec); 
+%     hold on;
+%     if dataDim == 3
+%         text(v_rec(plot_v_indexes,1), v_rec(plot_v_indexes,2), v_rec(1:3,3), v_numers_cells,'FontWeight','bold','Color', 'black')
+%     else
+%         text(v_rec(plot_v_indexes,1), v_rec(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
+%     end
+%     title(sprintf('Reconstructed graph'));   
+%     view(0,90)
 set(gcf,'Position', [400 100 1200 400])   

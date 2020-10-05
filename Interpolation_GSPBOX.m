@@ -1,4 +1,4 @@
-clc; clear; close all; rng('default')
+clc; clear; close all; rng(1)
 
 %% Parameters
 nEigs = 30;
@@ -14,20 +14,21 @@ b_showGraphMatricesFigures = false;
 
 b_gaussianDataset = false;
 b_normlizedLaplacian = true;
-b_useRandomProjections = true;
+b_useRandomProjections = false;
 
 %% Generate dataset
 if b_gaussianDataset
     N = 1000;
-    dataDim = 2;
-    sDataset = GenerateDataset('Gaussian', dataDim, nComponents, N, 0);
+    dataDim = 1;
+    graphName = 'Uniform';
+    sDataset = GenerateDataset(graphName, dataDim, nComponents, N, 0);
     GMMRegVal = 0;
 else
     N = 500;
-%     N = round(sqrt(N))^2; G_tmp = gsp_2dgrid(sqrt(N),sqrt(N));
-%     G_tmp = gsp_sensor(N);
-    G_tmp = gsp_bunny(); N = G_tmp.N;
-%     G_tmp = gsp_minnesota(); N = G_tmp.N;
+%     N = round(sqrt(N))^2; G_tmp = gsp_2dgrid(sqrt(N),sqrt(N)); graphName = 'twodgrid';
+    G_tmp = gsp_sensor(N);  graphName = 'sensor';
+%     G_tmp = gsp_bunny(); N = G_tmp.N; graphName = 'bunny';
+%     G_tmp = gsp_minnesota(); N = G_tmp.N; graphName = 'minnesota';
 %     G_tmp = gsp_david_sensor_network(); N =G_tmp.N;
     sDataset.sData.x = G_tmp.coords;
     sDataset.estDataDist = estDataDist;
@@ -159,11 +160,13 @@ subplot(1,2,1)
 gsp_plot_signal_spectral(G,f_hat,param);
 xlabel('$\lambda_k$', 'Interpreter', 'latex', 'FontSize', 14);
 ylabel('$\hat{f}$', 'Interpreter', 'latex', 'FontSize', 16);
+set(gca,'FontSize', 14);
 subplot(1,2,2)
 stem(f_hat(1:k0+3));
 xlabel('$k$', 'Interpreter', 'latex', 'FontSize', 14);
 ylabel('$\hat{f}$', 'Interpreter', 'latex', 'FontSize', 16);
-sgtitle('Graph signal spectrum')
+set(gca,'FontSize', 14);
+sgtitle('Graph signal spectrum', 'Interpreter', 'latex', 'FontSize', 14)
 set(gcf,'Position', [100 200 1200 400])
 
 
@@ -175,20 +178,17 @@ sample_ind = sort(randPerm(1:round(samplingRatio*N)));
 % or this:
 % sample_ind = (1:samplingRatio*N)';
 
-sampled_signal = f(sample_ind);
-sampled_signal_padded = zeros(size(f));
-sampled_signal_padded(sample_ind) = f(sample_ind);
+f_sampled = f(sample_ind);
+f_sampled_padded = zeros(size(f));
+f_sampled_padded(sample_ind) = f(sample_ind);
 
 %% GSP interpolation
-gsp_interp_signal = gsp_interpolate(G,sampled_signal,sample_ind);
+gsp_interp_signal = gsp_interpolate(G,f_sampled,sample_ind);
 
 %% My interpolation using eigenFUNCTIONS
 gamma_A_eigrls = 0;0.01;
 gamma_I_eigrls = 0;0.1; 
-c = eigrls(sampled_signal_padded, mPhiAnalytic, vLambdaAnalytic, gamma_A_eigrls, gamma_I_eigrls, G.L);
-% fprintf('c =\n\t');
-% fprintf('%f\n\t', c);
-% fprintf('\n');
+c = eigrls(f_sampled_padded, mPhiAnalytic, vLambdaAnalytic, gamma_A_eigrls, gamma_I_eigrls, G.L);
 my_interp_signal = mPhiAnalytic*c;
 
 %% My interpolation using eigenVECTORS
@@ -202,18 +202,29 @@ my_interp_signal = mPhiAnalytic*c;
 
 %% Plot interpolation
 fig = figure;
-subplot(131); 
-    gsp_plot_signal(G,f,param); 
+subplot(131);
+    if dataDim > 1
+        gsp_plot_signal(G,f,param); 
+    else
+        plot(G.coords, f, '.');
+    end
     hold on; 
-    if dataDim == 2
+    if dataDim == 1
+        scatter(G.coords(sample_ind), f(sample_ind), 'ko')
+    elseif dataDim == 2
         scatter(G.coords(sample_ind,1), G.coords(sample_ind,2), 'ko')
     elseif dataDim == 3
         scatter3(G.coords(sample_ind,1), G.coords(sample_ind,2), G.coords(sample_ind,3), 'ko')
     end
     view(0,90)
+    set(gca,'FontSize', 14);
     title(['Original graph-signal' newline '$f^T L f$ = ' num2str(f'*G.L*f, '%.3f') newline], 'Interpreter', 'latex', 'FontSize', 14);
 subplot(132); 
-    gsp_plot_signal(G,gsp_interp_signal,param); 
+    if dataDim > 1
+        gsp_plot_signal(G,gsp_interp_signal,param); 
+    else
+        plot(G.coords, gsp_interp_signal, '.');
+    end
     hold on; 
     if dataDim == 2
         scatter(G.coords(sample_ind,1), G.coords(sample_ind,2), 'ko')
@@ -221,33 +232,28 @@ subplot(132);
         scatter3(G.coords(sample_ind,1), G.coords(sample_ind,2), G.coords(sample_ind,3), 'ko')
     end
     view(0,90)
-    title(['Pesenson''s interpolation' newline '$f^T L f$ = ' num2str(gsp_interp_signal'*G.L*gsp_interp_signal, '%.3f') newline ...
+    set(gca,'FontSize', 14);
+    title(['Pesenson''s interpolation' newline '$f_{{\bf int}}^T L f_{{\bf int}}$ = ' num2str(gsp_interp_signal'*G.L*gsp_interp_signal, '%.3f') newline ...
         'error: ' num2str(norm(f - gsp_interp_signal)/norm(f), '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
 subplot(133); 
-    gsp_plot_signal(G,my_interp_signal,param);
+    if dataDim > 1
+        gsp_plot_signal(G,my_interp_signal,param);
+    else
+        plot(G.coords, my_interp_signal, '.');
+    end
     hold on; 
     if dataDim == 2
         scatter(G.coords(sample_ind,1), G.coords(sample_ind,2), 'ko')
     elseif dataDim == 3
         scatter3(G.coords(sample_ind,1), G.coords(sample_ind,2), G.coords(sample_ind,3), 'ko')
     end
-    title(['Our interpolation (no transformation)' newline '$f^T L f$ = ' num2str(my_interp_signal'*G.L*my_interp_signal, '%.3f') newline ...
+    set(gca,'FontSize', 14);
+    title(['Our interpolation (no transformation)' newline '$f_{{\bf int}}^T L f_{{\bf int}}$ = ' num2str(my_interp_signal'*G.L*my_interp_signal, '%.3f') newline ...
         'error: ' num2str(norm(f - my_interp_signal)/norm(f), '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
     view(0,90)
 set(gcf,'Position', [400 100 1200 400])   
-
 saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_interp_no_transform'), 'epsc');
 
-% subplot(223); 
-%     gsp_plot_signal(G,eigenvecs_interp_signal,param); 
-%     title(sprintf('Using V\n error: %.3f\n', norm(f - eigenvecs_interp_signal)/norm(f)));   
-%     view(0,90)
-% set(gcf,'Position', [400 100 800 800])
-
-
-% fprintf('GSP interpolation error: %.3f\n', norm(f - gsp_interp_signal)/norm(f));
-% fprintf('V   interpolation error: %.3f\n', norm(f - eigenvecs_interp_signal)/norm(f));
-% fprintf('Our interpolation error: %.3f\n', norm(f - my_interp_signal)/norm(f));
 
 %% Transform
 % "Random projection"
@@ -277,41 +283,63 @@ else
     % % Whitening matrix
     % [v_tilde, R, invR] = whiten(v,1e-5);
 end
-
-figure; 
-subplot(dataDim+1,2,1)
+if dataDim == 1
+    histPlotRows = 1;
+else
+    histPlotRows = 3;
+end
+fig = figure; 
+subplot(histPlotRows,2,1)
 histogram(v(:,1),100);
-title('v1 histogram');
-subplot(dataDim+1,2,2)
+set(gca,'FontSize', 14);
+title('$v_1$ histogram', 'Interpreter', 'latex', 'FontSize', 14);
+subplot(histPlotRows,2,2)
 histfit(v_tilde(:,1),100);
-title('v tilde1 histogram');
-subplot(dataDim+1,2,3)
-histogram(v(:,2),100);
-title('v2 histogram');
-subplot(dataDim+1,2,4)
-histfit(v_tilde(:,2),100);
-title('v tilde2 histogram');
-if dataDim == 2
-    subplot(dataDim+1,2,5)
-    hist3(v,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'flat');
-    colormap(gca, 'hot')
-    colorbar()
-    view(2)
-    xlim([ min(v(:,1)) max(v(:,1))])
-    ylim([ min(v(:,2)) max(v(:,2))])
-    title('v histogram');
+set(gca,'FontSize', 14);
+title('$\tilde{v}_1$ histogram', 'Interpreter', 'latex', 'FontSize', 14);
+if dataDim == 2 || dataDim == 3
+    subplot(histPlotRows,2,3)
+    histogram(v(:,2),100);
+    title('$v_2$ histogram', 'Interpreter', 'latex', 'FontSize', 14);
+    set(gca,'FontSize', 14);
+    subplot(histPlotRows,2,4)
+    histfit(v_tilde(:,2),100);
+    title('$\tilde{v}_2$ histogram', 'Interpreter', 'latex', 'FontSize', 14);
+    set(gca,'FontSize', 14);
+    
+    if dataDim == 2
+        subplot(histPlotRows,2,5)
+        hist3(v,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'flat');
+        colormap(gca, 'hot')
+        colorbar()
+        view(2)
+        xlim([ min(v(:,1)) max(v(:,1))])
+        ylim([ min(v(:,2)) max(v(:,2))])
+        title('$v$ histogram', 'Interpreter', 'latex', 'FontSize', 14);
+        set(gca,'FontSize', 14);
+
+        subplot(histPlotRows,2,6)
+        hist3(v_tilde,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'flat');
+        colormap(gca, 'hot')
+        colorbar()
+        view(2)
+        xlim([ min(v_tilde(:,1)) max(v_tilde(:,1))])
+        ylim([ min(v_tilde(:,2)) max(v_tilde(:,2))])
+        title('$\tilde{v}$ histogram', 'Interpreter', 'latex', 'FontSize', 14);
+        set(gca,'FontSize', 14);
+    else
+        subplot(histPlotRows,2,5)
+        histogram(v(:,3),100);
+        title('$v_3$ histogram', 'Interpreter', 'latex', 'FontSize', 14);
+        set(gca,'FontSize', 14);
+        subplot(histPlotRows,2,6)
+        histfit(v_tilde(:,3),100);
+        title('$\tilde{v}_3$ histogram', 'Interpreter', 'latex', 'FontSize', 14);
+        set(gca,'FontSize', 14);
+    end    
 end
-if size(v_tilde,2) == 2
-    subplot(dataDim+1,2,6)
-    hist3(v_tilde,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'flat');
-    colormap(gca, 'hot')
-    colorbar()
-    view(2)
-    xlim([ min(v_tilde(:,1)) max(v_tilde(:,1))])
-    ylim([ min(v_tilde(:,2)) max(v_tilde(:,2))])
-    title('v tilde3 histogram');
-end
-set(gcf,'Position', [100 200 1200 800])
+set(gcf,'Position', [100 200 1000 histPlotRows*250])
+saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_hists_transformed'), 'epsc');
 
 % Distances
 ii = 5; jj = 60;
@@ -345,27 +373,30 @@ end
 % PlotSpectrum(sSimParams, sDatasetTilde, [], vLambdaTildeAnalytic, vLambdaTildeNumeric, []);
 
 %% Find coeffs for graph-signal
-if b_useRandomProjections
-    f_tilde = f; % Assuming the distances are preserved
-else
-    f_tilde = R*f;
-end
+Rf = R*f;
 
+% EigRLS
 tilde_gamma_A_eigrls = 0;0;
 tilde_gamma_I_eigrls = 0;0.1;
-c_tilde = eigrls(f_tilde, mPhiTildeAnalytic, vLambdaTildeAnalytic, tilde_gamma_A_eigrls, tilde_gamma_I_eigrls, G.L);
+c_tilde = eigrls(Rf, mPhiTildeAnalytic, vLambdaTildeAnalytic, tilde_gamma_A_eigrls, tilde_gamma_I_eigrls, G.L);
 % c_tilde = lsqminnorm(mPhiTildeAnalytic,R*f);
 % c_tilde = (mPhiTildeAnalytic.'*mPhiTildeAnalytic)\(mPhiTildeAnalytic.'*(R*f));
 % c_tilde = pinv(mPhiTildeAnalytic)*R*f;
 % f_tilde = mPhiTildeAnalytic*c_tilde;
+f_tilde_eigrls = mPhiTildeAnalytic*c_tilde;
 
-f_tilde2 = mPhiTildeAnalytic*c_tilde;
+% fminsearch
+fun = @(c)f'*G.L*f - c'*mPhiTildeAnalytic.'*G_tilde.L*mPhiTildeAnalytic*c;
+c0 = randn(nEigs,1);
+options = optimset('MaxIter',100);
+c_tilde = fminsearch(fun,c0,options);
+f_tilde_fmin = mPhiTildeAnalytic*c_tilde;
 
 
 %% Reconstruction
 if b_useRandomProjections
     f_rec = f;
-    f_rec2 = f;
+    f_int = f;
     v_rec = v;
 else
     %This is the same: [mPhiTildeAnalytic.'*f_tilde mPhiTildeAnalytic.'*R*f]
@@ -378,8 +409,8 @@ else
     % invR = R';
     % f_reconstructed = (invR.'*invR)\(invR.'*f_tilde);
     % f_reconstructed = lsqminnorm(R',f_tilde);
-    f_rec = R'*f_tilde;
-    f_rec2 = R'*f_tilde2;
+    f_rec = R'*Rf;
+    f_int = R'*f_tilde_eigrls;
     v_rec = R'*v_tilde;
 end
 
@@ -408,45 +439,124 @@ if b_normlizedLaplacian
 end
 
 %% Plot
-plot_v_indexes = (1:3:20)';
-v_numers_cells = cellstr(num2str(plot_v_indexes))';
-figure;
-subplot(2,3,1); 
-    gsp_plot_signal(G,f,param); 
-    title(['Original graph-signal' newline '$f^T L f$ = ' num2str(f'*G.L*f, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
-    hold on;
-    if dataDim == 3
-        text(v(plot_v_indexes,1), v(plot_v_indexes,2), v(plot_v_indexes,3), v_numers_cells,'FontWeight','bold','Color', 'black')
+fig = figure;
+subplot(1,3,1); 
+    if dataDim > 1
+        gsp_plot_signal(G,f,param);
     else
-        text(v(plot_v_indexes,1), v(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
+        plot(G.coords, f, '.');
+        xlabel('$v$', 'Interpreter', 'latex', 'FontSize', 14);
     end
+    title(['Original graph-signal' newline ...
+           '$f(v)$' newline ...
+           '$f^T L f$ = ' num2str(f'*G.L*f, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
     view(0,90)
-subplot(2,3,2); 
-    gsp_plot_signal(G_tilde,f_tilde,param); 
-    title(['Transformed graph-signal' newline '$\tilde{f}^T \tilde{L} \tilde{f}$ = ' num2str(f_tilde'*G_tilde.L*f_tilde, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
-    hold on;
-    if dataDim == 3
-        text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_tilde(plot_v_indexes,3), v_numers_cells,'FontWeight','bold','Color', 'black')
+    set(gca,'FontSize', 14);
+subplot(1,3,2); 
+    if dataDim > 1
+        gsp_plot_signal(G_tilde,f_tilde_eigrls,param); 
     else
-        text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
+        plot(G_tilde.coords, f_tilde_eigrls, '.');
+        xlabel('$\tilde{v}$', 'Interpreter', 'latex', 'FontSize', 14);
     end
+    title(['Transformed graph-signal (EigRLS)' newline ...
+           '$\tilde{f}(\tilde{v}) = \tilde{{\bf \Phi}} c \approx {\bf R} f(v)$' newline ...
+           '$\tilde{f}^T \tilde{L} \tilde{f}$ = ' num2str(f_tilde_eigrls'*G_tilde.L*f_tilde_eigrls, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
     view(0,90)
-subplot(2,3,3); 
-    gsp_plot_signal(G_rec,f_rec,param); 
-    title(['Reconstructed graph-signal' newline '$\hat{f}^T L \hat{f}$ = ' num2str(f_rec'*G.L*f_rec, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
-    view(0,90)
-subplot(2,3,5); 
-    gsp_plot_signal(G_tilde,f_tilde2,param); 
-    title(['Transformed graph-signal 2' newline '$\tilde{f}^T \tilde{L} \tilde{f}$ = ' num2str(f_tilde2'*G_tilde.L*f_tilde2, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
-    hold on;
-    if dataDim == 3
-        text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_tilde(plot_v_indexes,3), v_numers_cells,'FontWeight','bold','Color', 'black')
+    set(gca,'FontSize', 14);
+subplot(1,3,3); 
+    if dataDim > 1
+        gsp_plot_signal(G_tilde,f_tilde_fmin,param); 
     else
-        text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
+        plot(G_tilde.coords, f_tilde_fmin, '.');
+        xlabel('$\tilde{v}$', 'Interpreter', 'latex', 'FontSize', 14);
     end
+    title(['Transformed graph-signal (fminsearch)' newline ...
+           '$\tilde{f}(\tilde{v}) = \tilde{{\bf \Phi}} c$      $[f^T L f \approx c^T \tilde{{\bf \Phi}}^T \tilde{L} \tilde{{\bf \Phi}} c]$' newline ...
+           '$\tilde{f}^T \tilde{L} \tilde{f}$ = ' num2str(f_tilde_fmin'*G_tilde.L*f_tilde_fmin, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
     view(0,90)
-subplot(2,3,6); 
-    gsp_plot_signal(G_rec,f_rec2,param); 
-    title(['Reconstructed graph-signal 2' newline '$\hat{f}^T L \hat{f}$ = ' num2str(f_rec2'*G.L*f_rec2, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
+    set(gca,'FontSize', 14);
+set(gcf,'Position', [400 100 1400 400])  
+saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_transformation'), 'epsc');
+
+
+
+fig = figure;
+subplot(1,3,1); 
+    if dataDim > 1
+        gsp_plot_signal(G,f,param);
+    else
+        plot(G.coords, f, '.');
+        xlabel('$v$', 'Interpreter', 'latex', 'FontSize', 14);
+    end
+    title(['Original graph-signal' newline '$f(v)$'], 'Interpreter', 'latex', 'FontSize', 14);
     view(0,90)
-set(gcf,'Position', [400 100 1200 800])   
+    set(gca,'FontSize', 14);
+subplot(1,3,2); 
+    if dataDim > 1
+        gsp_plot_signal(G_tilde,Rf,param); 
+    else
+        plot(G_tilde.coords, Rf, '.');
+        xlabel('$\tilde{v}$', 'Interpreter', 'latex', 'FontSize', 14);
+    end
+    title(['Transformed graph-signal' newline '$\tilde{f}(\tilde{v}) = {\bf R} f(v)$'], 'Interpreter', 'latex', 'FontSize', 14);
+    view(0,90)
+    set(gca,'FontSize', 14);
+subplot(1,3,3); 
+    if dataDim > 1
+        gsp_plot_signal(G_rec,f_rec,param); 
+    else
+        plot(G_rec.coords, f_rec, '.');
+        xlabel('$\tilde{v}$', 'Interpreter', 'latex', 'FontSize', 14);
+    end
+    title(['Reconstructed graph-signal' newline '$\hat{f}(v) = {\bf R}^T \tilde{f}(\tilde{v})$'], 'Interpreter', 'latex', 'FontSize', 14);
+    view(0,90)
+    set(gca,'FontSize', 14);
+set(gcf,'Position', [400 100 1400 400])  
+saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_reconstruction'), 'epsc');
+
+
+
+
+% plot_v_indexes = (1:3:20)';
+% v_numers_cells = cellstr(num2str(plot_v_indexes))';
+% figure;
+% subplot(2,3,1); 
+%     gsp_plot_signal(G,f,param); 
+%     title(['Original graph-signal' newline '$f^T L f$ = ' num2str(f'*G.L*f, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
+%     hold on;
+%     if dataDim == 3
+%         text(v(plot_v_indexes,1), v(plot_v_indexes,2), v(plot_v_indexes,3), v_numers_cells,'FontWeight','bold','Color', 'black')
+%     else
+%         text(v(plot_v_indexes,1), v(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
+%     end
+%     view(0,90)
+% subplot(2,3,2); 
+%     gsp_plot_signal(G_tilde,f_tilde_sampled_padded,param); 
+%     title(['Transformed graph-signal' newline '$\tilde{f}^T \tilde{L} \tilde{f}$ = ' num2str(f_tilde_sampled_padded'*G_tilde.L*f_tilde_sampled_padded, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
+%     hold on;
+%     if dataDim == 3
+%         text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_tilde(plot_v_indexes,3), v_numers_cells,'FontWeight','bold','Color', 'black')
+%     else
+%         text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
+%     end
+%     view(0,90)
+% subplot(2,3,3); 
+%     gsp_plot_signal(G_rec,f_rec,param); 
+%     title(['Reconstructed graph-signal' newline '$\hat{f}^T L \hat{f}$ = ' num2str(f_rec'*G.L*f_rec, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
+%     view(0,90)
+% subplot(2,3,5); 
+%     gsp_plot_signal(G_tilde,f_tilde_int,param); 
+%     title(['Transformed graph-signal 2' newline '$\tilde{f}^T \tilde{L} \tilde{f}$ = ' num2str(f_tilde_int'*G_tilde.L*f_tilde_int, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
+%     hold on;
+%     if dataDim == 3
+%         text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_tilde(plot_v_indexes,3), v_numers_cells,'FontWeight','bold','Color', 'black')
+%     else
+%         text(v_tilde(plot_v_indexes,1), v_tilde(plot_v_indexes,2), v_numers_cells,'FontWeight','bold','Color', 'black')
+%     end
+%     view(0,90)
+% subplot(2,3,6); 
+%     gsp_plot_signal(G_rec,f_int,param); 
+%     title(['Reconstructed graph-signal 2' newline '$\hat{f}^T L \hat{f}$ = ' num2str(f_int'*G.L*f_int, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
+%     view(0,90)
+% set(gcf,'Position', [400 100 1200 800])   

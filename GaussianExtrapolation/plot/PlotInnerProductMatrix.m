@@ -26,13 +26,15 @@ set(gca,'FontSize', 14);
 set(gcf,'Position', [x0 y0 width height])
 
 %% Save
-if ~exist(sSimParams.outputFolder, 'dir')
-    mkdir(sSimParams.outputFolder)
+if ~isempty(sSimParams)
+    if ~exist(sSimParams.outputFolder, 'dir')
+        mkdir(sSimParams.outputFolder)
+    end
+    if isempty(nysRatio)
+        simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
+    else
+        simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+    end
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix,  '_inner_product_matrix_', figName), 'epsc');
 end
-if isempty(nysRatio)
-    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
-else
-    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
-end
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix,  '_inner_product_matrix_', figName), 'epsc');
 end

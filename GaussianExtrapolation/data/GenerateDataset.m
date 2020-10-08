@@ -61,7 +61,9 @@ else
             error('generate random data for more than 2D')
         end        
     elseif strcmp(actualDataDist, 'Uniform')
-        xTotal = (sSimParams.xMax - sSimParams.xMin)*rand(nTotal, dim) + sSimParams.xMin;
+        xMin = -1;
+        xMax = 1;
+        xTotal = (xMax - xMin)*rand(nTotal, dim) + xMin;
     else
         error('unknown pdf')
     end

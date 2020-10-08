@@ -3,9 +3,9 @@ function fig = PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambdaAnalytic, vL
 fig = figure('Name', 'Spectrum');
 M = length(vLambdaAnalytic);
 subplot(2,1,1);
-stem(0:M-1, vLambdaAnalytic, 'x', 'DisplayName', '$\lambda^{\phi}_m$');
+stem(0:M-1, vLambdaAnalytic(1:M), 'x', 'DisplayName', '$\lambda^{\phi}_m$');
 hold on;
-stem(0:M-1, vLambdaNumeric, 'DisplayName', '$\lambda^{v}_m$');
+stem(0:M-1, vLambdaNumeric(1:M), 'DisplayName', '$\lambda^{v}_m$');
 if ~isempty(vNysRatio)
     for r = 1:length(vNysRatio)
         nysRatio = vNysRatio(r);
@@ -20,9 +20,9 @@ title('Eigenvalues', 'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 
 subplot(2,1,2);
-stem(0:M-1, log(vLambdaAnalytic),'x', 'LineStyle','none', 'DisplayName', '$\log(\lambda^{\phi}_m)$');
+stem(0:M-1, log(vLambdaAnalytic(1:M)),'x', 'LineStyle','none', 'DisplayName', '$\log(\lambda^{\phi}_m)$');
 hold on;
-stem(0:M-1, log(vLambdaNumeric),'LineStyle','none', 'DisplayName', '$\log(\lambda^{v}_m)$');
+stem(0:M-1, log(vLambdaNumeric(1:M)),'LineStyle','none', 'DisplayName', '$\log(\lambda^{v}_m)$');
 if ~isempty(vNysRatio)
     for r = 1:length(vNysRatio)
         nysRatio = vNysRatio(r);

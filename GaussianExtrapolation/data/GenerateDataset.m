@@ -13,8 +13,10 @@ end
 nTotal = nTrain + nTest;
 %% Generate data
 if strcmp(actualDataDist, 'Two_moons')
+    assert(dim == 2);
     sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile);
 elseif strcmp(actualDataDist, 'Two_spirals')
+    assert(dim == 2);
     sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
 else
     if strcmp(actualDataDist, 'Gaussian')

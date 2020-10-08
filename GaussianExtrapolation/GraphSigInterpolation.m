@@ -1,28 +1,54 @@
+%% Restart
 clc; clear; close all; rng('default')
 
 %% Parameters
-nEigs = 30;
+% Graph data
+dataDim = 2;
+graphName =  'sensor'; % 'Gaussian' / 'Uniform' / 
+                        % 'bunny' / 'twodgrid' / 'sensor' / 'minnesota' /
+                        % 'david_seonsor' / 'swiss_roll' / 'random_ring'
+% Graph parameters
+nEigs       = 30;
 nComponents = 1;
-omega = 0.3;
+omega       = 0.3;
 estDataDist = 'Gaussian';
-sSimParams.PlotEigenFuncsM = min(nEigs, 20);
-sSimParams.outputFolder = 'figs';
-sSimParams.b_showEigenFigures = true;
-sSimParams.b_showGraphMatricesFigures = true;
-sSimParams.b_GSPBoxPlots = true;
-
-b_distributionDataset = false;
 b_normlizedLaplacian = true;
+gamma_A_eigrls = 0; 0.01;
+gamma_I_eigrls = 0; 0.1; 
+
+% Transformation
 verticesTransformation = 'mds'; % 'mds' / 'rp' / 'randOrth'
-samplingRatio = 0.1;
+tilde_gamma_A_eigrls = 0; 0.01;
+tilde_gamma_I_eigrls = 0; 0.1;
+
+% Plot parameters
+samplingRatio = 0.06;
 if samplingRatio < 0.2
     sSimParams.b_plotSamplingPointsMarkers = true;
 else
     sSimParams.b_plotSamplingPointsMarkers = false;
 end
+sSimParams.PlotEigenFuncsM            = min(nEigs, 20);
+sSimParams.outputFolder               = 'figs';
+sSimParams.b_showEigenFigures         = false;
+sSimParams.b_showGraphMatricesFigures = false;
+sSimParams.b_GSPBoxPlots              = true;
+
+
+% graphName = 'Two_moons';
+% nEigs       = 8;
+% nComponents = 2;
+% gamma_A_eigrls = 0; 0.01;
+% gamma_I_eigrls = 0.1; 
+% tilde_gamma_A_eigrls = 0; 0.01;
+% tilde_gamma_I_eigrls = 0.1;
+
 %% Generate graph
-[graphName, G, dist, sDataset, sKernelParams] = GenerateGraph(sSimParams, b_distributionDataset, nComponents, estDataDist, omega, b_normlizedLaplacian, nEigs);
+[G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, dataDim, nComponents, estDataDist, omega, b_normlizedLaplacian, nEigs);
 v = sDataset.sData.x; % For convenience
+if sSimParams.b_showGraphMatricesFigures
+    PlotGraphMatrices(G, b_normlizedLaplacian);
+end
 
 % Eigenvectors
 [V, vLambdaNumeric] = CalcNumericEigenvectors(G.N, sKernelParams, v);
@@ -47,26 +73,36 @@ if sSimParams.b_showEigenFigures
     PlotGraphFourierFunctions(G, nEigs)
 end
 %% Signal on the graph
-[f,f_hat] = GenerateGraphSignal(G, mPhiAnalytic);
-if sSimParams.b_showEigenFigures
-    PlotGraphFourierTransform(sSimParams,G,f_hat)
-end
-%% Sample the signal
-randPerm = randperm(G.N)';
-sample_ind = sort(randPerm(1:round(samplingRatio*G.N)));
-% non_sample_ind = setdiff(1:G.N,sample_ind);
-% sample_ind = (1:samplingRatio*G.N)';
+if isfield(sDataset.sData, 'y') &&  ~isempty(sDataset.sData.y) % If the dataset already contains a function
+    f = sDataset.sData.y;
+    sample_ind = find(sDataset.sData.y);
+    f_sampled = sDataset.sData.y(sample_ind);
+    f_sampled_padded = sDataset.sData.y;
+else
+    if ~isfield(G, 'U')
+        G = gsp_compute_fourier_basis(G);
+    end
+    [f,f_hat] = GenerateGraphSignal(G, mPhiAnalytic);
+    if sSimParams.b_showEigenFigures
+        PlotGraphFourierTransform(sSimParams,G,f_hat)
+    end
+    
+    % Sample the signal
+    randPerm = randperm(G.N)';
+    sample_ind = sort(randPerm(1:round(samplingRatio*G.N)));
+    % non_sample_ind = setdiff(1:G.N,sample_ind);
+    % sample_ind = (1:samplingRatio*G.N)';
 
-f_sampled = f(sample_ind);
-f_sampled_padded = zeros(size(f));
-f_sampled_padded(sample_ind) = f(sample_ind);
+    f_sampled = f(sample_ind);
+    f_sampled_padded = zeros(size(f));
+    f_sampled_padded(sample_ind) = f(sample_ind);
+end
+
 
 %% GSP interpolation
 gsp_interp_signal = gsp_interpolate(G,f_sampled,sample_ind);
 
 %% EigRLS interpolate (without transformation)
-gamma_A_eigrls = 0; 0.01;
-gamma_I_eigrls = 0; 0.1; 
 c = eigrls(f_sampled_padded, mPhiAnalytic, vLambdaAnalytic, gamma_A_eigrls, gamma_I_eigrls, G.L);
 f_int_no_transform = mPhiAnalytic*c;
 
@@ -119,11 +155,18 @@ end
 
 
 %% Plot vertices transformation
-PlotVerticesTransformation(sSimParams,sDataset.dim,v,v_tilde,graphName,verticesTransformation)
+PlotVerticesTransformation(sSimParams,sDataset.dim,v,v_tilde,graphName,verticesTransformation);
 
 %% Generate G_tilde
 [G_tilde, dist_tilde, sDatasetTilde, sKernelParamsTilde] = GenerateGraphTilde(v_tilde, nComponents,omega,nEigs,b_normlizedLaplacian);
+
+% Eigenfunctions
 [mPhiTildeAnalytic, vLambdaTildeAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParamsTilde, v_tilde, true);
+if sSimParams.b_showEigenFigures
+    PlotEigenfuncvecScatter(sSimParams, estDataDist, v_tilde, [], 0, sSimParams.PlotEigenFuncsM-1, mPhiTildeAnalytic, vLambdaTildeAnalytic, 'Analytic', [], G_tilde)
+end
+
+
 [~, vLambdaTildeNumeric] = CalcNumericEigenvectors(nEigs, sKernelParamsTilde, v_tilde);
 if sSimParams.b_showEigenFigures
     PlotSpectrum(sSimParams, sDatasetTilde, [], vLambdaTildeAnalytic, vLambdaTildeNumeric, []);
@@ -133,8 +176,6 @@ end
 fprintf('distances diffs norm = %d\n', norm(dist_tilde - dist, 'fro'));
 
 %% Find coeffs for graph-signal - EigRLS
-tilde_gamma_A_eigrls = 0;0;
-tilde_gamma_I_eigrls = 0;0.1;
 c_tilde = eigrls(f_tilde_sampled_padded, mPhiTildeAnalytic, vLambdaTildeAnalytic, tilde_gamma_A_eigrls, tilde_gamma_I_eigrls, G.L);
 % c_tilde = lsqminnorm(mPhiTildeAnalytic,R*f);
 % c_tilde = (mPhiTildeAnalytic.'*mPhiTildeAnalytic)\(mPhiTildeAnalytic.'*(R*f));
@@ -162,8 +203,8 @@ end
 
 %% Plot EigRLS
 PlotGraphSigInterpTransform(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_eigrls, samplingRatio, sample_ind, graphName, verticesTransformation, 'EigRLS');
-PlotGraphSigInterpTransformNoReturn(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_eigrls, samplingRatio, sample_ind, graphName, verticesTransformation, 'EigRLS');
+% PlotGraphSigInterpTransformNoReturn(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_eigrls, samplingRatio, sample_ind, graphName, verticesTransformation, 'EigRLS');
 
 %% Plot fminsearch
-PlotGraphSigInterpTransform(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_fminsearch, samplingRatio, sample_ind, graphName, verticesTransformation, 'fminsearch');
-PlotGraphSigInterpTransformNoReturn(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_fminsearch, samplingRatio, sample_ind, graphName, verticesTransformation, 'fminsearch');
+% PlotGraphSigInterpTransform(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_fminsearch, samplingRatio, sample_ind, graphName, verticesTransformation, 'fminsearch');
+% PlotGraphSigInterpTransformNoReturn(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_fminsearch, samplingRatio, sample_ind, graphName, verticesTransformation, 'fminsearch');

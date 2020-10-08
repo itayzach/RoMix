@@ -1,7 +1,5 @@
 function [f,f_hat] = GenerateGraphSignal(G, mPhiAnalytic)
 
-% G = gsp_compute_fourier_basis(G);
-
 % this:
 % paramf.log = 1;
 % Nf = 5;
@@ -26,17 +24,17 @@ function [f,f_hat] = GenerateGraphSignal(G, mPhiAnalytic)
 % f = G.U*(f_hat);
 
 % or this:
-% k0 = round(0.01*G.N);
-% f_hat = zeros(G.N,1);
-% f_hat(1:k0) = 5*sort(abs(randn(k0,1)), 'descend');
-% f = G.U*f_hat;
-% % f = V.'*f_hat;
+k0 = round(0.01*G.N);
+f_hat = zeros(G.N,1);
+f_hat(1:k0) = 5*sort(abs(randn(k0,1)), 'descend');
+f = G.U*f_hat;
+% f = V.'*f_hat;
 
 % or this:
-nEigs = size(mPhiAnalytic,2);
-c_orig = randn(nEigs, 1);
-f = mPhiAnalytic*c_orig;
-f_hat = G.U*f;
+% nEigs = size(mPhiAnalytic,2);
+% c_orig = randn(nEigs, 1);
+% f = mPhiAnalytic*c_orig;
+% f_hat = G.U*f;
 
 
 end

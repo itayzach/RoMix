@@ -28,14 +28,6 @@ subplot(132);
     else
         plot(G.coords, gsp_interp_signal, '.');
     end
-    if sSimParams.b_plotSamplingPointsMarkers
-        hold on; 
-        if dataDim == 2
-            scatter(G.coords(sampleInd,1), G.coords(sampleInd,2), 'ko')
-        elseif dataDim == 3
-            scatter3(G.coords(sampleInd,1), G.coords(sampleInd,2), G.coords(sampleInd,3), 'ko')
-        end
-    end
     view(0,90)
     set(gca,'FontSize', 14);
     title(['Pesenson''s interpolation' newline ...
@@ -46,14 +38,6 @@ subplot(133);
         gsp_plot_signal(G,f_int_no_transform,param);
     else
         plot(G.coords, f_int_no_transform, '.');
-    end
-    if sSimParams.b_plotSamplingPointsMarkers
-        hold on; 
-        if dataDim == 2
-            scatter(G.coords(sampleInd,1), G.coords(sampleInd,2), 'ko')
-        elseif dataDim == 3
-            scatter3(G.coords(sampleInd,1), G.coords(sampleInd,2), G.coords(sampleInd,3), 'ko')
-        end
     end
     set(gca,'FontSize', 14);
     title(['Our interpolation (no transformation)' newline '$f_{{\bf int}}^T L f_{{\bf int}}$ = ' num2str(f_int_no_transform'*G.L*f_int_no_transform, '%.3f') newline ...

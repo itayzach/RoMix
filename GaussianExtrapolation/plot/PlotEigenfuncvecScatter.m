@@ -1,4 +1,4 @@
-function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, firstEigenIdx, lastEigIdx, V, vLambda, figName, c, G)
+function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, firstEigenIdx, lastEigIdx, mPhi, vLambda, figName, c, G)
 dim = size(mData, 2);
 assert(dim <= 2, 'Not supported')
 if dim == 1
@@ -18,7 +18,7 @@ if dim == 1
         else
             assert('invalid option')
         end
-        plot(mData(:), V(:,m+1), '.', 'DisplayName', dispName);
+        plot(mData(:), mPhi(:,m+1), '.', 'DisplayName', dispName);
 %         scatter(mData(:), V(:,m+1), 'filled', 'DisplayName', dispName);
         xlim([ min(mData) max(mData) ])
         hold on;
@@ -43,12 +43,12 @@ elseif dim == 2
         subplot(nRows, nCols,m-firstEigenIdx+1);
         if sSimParams.b_GSPBoxPlots
             param.show_edges = false;
-            gsp_plot_signal(G,V(:,m+1),param); 
+            gsp_plot_signal(G,mPhi(:,m+1),param); 
         else
-            scatter3(mData(:,1), mData(:,2), V(:,m+1), [], V(:,m+1), 'filled');
+            scatter3(mData(:,1), mData(:,2), mPhi(:,m+1), [], mPhi(:,m+1), 'filled');
             colormap(gca, 'default')
             colorbar()
-            caxis([min(V(:,m+1)) max(V(:,m+1))])
+            caxis([min(mPhi(:,m+1)) max(mPhi(:,m+1))])
             view(2)
             xlim([ min(mData(:,1)) max(mData(:,1))])
             ylim([ min(mData(:,2)) max(mData(:,2))])

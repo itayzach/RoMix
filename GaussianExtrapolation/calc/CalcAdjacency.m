@@ -1,4 +1,4 @@
-function A = CalcAdjacency(sKernelParams, x, y)
+function [A, dist] = CalcAdjacency(sKernelParams, x, y)
 
 if ~exist('y', 'var')
     y = x;

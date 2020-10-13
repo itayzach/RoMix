@@ -32,7 +32,7 @@ subplot(1,3,2);
     if sSimParams.b_plotSamplingPointsMarkers
         hold on; 
         if dataDim == 1
-            scatter(G_tilde.coords(sample_ind), f_tilde_sampled_padded(sample_ind), 'ko')
+            scatter(G_tilde.coords(sample_ind), f_tilde_interp(sample_ind), 'ko')
         elseif dataDim == 2
             scatter(G_tilde.coords(sample_ind,1), G_tilde.coords(sample_ind,2), 'ko')
         elseif dataDim == 3
@@ -42,7 +42,7 @@ subplot(1,3,2);
     view(0,90)
     set(gca,'FontSize', 14);
     title(['Interpolated graph-signal on $\tilde{G}$' newline ...
-           'using ' interpMethod newline...
+           'using ' verticesTransformation ' (' interpMethod ')' newline...
            '$\tilde{f}_{\bf int}^T \tilde{L} \tilde{f}_{\bf int}$ = ' num2str(f_tilde_interp'*G_tilde.L*f_tilde_interp, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
 subplot(1,3,3); 
     if dataDim > 1

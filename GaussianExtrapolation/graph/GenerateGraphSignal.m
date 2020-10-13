@@ -1,4 +1,4 @@
-function [f,f_hat] = GenerateGraphSignal(G, mPhiAnalytic)
+function [f,f_hat] = GenerateGraphSignal(G, mPhi)
 
 % this:
 % paramf.log = 1;
@@ -28,12 +28,11 @@ k0 = round(0.01*G.N);
 f_hat = zeros(G.N,1);
 f_hat(1:k0) = 5*sort(abs(randn(k0,1)), 'descend');
 f = G.U*f_hat;
-% f = V.'*f_hat;
 
 % or this:
-% nEigs = size(mPhiAnalytic,2);
+% nEigs = size(mPhi,2);
 % c_orig = randn(nEigs, 1);
-% f = mPhiAnalytic*c_orig;
+% f = mPhi*c_orig;
 % f_hat = G.U*f;
 
 

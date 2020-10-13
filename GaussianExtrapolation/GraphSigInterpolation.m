@@ -2,12 +2,20 @@
 clc; clear; close all; rng('default')
 
 %% Parameters
+%==========================================================================
 % Graph data
+%==========================================================================
 dataDim = 2;
-graphName =  'sensor'; % 'Gaussian' / 'Uniform' / 
-                        % 'bunny' / 'twodgrid' / 'sensor' / 'minnesota' /
-                        % 'david_seonsor' / 'swiss_roll' / 'random_ring'
+
+% 'Gaussian' / 'Uniform' / 
+% 'bunny' / 'twodgrid' / 'sensor' / 'minnesota' /
+% 'david_seonsor' / 'swiss_roll' / 'random_ring'
+graphName =  'sensor'; 
+
+%==========================================================================
 % Graph parameters
+%==========================================================================
+b_generateGraphSignal = true;
 nEigs       = 30;
 nComponents = 1;
 omega       = 0.3;
@@ -16,24 +24,28 @@ b_normlizedLaplacian = true;
 gamma_A_eigrls = 0; 0.01;
 gamma_I_eigrls = 0; 0.1; 
 
+%==========================================================================
 % Transformation
-verticesTransformation = 'mds'; % 'mds' / 'rp' / 'randOrth'
+%==========================================================================
+verticesTransformation = 'MDS'; % 'MDS' / 'RP' / 'RandOrth'
 tilde_gamma_A_eigrls = 0; 0.01;
 tilde_gamma_I_eigrls = 0; 0.1;
 
+%==========================================================================
 % Plot parameters
-samplingRatio = 0.06;
+%==========================================================================
+samplingRatio = 0.1;
 if samplingRatio < 0.2
     sSimParams.b_plotSamplingPointsMarkers = true;
 else
     sSimParams.b_plotSamplingPointsMarkers = false;
 end
-sSimParams.PlotEigenFuncsM            = min(nEigs, 20);
 sSimParams.outputFolder               = 'figs';
+sSimParams.PlotEigenFuncsM            = min(nEigs, 20);
 sSimParams.b_showEigenFigures         = false;
 sSimParams.b_showGraphMatricesFigures = false;
 sSimParams.b_GSPBoxPlots              = true;
-
+sSimParams.b_showVerticesTransform    = false;
 
 % graphName = 'Two_moons';
 % nEigs       = 8;
@@ -50,30 +62,38 @@ if sSimParams.b_showGraphMatricesFigures
     PlotGraphMatrices(G, b_normlizedLaplacian);
 end
 
+%==========================================================================
 % Eigenvectors
-[V, vLambdaNumeric] = CalcNumericEigenvectors(G.N, sKernelParams, v);
+%==========================================================================
+[V, vLambdaNumeric] = CalcNumericEigenvectors(nEigs, sKernelParams, v);
 if sSimParams.b_showEigenFigures
     PlotEigenfuncvecScatter(sSimParams, estDataDist, v, [], 0, sSimParams.PlotEigenFuncsM-1, V, vLambdaNumeric, 'Numeric', [], G)
 end
 
+%==========================================================================
 % Eigenfunctions
+%==========================================================================
 [mPhiAnalytic, vLambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, v, true);
 if sSimParams.b_showEigenFigures
     PlotEigenfuncvecScatter(sSimParams, estDataDist, v, [], 0, sSimParams.PlotEigenFuncsM-1, mPhiAnalytic, vLambdaAnalytic, 'Analytic', [], G)
 end
 
+%==========================================================================
 % Eigenvalues
+%==========================================================================
 if sSimParams.b_showEigenFigures
     PlotSpectrum(sSimParams, sDataset, [], vLambdaAnalytic, vLambdaNumeric, []);
 end
 
+%==========================================================================
 % Laplacian eigenvectors (Fourier basis)
+%==========================================================================
 if sSimParams.b_showEigenFigures
     G = gsp_compute_fourier_basis(G);
     PlotGraphFourierFunctions(G, nEigs)
 end
 %% Signal on the graph
-if isfield(sDataset.sData, 'y') &&  ~isempty(sDataset.sData.y) % If the dataset already contains a function
+if ~b_generateGraphSignal % If the dataset already contains a function
     f = sDataset.sData.y;
     sample_ind = find(sDataset.sData.y);
     f_sampled = sDataset.sData.y(sample_ind);
@@ -82,7 +102,7 @@ else
     if ~isfield(G, 'U')
         G = gsp_compute_fourier_basis(G);
     end
-    [f,f_hat] = GenerateGraphSignal(G, mPhiAnalytic);
+    [f,f_hat] = GenerateGraphSignal(G, V);
     if sSimParams.b_showEigenFigures
         PlotGraphFourierTransform(sSimParams,G,f_hat)
     end
@@ -120,7 +140,7 @@ PlotGraphSigInterp(sSimParams, sDataset.dim, G, samplingRatio, sample_ind, f, gs
 
 %% Transform
 % "Random projection"
-if strcmp(verticesTransformation, 'rp')
+if strcmp(verticesTransformation, 'RP')
     newDim = dataDim;
     R = randn(dataDim,newDim); % Random projection matrix
     for i = 1:dataDim
@@ -128,7 +148,7 @@ if strcmp(verticesTransformation, 'rp')
     end
     v_tilde = v*R; % Projection
 %     Rf = f;
-elseif strcmp(verticesTransformation, 'randOrth')
+elseif strcmp(verticesTransformation, 'RandOrth')
     % % Linear combination of Gaussians
     % R = randn(G.N, G.N);
     % % for i = 1:G.N
@@ -147,7 +167,7 @@ elseif strcmp(verticesTransformation, 'randOrth')
 
     % % Whitening matrix
     % [v_tilde, R, invR] = whiten(v,1e-5);
-elseif strcmp(verticesTransformation, 'mds')
+elseif strcmp(verticesTransformation, 'MDS')
     [v_tilde, mdsLambda] = cmdscale(dist);
 %     Rf = f;
     f_tilde_sampled_padded = f_sampled_padded;
@@ -155,18 +175,24 @@ end
 
 
 %% Plot vertices transformation
-PlotVerticesTransformation(sSimParams,sDataset.dim,v,v_tilde,graphName,verticesTransformation);
+if sSimParams.b_showVerticesTransform
+    PlotVerticesTransformation(sSimParams,sDataset.dim,v,v_tilde,graphName,verticesTransformation);
+end
 
 %% Generate G_tilde
 [G_tilde, dist_tilde, sDatasetTilde, sKernelParamsTilde] = GenerateGraphTilde(v_tilde, nComponents,omega,nEigs,b_normlizedLaplacian);
 
+%==========================================================================
 % Eigenfunctions
+%==========================================================================
 [mPhiTildeAnalytic, vLambdaTildeAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParamsTilde, v_tilde, true);
 if sSimParams.b_showEigenFigures
     PlotEigenfuncvecScatter(sSimParams, estDataDist, v_tilde, [], 0, sSimParams.PlotEigenFuncsM-1, mPhiTildeAnalytic, vLambdaTildeAnalytic, 'Analytic', [], G_tilde)
 end
 
-
+%==========================================================================
+% Eigenvectors
+%==========================================================================
 [~, vLambdaTildeNumeric] = CalcNumericEigenvectors(nEigs, sKernelParamsTilde, v_tilde);
 if sSimParams.b_showEigenFigures
     PlotSpectrum(sSimParams, sDatasetTilde, [], vLambdaTildeAnalytic, vLambdaTildeNumeric, []);
@@ -182,7 +208,7 @@ c_tilde = eigrls(f_tilde_sampled_padded, mPhiTildeAnalytic, vLambdaTildeAnalytic
 % c_tilde = pinv(mPhiTildeAnalytic)*R*f;
 
 f_tilde_int_eigrls = mPhiTildeAnalytic*c_tilde; % Interpolate
-if strcmp(verticesTransformation, 'randOrth')
+if strcmp(verticesTransformation, 'RandOrth')
     f_int_eigrls = R'*f_tilde_int_eigrls;
 else
     f_int_eigrls = f_tilde_int_eigrls;
@@ -195,7 +221,7 @@ c0 = randn(nEigs,1);
 options = optimset('MaxIter',maxIter_fminsearch);
 c_tilde = fminsearch(fun,c0,options);
 f_tilde_int_fminsearch = mPhiTildeAnalytic*c_tilde;  % Interpolate
-if strcmp(verticesTransformation, 'randOrth')
+if strcmp(verticesTransformation, 'RandOrth')
     f_int_fminsearch = R'*f_tilde_int_fminsearch;
 else
     f_int_fminsearch = f_tilde_int_fminsearch;

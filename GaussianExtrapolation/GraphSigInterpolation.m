@@ -13,14 +13,17 @@ dataDim = 2;
 graphName =  'sensor'; 
 
 %==========================================================================
-% Graph parameters
+% Graph & graph-signal parameters
 %==========================================================================
-b_generateGraphSignal = true;
-nEigs       = 30;
-nComponents = 1;
 omega       = 0.3;
 estDataDist = 'Gaussian';
+nComponents = 1;
 b_normlizedLaplacian = true;
+
+nEigs = 30;
+b_generateGraphSignal = true;
+b_generateBLgraphSignal = true;
+
 gamma_A_eigrls = 0; 0.01;
 gamma_I_eigrls = 0; 0.1; 
 
@@ -44,8 +47,11 @@ sSimParams.outputFolder               = 'figs';
 sSimParams.PlotEigenFuncsM            = min(nEigs, 20);
 sSimParams.b_showEigenFigures         = false;
 sSimParams.b_showGraphMatricesFigures = false;
+sSimParams.b_showVerticesTransform    = true;
 sSimParams.b_GSPBoxPlots              = true;
-sSimParams.b_showVerticesTransform    = false;
+if dataDim == 1
+    sSimParams.b_GSPBoxPlots = false;
+end
 
 % graphName = 'Two_moons';
 % nEigs       = 8;
@@ -58,6 +64,7 @@ sSimParams.b_showVerticesTransform    = false;
 %% Generate graph
 [G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, dataDim, nComponents, estDataDist, omega, b_normlizedLaplacian, nEigs);
 v = sDataset.sData.x; % For convenience
+assert(size(v,2) == dataDim);
 if sSimParams.b_showGraphMatricesFigures
     PlotGraphMatrices(G, b_normlizedLaplacian);
 end
@@ -90,7 +97,7 @@ end
 %==========================================================================
 if sSimParams.b_showEigenFigures
     G = gsp_compute_fourier_basis(G);
-    PlotGraphFourierFunctions(G, nEigs)
+    PlotGraphFourierFunctions(sSimParams, G, nEigs)
 end
 %% Signal on the graph
 if ~b_generateGraphSignal % If the dataset already contains a function
@@ -102,7 +109,7 @@ else
     if ~isfield(G, 'U')
         G = gsp_compute_fourier_basis(G);
     end
-    [f,f_hat] = GenerateGraphSignal(G, V);
+    [f,f_hat] = GenerateGraphSignal(G, V, b_generateBLgraphSignal);
     if sSimParams.b_showEigenFigures
         PlotGraphFourierTransform(sSimParams,G,f_hat)
     end
@@ -147,7 +154,7 @@ if strcmp(verticesTransformation, 'RP')
        R(i,:) = R(i,:)/norm(R(i,:)); % Normalization
     end
     v_tilde = v*R; % Projection
-%     Rf = f;
+    f_tilde_sampled_padded = f_sampled_padded;
 elseif strcmp(verticesTransformation, 'RandOrth')
     % % Linear combination of Gaussians
     % R = randn(G.N, G.N);
@@ -162,13 +169,14 @@ elseif strcmp(verticesTransformation, 'RandOrth')
     % Random orthonormal matrix
     R = RandOrthMat(G.N);
     v_tilde = R*v;
-%     Rf = R*f;
     f_tilde_sampled_padded = R*f_sampled_padded;
 
     % % Whitening matrix
     % [v_tilde, R, invR] = whiten(v,1e-5);
+    
 elseif strcmp(verticesTransformation, 'MDS')
-    [v_tilde, mdsLambda] = cmdscale(dist);
+%     [v_tilde, mdsLambda] = cmdscale(dist);
+    [v_tilde, mdsLambda] = mdscale(dist, dataDim);
 %     Rf = f;
     f_tilde_sampled_padded = f_sampled_padded;
 end
@@ -214,23 +222,22 @@ else
     f_int_eigrls = f_tilde_int_eigrls;
 end
 
-%% Find coeffs for graph-signal - fminsearch
-maxIter_fminsearch = 100;
-fun = @(c)f_sampled'*G.L(sample_ind,sample_ind)*f_sampled - c'*mPhiTildeAnalytic.'*G_tilde.L*mPhiTildeAnalytic*c;
-c0 = randn(nEigs,1);
-options = optimset('MaxIter',maxIter_fminsearch);
-c_tilde = fminsearch(fun,c0,options);
-f_tilde_int_fminsearch = mPhiTildeAnalytic*c_tilde;  % Interpolate
-if strcmp(verticesTransformation, 'RandOrth')
-    f_int_fminsearch = R'*f_tilde_int_fminsearch;
-else
-    f_int_fminsearch = f_tilde_int_fminsearch;
-end
-
-%% Plot EigRLS
 PlotGraphSigInterpTransform(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_eigrls, samplingRatio, sample_ind, graphName, verticesTransformation, 'EigRLS');
 % PlotGraphSigInterpTransformNoReturn(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_eigrls, samplingRatio, sample_ind, graphName, verticesTransformation, 'EigRLS');
 
-%% Plot fminsearch
+
+%% Find coeffs for graph-signal - fminsearch
+% maxIter_fminsearch = 100;
+% fun = @(c)f_sampled'*G.L(sample_ind,sample_ind)*f_sampled - c'*mPhiTildeAnalytic.'*G_tilde.L*mPhiTildeAnalytic*c;
+% c0 = randn(nEigs,1);
+% options = optimset('MaxIter',maxIter_fminsearch);
+% c_tilde = fminsearch(fun,c0,options);
+% f_tilde_int_fminsearch = mPhiTildeAnalytic*c_tilde;  % Interpolate
+% if strcmp(verticesTransformation, 'RandOrth')
+%     f_int_fminsearch = R'*f_tilde_int_fminsearch;
+% else
+%     f_int_fminsearch = f_tilde_int_fminsearch;
+% end
+
 % PlotGraphSigInterpTransform(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_fminsearch, samplingRatio, sample_ind, graphName, verticesTransformation, 'fminsearch');
 % PlotGraphSigInterpTransformNoReturn(sSimParams, sDataset.dim, G, f, G_tilde, f_tilde_int_fminsearch, samplingRatio, sample_ind, graphName, verticesTransformation, 'fminsearch');

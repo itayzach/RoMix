@@ -1,3 +1,3 @@
 [submodule "gspbox"]
-	path = gspbox
-	url = https://github.com/epfl-lts2/gspbox.git
+   path = gspbox
+   url = https://github.com/itayzach/gspbox.git

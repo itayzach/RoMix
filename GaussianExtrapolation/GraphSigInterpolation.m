@@ -5,9 +5,8 @@ clc; clear; close all; rng('default')
 %==========================================================================
 % Graph data
 %==========================================================================
-dataDim = 2;
-
-% 'Gaussian' / 'Uniform' / 
+% 'Gaussian_1D' / 'Uniform_1D' / 'Gaussian_2D' / 'Uniform_2D' / 
+% 'Two_moons' /
 % 'bunny' / 'twodgrid' / 'sensor' / 'minnesota' /
 % 'david_seonsor' / 'swiss_roll' / 'random_ring'
 graphName =  'sensor'; 
@@ -21,8 +20,9 @@ nComponents = 1;
 b_normlizedLaplacian = true;
 
 nEigs = 30;
+samplingRatio = 0.05;
 b_generateGraphSignal = true;
-b_generateBLgraphSignal = true;
+graphSignalModel = 'alpha_K'; % 'bandlimited' / 'V_c' / 'alpha_K'
 
 gamma_A_eigrls = 0; 0.01;
 gamma_I_eigrls = 0; 0.1; 
@@ -30,14 +30,13 @@ gamma_I_eigrls = 0; 0.1;
 %==========================================================================
 % Transformation
 %==========================================================================
-verticesTransformation = 'MDS'; % 'MDS' / 'RP' / 'RandOrth'
+verticesTransformation = 'MDS'; % 'MDS' / 'RP' / 'RandOrth' / 'none'
 tilde_gamma_A_eigrls = 0; 0.01;
 tilde_gamma_I_eigrls = 0; 0.1;
 
 %==========================================================================
 % Plot parameters
 %==========================================================================
-samplingRatio = 0.1;
 if samplingRatio < 0.2
     sSimParams.b_plotSamplingPointsMarkers = true;
 else
@@ -47,11 +46,9 @@ sSimParams.outputFolder               = 'figs';
 sSimParams.PlotEigenFuncsM            = min(nEigs, 20);
 sSimParams.b_showEigenFigures         = false;
 sSimParams.b_showGraphMatricesFigures = false;
-sSimParams.b_showVerticesTransform    = true;
+sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = true;
-if dataDim == 1
-    sSimParams.b_GSPBoxPlots = false;
-end
+
 
 % graphName = 'Two_moons';
 % nEigs       = 8;
@@ -62,11 +59,13 @@ end
 % tilde_gamma_I_eigrls = 0.1;
 
 %% Generate graph
-[G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, dataDim, nComponents, estDataDist, omega, b_normlizedLaplacian, nEigs);
+[G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, nComponents, estDataDist, omega, b_normlizedLaplacian, nEigs);
 v = sDataset.sData.x; % For convenience
-assert(size(v,2) == dataDim);
 if sSimParams.b_showGraphMatricesFigures
     PlotGraphMatrices(G, b_normlizedLaplacian);
+end
+if sDataset.dim == 1
+    sSimParams.b_GSPBoxPlots = false;
 end
 
 %==========================================================================
@@ -146,11 +145,14 @@ f_int_no_transform = mPhiAnalytic*c;
 PlotGraphSigInterp(sSimParams, sDataset.dim, G, samplingRatio, sample_ind, f, gsp_interp_signal, f_int_no_transform, graphName);
 
 %% Transform
+if strcmp(verticesTransformation, 'none')
+    return
+end
 % "Random projection"
 if strcmp(verticesTransformation, 'RP')
-    newDim = dataDim;
-    R = randn(dataDim,newDim); % Random projection matrix
-    for i = 1:dataDim
+    newDim = sDataset.dim;
+    R = randn(sDataset.dim,newDim); % Random projection matrix
+    for i = 1:sDataset.dim
        R(i,:) = R(i,:)/norm(R(i,:)); % Normalization
     end
     v_tilde = v*R; % Projection
@@ -175,8 +177,8 @@ elseif strcmp(verticesTransformation, 'RandOrth')
     % [v_tilde, R, invR] = whiten(v,1e-5);
     
 elseif strcmp(verticesTransformation, 'MDS')
-%     [v_tilde, mdsLambda] = cmdscale(dist);
-    [v_tilde, mdsLambda] = mdscale(dist, dataDim);
+    [v_tilde, mdsLambda] = cmdscale(dist);
+%     [v_tilde, mdsLambda] = mdscale(dist, sDataset.dim);
 %     Rf = f;
     f_tilde_sampled_padded = f_sampled_padded;
 end

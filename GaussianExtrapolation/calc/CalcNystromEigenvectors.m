@@ -1,17 +1,17 @@
-function [ mPhiNys, vLambdaNys ] = CalcNystromEigenvectors(sSimParams, sKernelParams, mData, nysRatio)
+function [ mPhiNys, vLambdaNys ] = CalcNystromEigenvectors(nEigs, sKernelParams, mData, nysRatio)
 
 nTotal = length(mData);
 nComponents = sKernelParams.sDistParams.estNumComponents;
 %% Split data matrix into blocks
-mLeftUpperBlock = mData(1:nysRatio*nTotal,:);
-mRightUpperBlock = mData(nysRatio*nTotal+1:end,:);
+mLeftUpperBlock = mData(1:round(nysRatio*nTotal),:);
+mRightUpperBlock = mData(round(nysRatio*nTotal)+1:end,:);
 
 %% CalcAdjacency
 A = CalcAdjacency(sKernelParams, mLeftUpperBlock);
 B = CalcAdjacency(sKernelParams, mLeftUpperBlock, mRightUpperBlock);
 
 %% EVD with no orthogonalization and Nystrom
-[mPhi, mLambdaNys] = eigs(A, sSimParams.PlotSpectM);
+[mPhi, mLambdaNys] = eigs(A, nEigs);
 [vLambdaNys, idx] = sort(diag(mLambdaNys), 'descend');
 mPhi = mPhi(:,idx);
 mPhiExt = B.'*mPhi*diag(1./vLambdaNys);

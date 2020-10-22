@@ -1,4 +1,4 @@
-function [f,f_hat] = GenerateGraphSignal(G, mPhi, graphSignalModel)
+function [f, f_hat, coeffs] = GenerateGraphSignal(G, mPhi, graphSignalModel)
 if strcmpi(graphSignalModel, 'bandlimited')
     % paramf.log = 1;
     % Nf = 5;
@@ -23,14 +23,17 @@ if strcmpi(graphSignalModel, 'bandlimited')
     f_hat = zeros(G.N,1);
     f_hat(1:k0) = 5*sort(abs(randn(k0,1)), 'descend');
     f = G.U*f_hat;
+    coeffs = [];
 else
     if strcmpi(graphSignalModel, 'V_c')
         nEigs = size(mPhi,2);
         c_orig = randn(nEigs, 1);
         f = mPhi*c_orig;
+        coeffs = c_orig;
     elseif strcmpi(graphSignalModel, 'alpha_K')
         alpha = randn(G.N,1);
-        f = G.W*alpha;
+        f = G.W*alpha; % K*alpha
+        coeffs = alpha;
     else
         error('unknown graphSignalModel');
     end

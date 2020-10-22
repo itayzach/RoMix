@@ -1,9 +1,18 @@
-function [G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, dataDim, nComponents,estDataDist,omega, b_normlizedLaplacian, nEigs)
+function [G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, nComponents,estDataDist,omega, b_normlizedLaplacian, nEigs)
 %% Generate graph
 switch graphName
-    case {'Two_moons', 'Uniform', 'Gaussian'}
+    case {'Uniform_2D', 'Gaussian_2D', 'Uniform_1D', 'Gaussian_1D' }
+        splitOut = split(graphName, "_");
+        dataDist = splitOut{1};
+        dataDim = str2double(splitOut{2}(1));
         N = 1000;
-        sDataset = GenerateDataset(graphName, dataDim, nComponents, N, 0);
+        sDataset = GenerateDataset(dataDist, dataDim, nComponents, N, 0);
+        GMMRegVal = 0;
+    case 'Two_moons'
+        N = 1000;
+        dataDist = 'Two_moons';
+        dataDim = 2;
+        sDataset = GenerateDataset(dataDist, dataDim, nComponents, N, 0);
         GMMRegVal = 0;
     case 'bunny'
         G_tmp = gsp_bunny();
@@ -15,7 +24,7 @@ switch graphName
         G_tmp = gsp_sensor(N);
     case 'minnesota'
         G_tmp = gsp_minnesota();
-    case 'david_seonsor'
+    case 'david_sensor'
         G_tmp = gsp_david_sensor_network();
     case 'swiss_roll'
         N = 500;

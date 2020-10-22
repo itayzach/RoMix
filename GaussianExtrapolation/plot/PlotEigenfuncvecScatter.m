@@ -1,20 +1,20 @@
-function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, firstEigenIdx, lastEigIdx, mPhi, vLambda, figName, c, G)
+function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, firstEigenIdx, lastEigIdx, mPhi, vLambda, figName, c, G, suptitle)
 dim = size(mData, 2);
 assert(dim <= 2, 'Not supported')
 if dim == 1
     %% Plot params
-    x0     = 10;
-    y0     = 50;
-    width  = 1800;
-    height = 900;
+    x0     = 500;
+    y0     = 400;
+    width  = 800;
+    height = 400;
     fig = figure('Name', '1D Scatter');
     for m = firstEigenIdx:lastEigIdx
         if strcmp(figName, 'Analytic')
-            dispName = ['$\phi^{Ana}_{' num2str(m) '}({\bf x}),$ $\lambda^{Ana}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
+            dispName = ['$\phi_{' num2str(m) '},$ $\lambda^{\phi}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
         elseif strcmp(figName, 'Numeric')
-            dispName = ['$\phi^{Num}_{' num2str(m) '}({\bf x}),$ $\lambda^{Num}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
+            dispName = ['$v_{' num2str(m) '},$ $\lambda^{v}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
         elseif strcmp(figName, 'Nystrom')
-            dispName = ['$\phi^{Nys}_{' num2str(m) '}({\bf x}),$ $\lambda^{Nys}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
+            dispName = ['$\hat{v}_{' num2str(m) '},$ $\lambda^{\hat{v}}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
         else
             assert('invalid option')
         end
@@ -24,14 +24,14 @@ if dim == 1
         hold on;
         set(gca,'FontSize', 14);
     end
-    legend('Interpreter', 'latex', 'FontSize', 14)
+    legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',min(ceil(length(firstEigenIdx:lastEigIdx)/2),3))
     set(gcf,'Position', [x0 y0 width height])
 elseif dim == 2
     %% Plot params
-    x0     = 10;
-    y0     = 50;
-    width  = 1800;
-    height = 900;
+    x0     = 400;
+    y0     = 200;
+    width  = 1200; 1800;
+    height = 600; 900;
     nRows = floor(sqrt(sSimParams.PlotEigenFuncsM+1));
     if nRows > 4
         nRows = 4;
@@ -65,8 +65,11 @@ elseif dim == 2
         else
             assert('invalid option')
         end
-        title(dispName,  'Interpreter', 'latex', 'FontSize', 14)
+        title(dispName, 'Interpreter', 'latex', 'FontSize', 14)
         set(gca,'FontSize', 14);
+    end
+    if exist('suptitle', 'var')
+        sgtitle(suptitle,'Interpreter', 'latex', 'FontSize', 16);
     end
     set(gcf,'Position', [x0 y0 width height])
 end

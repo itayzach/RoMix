@@ -1,5 +1,5 @@
-function [f,f_hat] = GenerateGraphSignal(G, mPhi, b_generateBLgraphSignal)
-if b_generateBLgraphSignal
+function [f,f_hat] = GenerateGraphSignal(G, mPhi, graphSignalModel)
+if strcmpi(graphSignalModel, 'bandlimited')
     % paramf.log = 1;
     % Nf = 5;
     % g = gsp_design_warped_translates(G, Nf,paramf);  
@@ -24,10 +24,21 @@ if b_generateBLgraphSignal
     f_hat(1:k0) = 5*sort(abs(randn(k0,1)), 'descend');
     f = G.U*f_hat;
 else
-    nEigs = size(mPhi,2);
-    c_orig = randn(nEigs, 1);
-    f = mPhi*c_orig;
-    f_hat = G.U*f;
+    if strcmpi(graphSignalModel, 'V_c')
+        nEigs = size(mPhi,2);
+        c_orig = randn(nEigs, 1);
+        f = mPhi*c_orig;
+    elseif strcmpi(graphSignalModel, 'alpha_K')
+        alpha = randn(G.N,1);
+        f = G.W*alpha;
+    else
+        error('unknown graphSignalModel');
+    end
+    if isfield(G, 'U')
+        f_hat = G.U*f;
+    else
+        f_hat = [];
+    end
 end
 
 

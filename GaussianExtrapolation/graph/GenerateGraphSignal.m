@@ -25,13 +25,13 @@ if strcmpi(graphSignalModel, 'bandlimited')
     f = G.U*f_hat;
     coeffs = [];
 else
-    if strcmpi(graphSignalModel, 'V_c')
+    if strcmpi(graphSignalModel, 'V_c') || strcmpi(graphSignalModel, 'Phi_c')
         nEigs = size(mPhi,2);
-        c_orig = randn(nEigs, 1);
+        c_orig = 10*randn(nEigs, 1);
         f = mPhi*c_orig;
         coeffs = c_orig;
     elseif strcmpi(graphSignalModel, 'alpha_K')
-        alpha = randn(G.N,1);
+        alpha = 10*randn(G.N,1);
         f = G.W*alpha; % K*alpha
         coeffs = alpha;
     else

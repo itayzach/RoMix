@@ -1,9 +1,11 @@
-function fig = PlotInnerProductMatrix(sSimParams, sDistParams, sDataset, nysRatio, mPhi, figName)
+function fig = PlotInnerProductMatrix(sSimParams, sDistParams, graphName, nysRatio, mPhi, figName)
 
 x0     = 10;
 y0     = 50;
 width  = 600;
 height = 400;
+
+N = size(mPhi,1);
 
 fig = figure('Name', sprintf('%s IP matrix', figName));
 
@@ -11,8 +13,7 @@ if strcmp(figName, 'Numeric')
     mInnerProduct = mPhi.'*mPhi;
     pltTitle = [figName ' - $V^T V$'];
 elseif strcmp(figName, 'Analytic')
-    n = length(sDataset.sData.x);
-    mInnerProduct = n^sDistParams.dim * (mPhi.' * diag(sDistParams.vPr)* mPhi);
+    mInnerProduct = N^sDistParams.dim * (mPhi.' * diag(sDistParams.vPr)* mPhi);
     pltTitle = [figName ' - $\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$'];
 elseif strcmp(figName, 'Nystrom')
     mInnerProduct = mPhi.'*mPhi;
@@ -31,9 +32,9 @@ if ~isempty(sSimParams)
         mkdir(sSimParams.outputFolder)
     end
     if isempty(nysRatio)
-        simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
+        simPrefix = strcat(graphName, num2str(sDistParams.dim), 'd');
     else
-        simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+        simPrefix = strcat(graphName, num2str(sDistParams.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
     end
     saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix,  '_inner_product_matrix_', figName), 'epsc');
 end

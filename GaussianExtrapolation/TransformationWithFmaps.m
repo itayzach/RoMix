@@ -9,7 +9,7 @@ clc; clear; close all; rng('default')
 % 'Two_moons' /
 % 'bunny' / 'twodgrid' / 'sensor' / 'minnesota' /
 % 'david_sensor' / 'swiss_roll' / 'random_ring'
-graphName =  'Uniform_2D'; 
+graphName =  'Uniform_2D';
 
 %==========================================================================
 % Graph & graph-signal parameters
@@ -18,8 +18,11 @@ omega       = 0.3;
 estDataDist = 'Gaussian';
 nComponents = 1;
 b_normlizedLaplacian = true;
-graphSignalModel = 'V_c'; % 'K_alpha' / 'V_c' / 'Phi_c' / 'U_fhat'
+
+graphSignalModel = 'K_alpha'; % 'K_alpha' / 'V_c' / 'Phi_c' / 'U_fhat'
+G_basis      = 'Numeric';  % 'Analytic' / 'Numeric' / 'LaplacianEigenvectors' / 'representerBasis'
 G_tildeBasis = 'Analytic'; % 'Analytic' / 'Numeric'
+
 verticesTransform = 'randomMatrix'; % 'permutation' / 'RandOrthMat' / 'randomMatrix'
 nEigs = 30;
 samplingRatio = 0.05;
@@ -87,13 +90,16 @@ if strcmp(graphSignalModel, 'Phi_c')
     [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, Phi, graphSignalModel);
 elseif strcmp(graphSignalModel, 'V_c')
     [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, V, graphSignalModel);
+    f_title = '$f(v) = {\bf V} c$';
 elseif strcmp(graphSignalModel, 'K_alpha')
     [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, [], graphSignalModel);
+    f_title = '$f(v) = {\bf K} \alpha$';
 elseif strcmp(graphSignalModel, 'U_fhat')
     if ~isfield(G, 'U')
         G = gsp_compute_fourier_basis(G);
     end
     [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, [], graphSignalModel);
+    f_title = '$f(v) = {\bf U} \hat{f}$';
 end
 randPerm = randperm(G.N)';
 sampleInd = sort(randPerm(1:round(samplingRatio*G.N)));
@@ -106,14 +112,15 @@ f_sampled_padded(sampleInd) = f(sampleInd);
 %==========================================================================
 % find coeffs by projecting f onto V ( c = V'*f ) and use least squares since f is sampled
 J = diag(sign(abs(f_sampled_padded)));
-if strcmp(graphSignalModel, 'Phi_c')
+if strcmp(G_basis, 'Analytic')
+    assert(strcmp(graphName, 'Gaussian_1D') || strcmp(graphName, 'Gaussian_2D'))
     coeffsLS = pinv(J*mPhiAnalytic)*f_sampled_padded;
-elseif strcmp(graphSignalModel, 'V_c')
+elseif strcmp(G_basis, 'Numeric')
     coeffsLS = pinv(J*V)*f_sampled_padded;
-elseif strcmp(graphSignalModel, 'K_alpha')
-    warning('is K a basis? can I do that?');
+elseif strcmp(G_basis, 'representerBasis')
+    warning('is this correct?');
     coeffsLS = pinv(J*G.W)*f_sampled_padded;
-elseif strcmp(graphSignalModel, 'U_fhat')
+elseif strcmp(G_basis, 'LaplacianEigenvectors')
     coeffsLS = pinv(J*G.U)*f_sampled_padded; % same as iGFT: coeffs = f_hat = G.U'*f
 end
 
@@ -175,27 +182,27 @@ end
 if strcmp(G_tildeBasis, 'Analytic')
     [n, dim] = size(v_tilde);
     mPrTilde = diag(sKernelTildeParams.sDistParams.vPr);
-    if strcmp(graphSignalModel, 'Phi_c')
+    if strcmp(G_basis, 'Analytic')
         C = mPhiTildeAnalytic'*R*mPhiTildeAnalytic;
-    elseif strcmp(graphSignalModel, 'V_c')
+    elseif strcmp(G_basis, 'Numeric')
 %         C = mPhiTildeAnalytic'*mPrTilde'*R*V;
         C = mPhiTildeAnalytic'*R*V;
-    elseif strcmp(graphSignalModel, 'K_alpha')
+    elseif strcmp(G_basis, 'representerBasis')
 %         C = mPhiTildeAnalytic'*R*G.W; 
 %         C = n^dim*mPhiTildeAnalytic'*mPrTilde'*R*G.W;
 %         C = mPhiTildeAnalytic'*mPrTilde'*R*G.W;
 %         C = mPhiTildeAnalytic'*mPrTilde'*R*G.W;
         C = mPhiTildeAnalytic'*R*G.W;
-    elseif strcmp(graphSignalModel, 'U_fhat')
+    elseif strcmp(G_basis, 'LaplacianEigenvectors')
         C = mPhiTildeAnalytic'*R*G.U;
     end
     
 elseif strcmp(G_tildeBasis, 'Numeric')
-    if strcmp(graphSignalModel, 'V_c')
+    if strcmp(G_basis, 'Numeric')
         C = V_tilde'*R*V;
-    elseif strcmp(graphSignalModel, 'K_alpha')
+    elseif strcmp(G_basis, 'representerBasis')
         C = V_tilde'*R*G.W;
-    elseif strcmp(graphSignalModel, 'U_fhat')
+    elseif strcmp(G_basis, 'LaplacianEigenvectors')
         C = V_tilde'*R*G.U;        
     end
 else
@@ -214,41 +221,38 @@ subplot(1,3,3)
 set(gcf,'Position', [400 400 1500 400])
 %% Transform
 coeffsTilde = C*coeffsLS; 
-coeffsTildeDebug = C*coeffsGroundTruthForDebug;
+% coeffsTildeDebug = C*coeffsGroundTruthForDebug;
 
 
 if strcmp(G_tildeBasis, 'Analytic')
     f_tilde = mPhiTildeAnalytic*coeffsTilde;
-    coeffsRec = C\coeffsTilde;
+    coeffs_interp = C\coeffsTilde;
     f_tilde_title = '$\tilde{f}(\tilde{v}) = \tilde{{\bf \Phi}} \tilde{c}$';
 elseif strcmp(G_tildeBasis, 'Numeric')
     f_tilde = V_tilde*coeffsTilde;
 %     coeffsRec = C'*coeffsTilde;
-    coeffsRec = C\coeffsTilde;
+    coeffs_interp = C\coeffsTilde;
     f_tilde_title = '$\tilde{f}(\tilde{v}) = \tilde{{\bf V}} \tilde{c}$';
 else
     error('invalid basis')
 end
 
-if strcmp(graphSignalModel, 'V_c')
-    f_interp = V*coeffsRec;
+if strcmp(G_basis, 'Numeric')
+    f_interp = V*coeffs_interp;
     f_interp_title = '$f_{{\bf int}}(v) = {\bf V} c_{{\bf int}}$';
-    f_title = '$f(v) = {\bf V} c$';
-elseif strcmp(graphSignalModel, 'K_alpha')
-    f_interp = G.W*coeffsRec;
+elseif strcmp(G_basis, 'representerBasis')
+    f_interp = G.W*coeffs_interp;
     f_interp_title = '$f_{{\bf int}}(v) = {\bf K} \alpha_{{\bf int}}$';
-    f_title = '$f(v) = {\bf K} \alpha$';
-elseif strcmp(graphSignalModel, 'U_fhat')
-    f_interp = G.U*coeffsRec;
+elseif strcmp(G_basis, 'LaplacianEigenvectors')
+    f_interp = G.U*coeffs_interp;
     f_interp_title = '$f_{{\bf int}}(v) = {\bf U} \hat{f}_{{\bf int}}$';
-    f_title = '$f(v) = {\bf U} \hat{f}$';    
 end
 
 figure; 
-scatter(1:length(coeffsGroundTruthForDebug), coeffsGroundTruthForDebug, 'ro')
+scatter(1:length(coeffsLS), coeffsLS, 'bx', 'DisplayName', 'Least-squares')
 hold on
-scatter(1:length(coeffsLS), coeffsLS, 'bx')
-scatter(1:length(coeffsRec), coeffsRec, 'k+')
-legend('Ground-truth', 'Least-squares', 'Interpolated')
+scatter(1:length(coeffs_interp), coeffs_interp, 'ro', 'DisplayName', 'Interpolated')
+% scatter(1:length(coeffsGroundTruthForDebug), coeffsGroundTruthForDebug, 'go', 'DisplayName', 'Ground-truth')
+legend()
 
 PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$', G, '$G$', f, f_title, f_tilde, f_tilde_title, f_interp, f_interp_title, sampleInd)

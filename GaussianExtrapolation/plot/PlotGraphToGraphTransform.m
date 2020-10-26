@@ -45,6 +45,9 @@ for iGraph = 1:nGraphs
             f_title = f3_title;
         end
     end
+    if isempty(G)
+        continue
+    end
     v = G.coords;
     G_dataDim = size(G.coords,2);
     

@@ -1,10 +1,18 @@
-function [] = PlotGraphToGraphTransform(G1, G1_title, G2, G2_title, G3, G3_title, f1, f1_title, f2, f2_title, f3, f3_title)
+function [] = PlotGraphToGraphTransform(sSimParams, G1, G1_title, G2, G2_title, G3, G3_title, f1, f1_title, f2, f2_title, f3, f3_title, sampleInd)
 
+nVerteciesText = 4;
 param.show_edges = false;
-
-rperm = randperm(size(G1.coords,1));
-vPlotIndexes = rperm(1:5)'; %(1:5)';(1:3:20)';
-vNumAsText = strcat('\leftarrow ', {' '}, cellstr(num2str(vPlotIndexes)))';
+if exist('sampleInd', 'var')
+    vTextPlotIndexes = sampleInd(1:nVerteciesText);
+    if ~sSimParams.b_plotSamplingPointsMarkers
+        sampleInd = sampleInd(1:nVerteciesText);
+    end
+else
+    rperm = randperm(size(G1.coords,1));
+    vTextPlotIndexes = rperm(1:nVerteciesText)'; %(1:5)';(1:3:20)';
+    sampleInd = vTextPlotIndexes;
+end
+vNumAsText = strcat('\leftarrow ', {' '}, cellstr(num2str(vTextPlotIndexes)))';
 
 if exist('G3', 'var')
     nGraphs = 3;
@@ -47,19 +55,20 @@ for iGraph = 1:nGraphs
         else
             plot(G.coords, f, '.');
         end
-        hold on;
+        hold on;       
+        
         if G_dataDim == 3
-            text(v(vPlotIndexes,1) + 0.05, v(vPlotIndexes,2)+0.01, v(vPlotIndexes,3), vNumAsText,...
+            scatter3(v(sampleInd,1), v(sampleInd,2), v(sampleInd,3), 'ko')
+            text(v(vTextPlotIndexes,1) + 0.05, v(vTextPlotIndexes,2)+0.01, v(vTextPlotIndexes,3), vNumAsText,...
                 'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
-            scatter3(v(vPlotIndexes,1), v(vPlotIndexes,2), v(vPlotIndexes,3), 'ko')
         elseif G_dataDim == 2
-            text(v(vPlotIndexes,1) + 0.05, v(vPlotIndexes,2)+0.01, vNumAsText,...
+            scatter(v(sampleInd,1), v(sampleInd,2), 50, 'ko')
+            text(v(vTextPlotIndexes,1) + 0.05, v(vTextPlotIndexes,2)+0.01, vNumAsText,...
                 'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
-            scatter(v(vPlotIndexes,1), v(vPlotIndexes,2), 'ko')
         elseif G_dataDim == 1
-            text(v(vPlotIndexes) + 0.05, f(vPlotIndexes)+0.01, vNumAsText,...
+            scatter(v(sampleInd), f(sampleInd), 'ko')
+            text(v(vTextPlotIndexes) + 0.05, f(vTextPlotIndexes)+0.01, vNumAsText,...
                 'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
-            scatter(v(vPlotIndexes), f(vPlotIndexes), 'ko')
         else
             error('invalid dim');
         end

@@ -31,7 +31,7 @@ else
         f = mPhi*c_orig;
         coeffs = c_orig;
     elseif strcmpi(graphSignalModel, 'alpha_K')
-        alpha = 10*randn(G.N,1);
+        alpha = randn(G.N,1);
         f = G.W*alpha; % K*alpha
         coeffs = alpha;
     else

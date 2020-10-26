@@ -100,7 +100,7 @@ end
 
 % R = RandOrthMat(G.N);
 
-R = 1/sqrt(G.N)*randn(G.N,G.N);
+R = (1/sqrt(G.N))*randn(G.N,G.N);
 
 v_tilde = R*v;
 
@@ -113,7 +113,11 @@ v_tilde = R*v;
 %==========================================================================
 % Generate G_tilde
 %==========================================================================
-PlotGraphToGraphTransform(G, G_tilde);
+if size(v,2) > 1
+%     PlotGraphToGraphTransform(G, G_tilde);
+    PlotGraphToGraphTransform(G, '$G$', G_tilde, '$\tilde{G}$');
+
+end
 
 %==========================================================================
 % Eigenfunctions
@@ -148,6 +152,7 @@ if strcmp(G_tildeBasis, 'Analytic')
         C = n^dim*mPhiTildeAnalytic'*R*mPhiTildeAnalytic;
     elseif strcmp(graphSignalModel, 'V_c')
         C = n^dim*mPhiTildeAnalytic'*mPrTilde'*R*V;
+        C = mPhiTildeAnalytic'*mPrTilde'*R*V;
     elseif strcmp(graphSignalModel, 'alpha_K')
 %         C = mPhiTildeAnalytic'*R*G.W; 
         C = n^dim*mPhiTildeAnalytic'*mPrTilde'*R*G.W;
@@ -169,7 +174,7 @@ subplot(1,2,1)
     title('$C$', 'Interpreter', 'latex', 'FontSize', 14)
 subplot(1,2,2)
     imagesc(C\C); colorbar;
-    title('$C^T C$', 'Interpreter', 'latex', 'FontSize', 14)
+    title('$C^{-1} C$', 'Interpreter', 'latex', 'FontSize', 14)
 set(gcf,'Position', [400 400 1000 400])
 %% Transform
 coeffsTilde = C*coeffs;
@@ -194,4 +199,4 @@ elseif strcmp(graphSignalModel, 'alpha_K')
     f_rec = G.W*coeffsRec;
 end
 
-PlotGraphToGraphTransformAndBack(G, G_tilde, G, '$G$', '$\tilde{G}$', '$G$', f, f_tilde, f_rec, '$f(v)$', '$\tilde{f}(\tilde{v})$', '$f_{rec}(v)$')
+PlotGraphToGraphTransform(G, '$G$', G_tilde, '$\tilde{G}$', G, '$G$', f, '$f(v)$', f_tilde, '$\tilde{f}(\tilde{v})$', f_rec, '$f_{rec}(v)$')

@@ -18,11 +18,11 @@ omega       = 0.3;
 estDataDist = 'Gaussian';
 nComponents = 1;
 b_normlizedLaplacian = true;
-graphSignalModel = 'V_c'; % 'alpha_K' / 'V_c' / 'Phi_c'
-G_tildeBasis = 'Numeric'; % 'Analytic' / 'Numeric'
-
+graphSignalModel = 'V_c'; % 'K_alpha' / 'V_c' / 'Phi_c' / 'U_fhat'
+G_tildeBasis = 'Analytic'; % 'Analytic' / 'Numeric'
+verticesTransform = 'randomMatrix'; % 'permutation' / 'RandOrthMat' / 'randomMatrix'
 nEigs = 30;
-samplingRatio = 0;
+samplingRatio = 0.05;
 nysRatio = 0.8;
 
 %==========================================================================
@@ -84,24 +84,53 @@ end
 % Graph-signal
 %==========================================================================
 if strcmp(graphSignalModel, 'Phi_c')
-    [f,f_hat,coeffs] = GenerateGraphSignal(G, Phi, graphSignalModel);
+    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, Phi, graphSignalModel);
 elseif strcmp(graphSignalModel, 'V_c')
-    [f,f_hat,coeffs] = GenerateGraphSignal(G, V, graphSignalModel);
-elseif strcmp(graphSignalModel, 'alpha_K')
-    [f,f_hat,coeffs] = GenerateGraphSignal(G, [], graphSignalModel);
+    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, V, graphSignalModel);
+elseif strcmp(graphSignalModel, 'K_alpha')
+    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, [], graphSignalModel);
+elseif strcmp(graphSignalModel, 'U_fhat')
+    if ~isfield(G, 'U')
+        G = gsp_compute_fourier_basis(G);
+    end
+    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, [], graphSignalModel);
 end
+randPerm = randperm(G.N)';
+sampleInd = sort(randPerm(1:round(samplingRatio*G.N)));
+f_sampled = f(sampleInd);
+f_sampled_padded = zeros(size(f));
+f_sampled_padded(sampleInd) = f(sampleInd);
+
+%==========================================================================
+% Coefficients
+%==========================================================================
+% find coeffs by projecting f onto V ( c = V'*f ) and use least squares since f is sampled
+J = diag(sign(abs(f_sampled_padded)));
+if strcmp(graphSignalModel, 'Phi_c')
+    coeffsLS = pinv(J*mPhiAnalytic)*f_sampled_padded;
+elseif strcmp(graphSignalModel, 'V_c')
+    coeffsLS = pinv(J*V)*f_sampled_padded;
+elseif strcmp(graphSignalModel, 'K_alpha')
+    warning('is K a basis? can I do that?');
+    coeffsLS = pinv(J*G.W)*f_sampled_padded;
+elseif strcmp(graphSignalModel, 'U_fhat')
+    coeffsLS = pinv(J*G.U)*f_sampled_padded; % same as iGFT: coeffs = f_hat = G.U'*f
+end
+
+
 %% G_tilde
 %==========================================================================
 % Transform
 %==========================================================================
-% R = eye(G.N);
-% r = randperm(G.N);
-% R = R(r,:);
-
-% R = RandOrthMat(G.N);
-
-R = (1/sqrt(G.N))*randn(G.N,G.N);
-
+if strcmp(verticesTransform, 'permutation')
+    R = eye(G.N);
+    r = randperm(G.N);
+    R = R(r,:);
+elseif strcmp(verticesTransform, 'RandOrthMat')
+    R = RandOrthMat(G.N);
+elseif strcmp(verticesTransform, 'randomMatrix')
+    R = (1/sqrt(G.N))*randn(G.N,G.N);
+end
 v_tilde = R*v;
 
 %==========================================================================
@@ -115,7 +144,7 @@ v_tilde = R*v;
 %==========================================================================
 if size(v,2) > 1
 %     PlotGraphToGraphTransform(G, G_tilde);
-    PlotGraphToGraphTransform(G, '$G$', G_tilde, '$\tilde{G}$');
+    PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$');
 
 end
 
@@ -141,62 +170,85 @@ if sSimParams.b_showEigenFigures
     PlotInnerProductMatrix(sSimParams, sKernelTildeParams.sDistParams, graphName, [], V_tilde, 'Numeric');
 end
 
-
 %% Functional maps
 % fmap: C = L2.evecs'*L2.A'*P'*L1.evecs;
-
 if strcmp(G_tildeBasis, 'Analytic')
     [n, dim] = size(v_tilde);
     mPrTilde = diag(sKernelTildeParams.sDistParams.vPr);
     if strcmp(graphSignalModel, 'Phi_c')
-        C = n^dim*mPhiTildeAnalytic'*R*mPhiTildeAnalytic;
+        C = mPhiTildeAnalytic'*R*mPhiTildeAnalytic;
     elseif strcmp(graphSignalModel, 'V_c')
-        C = n^dim*mPhiTildeAnalytic'*mPrTilde'*R*V;
-        C = mPhiTildeAnalytic'*mPrTilde'*R*V;
-    elseif strcmp(graphSignalModel, 'alpha_K')
+%         C = mPhiTildeAnalytic'*mPrTilde'*R*V;
+        C = mPhiTildeAnalytic'*R*V;
+    elseif strcmp(graphSignalModel, 'K_alpha')
 %         C = mPhiTildeAnalytic'*R*G.W; 
-        C = n^dim*mPhiTildeAnalytic'*mPrTilde'*R*G.W;
+%         C = n^dim*mPhiTildeAnalytic'*mPrTilde'*R*G.W;
 %         C = mPhiTildeAnalytic'*mPrTilde'*R*G.W;
+%         C = mPhiTildeAnalytic'*mPrTilde'*R*G.W;
+        C = mPhiTildeAnalytic'*R*G.W;
+    elseif strcmp(graphSignalModel, 'U_fhat')
+        C = mPhiTildeAnalytic'*R*G.U;
     end
     
 elseif strcmp(G_tildeBasis, 'Numeric')
     if strcmp(graphSignalModel, 'V_c')
         C = V_tilde'*R*V;
-    elseif strcmp(graphSignalModel, 'alpha_K')
+    elseif strcmp(graphSignalModel, 'K_alpha')
         C = V_tilde'*R*G.W;
+    elseif strcmp(graphSignalModel, 'U_fhat')
+        C = V_tilde'*R*G.U;        
     end
 else
     error('invalid basis')
 end
 figure; 
-subplot(1,2,1)
+subplot(1,3,1)
     imagesc(C); colorbar;
     title('$C$', 'Interpreter', 'latex', 'FontSize', 14)
-subplot(1,2,2)
+subplot(1,3,2)
     imagesc(C\C); colorbar;
     title('$C^{-1} C$', 'Interpreter', 'latex', 'FontSize', 14)
-set(gcf,'Position', [400 400 1000 400])
+subplot(1,3,3)
+    imagesc(C'*C); colorbar;
+    title('$C^T C$', 'Interpreter', 'latex', 'FontSize', 14)    
+set(gcf,'Position', [400 400 1500 400])
 %% Transform
-coeffsTilde = C*coeffs;
+coeffsTilde = C*coeffsLS; 
+coeffsTildeDebug = C*coeffsGroundTruthForDebug;
 
-% f_str = '\sum_{i=1}^N \alpha_i K(v,v_i)';
-f_str = '';
 
 if strcmp(G_tildeBasis, 'Analytic')
     f_tilde = mPhiTildeAnalytic*coeffsTilde;
-    coeffsRec = (1/n^dim)*C'*coeffsTilde;
+    coeffsRec = C\coeffsTilde;
+    f_tilde_title = '$\tilde{f}(\tilde{v}) = \tilde{{\bf \Phi}} \tilde{c}$';
 elseif strcmp(G_tildeBasis, 'Numeric')
     f_tilde = V_tilde*coeffsTilde;
 %     coeffsRec = C'*coeffsTilde;
     coeffsRec = C\coeffsTilde;
+    f_tilde_title = '$\tilde{f}(\tilde{v}) = \tilde{{\bf V}} \tilde{c}$';
 else
     error('invalid basis')
 end
 
 if strcmp(graphSignalModel, 'V_c')
-    f_rec = V*coeffsRec;
-elseif strcmp(graphSignalModel, 'alpha_K')
-    f_rec = G.W*coeffsRec;
+    f_interp = V*coeffsRec;
+    f_interp_title = '$f_{{\bf int}}(v) = {\bf V} c_{{\bf int}}$';
+    f_title = '$f(v) = {\bf V} c$';
+elseif strcmp(graphSignalModel, 'K_alpha')
+    f_interp = G.W*coeffsRec;
+    f_interp_title = '$f_{{\bf int}}(v) = {\bf K} \alpha_{{\bf int}}$';
+    f_title = '$f(v) = {\bf K} \alpha$';
+elseif strcmp(graphSignalModel, 'U_fhat')
+    f_interp = G.U*coeffsRec;
+    f_interp_title = '$f_{{\bf int}}(v) = {\bf U} \hat{f}_{{\bf int}}$';
+    f_title = '$f(v) = {\bf U} \hat{f}$';    
 end
 
-PlotGraphToGraphTransform(G, '$G$', G_tilde, '$\tilde{G}$', G, '$G$', f, '$f(v)$', f_tilde, '$\tilde{f}(\tilde{v})$', f_rec, '$f_{rec}(v)$')
+figure; 
+scatter(1:length(coeffsGroundTruthForDebug), coeffsGroundTruthForDebug, 'ro')
+hold on
+scatter(1:length(coeffsLS), coeffsLS, 'bx')
+scatter(1:length(coeffsRec), coeffsRec, 'k+')
+legend('Ground-truth', 'Least-squares', 'Interpolated')
+
+PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$', G, '$G$', f, f_title, f_tilde, f_tilde_title, f_interp, f_interp_title, sampleInd)

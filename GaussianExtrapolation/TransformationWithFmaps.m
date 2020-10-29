@@ -19,14 +19,14 @@ estDataDist = 'Gaussian';
 nComponents = 1;
 b_normlizedLaplacian = true;
 
-graphSignalModel = 'K_alpha'; % 'K_alpha' / 'V_c' / 'Phi_c' / 'U_fhat'
+graphSignalModel = 'V_c'; % 'K_alpha' / 'V_c' / 'Phi_c' / 'U_fhat'
 G_basis      = 'Numeric';  % 'Analytic' / 'Numeric' / 'LaplacianEigenvectors' / 'representerBasis'
 G_tildeBasis = 'Analytic'; % 'Analytic' / 'Numeric'
 
-verticesTransform = 'randomMatrix'; % 'permutation' / 'RandOrthMat' / 'randomMatrix'
-nEigs = 30;
-samplingRatio = 0.05;
-nysRatio = 0.8;
+verticesTransform = 'randomMatrix'; % 'permutation' / 'RandOrthMat' / 'randomMatrix' / 'eye'
+G_nEigs = 30;
+Gtilde_nEigs = 30;
+samplingRatio = 0.1;
 
 %==========================================================================
 % Plot parameters
@@ -36,15 +36,17 @@ if samplingRatio < 0.2
 else
     sSimParams.b_plotSamplingPointsMarkers = false;
 end
+sSimParams.b_plotSamplingPointsMarkers = false;
+
 sSimParams.outputFolder               = 'figs';
-sSimParams.PlotEigenFuncsM            = min(nEigs, 12);
+sSimParams.PlotEigenFuncsM            = min(G_nEigs, 12);
 sSimParams.b_showEigenFigures         = false;
 sSimParams.b_showGraphMatricesFigures = false;
 sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = true;
 %% Generate graph
 [G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, nComponents, ...
-    estDataDist, omega, b_normlizedLaplacian, nEigs);
+    estDataDist, omega, b_normlizedLaplacian, G_nEigs);
 v = sDataset.sData.x; % For convenience
 if sSimParams.b_showGraphMatricesFigures
     PlotGraphMatrices(G, b_normlizedLaplacian);
@@ -56,7 +58,7 @@ end
 %==========================================================================
 % Eigenvectors
 %==========================================================================
-[V, vLambdaNumeric] = CalcNumericEigenvectors(nEigs, sKernelParams, v);
+[V, vLambdaNumeric] = CalcNumericEigenvectors(G_nEigs, sKernelParams, v);
 if sSimParams.b_showEigenFigures
     PlotEigenfuncvecScatter(sSimParams, estDataDist, v, [], 0, ...
         sSimParams.PlotEigenFuncsM-1, V, vLambdaNumeric, 'Numeric', [], G, ...
@@ -73,24 +75,25 @@ end
 %         '${\bf W}_G$ Nystrom Eigenvectors')
 % end
 % 
-% %==========================================================================
-% % Eigenfunctions
-% %==========================================================================
-% [mPhiAnalytic, vLambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, v, true);
-% if sSimParams.b_showEigenFigures
-%     PlotEigenfuncvecScatter(sSimParams, estDataDist, v, [], 0, ...
-%         sSimParams.PlotEigenFuncsM-1, mPhiAnalytic, vLambdaAnalytic, 'Analytic', [], G, ...
-%         '${\bf W}_G$ kernel Eigenfunctions')
-% end
+%==========================================================================
+% Eigenfunctions
+%==========================================================================
+[mPhiAnalytic, vLambdaAnalytic] = CalcAnalyticEigenfunctions(G_nEigs, sKernelParams, v, true);
+if sSimParams.b_showEigenFigures
+    PlotEigenfuncvecScatter(sSimParams, estDataDist, v, [], 0, ...
+        sSimParams.PlotEigenFuncsM-1, mPhiAnalytic, vLambdaAnalytic, 'Analytic', [], G, ...
+        '${\bf W}_G$ kernel Eigenfunctions')
+end
 
 %==========================================================================
 % Graph-signal
 %==========================================================================
 if strcmp(graphSignalModel, 'Phi_c')
-    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, Phi, graphSignalModel);
+    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, mPhiAnalytic, graphSignalModel);
+    f_title = '$f(v) = {\bf \Phi} c$';
 elseif strcmp(graphSignalModel, 'V_c')
     [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, V, graphSignalModel);
-    f_title = '$f(v) = {\bf V} c$';
+    f_title = '$f(v) = {\bf V} \alpha$';
 elseif strcmp(graphSignalModel, 'K_alpha')
     [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, [], graphSignalModel);
     f_title = '$f(v) = {\bf K} \alpha$';
@@ -107,22 +110,22 @@ f_sampled = f(sampleInd);
 f_sampled_padded = zeros(size(f));
 f_sampled_padded(sampleInd) = f(sampleInd);
 
-%==========================================================================
-% Coefficients
-%==========================================================================
-% find coeffs by projecting f onto V ( c = V'*f ) and use least squares since f is sampled
-J = diag(sign(abs(f_sampled_padded)));
-if strcmp(G_basis, 'Analytic')
-    assert(strcmp(graphName, 'Gaussian_1D') || strcmp(graphName, 'Gaussian_2D'))
-    coeffsLS = pinv(J*mPhiAnalytic)*f_sampled_padded;
-elseif strcmp(G_basis, 'Numeric')
-    coeffsLS = pinv(J*V)*f_sampled_padded;
-elseif strcmp(G_basis, 'representerBasis')
-    warning('is this correct?');
-    coeffsLS = pinv(J*G.W)*f_sampled_padded;
-elseif strcmp(G_basis, 'LaplacianEigenvectors')
-    coeffsLS = pinv(J*G.U)*f_sampled_padded; % same as iGFT: coeffs = f_hat = G.U'*f
-end
+% %==========================================================================
+% % Coefficients
+% %==========================================================================
+% % find coeffs by projecting f onto V ( c = V'*f ) and use least squares since f is sampled
+% J = diag(sign(abs(f_sampled_padded)));
+% if strcmp(G_basis, 'Analytic')
+%     assert(strcmp(graphName, 'Gaussian_1D') || strcmp(graphName, 'Gaussian_2D'))
+%     coeffsLS = pinv(J*mPhiAnalytic)*f_sampled_padded;
+% elseif strcmp(G_basis, 'Numeric')
+%     coeffsLS = pinv(J*V)*f_sampled_padded;
+% elseif strcmp(G_basis, 'representerBasis')
+%     warning('is this correct?');
+%     coeffsLS = pinv(J*G.W)*f_sampled_padded;
+% elseif strcmp(G_basis, 'LaplacianEigenvectors')
+%     coeffsLS = pinv(J*G.U)*f_sampled_padded; % same as iGFT: coeffs = f_hat = G.U'*f
+% end
 
 
 %% G_tilde
@@ -133,6 +136,8 @@ if strcmp(verticesTransform, 'permutation')
     R = eye(G.N);
     r = randperm(G.N);
     R = R(r,:);
+elseif strcmp(verticesTransform, 'eye')
+    R = eye(G.N);
 elseif strcmp(verticesTransform, 'RandOrthMat')
     R = RandOrthMat(G.N);
 elseif strcmp(verticesTransform, 'randomMatrix')
@@ -144,32 +149,31 @@ v_tilde = R*v;
 % Generate G_tilde
 %==========================================================================
 [G_tilde, dist_tilde, sDatasetTilde, sKernelTildeParams] = GenerateGraphTilde(v_tilde, nComponents,omega,...
-    nEigs,b_normlizedLaplacian);
+    Gtilde_nEigs,b_normlizedLaplacian);
 
 %==========================================================================
 % Generate G_tilde
 %==========================================================================
-if size(v,2) > 1
-%     PlotGraphToGraphTransform(G, G_tilde);
-    PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$');
-
-end
+% if size(v,2) > 1
+%     PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$');
+% end
 
 %==========================================================================
 % Eigenfunctions
 %==========================================================================
-[mPhiTildeAnalytic, vLambdaTildeAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelTildeParams, ...
+[mPhiTildeAnalytic, vLambdaTildeAnalytic] = CalcAnalyticEigenfunctions(Gtilde_nEigs, sKernelTildeParams, ...
     v_tilde, true);
 if sSimParams.b_showEigenFigures
     PlotEigenfuncvecScatter(sSimParams, estDataDist, v_tilde, [], 0, sSimParams.PlotEigenFuncsM-1, ...
         mPhiTildeAnalytic, vLambdaTildeAnalytic, 'Analytic', [], G_tilde, ...
         ['${\bf W}_{\tilde{G}}$ kernel Eigenfunctions' newline '$\tilde{v}={\bf R} v$'])
-    PlotInnerProductMatrix(sSimParams, sKernelTildeParams.sDistParams, graphName, [], mPhiTildeAnalytic, 'Analytic');
 end
+% PlotInnerProductMatrix(sSimParams, sKernelTildeParams.sDistParams, graphName, [], mPhiTildeAnalytic, 'Analytic');
+
 %==========================================================================
 % Eigenvectors
 %==========================================================================
-[V_tilde, vLambdaNumericTilde] = CalcNumericEigenvectors(nEigs, sKernelTildeParams, v_tilde);
+[V_tilde, vLambdaNumericTilde] = CalcNumericEigenvectors(Gtilde_nEigs, sKernelTildeParams, v_tilde);
 if sSimParams.b_showEigenFigures
     PlotEigenfuncvecScatter(sSimParams, estDataDist, v_tilde, [], 0, ...
         sSimParams.PlotEigenFuncsM-1, V_tilde, vLambdaNumericTilde, 'Numeric', [], G_tilde, ...
@@ -177,82 +181,112 @@ if sSimParams.b_showEigenFigures
     PlotInnerProductMatrix(sSimParams, sKernelTildeParams.sDistParams, graphName, [], V_tilde, 'Numeric');
 end
 
-%% Functional maps
-% fmap: C = L2.evecs'*L2.A'*P'*L1.evecs;
+%% Functional maps: C = L2.evecs'*L2.A'*P'*L1.evecs;
 if strcmp(G_tildeBasis, 'Analytic')
     [n, dim] = size(v_tilde);
     mPrTilde = diag(sKernelTildeParams.sDistParams.vPr);
     if strcmp(G_basis, 'Analytic')
-        C = mPhiTildeAnalytic'*R*mPhiTildeAnalytic;
+        C = pinv(mPhiTildeAnalytic)*R*mPhiAnalytic;
+        T = mPhiTildeAnalytic*C*pinv(mPhiAnalytic);
     elseif strcmp(G_basis, 'Numeric')
-%         C = mPhiTildeAnalytic'*mPrTilde'*R*V;
-        C = mPhiTildeAnalytic'*R*V;
+        C = pinv(mPhiTildeAnalytic)*R*V; %TODO: try with mPrTidle? C = mPhiTildeAnalytic'*mPrTilde'*R*V;
+        T = mPhiTildeAnalytic*C*V';
     elseif strcmp(G_basis, 'representerBasis')
-%         C = mPhiTildeAnalytic'*R*G.W; 
-%         C = n^dim*mPhiTildeAnalytic'*mPrTilde'*R*G.W;
-%         C = mPhiTildeAnalytic'*mPrTilde'*R*G.W;
-%         C = mPhiTildeAnalytic'*mPrTilde'*R*G.W;
-        C = mPhiTildeAnalytic'*R*G.W;
+        C = pinv(mPhiTildeAnalytic)*R*G.W; %TODO: try with mPrTilde? n^dim*pinv(mPhiTildeAnalytic)*mPrTilde'*R*G.W;
+        T = mPhiTildeAnalytic*C*pinv(full(G.W));
     elseif strcmp(G_basis, 'LaplacianEigenvectors')
-        C = mPhiTildeAnalytic'*R*G.U;
+        C = pinv(mPhiTildeAnalytic)*R*G.U;
+        T = mPhiTildeAnalytic*C*G.U';
     end
     
 elseif strcmp(G_tildeBasis, 'Numeric')
     if strcmp(G_basis, 'Numeric')
         C = V_tilde'*R*V;
+        T = V_tilde*C*V';
     elseif strcmp(G_basis, 'representerBasis')
         C = V_tilde'*R*G.W;
+        T = V_tilde*C*pinv(full(G.W));
     elseif strcmp(G_basis, 'LaplacianEigenvectors')
-        C = V_tilde'*R*G.U;        
+        C = V_tilde'*R*G.U;
+        T = V_tilde*C*G.U';
     end
 else
     error('invalid basis')
 end
-figure; 
-subplot(1,3,1)
-    imagesc(C); colorbar;
-    title('$C$', 'Interpreter', 'latex', 'FontSize', 14)
-subplot(1,3,2)
-    imagesc(C\C); colorbar;
-    title('$C^{-1} C$', 'Interpreter', 'latex', 'FontSize', 14)
-subplot(1,3,3)
-    imagesc(C'*C); colorbar;
-    title('$C^T C$', 'Interpreter', 'latex', 'FontSize', 14)    
-set(gcf,'Position', [400 400 1500 400])
+% figure; 
+% subplot(1,3,1)
+%     imagesc(C); colorbar;
+%     title('$C$', 'Interpreter', 'latex', 'FontSize', 14)
+% subplot(1,3,2)
+%     imagesc(C\C); colorbar;
+%     title('$C^{-1} C$', 'Interpreter', 'latex', 'FontSize', 14)
+% subplot(1,3,3)
+%     imagesc(C'*C); colorbar;
+%     title('$C^T C$', 'Interpreter', 'latex', 'FontSize', 14)    
+% set(gcf,'Position', [400 400 1500 400])
 %% Transform
-coeffsTilde = C*coeffsLS; 
-% coeffsTildeDebug = C*coeffsGroundTruthForDebug;
-
+% coeffsTilde = C*coeffsLS;
+J = diag(sign(abs(f_sampled_padded)));
+f_tilde_sampled_padded = (1/samplingRatio)*T*f_sampled_padded;
+f_tilde_sampled_title = '$\tilde{f}_{\mathcal{S}}(\tilde{v}) = {\bf T} f_{\mathcal{S}}$';
 
 if strcmp(G_tildeBasis, 'Analytic')
-    f_tilde = mPhiTildeAnalytic*coeffsTilde;
-    coeffs_interp = C\coeffsTilde;
-    f_tilde_title = '$\tilde{f}(\tilde{v}) = \tilde{{\bf \Phi}} \tilde{c}$';
+%     f_tilde2 = (mPhiTildeAnalytic*pinv(mPhiTildeAnalytic))*R*(V*V')*f_sampled_padded; % TODO: kaha kaha
+%     coeffsTilde_dbg = C*V'*f; % NOTE: coeffsLS = V'*f  
+%     f_tilde_dbg = mPhiTildeAnalytic*C*V'*f; % TODO: works
+%     f_tilde_dbg = (mPhiTildeAnalytic*pinv(mPhiTildeAnalytic))*R*(V*V')*f; % TODO: works
+%     f_tilde_dbg2 = mPhiTildeAnalytic*coeffsTilde_dbg;
+%     coeffsTilde = eigrls(f_tilde_sampled,mPhiTildeAnalytic,vLambdaTildeAnalytic, 0, 0, G_tilde.L);
+    coeffsTilde = ( (J*mPhiTildeAnalytic).' * (J*mPhiTildeAnalytic) ) \ ((J*mPhiTildeAnalytic).' * f_tilde_sampled_padded);
+    f_tilde_interp = mPhiTildeAnalytic*coeffsTilde;
+    f_tilde_interp_title = '$\tilde{f}_{{\bf int}}(\tilde{v}) = \tilde{{\bf \Phi}} \tilde{c}$';
 elseif strcmp(G_tildeBasis, 'Numeric')
-    f_tilde = V_tilde*coeffsTilde;
-%     coeffsRec = C'*coeffsTilde;
-    coeffs_interp = C\coeffsTilde;
-    f_tilde_title = '$\tilde{f}(\tilde{v}) = \tilde{{\bf V}} \tilde{c}$';
+%     f_tilde2 = (V_tilde*V_tilde')*R*(V*V')*f_sampled_padded; % TODO: kaha kaha
+%     coeffsTilde_dbg = C*V'*f; % NOTE: coeffsLS = V'*f  
+%     f_tilde_dbg = V_tilde*C*V'*f; % TODO: works
+%     f_tilde_dbg = (V_tilde*V_tilde')*R*(V*V')*f; % TODO: works
+%     f_tilde_dbg2 = V_tilde*coeffsTilde_dbg;
+%     coeffsTilde = eigrls(f_tilde_sampled,V_tilde,vLambdaNumericTilde, 0, 0, G_tilde.L);
+    coeffsTilde = ( (J*V_tilde).' * (J*V_tilde) ) \ ((J*V_tilde).' * f_tilde_sampled_padded);
+    f_tilde_interp = V_tilde*coeffsTilde;
+    f_tilde_interp_title = '$\tilde{f}_{{\bf int}}(\tilde{v}) = \tilde{{\bf V}} \tilde{\alpha}$';
 else
     error('invalid basis')
 end
 
-if strcmp(G_basis, 'Numeric')
-    f_interp = V*coeffs_interp;
-    f_interp_title = '$f_{{\bf int}}(v) = {\bf V} c_{{\bf int}}$';
-elseif strcmp(G_basis, 'representerBasis')
-    f_interp = G.W*coeffs_interp;
-    f_interp_title = '$f_{{\bf int}}(v) = {\bf K} \alpha_{{\bf int}}$';
-elseif strcmp(G_basis, 'LaplacianEigenvectors')
-    f_interp = G.U*coeffs_interp;
-    f_interp_title = '$f_{{\bf int}}(v) = {\bf U} \hat{f}_{{\bf int}}$';
-end
+coeffs_interp = C\coeffsTilde; % TODO: can we use C' instead of inv(C)?
 
-figure; 
-scatter(1:length(coeffsLS), coeffsLS, 'bx', 'DisplayName', 'Least-squares')
-hold on
-scatter(1:length(coeffs_interp), coeffs_interp, 'ro', 'DisplayName', 'Interpolated')
-% scatter(1:length(coeffsGroundTruthForDebug), coeffsGroundTruthForDebug, 'go', 'DisplayName', 'Ground-truth')
-legend()
+% figure; 
+% idx = 100;
+% scatter(1:idx, f_tilde_dbg(1:idx), 'bx', 'DisplayName', 'f tilde dbg')
+% hold on
+% scatter(1:idx, f_tilde_dbg2(1:idx), 'ko', 'DisplayName', 'f tilde dbg 2')
+% scatter(1:idx, f_tilde(1:idx), 'ro', 'DisplayName', 'f tilde')
+% legend()
 
-PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$', G, '$G$', f, f_title, f_tilde, f_tilde_title, f_interp, f_interp_title, sampleInd)
+% if strcmp(G_basis, 'Numeric')
+%     f_interp = V*coeffs_interp;
+%     f_interp_title = '$f_{{\bf int}}(v) = {\bf V} \alpha_{{\bf int}}$';
+% elseif strcmp(G_basis, 'representerBasis')
+%     f_interp = G.W*coeffs_interp;
+%     f_interp_title = '$f_{{\bf int}}(v) = {\bf K} \alpha_{{\bf int}}$';
+% elseif strcmp(G_basis, 'LaplacianEigenvectors')
+%     f_interp = G.U*coeffs_interp;
+%     f_interp_title = '$f_{{\bf int}}(v) = {\bf U} \hat{f}_{{\bf int}}$';
+% end
+
+% f_interp = pinv(T)*f_tilde_interp;
+f_interp = pinv(T)*f_tilde_interp;
+f_interp_title = '$f_{{\bf int}}(v) = {\bf T}^\dagger \tilde{f}_{{\bf int}}(\tilde{v})$';
+% figure; 
+% scatter(1:length(coeffsLS), coeffsLS, 'bx', 'DisplayName', 'Least-squares')
+% hold on
+% scatter(1:length(coeffs_interp), coeffs_interp, 'ro', 'DisplayName', 'Interpolated')
+% % scatter(1:length(coeffsGroundTruthForDebug), coeffsGroundTruthForDebug, 'go', 'DisplayName', 'Ground-truth')
+% legend()
+
+% PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$', ...
+%     G, '$G$', f, f_title, f_tilde_sampled_padded, f_tilde_sampled_title, f_interp, f_interp_title, sampleInd)
+
+PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$', ...
+    G, '$G$', f, f_title, f_tilde_interp, f_tilde_interp_title, f_interp, f_interp_title, sampleInd)

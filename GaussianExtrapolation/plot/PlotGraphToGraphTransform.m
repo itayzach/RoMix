@@ -79,7 +79,7 @@ for iGraph = 1:nGraphs
         plot_title = ['Graph-signal on ' G_title newline f_title];
         if iGraph == 3
             err = norm(f1-f3)/norm(f1);
-            plot_title = strcat(plot_title, [ newline 'Error = ', num2str(err, '%d')]);
+            plot_title = strcat(plot_title, [ newline 'Error = ', num2str(err, '%.6f')]);
         end
         title(plot_title, 'Interpreter', 'latex', 'FontSize', 14);
     else

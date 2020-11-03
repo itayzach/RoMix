@@ -234,25 +234,18 @@ f_tilde_sampled_padded = zeros(size(f));
 f_tilde_sampled_padded(sampleInd) = f_tilde_sampled;
 
 
-f_tilde_sampled_title = '$\tilde{f}_{\mathcal{S}}(\tilde{v}) = {\bf T} f_{\mathcal{S}}$';
-
 if strcmp(Gtilde_basisModel, 'Analytic')
-%     coeffsTilde = eigrls(f_tilde_sampled_padded,mPhiTilde,vLambdaAnalyticTilde, 0, 0, G_tilde.L);
-%     f_tilde_interp = mPhiTilde*coeffsTilde;
     f_tilde_interp_title = '$\tilde{f}_{{\bf int}}(\tilde{v}) = \tilde{{\bf \Phi}} \tilde{c}$';
 elseif strcmp(Gtilde_basisModel, 'Numeric')
-%     coeffsTilde = eigrls(f_tilde_sampled_padded,V_tilde,vLambdaNumericTilde, 0, 0, G_tilde.L);
-%     f_tilde_interp = V_tilde*coeffsTilde;
     f_tilde_interp_title = '$\tilde{f}_{{\bf int}}(\tilde{v}) = \tilde{{\bf V}} \tilde{\alpha}$';
 elseif strcmp(Gtilde_basisModel, 'LaplacianEigenvectors')
-%     coeffsTilde = ( (S*G_tilde.U).' * (S*G_tilde.U) ) \ ((S*G_tilde.U).' * f_tilde_sampled_padded);
-%     f_tilde_interp = G_tilde.U*coeffsTilde;
     f_tilde_interp_title = '$\tilde{f}_{{\bf int}}(\tilde{v}) = \tilde{{\bf U}} \tilde{\hat{f}}$';
 else
     error('invalid basis')
 end
 
-coeffsTilde = eigrls(f_tilde_sampled_padded,Btilde,Btilde_eigvals, 0, 0, G_tilde.L);
+% coeffsTilde = ( (S*Btilde).' * (S*Btilde) ) \ ((S*Btilde).' * f_tilde_sampled_padded);
+coeffsTilde = eigrls(f_tilde_sampled_padded, Btilde, Btilde_eigvals, 0, 0, G_tilde.L);
 f_tilde_interp = Btilde*coeffsTilde;
 
 if sSimParams.b_calcCoeffsInterpolated
@@ -268,7 +261,6 @@ end
 
 f_interp = pinv(T)*f_tilde_interp;
 f_interp_title = '$f_{{\bf int}}(v) = {\bf T}^\dagger \tilde{f}_{{\bf int}}(\tilde{v})$';
-
 
 PlotGraphToGraphTransform(sSimParams, G, '$G$', G_tilde, '$\tilde{G}$', ...
     G, '$G$', f, f_title, f_tilde_interp, f_tilde_interp_title, f_interp, f_interp_title, sampleInd)

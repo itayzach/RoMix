@@ -24,7 +24,7 @@ G_basisModel     = 'Numeric';  % 'Analytic' / 'Numeric' / 'LaplacianEigenvectors
 Gtilde_basisModel = 'Analytic'; % 'Analytic' / 'Numeric' / 'LaplacianEigenvectors'
 
 verticesTransform = 'randomMatrix'; % 'permutation' / 'RandOrthMat' / 'randomMatrix' / 'eye'
-funcTransform     = 'pinv(Btilde)RB'; % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
+funcTransform     = 'pinv(Btilde)B'; % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
 G_nEigs = 30;
 Gtilde_nEigs = 30;
 samplingRatio = 0.05;
@@ -47,6 +47,7 @@ sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = true;
 sSimParams.b_plotTransformation       = false;
 sSimParams.b_calcCoeffsInterpolated   = false;
+sSimParams.b_interpolateOnGWithLS     = false;
 %% Generate graph
 [G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, nComponents, ...
     estDataDist, omega, b_normlizedLaplacian, G_nEigs);
@@ -126,13 +127,14 @@ f_sampled_padded2 = S*f;
 %==========================================================================
 % Coefficients
 %==========================================================================
-% find coeffs by projecting f onto V ( c = V'*f ) and use least squares since f is sampled
-coeffsLS = pinv(S*B)*f_sampled_padded;
-f_interp_no_transform = B*coeffsLS;
-f_interp_no_transform_title = '$f_{{\bf int}}(v) = {\bf B}({\bf SB})^\dagger f_{\mathcal{S}}(v)$';
-PlotGraphToGraphTransform(sSimParams, G, '$G$',  G, '$G$', [], [], ...
-    f, f_title, f_interp_no_transform, f_interp_no_transform_title, [], [], sampleInd)
-
+if sSimParams.b_interpolateOnGWithLS
+    % find coeffs by projecting f onto V ( c = V'*f ) and use least squares since f is sampled
+    coeffsLS = pinv(S*B)*f_sampled_padded;
+    f_interp_no_transform = B*coeffsLS;
+    f_interp_no_transform_title = '$f_{{\bf int}}(v) = {\bf B}({\bf SB})^\dagger f_{\mathcal{S}}(v)$';
+    PlotGraphToGraphTransform(sSimParams, G, '$G$',  G, '$G$', [], [], ...
+        f, f_title, f_interp_no_transform, f_interp_no_transform_title, [], [], sampleInd)
+end
 % norm(f - f_interp_no_transform)/norm(f)
 %% G_tilde
 %==========================================================================

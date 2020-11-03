@@ -14,7 +14,7 @@ else
 end
 vNumAsText = strcat('\leftarrow ', {' '}, cellstr(num2str(vTextPlotIndexes)))';
 
-if exist('G3', 'var')
+if exist('G3', 'var') && ~isempty(G3)
     nGraphs = 3;
 else
     nGraphs = 2;
@@ -77,9 +77,9 @@ for iGraph = 1:nGraphs
         end
         view(0,90)
         plot_title = ['Graph-signal on ' G_title newline f_title];
-        if iGraph == 3
-            err = norm(f1-f3)/norm(f1);
-            plot_title = strcat(plot_title, [ newline 'Error = ', num2str(err, '%.6f')]);
+        if iGraph == nGraphs
+            err = norm(f1-f)/norm(f1);
+            plot_title = strcat(plot_title, [ newline 'Error = ', num2str(err, '%d')]);
         end
         title(plot_title, 'Interpreter', 'latex', 'FontSize', 14);
     else

@@ -28,6 +28,12 @@ funcTransform     = 'pinv(Btilde)B'; % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
 G_nEigs = 30;
 Gtilde_nEigs = 30;
 samplingRatio = 0.05;
+% % TODO: the following does not work:
+% graphSignalModel = 'U_fhat';
+% G_basisModel     = 'LaplacianEigenvectors';
+% Gtilde_basisModel = 'Numeric';
+% verticesTransform = 'randomMatrix';
+% funcTransform     = 'pinv(Btilde)RB'; 
 
 %==========================================================================
 % Plot parameters

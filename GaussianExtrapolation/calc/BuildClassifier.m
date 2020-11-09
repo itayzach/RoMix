@@ -36,7 +36,7 @@ X=[sClassifier.XX1(:) sClassifier.XX2(:)];
 tic;
 [ mPhi_m_X, ~ ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, X, b_normalize);
 run_time = toc;
-fprintf('Phi time = %f\n', run_time);
+fprintf('Phi time = %.2f ms\n', run_time*1e3);
 
 if sSimParams.b_plotEigenfunctions
     firstEigenIdxToPlot = 0;

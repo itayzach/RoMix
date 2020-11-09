@@ -12,4 +12,5 @@ end
 %% Figures
 sSimParams.outputFolder = 'figs';
 sSimParams.b_plotEigenfunctions = true;
+sSimParams.b_GSPBoxPlots = false;
 end

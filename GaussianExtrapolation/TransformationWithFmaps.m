@@ -98,21 +98,18 @@ end
 % Graph-signal
 %==========================================================================
 if strcmp(graphSignalModel, 'Phi_c')
-    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, mPhi, graphSignalModel);
     f_title = '$f(v) = {\bf \Phi} c$';
 elseif strcmp(graphSignalModel, 'V_c')
-    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, V, graphSignalModel);
     f_title = '$f(v) = {\bf V} \alpha$';
 elseif strcmp(graphSignalModel, 'K_alpha')
-    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, [], graphSignalModel);
     f_title = '$f(v) = {\bf K} \alpha$';
 elseif strcmp(graphSignalModel, 'U_fhat')
-    if ~isfield(G, 'U')
-        G = gsp_compute_fourier_basis(G);
-    end
-    [f,f_hat,coeffsGroundTruthForDebug] = GenerateGraphSignal(G, [], graphSignalModel);
     f_title = '$f(v) = {\bf U} \hat{f}$';
 end
+[f, coeffsGroundTruthForDebug] = GenerateGraphSignal(B, graphSignalModel);
+
+% f_sampled_padded = zeros(size(f));
+% f_sampled_padded(sampleInd) = f(sampleInd);
 randPerm = randperm(G.N)';
 sampleInd = sort(randPerm(1:round(samplingRatio*G.N)));
 S = zeros(G.N,1);

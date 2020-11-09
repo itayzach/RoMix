@@ -22,7 +22,7 @@ if strcmp(classifier.Name, 'laprlsc') || strcmp(classifier.Name, 'clustering')
     tic;
     mK_xTrain_X = calckernel(classifier.Kernel,classifier.KernelParam, xTrain_laprls, X);
     run_time = toc;
-    fprintf('K time = %f\n', run_time);
+    fprintf('K time = %.2f ms\n', run_time*1e3);
     mK_xTrain_xTrain = calckernel(classifier.Kernel,classifier.KernelParam, xTrain_laprls, xTrain_laprls);
     vKa = mK_xTrain_X*alpha_laprls;
     vKa_train = mK_xTrain_xTrain*alpha_laprls;

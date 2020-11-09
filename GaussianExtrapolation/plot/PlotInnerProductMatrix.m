@@ -20,7 +20,7 @@ elseif strcmp(figName, 'Nystrom')
     pltTitle = [figName ' - $\hat{V}^T \hat{V}$'];    
 end
 imagesc(mInnerProduct)
-colormap(gca, 'hot')
+% colormap(gca, 'hot')
 colorbar()
 title(pltTitle, 'Interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);

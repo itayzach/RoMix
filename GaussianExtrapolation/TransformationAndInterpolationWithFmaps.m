@@ -10,7 +10,7 @@ clc; clear; close all; rng('default')
 % 'bunny' / 'twodgrid' / 'sensor' / 'minnesota' /
 % 'david_sensor' / 'swiss_roll' / 'random_ring'
 graphName =  'Uniform_2D';
-N = 1000;
+
 %==========================================================================
 % Graph & graph-signal parameters
 %==========================================================================
@@ -24,17 +24,18 @@ G_basisModel     = 'Numeric';  % 'Analytic' / 'Numeric' / 'LaplacianEigenvectors
 Gtilde_basisModel = 'Analytic'; % 'Analytic' / 'Numeric' / 'LaplacianEigenvectors'
 
 verticesTransform = 'randomMatrix'; % 'permutation' / 'RandOrthMat' / 'randomMatrix' / 'eye'
-funcTransform     = 'pinv(Btilde)B'; % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
+funcTransform     = 'pinv(Btilde)RB'; % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
 G_nEigs = 30;
 Gtilde_nEigs = 30;
-samplingRatio = 0.05;
+samplingRatio = 1;0.8;
+
+
 % % TODO: the following does not work:
 % graphSignalModel = 'U_fhat';
 % G_basisModel     = 'LaplacianEigenvectors';
 % Gtilde_basisModel = 'Numeric';
 % verticesTransform = 'randomMatrix';
 % funcTransform     = 'pinv(Btilde)RB'; 
-
 %==========================================================================
 % Plot parameters
 %==========================================================================
@@ -50,14 +51,15 @@ sSimParams.PlotEigenFuncsM            = min(G_nEigs, 12);
 sSimParams.b_showEigenFigures         = false;
 sSimParams.b_showGraphMatricesFigures = false;
 sSimParams.b_showVerticesTransform    = false;
-sSimParams.b_GSPBoxPlots              = true;
+sSimParams.b_GSPBoxPlots              = false;
 sSimParams.b_plotTransformation       = false;
 sSimParams.b_calcCoeffsInterpolated   = false;
 sSimParams.b_interpolateOnGWithLS     = true;
 %% Generate graph
 [G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, nComponents, ...
-    estDataDist, omega, b_normlizedLaplacian, G_nEigs, N);
-v = sDataset.sData.x; % For convenience
+    estDataDist, omega, b_normlizedLaplacian, G_nEigs);
+v_N = sDataset.sData.x; % For convenience
+
 if sSimParams.b_showGraphMatricesFigures
     PlotGraphMatrices(G, b_normlizedLaplacian);
 end
@@ -65,84 +67,91 @@ if sDataset.dim == 1
     sSimParams.b_GSPBoxPlots = false;
 end
 
+%%
 %==========================================================================
-% Eigenfunctions
+% Sampling matrix
 %==========================================================================
-if strcmp(G_basisModel, 'Analytic')
-    [mPhi, vLambdaAnalytic] = CalcAnalyticEigenfunctions(G_nEigs, sKernelParams, v, true);
-    if sSimParams.b_showEigenFigures
-        PlotEigenfuncvecScatter(sSimParams, estDataDist, v, [], 0, ...
-            sSimParams.PlotEigenFuncsM-1, mPhi, vLambdaAnalytic, 'Analytic', [], G, ...
-            '${\bf W}_G$ kernel Eigenfunctions')
-    end
-    B = mPhi;
-    B_eigvals = vLambdaAnalytic;
-%==========================================================================
-% Eigenvectors
-%==========================================================================    
-elseif strcmp(G_basisModel, 'Numeric')
-    [V, vLambdaNumeric] = CalcNumericEigenvectors(G_nEigs, sKernelParams, v);
-    if sSimParams.b_showEigenFigures
-        PlotEigenfuncvecScatter(sSimParams, estDataDist, v, [], 0, ...
-            sSimParams.PlotEigenFuncsM-1, V, vLambdaNumeric, 'Numeric', [], G, ...
-            '${\bf W}_G$ Eigenvectors')
-    end
-    B = V;
-    B_eigvals = vLambdaNumeric;
-%==========================================================================
-% Laplacian Eigenvectors
-%==========================================================================    
-elseif strcmp(G_basisModel, 'LaplacianEigenvectors')
-    G = gsp_compute_fourier_basis(G); 
-    B = G.U;
-    B_eigvals = G.e;
-else
-    error('invalid basis')
-end
-
-%==========================================================================
-% Graph-signal
-%==========================================================================
-if strcmp(graphSignalModel, 'Phi_c')
-    f_title = '$f(v) = {\bf \Phi} c$';
-    coeffs = 10*randn(G_nEigs, 1);
-elseif strcmp(graphSignalModel, 'V_c')
-    f_title = '$f(v) = {\bf V} \alpha$';
-    coeffs = 10*randn(G_nEigs, 1);
-%     coeffs = zeros(G_nEigs, 1);
-%     coeffs(3) = 10;
-elseif strcmp(graphSignalModel, 'K_alpha')
-    f_title = '$f(v) = {\bf K} \alpha$';
-    coeffs = randn(N,1); % alpha
-elseif strcmp(graphSignalModel, 'U_fhat')
-    f_title = '$f(v) = {\bf U} \hat{f}$';
-    k0 = round(0.01*N);
-    f_hat = zeros(N,1);
-    f_hat(1:k0) = 5*sort(abs(randn(k0,1)), 'descend');
-    coeffs = f_hat;
-end
-f = GenerateGraphSignal(graphSignalModel, B, coeffs);
-
-% f_sampled_padded = zeros(size(f));
-% f_sampled_padded(sampleInd) = f(sampleInd);
 randPerm = randperm(G.N)';
 sampleInd = sort(randPerm(1:round(samplingRatio*G.N)));
 S = zeros(G.N,1);
 S(sampleInd) = 1;
 S = diag(S);
 
-f_sampled = f(sampleInd);
-f_sampled_padded = zeros(size(f));
-f_sampled_padded(sampleInd) = f(sampleInd);
-f_sampled_padded2 = S*f;
+v_n = v_N(sampleInd,:);
+n = length(v_n);
+%% Basis on G
+%==========================================================================
+% Eigenfunctions
+%==========================================================================
+if strcmp(G_basisModel, 'Analytic')
+    [mPhi, vLambdaAnalytic] = CalcAnalyticEigenfunctions(G_nEigs, sKernelParams, v_n, true);
+    if sSimParams.b_showEigenFigures
+        PlotEigenfuncvecScatter(sSimParams, estDataDist, v_n, [], 0, ...
+            sSimParams.PlotEigenFuncsM-1, mPhi, vLambdaAnalytic, 'Analytic', [], G, ...
+            '${\bf W}_G$ kernel Eigenfunctions')
+    end
+    Bn = mPhi;
+    Bn_eigvals = vLambdaAnalytic;
+%==========================================================================
+% Eigenvectors
+%==========================================================================    
+elseif strcmp(G_basisModel, 'Numeric')
+    [V, vLambdaNumeric] = CalcNumericEigenvectors(G_nEigs, sKernelParams, v_n);
+    if sSimParams.b_showEigenFigures
+        PlotEigenfuncvecScatter(sSimParams, estDataDist, v_n, [], 0, ...
+            sSimParams.PlotEigenFuncsM-1, V, vLambdaNumeric, 'Numeric', [], G, ...
+            '${\bf W}_G$ Eigenvectors')
+    end
+    Bn = V;
+    Bn_eigvals = vLambdaNumeric;
+    
+    [V, vLambdaNumeric] = CalcNumericEigenvectors(G_nEigs, sKernelParams, v_N);
+    if sSimParams.b_showEigenFigures
+        PlotEigenfuncvecScatter(sSimParams, estDataDist, v_N, [], 0, ...
+            sSimParams.PlotEigenFuncsM-1, V, vLambdaNumeric, 'Numeric', [], G, ...
+            '${\bf W}_G$ Eigenvectors')
+    end
+    BN = V;
+    BN_eigvals = vLambdaNumeric;
+%==========================================================================
+% Laplacian Eigenvectors
+%==========================================================================    
+elseif strcmp(G_basisModel, 'LaplacianEigenvectors')
+    G = gsp_compute_fourier_basis(G); 
+    Bn = G.U;
+    Bn_eigvals = G.e;
+else
+    error('invalid basis')
+end
+
+
+
+%%
+%==========================================================================
+% Graph-signal
+%==========================================================================
+if strcmp(graphSignalModel, 'Phi_c')
+    f_title = '$f(v) = {\bf \Phi} c$';
+elseif strcmp(graphSignalModel, 'V_c')
+    f_title = '$f(v) = {\bf V} \alpha$';
+elseif strcmp(graphSignalModel, 'K_alpha')
+    f_title = '$f(v) = {\bf K} \alpha$';
+elseif strcmp(graphSignalModel, 'U_fhat')
+    f_title = '$f(v) = {\bf U} \hat{f}$';
+end
+[f, coeffsGroundTruthForDebug] = GenerateGraphSignal(Bn, graphSignalModel);
+
+% f_sampled_padded = zeros(size(f));
+% f_sampled_padded(sampleInd) = f(sampleInd);
 
 %==========================================================================
 % Coefficients
 %==========================================================================
 if sSimParams.b_interpolateOnGWithLS
     % find coeffs by projecting f onto V ( c = V'*f ) and use least squares since f is sampled
-    coeffsLS = pinv(S*B)*f_sampled_padded;
-    f_interp_no_transform = B*coeffsLS;
+    coeffsLS = pinv(Bn)*f;
+%     error('TODO: f_interp_no_transform is not interpolated! it is 800x1 instead of 1000x1')
+    f_interp_no_transform = Bn*coeffsLS;
     f_interp_no_transform_title = '$f_{{\bf int}}(v) = {\bf B}({\bf SB})^\dagger f_{\mathcal{S}}(v)$';
     PlotGraphToGraphTransform(sSimParams, G, '$G$',  G, '$G$', [], [], ...
         f, f_title, f_interp_no_transform, f_interp_no_transform_title, [], [], sampleInd)
@@ -163,7 +172,7 @@ elseif strcmp(verticesTransform, 'RandOrthMat')
 elseif strcmp(verticesTransform, 'randomMatrix')
     R = (1/sqrt(G.N))*randn(G.N,G.N);
 end
-v_tilde = R*v;
+v_tilde = R*v_N; % TODO: should I use all v or just v_n?
 
 %==========================================================================
 % Generate G_tilde
@@ -215,14 +224,14 @@ if strcmp(Gtilde_basisModel, 'Analytic')
 end
 
 if strcmp(funcTransform, 'pinv(Btilde)RB')
-    C = pinv(Btilde)*R*B;
+    C = pinv(Btilde)*R*Bn;
 elseif strcmp(funcTransform, 'pinv(Btilde)B')
-    C = pinv(Btilde)*B;
+    C = pinv(Btilde)*Bn;
 else
     error('select funcTransform');
 end
-T = Btilde*C*pinv(B);
-TS = Btilde*C*pinv(S*B);
+T = Btilde*C*pinv(Bn);
+TS = Btilde*C*pinv(S*Bn);
 
 if sSimParams.b_plotTransformation
     figure; 
@@ -241,7 +250,7 @@ end
 % coeffsTilde = C*coeffsLS;
 
 % TODO: Make following lines are be like S*T*f_sampled_padded;
-f_tilde_sampled = TS(sampleInd,sampleInd)*f_sampled;
+f_tilde_sampled = TS(sampleInd,sampleInd)*f;
 f_tilde_sampled_padded = zeros(size(f));
 f_tilde_sampled_padded(sampleInd) = f_tilde_sampled;
 
@@ -256,10 +265,8 @@ else
     error('invalid basis')
 end
 
-% NOTE: next 3 options are the same...
 % coeffsTilde = ( (S*Btilde).' * (S*Btilde) ) \ ((S*Btilde).' * f_tilde_sampled_padded);
-% coeffsTilde = eigrls(f_tilde_sampled_padded, Btilde, Btilde_eigvals, 0, 0, G_tilde.L);
-coeffsTilde = C*coeffs;
+coeffsTilde = eigrls(f_tilde_sampled_padded, Btilde, Btilde_eigvals, 0, 0, G_tilde.L);
 f_tilde_interp = Btilde*coeffsTilde;
 
 if sSimParams.b_calcCoeffsInterpolated

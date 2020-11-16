@@ -10,7 +10,7 @@ clc; clear; close all; rng('default')
 % 'bunny' / 'twodgrid' / 'sensor' / 'minnesota' /
 % 'david_sensor' / 'swiss_roll' / 'random_ring'
 graphName =  'Uniform_2D';
-
+N = 1000;
 %==========================================================================
 % Graph & graph-signal parameters
 %==========================================================================
@@ -53,10 +53,10 @@ sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = true;
 sSimParams.b_plotTransformation       = false;
 sSimParams.b_calcCoeffsInterpolated   = false;
-sSimParams.b_interpolateOnGWithLS     = false;
+sSimParams.b_interpolateOnGWithLS     = true;
 %% Generate graph
 [G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, nComponents, ...
-    estDataDist, omega, b_normlizedLaplacian, G_nEigs);
+    estDataDist, omega, b_normlizedLaplacian, G_nEigs, N);
 v = sDataset.sData.x; % For convenience
 if sSimParams.b_showGraphMatricesFigures
     PlotGraphMatrices(G, b_normlizedLaplacian);
@@ -105,14 +105,23 @@ end
 %==========================================================================
 if strcmp(graphSignalModel, 'Phi_c')
     f_title = '$f(v) = {\bf \Phi} c$';
+    coeffs = 10*randn(G_nEigs, 1);
 elseif strcmp(graphSignalModel, 'V_c')
     f_title = '$f(v) = {\bf V} \alpha$';
+    coeffs = 10*randn(G_nEigs, 1);
+%     coeffs = zeros(G_nEigs, 1);
+%     coeffs(3) = 10;
 elseif strcmp(graphSignalModel, 'K_alpha')
     f_title = '$f(v) = {\bf K} \alpha$';
+    coeffs = randn(N,1); % alpha
 elseif strcmp(graphSignalModel, 'U_fhat')
     f_title = '$f(v) = {\bf U} \hat{f}$';
+    k0 = round(0.01*N);
+    f_hat = zeros(N,1);
+    f_hat(1:k0) = 5*sort(abs(randn(k0,1)), 'descend');
+    coeffs = f_hat;
 end
-[f, coeffsGroundTruthForDebug] = GenerateGraphSignal(B, graphSignalModel);
+f = GenerateGraphSignal(graphSignalModel, B, coeffs);
 
 % f_sampled_padded = zeros(size(f));
 % f_sampled_padded(sampleInd) = f(sampleInd);
@@ -247,8 +256,10 @@ else
     error('invalid basis')
 end
 
+% NOTE: next 3 options are the same...
 % coeffsTilde = ( (S*Btilde).' * (S*Btilde) ) \ ((S*Btilde).' * f_tilde_sampled_padded);
-coeffsTilde = eigrls(f_tilde_sampled_padded, Btilde, Btilde_eigvals, 0, 0, G_tilde.L);
+% coeffsTilde = eigrls(f_tilde_sampled_padded, Btilde, Btilde_eigvals, 0, 0, G_tilde.L);
+coeffsTilde = C*coeffs;
 f_tilde_interp = Btilde*coeffsTilde;
 
 if sSimParams.b_calcCoeffsInterpolated

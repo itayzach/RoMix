@@ -70,8 +70,10 @@ for iGraph = 1:nGraphs
                 text(v(vTextPlotIndexes,1)*1.05, v(vTextPlotIndexes,2)*1.01, vNumAsText,...
                     'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
             elseif G_dataDim == 1
+                shiftright = (max(v(:,1))-min(v(:,1)))/length(v);
+                shiftup = (max(f)-min(f))/length(f);
                 scatter(v(sampleInd), f(sampleInd), 'ko')
-                text(v(vTextPlotIndexes)*1.05, f(vTextPlotIndexes)*1.01, vNumAsText,...
+                text(v(vTextPlotIndexes)+2*shiftright, f(vTextPlotIndexes)+2*shiftup, vNumAsText,...
                     'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
             else
                 error('invalid dim');
@@ -84,6 +86,7 @@ for iGraph = 1:nGraphs
             plot_title = strcat(plot_title, [ newline 'Error = ', num2str(err, '%d')]);
         end
         title(plot_title, 'Interpreter', 'latex', 'FontSize', 14);
+        set(gca,'FontSize', 14);
     else
         gsp_plot_graph(G,param);
         title(G_title, 'Interpreter', 'latex', 'FontSize', 14);

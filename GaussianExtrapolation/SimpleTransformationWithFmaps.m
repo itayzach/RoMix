@@ -2,7 +2,7 @@
 clc; clear; close all; rng('default')
 
 %% Parameters
-graphName =  'Gaussian_1D'; % Uniform_1D
+graphName =  'Gaussian_2D'; % Uniform_1D
 nNodes = 1000; % number of nodes in G
 
 %==========================================================================
@@ -21,7 +21,7 @@ M_Gtilde = 30;
 phiInd = 4;
 
 funcTransform = 'pinv(Btilde)B';  % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
-verticesTransform = 'eye'; % 'permutation' / 'RandOrthMat' / 'randomMatrix' / 'eye'
+verticesTransform = 'eye'; % 'permutation' / 'randomMatrix' / 'eye'
 %==========================================================================
 % Plot parameters
 %==========================================================================
@@ -34,7 +34,7 @@ sPlotParams.b_GSPBoxPlots               = true;
 sPlotParams.b_plotTransformation        = false;
 sPlotParams.b_calcalphaInterpolated     = false;
 sPlotParams.b_interpolateOnGWithLS      = true;
-sPlotParams.b_plotSamplingPointsMarkers = false;
+sPlotParams.b_plotSamplingPointsMarkers = true;
 
 %% Generate graph
 [G, ~, ~, sKernelParams] = GenerateGraph(graphName, nComponents, estDataDist, omega, true, M_G, nNodes);
@@ -112,12 +112,15 @@ figure;
 subplot(1,3,1)
     imagesc(R); colorbar;
     title('${\bf R}$', 'Interpreter', 'latex', 'FontSize', 14)
+    set(gca,'FontSize', 14);
 subplot(1,3,2)
     imagesc(C); colorbar;
     title('${\bf C}$', 'Interpreter', 'latex', 'FontSize', 14)
+    set(gca,'FontSize', 14);
 subplot(1,3,3)    
     imagesc(pinv(C)); colorbar;
     title('${\bf C}^\dagger$', 'Interpreter', 'latex', 'FontSize', 14)
+    set(gca,'FontSize', 14);
 set(gcf,'Position', [400 400 1500 400])
 
 
@@ -131,9 +134,11 @@ figure;
 subplot(1,2,1)
     imagesc(PhiTilde_PhiTildeInv); colorbar;
     title('$\tilde{\Phi} \Phi^\dagger$', 'Interpreter', 'latex', 'FontSize', 14)
+    set(gca,'FontSize', 14);
 subplot(1,2,2)
     imagesc(PhiTildeInv_PhiTilde); colorbar;
     title('$\Phi^\dagger \tilde{\Phi}$', 'Interpreter', 'latex', 'FontSize', 14)
+    set(gca,'FontSize', 14);
 set(gcf,'Position', [400 400 1000 400])
 
 %==========================================================================
@@ -142,29 +147,20 @@ set(gcf,'Position', [400 400 1000 400])
 alpha_rec = pinv(C)*alpha_tilde;
 
 figure; 
-title('$\alpha$ vs. $\alpha_{rec}$', 'Interpreter', 'latex', 'FontSize', 14)
-scatter(1:M_G, alpha, 'bx', 'DisplayName', 'Ground truth')
+title('$\alpha$ vs. $\alpha_{{\bf rec}$', 'Interpreter', 'latex', 'FontSize', 14)
+scatter(1:M_G, alpha, 'bx', 'DisplayName', '$\alpha$')
 hold on
-scatter(1:M_G, alpha_rec, 'ro', 'DisplayName', 'Reconstructed')
-legend()
+scatter(1:M_G, alpha_rec, 'ro', 'DisplayName', '$\alpha_{{\bf rec}}$')
+scatter(1:M_G, C(:,phiInd), 'k+', 'DisplayName', ['${\bf C}(:,' num2str(phiInd) ')$'])
+legend('Interpreter', 'latex', 'FontSize', 14)
+set(gca,'FontSize', 14);
 
 fprintf('alpha_rec\t\talpha\n');
 disp([alpha_rec(1:5) alpha(1:5)]);
 
 %==========================================================================
-% Test f_rec
+% Test phi_rec
 %==========================================================================
-f_rec = pinv(T)*f_tilde;
-fprintf('f_rec\t\tf\n');
-disp([f_rec(1:5) f(1:5)]);
-f_title = '$f(v) = {\bf V} \alpha$';
-f_tilde_title = '$\tilde{f}(\tilde{v}) = \tilde{{\bf \Phi}} \tilde{\alpha}$';
-f_rec_title = '$f_{{\bf rec}}(v) = \tilde{{\bf \Phi}} \alpha_{{\bf rec}}$';
-
-% PlotGraphToGraphTransform(sPlotParams, G, '$G$', G_tilde, '$\tilde{G}$', ...
-%     G, '$G$', f, f_title, f_tilde, f_tilde_title, f_rec, f_rec_title)
-
-
 phi = PhiNumeric(:,phiInd);
 phi_tilde = PhiAnalytic_tilde(:,phiInd);
 PhiNumeric_rec = PhiAnalytic_tilde*C;
@@ -178,6 +174,19 @@ phi_tilde_title = ['$\tilde{\phi_' num2str(phiInd) '}$ (Analytic)'];
 phi_rec_title = ['$\phi_{{\bf rec}, ' num2str(phiInd) '} $ (Numeric)'];
 PlotGraphToGraphTransform(sPlotParams, G, '$G$', G_tilde, '$\tilde{G}$', ...
     G, '$G$', phi, phi_title, phi_tilde, phi_tilde_title, phi_rec, phi_rec_title)
+
+% %==========================================================================
+% % Test f_rec
+% %==========================================================================
+% f_rec = pinv(T)*f_tilde;
+% fprintf('f_rec\t\tf\n');
+% disp([f_rec(1:5) f(1:5)]);
+% f_title = '$f(v) = {\bf V} \alpha$';
+% f_tilde_title = '$\tilde{f}(\tilde{v}) = \tilde{{\bf \Phi}} \tilde{\alpha}$';
+% f_rec_title = '$f_{{\bf rec}}(v) = \tilde{{\bf \Phi}} \alpha_{{\bf rec}}$';
+% 
+% PlotGraphToGraphTransform(sPlotParams, G, '$G$', G_tilde, '$\tilde{G}$', ...
+%     G, '$G$', f, f_title, f_tilde, f_tilde_title, f_rec, f_rec_title)
 
 %% Interpolate on Gtilde
 % if size(v,2) == 1

@@ -60,20 +60,22 @@ for iGraph = 1:nGraphs
         end
         hold on;       
         
-        if G_dataDim == 3
-            scatter3(v(sampleInd,1), v(sampleInd,2), v(sampleInd,3), 'ko')
-            text(v(vTextPlotIndexes,1) + 0.05, v(vTextPlotIndexes,2)+0.01, v(vTextPlotIndexes,3), vNumAsText,...
-                'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
-        elseif G_dataDim == 2
-            scatter(v(sampleInd,1), v(sampleInd,2), 50, 'ko')
-            text(v(vTextPlotIndexes,1) + 0.05, v(vTextPlotIndexes,2)+0.01, vNumAsText,...
-                'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
-        elseif G_dataDim == 1
-            scatter(v(sampleInd), f(sampleInd), 'ko')
-            text(v(vTextPlotIndexes) + 0.05, f(vTextPlotIndexes)+0.01, vNumAsText,...
-                'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
-        else
-            error('invalid dim');
+        if sSimParams.b_plotSamplingPointsMarkers
+            if G_dataDim == 3
+                scatter3(v(sampleInd,1), v(sampleInd,2), v(sampleInd,3), 'ko')
+                text(v(vTextPlotIndexes,1)*1.05, v(vTextPlotIndexes,2)*1.01, v(vTextPlotIndexes,3), vNumAsText,...
+                    'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
+            elseif G_dataDim == 2
+                scatter(v(sampleInd,1), v(sampleInd,2), 50, 'ko')
+                text(v(vTextPlotIndexes,1)*1.05, v(vTextPlotIndexes,2)*1.01, vNumAsText,...
+                    'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
+            elseif G_dataDim == 1
+                scatter(v(sampleInd), f(sampleInd), 'ko')
+                text(v(vTextPlotIndexes)*1.05, f(vTextPlotIndexes)*1.01, vNumAsText,...
+                    'FontWeight','bold','Color', 'black', 'BackgroundColor', 'white', 'Margin', 1,'EdgeColor','black')
+            else
+                error('invalid dim');
+            end
         end
         view(0,90)
         plot_title = ['Graph-signal on ' G_title newline f_title];

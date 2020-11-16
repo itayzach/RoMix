@@ -20,8 +20,8 @@ M_Gtilde = 30;
 
 phiInd = 4;
 
-funcTransform = 'pinv(Btilde)B';  % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
-verticesTransform = 'eye'; % 'permutation' / 'randomMatrix' / 'eye'
+funcTransform = 'pinv(Btilde)RB';  % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
+verticesTransform = 'permutation'; % 'permutation' / 'randomMatrix' / 'eye'
 %==========================================================================
 % Plot parameters
 %==========================================================================
@@ -163,11 +163,13 @@ disp([alpha_rec(1:5) alpha(1:5)]);
 %==========================================================================
 phi = PhiNumeric(:,phiInd);
 phi_tilde = PhiAnalytic_tilde(:,phiInd);
-PhiNumeric_rec = PhiAnalytic_tilde*C;
+PhiNumeric_rec = R\PhiAnalytic_tilde*C; % R^(-1)*PhiAnalytic_tilde*C
+
+vecnorm( PhiNumeric_rec - PhiNumeric, 2 )
 phi_rec = PhiNumeric_rec(:,phiInd);
 
 fprintf('Phi%d\t\t Phi_rec%d\n', phiInd, phiInd);
-disp([ PhiNumeric(1:5,phiInd) phi_rec(1:5)])
+disp([ phi(1:5) phi_rec(1:5)])
 
 phi_title = ['$\phi_' num2str(phiInd) '$ (Numeric)'];
 phi_tilde_title = ['$\tilde{\phi_' num2str(phiInd) '}$ (Analytic)'];

@@ -2,7 +2,7 @@
 clc; clear; close all; rng('default')
 
 %% Parameters
-graphName =  'Gaussian_2D'; % Uniform_1D
+graphName =  'Uniform_1D'; % Uniform_1D
 nNodes = 1000; % number of nodes in G
 
 %==========================================================================
@@ -16,12 +16,12 @@ nComponents = 1;
 % basis parameters
 %==========================================================================
 M_G = 30;
-M_Gtilde = 30;
+M_Gtilde = 1000;
 
 phiInd = 4;
 
-funcTransform = 'pinv(Btilde)RB';  % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
-verticesTransform = 'permutation'; % 'permutation' / 'randomMatrix' / 'eye'
+funcTransform = 'pinv(Btilde)B';  % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
+verticesTransform = 'randomMatrix'; % 'permutation' / 'randomMatrix' / 'eye'
 %==========================================================================
 % Plot parameters
 %==========================================================================
@@ -49,9 +49,9 @@ end
 
 [PhiNumeric, vLambdaNumeric] = CalcNumericEigenvectors(M_G, sKernelParams, v);
 if sPlotParams.b_showEigenFigures
-    PlotEigenfuncvecScatter(sPlotParams, estDataDist, v, [], 0, ...
-        sPlotParams.PlotEigenFuncsM-1, PhiNumeric, vLambdaNumeric, 'Numeric', [], G, ...
-        '${\bf W}_G$ Eigenvectors')
+%     PlotEigenfuncvecScatter(sPlotParams, estDataDist, v, [], 0, ...
+%         sPlotParams.PlotEigenFuncsM-1, PhiNumeric, vLambdaNumeric, 'Numeric', [], G, ...
+%         '${\bf W}_G$ Eigenvectors')
 end
 
 %% Generate graph signal
@@ -83,28 +83,48 @@ v_tilde = R*v;
 %==========================================================================
 % Eigenfunctions
 %==========================================================================
-[PhiAnalytic_tilde, vLambdaAnalytic_tilde] = CalcAnalyticEigenfunctions(M_Gtilde, sKernelTildeParams, v_tilde, true);
+% [PhiAnalytic_tilde, vLambdaAnalytic_tilde] = CalcAnalyticEigenfunctions(M_Gtilde, sKernelTildeParams, v_tilde, true);
+% if sPlotParams.b_showEigenFigures
+%     firstEigenfunctionToPlot = 144;
+%     lastEigenfunctionToPlot = 149;
+%     PlotEigenfuncvecScatter(sPlotParams, estDataDist, v_tilde, [], firstEigenfunctionToPlot, lastEigenfunctionToPlot, ...
+%         PhiAnalytic_tilde, vLambdaAnalytic_tilde, 'Analytic', [], G_tilde, ...
+%         ['${\bf W}_{\tilde{G}}$ kernel Eigenfunctions' newline '$\tilde{v}={\bf R} v$'])
+%     PlotInnerProductMatrix(sPlotParams, sKernelTildeParams.sDistParams, graphName, [], PhiAnalytic_tilde, 'Analytic');
+% end
+
+[PhiNumeric_tilde, vLambdaNumeric_tilde] = CalcNumericEigenvectors(M_Gtilde, sKernelTildeParams, v_tilde);
+% PhiNumeric_tilde = FlipSign(PhiAnalytic_tilde, PhiNumeric_tilde);
 if sPlotParams.b_showEigenFigures
-    PlotEigenfuncvecScatter(sPlotParams, estDataDist, v_tilde, [], 0, sPlotParams.PlotEigenFuncsM-1, ...
-        PhiAnalytic_tilde, vLambdaAnalytic_tilde, 'Analytic', [], G_tilde, ...
-        ['${\bf W}_{\tilde{G}}$ kernel Eigenfunctions' newline '$\tilde{v}={\bf R} v$'])
-    PlotInnerProductMatrix(sPlotParams, sKernelTildeParams.sDistParams, graphName, [], PhiAnalytic_tilde, 'Analytic');
+    firstEigenvectorToPlot = 144;
+    lastEigenvectorToPlot = 149;
+    PlotEigenfuncvecScatter(sPlotParams, estDataDist, v_tilde, [], firstEigenvectorToPlot, ...
+        lastEigenvectorToPlot, PhiNumeric_tilde, vLambdaNumeric_tilde, 'Numeric', [], G, ...
+        '${\bf W}_G$ Eigenvectors')
 end
+
+% figure;
+% idx = 10;
+% plot(vecnorm(PhiNumeric_tilde(:,1:idx)-PhiAnalytic_tilde(:,1:idx)))
+
+Phi_tilde = PhiNumeric_tilde;
+
 
 %% Functional maps: C = L2.evecs'*L2.A'*P'*L1.evecs;
 if strcmp(funcTransform, 'pinv(Btilde)RB')
-    C = pinv(PhiAnalytic_tilde)*R*PhiNumeric;
+    C = pinv(Phi_tilde)*R*PhiNumeric;
 elseif strcmp(funcTransform, 'pinv(Btilde)B')
-    C = pinv(PhiAnalytic_tilde)*PhiNumeric;
+    C = pinv(Phi_tilde)*PhiNumeric;
 else
     error('select funcTransform');
 end
-T = PhiAnalytic_tilde*C*pinv(PhiNumeric);
+T = Phi_tilde*C*pinv(PhiNumeric);
 
 alpha_tilde = C*alpha;
 f_tilde = T*f;
 
 %% Test
+figure; plot(v, [Phi_tilde*C(:,phiInd), PhiNumeric(:,phiInd)],'.')
 %==========================================================================
 % Show C, pinv(C) and R
 %==========================================================================
@@ -127,8 +147,8 @@ set(gcf,'Position', [400 400 1500 400])
 %==========================================================================
 % Test identity
 %==========================================================================
-PhiTilde_PhiTildeInv = PhiAnalytic_tilde*pinv(PhiAnalytic_tilde);
-PhiTildeInv_PhiTilde = pinv(PhiAnalytic_tilde)*PhiAnalytic_tilde;
+PhiTilde_PhiTildeInv = Phi_tilde*pinv(Phi_tilde);
+PhiTildeInv_PhiTilde = pinv(Phi_tilde)*Phi_tilde;
 
 figure; 
 subplot(1,2,1)
@@ -151,7 +171,7 @@ title('$\alpha$ vs. $\alpha_{{\bf rec}$', 'Interpreter', 'latex', 'FontSize', 14
 scatter(1:M_G, alpha, 'bx', 'DisplayName', '$\alpha$')
 hold on
 scatter(1:M_G, alpha_rec, 'ro', 'DisplayName', '$\alpha_{{\bf rec}}$')
-scatter(1:M_G, C(:,phiInd), 'k+', 'DisplayName', ['${\bf C}(:,' num2str(phiInd) ')$'])
+scatter(1:M_Gtilde, C(:,phiInd), 'k+', 'DisplayName', ['${\bf C}(:,' num2str(phiInd) ')$'])
 legend('Interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
 
@@ -162,8 +182,9 @@ disp([alpha_rec(1:5) alpha(1:5)]);
 % Test phi_rec
 %==========================================================================
 phi = PhiNumeric(:,phiInd);
-phi_tilde = PhiAnalytic_tilde(:,phiInd);
-PhiNumeric_rec = R\PhiAnalytic_tilde*C; % R^(-1)*PhiAnalytic_tilde*C
+phi_tilde = Phi_tilde(:,phiInd);
+% PhiNumeric_rec = R\Phi_tilde*C; % R^(-1)*PhiAnalytic_tilde*C
+PhiNumeric_rec = Phi_tilde*C; % R^(-1)*PhiAnalytic_tilde*C
 
 vecnorm( PhiNumeric_rec - PhiNumeric, 2 )
 phi_rec = PhiNumeric_rec(:,phiInd);

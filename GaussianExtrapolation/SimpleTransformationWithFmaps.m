@@ -20,7 +20,7 @@ M_Gtilde = 1000;
 
 phiInd = 4;
 
-funcTransform = 'pinv(Btilde)B';  % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
+funcTransform     = 'pinv(Btilde)B'; % 'pinv(Btilde)RB' / 'pinv(Btilde)B'
 verticesTransform = 'randomMatrix'; % 'permutation' / 'randomMatrix' / 'eye'
 %==========================================================================
 % Plot parameters
@@ -108,7 +108,7 @@ end
 % plot(vecnorm(PhiNumeric_tilde(:,1:idx)-PhiAnalytic_tilde(:,1:idx)))
 
 Phi_tilde = PhiNumeric_tilde;
-
+% Phi_tilde = PhiAnalytic_tilde;
 
 %% Functional maps: C = L2.evecs'*L2.A'*P'*L1.evecs;
 if strcmp(funcTransform, 'pinv(Btilde)RB')
@@ -122,9 +122,9 @@ T = Phi_tilde*C*pinv(PhiNumeric);
 
 alpha_tilde = C*alpha;
 f_tilde = T*f;
+f_tilde_title = ['$\tilde{f}$'];
 
 %% Test
-figure; plot(v, [Phi_tilde*C(:,phiInd), PhiNumeric(:,phiInd)],'.')
 %==========================================================================
 % Show C, pinv(C) and R
 %==========================================================================
@@ -181,22 +181,27 @@ disp([alpha_rec(1:5) alpha(1:5)]);
 %==========================================================================
 % Test phi_rec
 %==========================================================================
+% figure; plot(v, [Phi_tilde*C(:,phiInd), PhiNumeric(:,phiInd)],'.')
+
 phi = PhiNumeric(:,phiInd);
-phi_tilde = Phi_tilde(:,phiInd);
+phi_title = ['$\phi_{' num2str(phiInd) '}$ (Numeric)'];
+
+%     phi_tilde = Phi_tilde(:,phiInd);
+%     phi_tilde_title = ['$\tilde{\phi_{' num2str(phiInd) '}}$ (Analytic)'];
+
+
 % PhiNumeric_rec = R\Phi_tilde*C; % R^(-1)*PhiAnalytic_tilde*C
 PhiNumeric_rec = Phi_tilde*C; % R^(-1)*PhiAnalytic_tilde*C
-
-vecnorm( PhiNumeric_rec - PhiNumeric, 2 )
 phi_rec = PhiNumeric_rec(:,phiInd);
+phi_rec_title = ['$\phi_{{\bf rec}, ' num2str(phiInd) '} $ (Numeric)'];
 
 fprintf('Phi%d\t\t Phi_rec%d\n', phiInd, phiInd);
 disp([ phi(1:5) phi_rec(1:5)])
 
-phi_title = ['$\phi_' num2str(phiInd) '$ (Numeric)'];
-phi_tilde_title = ['$\tilde{\phi_' num2str(phiInd) '}$ (Analytic)'];
-phi_rec_title = ['$\phi_{{\bf rec}, ' num2str(phiInd) '} $ (Numeric)'];
+vecnorm( PhiNumeric_rec - PhiNumeric, 2 )
+
 PlotGraphToGraphTransform(sPlotParams, G, '$G$', G_tilde, '$\tilde{G}$', ...
-    G, '$G$', phi, phi_title, phi_tilde, phi_tilde_title, phi_rec, phi_rec_title)
+    G, '$G$', phi, phi_title, f_tilde, f_tilde_title, phi_rec, phi_rec_title)
 
 % %==========================================================================
 % % Test f_rec

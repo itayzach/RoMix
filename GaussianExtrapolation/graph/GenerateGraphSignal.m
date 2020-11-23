@@ -20,11 +20,11 @@ if strcmpi(graphSignalModel, 'bandlimited') || strcmpi(graphSignalModel, 'U_fhat
     % f_hat = 5*exp(-0.5*(1:N))';
     % f = G.U*(f_hat);
 
-    f = B*f_hat;
+    f = B*coeffs;
 elseif strcmpi(graphSignalModel, 'V_c') || strcmpi(graphSignalModel, 'Phi_c')   
     f = B*coeffs;
 elseif strcmpi(graphSignalModel, 'K_alpha')
-    f = B*alpha; % K*alpha
+    f = B*coeffs; % K*alpha
 else
     error('unknown graphSignalModel');
 end

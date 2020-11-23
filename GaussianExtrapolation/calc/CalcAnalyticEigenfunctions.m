@@ -8,7 +8,9 @@ for i = 1:nEigs
     j = sKernelParams.vEigIndex(i);
     m = OneDim2MultiDimIndex(j-1,dim);
     mPhiAnalytic(:,i) = phi(sKernelParams, c, m, mData);
+    assert(~any(isnan(mPhiAnalytic(:,i))), 'Phi %d contains NaN', m);
 end
+
 
 if b_normalize
     mPhiAnalytic = sqrt(nComponents/nTotal)*mPhiAnalytic;

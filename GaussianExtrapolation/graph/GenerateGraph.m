@@ -24,7 +24,9 @@ switch graphName
         %N = 500;
         G_tmp = gsp_sensor(N);
     case 'minnesota'
-        assert(~exist('N', 'var'), 'number of nodes cannot be changed for minnesota graph');
+        if exist('N', 'var')
+            error('number of nodes cannot be changed for minnesota graph');
+        end
         G_tmp = gsp_minnesota();
     case 'david_sensor'
         assert(~exist('N', 'var'), 'number of nodes cannot be changed for david_sensor graph');

@@ -14,15 +14,16 @@ graphName =  'sensor';
 %==========================================================================
 % Graph & graph-signal parameters
 %==========================================================================
+N           = 500;
 omega       = 0.3;
 estDataDist = 'Gaussian';
 nComponents = 1;
 b_normlizedLaplacian = true;
 
 nEigs = 30;
-samplingRatio = 0.05;
+samplingRatio = 0.1;
 b_generateGraphSignal = true;
-graphSignalModel = 'alpha_K'; % 'bandlimited' / 'V_c' / 'alpha_K'
+graphSignalModel = 'bandlimited'; % 'bandlimited' / 'V_c' / 'K_alpha'
 
 gamma_A_eigrls = 0; 0.01;
 gamma_I_eigrls = 0; 0.1; 
@@ -46,7 +47,7 @@ sSimParams.outputFolder               = 'figs';
 sSimParams.PlotEigenFuncsM            = min(nEigs, 20);
 sSimParams.b_showEigenFigures         = false;
 sSimParams.b_showGraphMatricesFigures = false;
-sSimParams.b_showVerticesTransform    = false;
+sSimParams.b_showVerticesTransform    = true;
 sSimParams.b_GSPBoxPlots              = true;
 
 
@@ -59,7 +60,7 @@ sSimParams.b_GSPBoxPlots              = true;
 % tilde_gamma_I_eigrls = 0.1;
 
 %% Generate graph
-[G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, nComponents, estDataDist, omega, b_normlizedLaplacian, nEigs);
+[G, dist, sDataset, sKernelParams] = GenerateGraph(graphName, nComponents, estDataDist, omega, b_normlizedLaplacian, nEigs, N);
 v = sDataset.sData.x; % For convenience
 if sSimParams.b_showGraphMatricesFigures
     PlotGraphMatrices(G, b_normlizedLaplacian);
@@ -108,8 +109,13 @@ else
     if ~isfield(G, 'U')
         G = gsp_compute_fourier_basis(G);
     end
-    [f,f_hat] = GenerateGraphSignal(G, V, b_generateBLgraphSignal);
+    assert(strcmp(graphSignalModel, 'bandlimited'), 'this scripts supports bandlimited functions only')
+    k0 = round(0.01*N);
+    f_hat = zeros(N,1);
+    f_hat(1:k0) = 5*sort(abs(randn(k0,1)), 'descend');
+    f = GenerateGraphSignal(graphSignalModel, G.U, f_hat);
     if sSimParams.b_showEigenFigures
+        f_hat = G.U*f;
         PlotGraphFourierTransform(sSimParams,G,f_hat)
     end
     

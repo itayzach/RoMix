@@ -24,6 +24,9 @@ if dim == 1
         hold on;
         set(gca,'FontSize', 14);
     end
+    if exist('suptitle', 'var')
+        title(suptitle,'Interpreter', 'latex', 'FontSize', 14);
+    end
     legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',min(ceil(length(firstEigenIdx:lastEigIdx)/2),3))
     set(gcf,'Position', [x0 y0 width height])
 elseif dim == 2

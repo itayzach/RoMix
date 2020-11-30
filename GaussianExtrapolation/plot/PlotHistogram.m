@@ -26,7 +26,7 @@ elseif dim == 2
     xlim([ min(v(:,1)) max(v(:,1))])
     ylim([ min(v(:,2)) max(v(:,2))])
 end
-title([plt_title newline actualDataDist], 'Interpreter', 'latex', 'FontSize', 14)
+title(strcat(plt_title, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
 set(gcf,'Position', [x0 y0 width height])
 

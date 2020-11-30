@@ -49,7 +49,7 @@ for dataDim = vDataDim
 
             if t == 1 && sSimParams.b_plotEigenfunctions
                 % Plot histogram and eigenvectors of the first iteration
-                PlotHistogram(sSimParams, sDataset);
+                PlotHistogram(sSimParams, [ sDataset.sData.x; sDataset.sData.xt], actualDataDist, 'Histogram');
                 PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambdaAnalytic, vLambdaNumeric, mLambdaNystrom);
 
                 PlotInnerProductMatrix(sSimParams, sDistParams, actualDataDist, [], squeeze(tPhiAnalytic(1,:,:)), 'Analytic');

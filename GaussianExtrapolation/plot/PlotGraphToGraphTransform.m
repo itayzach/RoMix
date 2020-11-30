@@ -80,8 +80,9 @@ for iGraph = 1:nGraphs
             end
         end
         view(0,90)
-        plot_title = ['Graph-signal on ' G_title newline f_title];
-        if iGraph == nGraphs
+        N = size(v,1);
+        plot_title = ['Graph-signal on ' G_title ' ($N$ = ' num2str(N) ')' newline f_title];
+        if iGraph == nGraphs && length(f1) == length(f)
             err = norm(f1-f)/norm(f1);
             plot_title = strcat(plot_title, [ newline 'Error = ', num2str(err, '%d')]);
         end

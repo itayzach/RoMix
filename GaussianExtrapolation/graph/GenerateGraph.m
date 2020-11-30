@@ -38,7 +38,7 @@ switch graphName
         %N = 500;
         G_tmp = gsp_random_ring(N);
     otherwise
-        error([graphName 'is not supported']);       
+        error([graphName ' is not supported']);       
 end
     
 if exist('G_tmp', 'var')

@@ -63,13 +63,8 @@ legend(strcat('$\tilde{\phi}_',string(vInd),'$'), 'interpreter', 'latex', 'Locat
 title('(Anayltic) Eigenfunctions of $W_{\tilde{G}}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% Transform eigenvectors
-C = V_tilde'*V;
-% alphaTilde = C*alpha;
-
-% f_tilde = V_tilde*alphaTilde;
-f_tilde = V_tilde*C(:,vInd);
-
-T = (V_tilde*V_tilde')*(V*V');
+C = pinv(V_tilde)*V;
+T = (V_tilde*pinv(V_tilde))*(V*V');
 
 figure('Name', 'Transformation matrices');
 subplot(1,2,1)
@@ -81,7 +76,11 @@ imagesc(C);
 colorbar();
 title('$C$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
-v_tilde = V_tilde(:,vInd);
+%% f_tilde
+% alphaTilde = C*alpha;
+
+% f_tilde = V_tilde*alphaTilde;
+f_tilde = V_tilde*C(:,vInd);
 Tv_tilde = T*V(:,vInd);
 
 figure('Name', 'f_tilde');
@@ -91,7 +90,6 @@ plot(X_tilde, Tv_tilde,'.');
 title('$\tilde{f}$ on $G$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 legend([strcat('$\tilde{f}_',string(vInd),'$') strcat('$T v_',string(vInd),'$') ]', 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 
-% plot(X_tilde, v_tilde,'.');
 %% Transform back
 X_rec = R\X_tilde;
 % V_rec = R\V_tilde*C;

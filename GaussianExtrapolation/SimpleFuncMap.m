@@ -63,8 +63,8 @@ legend(strcat('$\tilde{\phi}_',string(vInd),'$'), 'interpreter', 'latex', 'Locat
 title('(Anayltic) Eigenfunctions of $W_{\tilde{G}}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% Transform eigenvectors
-C = pinv(V_tilde)*V;
-T = (V_tilde*pinv(V_tilde))*(V*V');
+C = pinv(Phi_tilde)*V;
+T = (Phi_tilde*pinv(Phi_tilde))*(V*V');
 
 figure('Name', 'Transformation matrices');
 subplot(1,2,1)
@@ -78,9 +78,8 @@ title('$C$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% f_tilde
 % alphaTilde = C*alpha;
-
-% f_tilde = V_tilde*alphaTilde;
-f_tilde = V_tilde*C(:,vInd);
+% f_tilde = Phi_tilde*alphaTilde;
+f_tilde = Phi_tilde*C(:,vInd);
 Tv_tilde = T*V(:,vInd);
 
 figure('Name', 'f_tilde');

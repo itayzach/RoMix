@@ -1,7 +1,8 @@
 function sDistParams = EstimateDistributionParameters(sDataset, estNumComponents, RegularizationValue)
 
 sDistParams.estDataDist = sDataset.estDataDist;
-sDistParams.dim = sDataset.dim;
+dim = size(sDataset.sData.x,2);
+sDistParams.dim = dim;
 
 if strcmp(sDataset.estDataDist, 'Gaussian')
     lastwarn('')
@@ -22,7 +23,7 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         sDistParams.mu{c} = GMModel.mu(c,:);
         [sDistParams.u{c}, sDistParams.sigma_eigv{c}] = eig(sDistParams.cov{c});
         sDistParams.sigma{c} = diag(sqrt(sDistParams.sigma_eigv{c})).';
-        if sDataset.dim == 2
+        if dim == 2
             if sDistParams.cov{c}(1,1) > sDistParams.cov{c}(2,2)
                 warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
                 sDistParams.u{c} = fliplr(sDistParams.u{c});    
@@ -31,7 +32,7 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
             sDistParams.u{c} = [-sDistParams.u{c}(:,1) -sDistParams.u{c}(:,2)];    
         end
         sDistParams.mu_1D{c} = sDistParams.mu{c}*sDistParams.u{c};
-        isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-15)
+        isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-10)
     end
     
     % Caluclate the probability for each data point x

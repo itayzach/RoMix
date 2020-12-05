@@ -1,4 +1,5 @@
 function sKernelParams = GetKernelParams(sDataset, sDistParams, omega)
+dim = size(sDataset.sData.x,2);
 %% kernel and eigenfunctions constants type
 if strcmp(sDataset.estDataDist, 'Gaussian')
     sKernelParams.kernelType = 'gaussian';
@@ -17,7 +18,7 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         sKernelParams.A = sKernelParams.a + sKernelParams.b + sKernelParams.c;
         sKernelParams.B = sKernelParams.b./sKernelParams.A;
 
-        for d = 1:sDataset.dim
+        for d = 1:dim
             fprintf('a(%d) = %8.3f --> sigma(%d) (pdf width)    = %8.3f\n', d, sKernelParams.a(d), d, sDistParams.sigma(d));
         end
         fprintf('b     = %8.3f --> ell   (kernel width) = %8.3f\n', sKernelParams.b, sKernelParams.ell); 
@@ -36,12 +37,12 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         for c = 1:sDistParams.estNumComponents
             sKernelParams.beta{c} = 2*sDistParams.sigma{c}.^2/sKernelParams.omega^2;
 
-            for d = 1:sDataset.dim
+            for d = 1:dim
                 fprintf('sigma(%d) (pdf width)     = %8.3f\n', d, sDistParams.sigma{c}(d));
                 fprintf('mu(%d)    (pdf mean)      = %8.3f\n', d, sDistParams.mu{c}(d));
             end
                 fprintf('omega    (kernel width)  = %8.3f\n', sKernelParams.omega);
-            for d = 1:sDataset.dim
+            for d = 1:dim
                 fprintf('--> beta(%d)              = %8.3f\n', d, sKernelParams.beta{c}(d));
             end
         end
@@ -54,11 +55,11 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         sKernelParams.eps = 1; % 1/kernel width
         sKernelParams.alpha = 1./(sqrt(2)*sDistParams.sigma);
 
-        for d = 1:sDataset.dim
+        for d = 1:dim
             fprintf('alpha(d)                  = %8.3f\n', d, sKernelParams.alpha(d));
         end
         fprintf('eps (kernel width)        = %8.3f\n', sKernelParams.eps);
-        for d = 1:sDataset.dim
+        for d = 1:dim
             fprintf('--> sigma(%d) (pdf width)  = %8.3f\n', d, sDistParams.sigma(d));
             fprintf('    mu(%d)    (pdf mean)   = %8.3f\n', d, sDistParams.mu(d));
         end

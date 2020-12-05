@@ -1,7 +1,6 @@
 function [mPhiAnalytic, vLambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, mData, b_normalize)
 
 [nTotal, dim] = size(mData);
-nComponents = sKernelParams.sDistParams.estNumComponents;
 mPhiAnalytic = zeros(length(mData), nEigs);
 for i = 1:nEigs
     c = sKernelParams.vComponentIndex(i);
@@ -13,8 +12,9 @@ end
 
 
 if b_normalize
+    nComponents = sKernelParams.sDistParams.estNumComponents;
     mPhiAnalytic = sqrt(nComponents/nTotal)*mPhiAnalytic;
 end
 
-vLambdaAnalytic = sKernelParams.vLambdaAnaytic(1:nEigs);
+vLambdaAnalytic = sKernelParams.vLambdaAnalytic(1:nEigs);
 end

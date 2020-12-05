@@ -51,7 +51,7 @@ end
 %% Estimate distribution and get kernel parameters
 sDistParams = EstimateDistributionParameters(sDataset, nComponents, GMMRegVal);
 sKernelParams = GetKernelParams(sDataset, sDistParams, omega);
-[sKernelParams.vLambdaAnaytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
+[sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
     = CalcAnalyticEigenvalues(nEigs, sKernelParams, sDataset.dim, nComponents);
 v = sDataset.sData.x;
 %% Adjacency (gaussian kernel)

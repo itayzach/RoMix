@@ -59,7 +59,6 @@ if sPlotParams.b_showEigenFigures
         '${\bf W}_G$ Eigenvectors')
 end
 
-phi = V(:,vInd);
 PlotEigenfuncvecScatter(sPlotParams, estDataDist, X, [], v_m, v_m, V, Lambda, ...
     'Numeric', [], G, '${\bf W}_G$ Eigenvectors (Numeric)')
 
@@ -68,6 +67,7 @@ nysRatio = 0.8;
 [VNys, LambdaNys] = CalcNystromEigenvectors(M_G, sKernelParams, X, nysRatio);
 PlotEigenfuncvecScatter(sPlotParams, estDataDist, X, [], v_m, v_m, VNys, LambdaNys, ...
     'Nystrom', [], G, '${\bf W}_G$ Eigenvectors (Nystrom)')
+
 %% G_tilde
 %==========================================================================
 % Transform vertices

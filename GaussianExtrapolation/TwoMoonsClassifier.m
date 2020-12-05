@@ -20,7 +20,7 @@ PlotTwoMoons(sSimParams, sDataset)
 %%
 sDistParams = EstimateDistributionParameters(sDataset, nComponents, 0.1);
 sKernelParams = GetKernelParams(sDataset, sDistParams);
-[sKernelParams.vLambdaAnaytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
+[sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
                 = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, nComponents);
 %% LapRLS
 gamma_A_laprls = 0.03125;

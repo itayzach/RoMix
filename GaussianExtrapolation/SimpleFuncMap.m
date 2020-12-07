@@ -4,11 +4,30 @@ close all;
 rng('default');
 set(0,'DefaultFigureWindowStyle','docked')
 
-%% Uniform data
+%% Setup
+% 'Gaussian_1D' / 'Uniform_1D'
+verticesPDF = 'Uniform_1D';  
+
+% 'randomMatrix' / 'permutation' / 'eye'
+verticesTransform = 'randomMatrix';
+
+% 'WithR' / 'WithoutR'
+funcTransform = 'WithR';
+
+%% Random data
 N = 1000;
-maxVal = -1;
-minVal = 1;
-X = (maxVal - minVal)*rand(N,1) + minVal;
+if strcmp(verticesPDF, 'Uniform_1D')
+    maxVal = -1;
+    minVal = 1;
+    X = (maxVal - minVal)*rand(N,1) + minVal;
+elseif  strcmp(verticesPDF, 'Gaussian_1D')
+    sigma = 1;
+    mu = 0;
+    X = sigma*randn(N,1) + mu;
+else
+    error('invalid verticesPDF');
+end
+    
 figure('Name', 'Histogram of X'); 
 histogram(X,100);
 title('Histogram of $X$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
@@ -30,14 +49,30 @@ title('Eigenvectors of $W_G$', 'interpreter', 'latex', 'FontSize', 16);
 legend(strcat('$v_',string(vInd),'$'), 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 set(gca,'FontSize', 14);
 
-%% Transfrom to Gaussian
-R = (1/sqrt(N))*randn(N,N);
+%% Transfrom
+if strcmp(verticesTransform, 'randomMatrix')
+    R = (1/sqrt(N))*randn(N,N);
+elseif strcmp(verticesTransform, 'permutation')
+    R = eye(N);
+    r = randperm(N);
+    R = R(r,:);
+elseif strcmp(verticesTransform, 'eye')
+    R = eye(N);
+else
+    error('invalid verticesTransform');
+end
+    
 X_tilde = R*X;
 
 figure('Name', 'Histogram of X_tilde');
-histogram(X_tilde,100);
+histfit(X_tilde,100);
 title('Histogram of $\tilde{X}$', 'interpreter', 'latex', 'FontSize', 16); 
 set(gca,'FontSize', 14);
+
+figure('Name', 'R');
+imagesc(R);
+colorbar();
+title('$R$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% Build G tilde
 M_tilde = 30;
@@ -62,23 +97,28 @@ plot(X_tilde, Phi_tilde(:,vInd),'.');
 legend(strcat('$\tilde{\phi}_',string(vInd),'$'), 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title('(Anayltic) Eigenfunctions of $W_{\tilde{G}}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
-%% Transform eigenvectors
-C = pinv(Phi_tilde)*V;
-T = (Phi_tilde*pinv(Phi_tilde))*(V*V');
+%% Transform eigenvectors (Functional maps: C = L2.evecs'*L2.A'*P'*L1.evecs)
+if strcmp(funcTransform, 'WithR')
+    C = pinv(Phi_tilde)*R*V;
+    T = (Phi_tilde*pinv(Phi_tilde))*R*(V*V');
+elseif strcmp(funcTransform, 'WithoutR')
+    C = pinv(Phi_tilde)*V;
+    T = (Phi_tilde*pinv(Phi_tilde))*(V*V');
+else
+    error('invalid funcTransform');
+end
 
-figure('Name', 'Transformation matrices');
-subplot(1,2,1)
+
+figure('Name', 'T');
 imagesc(T);
 colorbar();
 title('$T$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
-subplot(1,2,2)
+figure('Name', 'C');
 imagesc(C);
 colorbar();
 title('$C$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% f_tilde
-% alphaTilde = C*alpha;
-% f_tilde = Phi_tilde*alphaTilde;
 f_tilde = Phi_tilde*C(:,vInd);
 Tv_tilde = T*V(:,vInd);
 

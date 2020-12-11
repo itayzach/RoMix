@@ -104,7 +104,10 @@ legend([strcat('$\tilde{v}_',string(vInd),'$') strcat('$\tilde{\phi}_',string(vI
 title('Eigenfunctions and eigenvectors of $W_{\tilde{G}}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% Debug
-% Phi_tilde = V_tilde;
+b_useAnalyticEigenfuncs = true;
+if ~b_useAnalyticEigenfuncs
+    Phi_tilde = V_tilde;
+end
 
 %% Transform eigenvectors (Functional maps: C = L2.evecs'*L2.A'*P'*L1.evecs)
 C = pinv(Phi_tilde)*R*V;

@@ -160,18 +160,26 @@ legend([strcat('$v_{{\bf rec},',string(vInd),'}$') strcat('$v_',string(vInd),'$'
 title(['Reconstructed eigenvectors of $W_G$' newline '${\bf V}_{{\bf rec}} = {\bf T}^\dagger {\bf T} {\bf V}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% Interpolate V in terms of Phi_tilde
+% 'interp' / 'NewRandomPoints'
+interpMethod = 'interp'; 
 N_int = 1500;
+
 interpRatio = (N+N_int)/N;
-if strcmp(verticesPDF, 'Uniform_1D')
-    maxVal = 1;
-    minVal = -1;
-    X_tilde_int = [X_tilde; (maxVal - minVal)*rand(N_int,1) + minVal];
-elseif  strcmp(verticesPDF, 'Gaussian_1D')
-    X_tilde_int = [X_tilde; sigma_tilde*randn(N_int,1)+mu_tilde];
+if strcmp(interpMethod, 'NewRandomPoints')
+    if strcmp(verticesPDF, 'Uniform_1D')
+        maxVal = 1;
+        minVal = -1;
+        X_tilde_int = [X_tilde; (maxVal - minVal)*rand(N_int,1) + minVal];
+    elseif  strcmp(verticesPDF, 'Gaussian_1D')
+        X_tilde_int = [X_tilde; sigma_tilde*randn(N_int,1)+mu_tilde];
+    else
+        error('invalid verticesPDF');
+    end
+elseif strcmp(interpMethod, 'interp')
+    X_tilde_int = interp(X_tilde,4);
 else
-    error('invalid verticesPDF');
+    error('invalid interpMethod')
 end
-% X_tilde_int = interp(X_tilde,2);
 
 [Phi_tilde_int, ~] = SimpleCalcAnalyticEigenfunctions(X_tilde_int, omega_tilde, sigma_tilde, mu_tilde, M_tilde);
 
@@ -185,4 +193,4 @@ plot(X_int, V_int(:,vInd),'o');
 hold on
 plot(X, V(:,vInd),'.');
 legend([strcat('$v_{{\bf int},',string(vInd),'}$') strcat('$v_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
-title(['Interpolated eigenvectors on $G$' newline '${\bf V}_{{\bf int}} = {\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+title(['Interpolated eigenvectors on $G$' newline '${\bf V}_{{\bf int}} = {\bf R_{{\bf int}}}^{-1} {\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);

@@ -11,7 +11,7 @@ verticesPDF = 'Gaussian_1D';
 verticesTransform = 'permutation';
 
 %% Random data
-N = 1000;
+N = 500;
 if strcmp(verticesPDF, 'Uniform_1D')
     maxVal = 1;
     minVal = -1;
@@ -97,10 +97,10 @@ V_tilde = FlipSign(Phi_tilde, V_tilde);
 lambdaNumericTilde = diag(LambdaNumericTilde);
 
 figure('Name', '(Numeric) Eigenvectors of W_Gtilde');
-plot(X_tilde, Phi_tilde(:,vInd),'o');
+plot(X_tilde, V_tilde(:,vInd),'o');
 hold on
-plot(X_tilde, V_tilde(:,vInd),'.');
-legend([strcat('$\tilde{\phi}_',string(vInd),'$') strcat('$\tilde{v}_',string(vInd),'$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+plot(X_tilde, Phi_tilde(:,vInd),'.');
+legend([strcat('$\tilde{v}_',string(vInd),'$') strcat('$\tilde{\phi}_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title('Eigenfunctions and eigenvectors of $W_{\tilde{G}}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% Debug
@@ -158,3 +158,31 @@ hold on
 plot(X, V(:,vInd),'.');
 legend([strcat('$v_{{\bf rec},',string(vInd),'}$') strcat('$v_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Reconstructed eigenvectors of $W_G$' newline '${\bf V}_{{\bf rec}} = {\bf T}^\dagger {\bf T} {\bf V}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+
+%% Interpolate V in terms of Phi_tilde
+N_int = 1500;
+interpRatio = (N+N_int)/N;
+if strcmp(verticesPDF, 'Uniform_1D')
+    maxVal = 1;
+    minVal = -1;
+    X_tilde_int = [X_tilde; (maxVal - minVal)*rand(N_int,1) + minVal];
+elseif  strcmp(verticesPDF, 'Gaussian_1D')
+    X_tilde_int = [X_tilde; sigma_tilde*randn(N_int,1)+mu_tilde];
+else
+    error('invalid verticesPDF');
+end
+% X_tilde_int = interp(X_tilde,2);
+
+[Phi_tilde_int, ~] = SimpleCalcAnalyticEigenfunctions(X_tilde_int, omega_tilde, sigma_tilde, mu_tilde, M_tilde);
+
+R_int = [R zeros(N,N_int);
+         zeros(N_int,N) eye(N_int)];
+X_int = R_int\X_tilde_int;
+V_int = (1/sqrt(interpRatio))*R_int\Phi_tilde_int*C;
+
+figure('Name', 'Interpolated eigenvectors of W_G');
+plot(X_int, V_int(:,vInd),'o');
+hold on
+plot(X, V(:,vInd),'.');
+legend([strcat('$v_{{\bf int},',string(vInd),'}$') strcat('$v_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+title(['Interpolated eigenvectors on $G$' newline '${\bf V}_{{\bf int}} = {\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);

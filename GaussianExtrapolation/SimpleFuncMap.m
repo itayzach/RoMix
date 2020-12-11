@@ -49,7 +49,7 @@ set(gca,'FontSize', 14);
 %% Transform
 if strcmp(verticesTransform, 'randomMatrix')
     R = (1/sqrt(N))*randn(N,N);
-    R = diag(randn(N,1));
+%     R = diag(randn(N,1));
 elseif strcmp(verticesTransform, 'permutation')
     R = eye(N);
     r = randperm(N);
@@ -61,8 +61,8 @@ else
 end
     
 X_tilde = R*X;
-sigma_tilde = 1;std(X_tilde); %1;
-mu_tilde = 0;mean(X_tilde); %0;
+sigma_tilde = 1; %std(X_tilde);
+mu_tilde = 0; %mean(X_tilde);
 
 figure('Name', 'Histogram of X_tilde');
 histfit(X_tilde,100);
@@ -134,10 +134,10 @@ Phi_tilde_rec = R*V*pinvC;
 % Tv_tilde = T*V(:,vInd);
 
 figure('Name', 'Reconstructed eigenfunctions of W_G_tilde');
-plot(X_tilde, Phi_tilde_rec(:,vInd),'o');
+plot(X_tilde, Phi_tilde(:,vInd),'o');
 hold on
-plot(X_tilde, Phi_tilde(:,vInd),'.');
-legend([strcat('$\tilde{\phi}_{{\bf rec},',string(vInd),'}$') strcat('$\tilde{\phi}_',string(vInd),'$') ] , 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+plot(X_tilde, Phi_tilde_rec(:,vInd),'.');
+legend([strcat('$\tilde{\phi}_',string(vInd),'$') strcat('$\tilde{\phi}_{{\bf rec},',string(vInd),'}$')] , 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Reconstructed eigenvectors on $\tilde{G}$' newline '${\bf \tilde{\Phi}}_{{\bf rec}} = {\bf R}{\bf V} {\bf C}^\dagger$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% V in terms of Phi_tilde
@@ -145,10 +145,10 @@ X_rec = R\X_tilde;
 V_rec = R\Phi_tilde*C;
 
 figure('Name', 'Reconstructed eigenvectors of W_G');
-plot(X_rec, V_rec(:,vInd),'o');
+plot(X, V(:,vInd),'o');
 hold on
-plot(X, V(:,vInd),'.');
-legend([strcat('$v_{{\bf rec},',string(vInd),'}$') strcat('$v_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+plot(X_rec, V_rec(:,vInd),'.');
+legend([strcat('$v_',string(vInd),'$') strcat('$v_{{\bf rec},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Reconstructed eigenvectors on $G$' newline '${\bf V}_{{\bf rec}} = {\bf R}^{-1}{\bf \tilde{\Phi}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% V in terms of Phi_tilde (take 2)
@@ -156,10 +156,10 @@ X_rec = R\X_tilde;
 V_rec = pinv(T)*T*V;
 
 figure('Name', 'Reconstructed eigenvectors of W_G');
-plot(X_rec, V_rec(:,vInd),'o');
+plot(X, V(:,vInd),'o');
 hold on
-plot(X, V(:,vInd),'.');
-legend([strcat('$v_{{\bf rec},',string(vInd),'}$') strcat('$v_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+plot(X_rec, V_rec(:,vInd),'.');
+legend([strcat('$v_',string(vInd),'$') strcat('$v_{{\bf rec},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Reconstructed eigenvectors of $W_G$' newline '${\bf V}_{{\bf rec}} = {\bf T}^\dagger {\bf T} {\bf V}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% Interpolate V in terms of Phi_tilde
@@ -192,8 +192,8 @@ X_int = R_int\X_tilde_int;
 V_int = (1/sqrt(interpRatio))*R_int\Phi_tilde_int*C;
 
 figure('Name', 'Interpolated eigenvectors of W_G');
-plot(X_int, V_int(:,vInd),'o');
+plot(X, V(:,vInd),'o');
 hold on
-plot(X, V(:,vInd),'.');
-legend([strcat('$v_{{\bf int},',string(vInd),'}$') strcat('$v_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+plot(X_int, V_int(:,vInd),'.');
+legend([strcat('$v_',string(vInd),'$') strcat('$v_{{\bf int},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Interpolated eigenvectors on $G$' newline '${\bf V}_{{\bf int}} = {\bf R_{{\bf int}}}^{-1} {\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);

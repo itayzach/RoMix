@@ -164,8 +164,8 @@ title(['Reconstructed eigenvectors of $W_G$' newline '${\bf V}_{{\bf rec}} = {\b
 
 %% Interpolate V in terms of Phi_tilde
 % 'interp' / 'NewRandomPoints'
-interpMethod = 'interp'; 
-N_int = 1500;
+interpMethod = 'NewRandomPoints'; 
+N_int = 2000;
 
 interpRatio = (N+N_int)/N;
 if strcmp(interpMethod, 'NewRandomPoints')

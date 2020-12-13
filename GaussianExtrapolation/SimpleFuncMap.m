@@ -8,7 +8,7 @@ set(0,'DefaultFigureWindowStyle','normal')
 verticesPDF = 'Gaussian_1D';  
 
 % 'randomMatrix' / 'permutation' / 'eye'
-verticesTransform = 'permutation';
+verticesTransform = 'eye';
 
 %% Random data
 N = 500;
@@ -162,7 +162,7 @@ plot(X_rec, V_rec(:,vInd),'.');
 legend([strcat('$v_',string(vInd),'$') strcat('$v_{{\bf rec},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Reconstructed eigenvectors of $W_G$' newline '${\bf V}_{{\bf rec}} = {\bf T}^\dagger {\bf T} {\bf V}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
-%% Interpolate V in terms of Phi_tilde
+%% Interpolate X_tilde
 % 'interp' / 'NewRandomPoints'
 interpMethod = 'NewRandomPoints'; 
 N_int = 2000;
@@ -184,16 +184,39 @@ else
     error('invalid interpMethod')
 end
 
+%% Interpolate V in terms of Phi_tilde with new points
 [Phi_tilde_int, ~] = SimpleCalcAnalyticEigenfunctions(X_tilde_int, omega_tilde, sigma_tilde, mu_tilde, M_tilde);
 
 R_int = [R zeros(N,N_int);
          zeros(N_int,N) eye(N_int)];
 X_int = R_int\X_tilde_int;
-V_int = (1/sqrt(interpRatio))*R_int\Phi_tilde_int*C;
+V_int_renormed = (1/sqrt(interpRatio))*R_int\Phi_tilde_int*C;
 
 figure('Name', 'Interpolated eigenvectors of W_G');
 plot(X, V(:,vInd),'o');
 hold on
-plot(X_int, V_int(:,vInd),'.');
+plot(X_int, V_int_renormed(:,vInd),'.');
 legend([strcat('$v_',string(vInd),'$') strcat('$v_{{\bf int},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
-title(['Interpolated eigenvectors on $G$' newline '${\bf V}_{{\bf int}} = {\bf R_{{\bf int}}}^{-1} {\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+title(['Interpolated eigenvectors on $G$' newline '${\bf V}_{{\bf int}} = {\bf R_{{\bf int}}}^{-1} {\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$' newline '$N + N_{{\bf int}}$ = ' num2str(N+N_int)], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+
+%% Build 'ground-truth' reference graph and eigenvectors
+assert(strcmp(verticesPDF, 'Gaussian_1D') && strcmp(verticesTransform, 'eye'))
+
+% Generate points
+N_int = 5000;
+X_tilde_int = [X_tilde; sigma_tilde*randn(N_int,1)+mu_tilde];
+X_int = X_tilde_int;
+
+[Phi_int, ~] = SimpleCalcAnalyticEigenfunctions(X_int, omega, sigma, mu, M);
+
+dist_int = pdist2(X_int, X_int);
+W_int = exp(-dist_int.^2/(2*omega^2));
+[V_int_gt, ~] = eigs(W_int, max(vInd));
+V_int_gt = FlipSign(Phi_tilde, V_int_gt);
+
+figure('Name', 'Ground-truth eigenvectors vs. eigenfunctions of W_G');
+plot(X_int, V_int_gt(:,vInd),'o');
+hold on
+plot(X_int, Phi_int(:,vInd),'.');
+legend([strcat('$v_',string(vInd),'$') strcat('$\phi_{',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+title(['"Ground-truth" eigenvectors vs. eigenfunctions on $G$' newline '$N + N_{{\bf int}}$ = ' num2str(N+N_int)], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);

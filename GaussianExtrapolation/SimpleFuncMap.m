@@ -2,7 +2,7 @@ clc;
 clear;
 close all;
 rng('default');
-set(0,'DefaultFigureWindowStyle','normal')
+set(0,'DefaultFigureWindowStyle','docked')
 %% Setup
 % 'Gaussian_1D' / 'Uniform_1D'
 verticesPDF = 'Gaussian_1D';  
@@ -11,20 +11,19 @@ verticesPDF = 'Gaussian_1D';
 verticesTransform = 'eye';
 
 %% Random data
-N = 500;
+n = 500;
 if strcmp(verticesPDF, 'Uniform_1D')
     maxVal = 1;
     minVal = -1;
-    X = (maxVal - minVal)*rand(N,1) + minVal; %linspace(minVal,maxVal,N)';
+    X = (maxVal - minVal)*rand(n,1) + minVal; %linspace(minVal,maxVal,N)';
 elseif  strcmp(verticesPDF, 'Gaussian_1D')
     sigma = 1;
     mu = 0;
-    X = sigma*randn(N,1) + mu;
+    X = sigma*randn(n,1) + mu;
 else
     error('invalid verticesPDF');
 end
 
-set(0,'DefaultFigureWindowStyle','docked')
 figure('Name', 'Histogram of X'); 
 histogram(X,100);
 title('Histogram of $X$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
@@ -48,14 +47,14 @@ set(gca,'FontSize', 14);
 
 %% Transform
 if strcmp(verticesTransform, 'randomMatrix')
-    R = (1/sqrt(N))*randn(N,N);
+    R = (1/sqrt(n))*randn(n,n);
 %     R = diag(randn(N,1));
 elseif strcmp(verticesTransform, 'permutation')
-    R = eye(N);
-    r = randperm(N);
+    R = eye(n);
+    r = randperm(n);
     R = R(r,:);
 elseif strcmp(verticesTransform, 'eye')
-    R = eye(N);
+    R = eye(n);
 else
     error('invalid verticesTransform');
 end
@@ -165,16 +164,17 @@ title(['Reconstructed eigenvectors of $W_G$' newline '${\bf V}_{{\bf rec}} = {\b
 %% Interpolate X_tilde
 % 'interp' / 'NewRandomPoints'
 interpMethod = 'NewRandomPoints'; 
-N_int = 2000;
+N = 2000;
+n_int = N - n;
 
-interpRatio = (N+N_int)/N;
+interpRatio = (N)/n;
 if strcmp(interpMethod, 'NewRandomPoints')
     if strcmp(verticesPDF, 'Uniform_1D')
         maxVal = 1;
         minVal = -1;
-        X_tilde_int = [X_tilde; (maxVal - minVal)*rand(N_int,1) + minVal];
+        X_tilde_int = [X_tilde; (maxVal - minVal)*rand(n_int,1) + minVal];
     elseif  strcmp(verticesPDF, 'Gaussian_1D')
-        X_tilde_int = [X_tilde; sigma_tilde*randn(N_int,1)+mu_tilde];
+        X_tilde_int = [X_tilde; sigma_tilde*randn(n_int,1)+mu_tilde];
     else
         error('invalid verticesPDF');
     end
@@ -187,8 +187,8 @@ end
 %% Interpolate V in terms of Phi_tilde with new points
 [Phi_tilde_int, ~] = SimpleCalcAnalyticEigenfunctions(X_tilde_int, omega_tilde, sigma_tilde, mu_tilde, M_tilde);
 
-R_int = [R zeros(N,N_int);
-         zeros(N_int,N) eye(N_int)];
+R_int = [R zeros(n,n_int);
+         zeros(n_int,n) eye(n_int)];
 X_int = R_int\X_tilde_int;
 V_int_renormed = (1/sqrt(interpRatio))*R_int\Phi_tilde_int*C;
 
@@ -197,14 +197,15 @@ plot(X, V(:,vInd),'o');
 hold on
 plot(X_int, V_int_renormed(:,vInd),'.');
 legend([strcat('$v_',string(vInd),'$') strcat('$v_{{\bf int},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
-title(['Interpolated eigenvectors on $G$' newline '${\bf V}_{{\bf int}} = {\bf R_{{\bf int}}}^{-1} {\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$' newline '$N + N_{{\bf int}}$ = ' num2str(N+N_int)], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+title(['Interpolated eigenvectors on $G$ ($N$ = ' num2str(N) '; $n$ = ' num2str(n) ')' newline '${\bf V}_{{\bf int}} = {\bf R_{{\bf int}}}^{-1} {\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
 %% Build 'ground-truth' reference graph and eigenvectors
 assert(strcmp(verticesPDF, 'Gaussian_1D') && strcmp(verticesTransform, 'eye'))
 
 % Generate points
-N_int = 5000;
-X_tilde_int = [X_tilde; sigma_tilde*randn(N_int,1)+mu_tilde];
+N = 10000;
+n_int = N - n;
+X_tilde_int = [X_tilde; sigma_tilde*randn(n_int,1)+mu_tilde];
 X_int = X_tilde_int;
 
 [Phi_int, ~] = SimpleCalcAnalyticEigenfunctions(X_int, omega, sigma, mu, M);
@@ -219,4 +220,4 @@ plot(X_int, V_int_gt(:,vInd),'o');
 hold on
 plot(X_int, Phi_int(:,vInd),'.');
 legend([strcat('$v_',string(vInd),'$') strcat('$\phi_{',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
-title(['"Ground-truth" eigenvectors vs. eigenfunctions on $G$' newline '$N + N_{{\bf int}}$ = ' num2str(N+N_int)], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+title(['"Ground-truth" eigenvectors vs. eigenfunctions on $G$ ($N$ = ' num2str(N) '; $n$ = ' num2str(n) ')'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);

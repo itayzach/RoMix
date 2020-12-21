@@ -1,78 +1,155 @@
 %% Init
 clc; clear; close all;
 rng('default');
+set(0,'DefaultFigureWindowStyle','docked')
 
-%%
-W = [0 4 2 2;
-     4 0 8 0;
-     2 8 0 0;
-     2 0 0 0];
-W = [0 1 0 1;
-     1 0 1 0;
-     0 1 0 1;
-     1 0 1 0];
- 
-X_test = randn(4, 4);
+%% Data
+dataset = 'torus'; % 'torus' / 'trefoil'
+N = 1000;
+b_normalize = true;
+b_plotDataset = true;
+X = GetDiffMapsDataset(dataset, N, b_normalize, b_plotDataset);
+N = length(X);
+%% Kernel
+epsilon = 0.05;
+dist = pdist2(X, X);
+K = exp(-dist.^2/epsilon);
 
-gaussSigma = 1;
-W = exp(-(pdist2(X_test, X_test).^2)./(2*gaussSigma^2));
- 
-D = diag(sum(W));
+figure('Name', 'K');
+imagesc(K);
+colorbar;
+title(strcat('$K_{i,j} = \exp(-\|x_i-x_j\|^2/\varepsilon), \quad \varepsilon = ', num2str(epsilon),'$'),...
+    'interpreter','latex', 'FontSize', 16); set(gca,'FontSize', 14);
+%% Normalize
+q = sum(K)';
+Q = diag(q);
 
-P = D^-1 * W;
-L = D - W;
-Ln = (D^-0.5)*L*(D^-0.5);
-I_N = eye(length(W));
+alpha = 1;
+Ka = Q^-alpha*K*Q^-alpha;
+da = sum(Ka)';
+Da = diag(da);
 
-T = 5;
-Pt = zeros(T, length(P), length(P));
-Phi_Pt = zeros(T, length(P), length(P));
-Lambda_Pt = zeros(T, length(P), length(P));
-Psi_Pt = zeros(T, length(P), length(P));
-
-
-for i = 1:T
-    if i == 1
-        Pt(1, :, :) = P;
-    else
-        Pt(i, :, :) = squeeze(Pt(i-1, :, :)) * P;
-    end
-    % Psi are the right eigenvectors ( P*Psi = Psi*Lambda   ==> P = Psi*Lambda*inv(Psi)    )
-    % Lambda are the eigenvalues
-    % Phi are the left eigenvectors  ( Phi'*P = Lambda*Phi' ==> P =  inv(Phi')*Lambda*Phi' )
-    [Psi_Pt(i, :, :), Lambda_Pt(i, :, :), Phi_Pt(i, :, :)] = eig(squeeze(Pt(i,:,:)));
-    [Lambda_P, idx_P] = sort(diag(squeeze(Lambda_Pt(i, :, :))), 'descend');
-    Lambda_Pt(i, :, :) = diag(Lambda_P);
-    Psi_P = squeeze(Psi_Pt(i, :, :));
-    Phi_P = squeeze(Phi_Pt(i, :, :));
-    Psi_Pt(i, :, :) = Psi_P(:, idx_P);
-    Phi_Pt(i, :, :) = Phi_P(:, idx_P);
+if alpha == 0
+    alphaDesc = 'Normalized graph Laplacian';
+elseif alpha == 0.5
+    alphaDesc = 'Fokker-Planck diffusion';
+elseif alpha == 1
+    alphaDesc = 'Heat kernel';
 end
+alphaStr = strcat('($\alpha = ', num2str(alpha),'$, ',alphaDesc,')');
 
-% [Phi, Lambda, Psi] = svd(P);
+figure('Name', 'Ka');
+imagesc(Ka);
+colorbar;
+title(strcat('$K^{(\alpha)} = Q^{-\alpha}KQ^{-\alpha}, \quad \varepsilon = ', num2str(epsilon),'$'),...
+    'interpreter','latex', 'FontSize', 16); set(gca,'FontSize', 14);
+%% RW matrix
+Pa = Da^-1*Ka;
+isalmostequal(diag(sum(Pa,2)),eye(N),1e-14) % make sure W is row stochastic
 
+figure('Name', 'Pa');
+imagesc(Pa);
+colorbar;
+title(strcat('$P_\alpha = D^{-1}_\alpha K_\alpha,\quad$', alphaStr),...
+    'interpreter','latex', 'FontSize', 16); 
+set(gca,'FontSize', 14);
+% x0 = 100; y0 = 100; width = 550; height = 400;
+% set(gcf,'Position', [x0 y0 width height])
 
-Psi_P = squeeze(Psi_Pt(1, :, :));
-Lambda_P = squeeze(Lambda_Pt(1, :, :));
-Phi_P = squeeze(Phi_Pt(1, :, :));
+%% Decompose
+M = 6; % number of eigenvectors
 
+[Psi, Lambda, Phi] = eigs(Pa,M);
 
-[Psi_Ln, Lambda_Ln] = eig(Ln);
-[Lambda_Ln, idx_Ln] = sort(diag(Lambda_Ln), 'ascend');
-Lambda_Ln = diag(Lambda_Ln);
-Psi_Ln = Psi_Ln(:, idx_Ln);
+% Psi2 = Da^(-1/2)*Psi;
+Psi = Psi./Psi(:,1);
+%% Psi^T D Psi
+% figure;
+% imagesc(Psi'*D*Psi);
+% colorbar;
+% title('$\Psi^T D \Psi$','interpreter','latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
-[Psi_L, Lambda_L] = eig(L);
-[Lambda_L, idx_L] = sort(diag(Lambda_L), 'ascend');
-Lambda_L = diag(Lambda_L);
-Psi_L = Psi_L(:, idx_L);
+%% Plot eigenvectors of K
+% [Phi_K, ~] = eigs(K, M);
+% figure;
+% for i = 1:M
+%     subplot(2,3,i)
+%     if size(X,2) == 3
+%         scatter3(X(:,1), X(:,2), X(:,3), 50, Phi_K(:,i), 'filled');
+%     else
+%         scatter(X(:,1), X(:,2), 50, Phi_K(:,i), 'filled');
+%     end
+%     colorbar();
+%     title(strcat('$\phi_', num2str(i), '$'),'interpreter','latex', 'FontSize', 16); set(gca,'FontSize', 14);
+% end
+% sgtitle('Eigenvectors of K');
+% x0 = 400; y0 = 200; width = 1200; height = 600;
+% set(gcf,'Position', [x0 y0 width height])
 
-assert(all(diag(Lambda_Ln)) >= 0);                                % Ln is PSD, so all eigenvalues must be >= 0
-isalmostequal(Psi_Ln*Lambda_Ln*Psi_Ln', Ln);          % Ln is symmetric
-isalmostequal(Psi_L*Lambda_L*Psi_L', L);              % L is symmetric
-isalmostequal(I_N - Lambda_Ln, Lambda_P);      % 
-isalmostequal(Phi_P'^-1*Lambda_P*Phi_P', P);      % Left eigenvectors of P
-isalmostequal(Psi_P*Lambda_P*Psi_P^-1, P);        % Right eigenvectors of P
-D^-0.5 * Psi_Ln
+%% Plot eigenvectors of P
+% figure;
+% for i = 1:M
+%     psiMax = max(Psi(:));
+%     psiMin = min(Psi(:));
+%     subplot(2,3,i)
+%     if size(X,2) == 3
+%         scatter3(X(:,1), X(:,2), X(:,3), 50, Psi(:,i), 'filled');
+%     else
+%         scatter(X(:,1), X(:,2), 50, Psi(:,i), 'filled');
+%     end
+%     caxis([ psiMin psiMax]);
+%     colorbar();
+%     title(strcat('$\psi_', num2str(i), '$, $\lambda_', num2str(i), ' = ', num2str(Lambda(i,i)), '$'),...
+%         'interpreter','latex', 'FontSize', 16); 
+%     set(gca,'FontSize', 14);
+% end
+% sgtitle(strcat('Eigenvectors of $P_\alpha,\quad$', alphaStr),...
+%     'interpreter','latex', 'FontSize', 16);
+% x0 = 400; y0 = 200; width = 1200; height = 600;
+% set(gcf,'Position', [x0 y0 width height])
 
-keyboard
+%% Diffusion maps
+t = 1;
+diffmap = diag(Lambda)'.^t.*Psi;
+
+%% Plot
+figure('Name', 'Diffusion map');
+cmap = 1:N;
+scatter(diffmap(:,2), diffmap(:,3), 50, cmap, 'filled')
+xlabel('$\lambda_2 \psi^{(\alpha)}_2$','interpreter','latex')
+ylabel('$\lambda_3 \psi^{(\alpha)}_3$','interpreter','latex')
+title(strcat('$t = ', num2str(t),',\quad$', alphaStr),'interpreter','latex', 'FontSize', 16); set(gca,'FontSize', 14);
+
+%% Dataset
+function X = GetDiffMapsDataset(dataset, N, b_normalize, b_plotDataset)
+    if strcmp(dataset, 'torus')
+        R = 10; r = 4;
+        tmin = 0;
+        tmax = 1;
+        t = linspace(tmin,tmax,sqrt(N))';
+        [x, y] = meshgrid(t,t);
+        x = x(:);
+        y = y(:);
+        X = [(R + r*cos(2*pi*y)).*cos(2*pi*x), (R + r*cos(2*pi*y)).*sin(2*pi*x), r*sin(2*pi*y) ];    
+    elseif strcmp(dataset, 'trefoil')
+        tmin = 0;
+        tmax = 2*pi;
+        t = linspace(tmin,tmax,N+1)'; t = t(1:end-1);
+        X = [sin(t)+2*sin(2*t), cos(t)-2*cos(2*t), -sin(3*t) ];
+    else
+        error('invalid dataset')
+    end
+
+    if b_normalize
+        X = X - mean(X);
+        X = X./std(X);
+    end
+
+    if b_plotDataset
+        figure('Name', 'Dataset');
+        cmap = 1:length(X);
+        scatter3(X(:,1), X(:,2), X(:,3), 50, cmap, 'filled');
+        title(strcat('$X$', ' (', dataset, ')'), 'interpreter', 'latex', 'FontSize', 16); 
+        set(gca,'FontSize', 14);
+    end
+end

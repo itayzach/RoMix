@@ -3,6 +3,7 @@ clc; clear; close all;
 rng('default');
 set(0,'DefaultFigureWindowStyle','docked')
 
+b_plotEigenvectors = true;
 %% Data
 dataset = 'trefoil'; % 'torus' / 'trefoil'
 N = 1000;

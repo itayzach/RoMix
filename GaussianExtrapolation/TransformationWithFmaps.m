@@ -1,6 +1,6 @@
 %% Restart
 clc; clear; close all; rng('default')
-
+set(0,'DefaultFigureWindowStyle','normal')
 %% Parameters
 %==========================================================================
 % Graph data

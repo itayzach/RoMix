@@ -20,19 +20,19 @@ imagesc(K);
 colorbar;
 title(strcat('$K_{i,j} = \exp(-\|x_i-x_j\|^2/\varepsilon), \quad \varepsilon = ', num2str(epsilon),'$'),...
     'interpreter','latex', 'FontSize', 16); set(gca,'FontSize', 14);
-%% Density (q)
-q = sum(K)';
-Q = diag(q);
+%% (2) Density (q_epsilon)
+q_eps = sum(K)';
+Q_eps = diag(q_eps);
 
 figure('Name', 'q');
 cmap = 1:N;
-scatter(1:N, q, 50, cmap, 'filled');
+scatter(1:N, q_eps, 50, cmap, 'filled');
 title(strcat('$q$'),...
     'interpreter','latex', 'FontSize', 16); set(gca,'FontSize', 14);
 
-%% Normalize by Q and alpha
+%% (3) Normalize by Q and alpha
 alpha = 1;
-Ka = Q^-alpha*K*Q^-alpha;
+Ka = Q_eps^-alpha*K*Q_eps^-alpha;
 da = sum(Ka)';
 Da = diag(da);
 

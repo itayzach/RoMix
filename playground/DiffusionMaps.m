@@ -6,13 +6,20 @@ set(0,'DefaultFigureWindowStyle','docked')
 b_plotEigenvectors = true;
 %% Data
 dataset = 'trefoil'; % 'torus' / 'trefoil'
-N = 3000;
+N = 2000;
 b_normalize = true;
 b_plotDataset = true;
 [X, cmap] = GetDiffMapsDataset(dataset, N, b_normalize, b_plotDataset);
 N = length(X);
 %% Kernel
-epsilon = 0.01;
+if strcmp(dataset, 'torus')
+    epsilon = 0.1;
+elseif strcmp(dataset, 'trefoil')
+    epsilon = 0.01;
+else
+    error('invalid dataset')
+end
+    
 dist = pdist2(X, X);
 K = exp(-dist.^2/epsilon);
 
@@ -143,22 +150,18 @@ set(gca,'FontSize', 14);
 function [X,cmap] = GetDiffMapsDataset(dataset, N, b_normalize, b_plotDataset)
     if strcmp(dataset, 'torus')
         R = 10; r = 4;
-        t = linspace(0,1,sqrt(N))';
-        [x, y] = meshgrid(t,t);
-        x = x(:);
-        y = y(:);
+        x = rand(N,1);
+        y = rand(N,1);
+        cmap = x; % color-code each point by the generated parameter to see the match after the embedding
         X = [(R + r*cos(2*pi*y)).*cos(2*pi*x), (R + r*cos(2*pi*y)).*sin(2*pi*x), r*sin(2*pi*y) ];    
     elseif strcmp(dataset, 'trefoil')
-%         t = linspace(0,2*pi,N)';
         t = 2*pi*rand(N,1);
         X = [sin(t)+2*sin(2*t), cos(t)-2*cos(2*t), -sin(3*t) ];
+        cmap = t; % color-code each point by the generated parameter to see the match after the embedding
     else
         error('invalid dataset')
     end
     
-    % color-code each point by the generated parameter to see the match after the embedding
-    cmap = t;
-
     if b_normalize
         X = X - mean(X);
         X = X./std(X);

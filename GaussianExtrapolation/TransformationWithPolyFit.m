@@ -122,16 +122,16 @@ plot(xTestGrid, polyCdf_xTestGrid, '.');
 ylim([0 1])
 title(['Est. vs. poly CDF (degree ' num2str(pCdfDegree) ')'], 'interpreter', 'latex', 'FontSize', 16);
 xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-ylabel('${\bf pCdf}(x)$', 'interpreter', 'latex', 'FontSize', 16);
-legend('${\bf eCdf}(x_{{\bf train}})$', '${\bf pCdf}(x_{{\bf test}})$', ...
+ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
+legend('${\bf eCDF}_{{\bf X}}(x_{{\bf train}})$', '$\hat{F}_{X}(x_{{\bf test}})$', ...
     'location', 'southeast', 'interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
 
 % figure('Name', 'xTilde = T(xTest) = icdf(polyCdf(xTest))');
 subplot(2,2,2)
 plot(xTildeTestGrid,polyCdf_xTestGrid,'.')
-title('$\tilde{x} = T(x) = \tilde{{\bf cdf}}^{-1}({\bf pCdf}(x))$', 'interpreter', 'latex', 'FontSize', 16);
-ylabel('${\bf pCdf}(x)$', 'interpreter', 'latex', 'FontSize', 16);
+title('$\tilde{x} = T(x) = F_{\tilde{X}}^{-1}(\hat{F}_{X}(x))$', 'interpreter', 'latex', 'FontSize', 16);
+ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
 xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
 set(gca,'FontSize', 14);
 
@@ -145,7 +145,7 @@ histfit(xTildeTestGrid ,100);
 title('Histogram of $\tilde{x}_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
 set(gca,'FontSize', 14);
 
-sgtitle(['${\bf pCdf}(x) = ' pCdfStr '$'], 'interpreter', 'latex', 'FontSize', 16);
+sgtitle(['$\hat{F}_{X}(x) = ' pCdfStr '$'], 'interpreter', 'latex', 'FontSize', 16);
 
 %% Build G tilde
 omegaTilde = 0.3;

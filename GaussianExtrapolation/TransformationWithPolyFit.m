@@ -45,48 +45,14 @@ set(gca,'FontSize', 14);
 xTrainGrid = xTrainGrid(1:end-1);
 estCdf_xTrainGrid = estCdf_xTrainGrid(1:end-1);
 
-pCdfDegree = 2;
-invpCdfDegree = 2;
+pCdfDegree = 10;
+invpCdfDegree = 10;
 pCdf = polyfit(xTrainGrid, estCdf_xTrainGrid, pCdfDegree); % to have analytic expression for the cdf
 invpCdf = polyfit(estCdf_xTrainGrid, xTrainGrid, invpCdfDegree); % to have analytic expression for the cdf
 
-%% Verify estCdf(xTrain) vs. polyCdf(xTest)
-xTestGrid = linspace(xMin,xMax,2000)';
-polyCdf_xTestGrid = polyval(pCdf, xTestGrid);
-b_saturate = false;
-if b_saturate && (any(polyCdf_xTestGrid > 1) || any(polyCdf_xTestGrid < 0))
-    warning('CDF must be in [0,1], saturating...');
-    polyCdf_xTestGrid(polyCdf_xTestGrid > 1) = 1-eps; % saturate
-    polyCdf_xTestGrid(polyCdf_xTestGrid < 0) = eps; % saturate
-end
-
-figure('Name', 'Verify estCdfPoly');
-plot(xTrainGrid, estCdf_xTrainGrid,'.');
-hold on;
-plot(xTestGrid, polyCdf_xTestGrid, '.');
-title('${\bf ecdf}(x_{{\bf train}}$) vs. ${\bf polyCdf}(x_{{\bf test}})$', 'interpreter', 'latex', 'FontSize', 16);
-legend('${\bf ecdf}(x_{{\bf train}})$', '${\bf polyCdf}(x_{{\bf test}})$', ...
-    'location', 'southeast', 'interpreter', 'latex', 'FontSize', 14)
-set(gca,'FontSize', 14);
-
-%% estCdf -> Gaussian iCDF
+%% Transform to Gtilde
 muTilde = 0;
 sigmaTilde = 1;
-xTildeTestGrid = icdf('Normal',polyCdf_xTestGrid,muTilde,sigmaTilde);
-
-figure('Name', 'xTilde = T(xTest) = icdf(polyCdf(xTest))');
-plot(polyCdf_xTestGrid,xTildeTestGrid,'.')
-title('$\tilde{x} = T(x_{{\bf test}}) = {\bf icdf}({\bf polyCdf}(x_{{\bf test}}))$', 'interpreter', 'latex', 'FontSize', 16);
-xlabel('${\bf polyCdf}(x_{{\bf test}})$', 'interpreter', 'latex', 'FontSize', 16);
-set(gca,'FontSize', 14);
-
-figure('Name', 'Histogram of xTildeTestGrid');
-histfit(xTildeTestGrid ,100);
-title('Histogram of $\tilde{x}_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
-set(gca,'FontSize', 14);
-
-
-%% Transform to Gtilde
 xTildeTrain = T(pCdf, true, muTilde, sigmaTilde, xTrain);
 
 %% Just a demonstrantion of the transformation
@@ -115,6 +81,71 @@ colormap('jet')
 xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
 title('Transformed nodes','interpreter', 'latex', 'FontSize', 16);
 set(gca,'YTick',[],'FontSize', 14);
+
+% Verify estCdf(xTrain) vs. polyCdf(xTest)
+xTestGrid = linspace(xMin,xMax,2000)';
+polyCdf_xTestGrid = polyval(pCdf, xTestGrid);
+b_saturate = false;
+if b_saturate && (any(polyCdf_xTestGrid > 1) || any(polyCdf_xTestGrid < 0))
+    warning('CDF must be in [0,1], saturating...');
+    polyCdf_xTestGrid(polyCdf_xTestGrid > 1) = 1-eps; % saturate
+    polyCdf_xTestGrid(polyCdf_xTestGrid < 0) = eps; % saturate
+end
+
+muTilde = 0;
+sigmaTilde = 1;
+xTildeTestGrid = icdf('Normal',polyCdf_xTestGrid,muTilde,sigmaTilde);
+
+pCdfStr = [];
+for p = 1:pCdfDegree+1
+    if abs(pCdf(p)) < 1e-4
+        continue;
+    end
+    if p > 1 && pCdf(p) > 0 && ~isempty(pCdfStr)
+        pCdfStr = strcat(pCdfStr,'+');
+    end
+    if p == pCdfDegree+1
+        pCdfStr = strcat(pCdfStr, num2str(pCdf(pCdfDegree+1),'%.5f'));
+    elseif p == pCdfDegree
+        pCdfStr = strcat(pCdfStr, num2str(pCdf(pCdfDegree),'%.5f'),'x');
+    else
+        pCdfStr = strcat(pCdfStr, num2str(pCdf(p),'%.5f'),'x^{',num2str(pCdfDegree-p+1),'}');
+    end
+    
+end
+
+figure('Name', 'Verify estCdfPoly');
+subplot(2,2,1)
+plot(xTrainGrid, estCdf_xTrainGrid,'.');
+hold on;
+plot(xTestGrid, polyCdf_xTestGrid, '.');
+ylim([0 1])
+title(['Est. vs. poly CDF (degree ' num2str(pCdfDegree) ')'], 'interpreter', 'latex', 'FontSize', 16);
+xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
+ylabel('${\bf pCdf}(x)$', 'interpreter', 'latex', 'FontSize', 16);
+legend('${\bf eCdf}(x_{{\bf train}})$', '${\bf pCdf}(x_{{\bf test}})$', ...
+    'location', 'southeast', 'interpreter', 'latex', 'FontSize', 14)
+set(gca,'FontSize', 14);
+
+% figure('Name', 'xTilde = T(xTest) = icdf(polyCdf(xTest))');
+subplot(2,2,2)
+plot(xTildeTestGrid,polyCdf_xTestGrid,'.')
+title('$\tilde{x} = T(x) = \tilde{{\bf cdf}}^{-1}({\bf pCdf}(x))$', 'interpreter', 'latex', 'FontSize', 16);
+ylabel('${\bf pCdf}(x)$', 'interpreter', 'latex', 'FontSize', 16);
+xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
+set(gca,'FontSize', 14);
+
+subplot(2,2,3)
+histogram(xTestGrid ,100);
+title('Histogram of $x_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
+set(gca,'FontSize', 14);
+
+subplot(2,2,4)
+histfit(xTildeTestGrid ,100);
+title('Histogram of $\tilde{x}_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
+set(gca,'FontSize', 14);
+
+sgtitle(['${\bf pCdf}(x) = ' pCdfStr '$'], 'interpreter', 'latex', 'FontSize', 16);
 
 %% Build G tilde
 omegaTilde = 0.3;

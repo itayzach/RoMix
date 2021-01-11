@@ -1,6 +1,7 @@
 %% Restart
 clc; clear; close all; rng('default');
 set(0,'DefaultFigureWindowStyle','docked')
+outputFolder = 'figs'; figSaveType = 'png';
 
 %% Random data
 verticesPDF = 'Uniform_1D'; % 'Gaussian_1D' / 'Uniform_1D'
@@ -19,10 +20,11 @@ else
     error('invalid verticesPDF');
 end
 
-figure('Name', 'Histogram of X'); 
+fig = figure('Name', 'Histogram of X'); 
 histogram(xTrain,100);
-title('Histogram of $X$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
-
+title('Histogram of ${\bf X}$', 'interpreter', 'latex', 'FontSize', 16); 
+set(gca,'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig1_histogram_X'), figSaveType);
 %% Generate graph
 omega = 3;
 dist = pdist2(xTrain, xTrain);
@@ -34,11 +36,12 @@ M = 20;
 lambda = diag(Lambda);
 vInd = 1:5;
 
-figure('Name', 'Eigenvectors of W_G');
+fig = figure('Name', 'Eigenvectors of W');
 plot(xTrain, V(:,vInd),'.');
-title('Eigenvectors of $W_G$ ', 'interpreter', 'latex', 'FontSize', 16);
+title('Eigenvectors of ${\bf W}$ ', 'interpreter', 'latex', 'FontSize', 16);
 legend(strcat('$v_',string(vInd),'$'), 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 set(gca,'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig2_evecs_W'), figSaveType);
 
 %% Learn CDF(x) from xTrain by fitting ecdf to a polynomial
 [estCdf_xTrainGrid, xTrainGrid] = ecdf(xTrain);
@@ -64,23 +67,24 @@ xSmallTestEst = invT(invpCdf, muTilde, sigmaTilde, xTestTilde);
 
 sz = 25;
 cmap = xSmallTest;
-figure('Name', 'x <-> xTilde');
+fig = figure('Name', 'x <-> xTilde');
 subplot(2,1,1)
-scatter(xSmallTest, zeros(1,nTestPoints), 100, cmap, 'o')
-hold on;
-scatter(xSmallTestEst, zeros(1,nTestPoints), 50, cmap, 'filled')
-colormap('jet')
-xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-legend('$x_{{\bf test}}$', '$T^{-1}(T(x_{{\bf test}}))$','interpreter', 'latex', 'FontSize', 14);
-title('Original nodes','interpreter', 'latex', 'FontSize', 16);
-set(gca,'YTick',[],'FontSize', 14);
-
+    scatter(xSmallTest, zeros(1,nTestPoints), 100, cmap, 'o')
+    hold on;
+    scatter(xSmallTestEst, zeros(1,nTestPoints), 50, cmap, 'filled')
+    colormap('jet')
+    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
+    legend('$x_{{\bf test}}$', '$T^{-1}(T(x_{{\bf test}}))$','interpreter', 'latex', 'FontSize', 14);
+    title('Original nodes','interpreter', 'latex', 'FontSize', 16);
+    set(gca,'YTick',[],'FontSize', 14);
 subplot(2,1,2);
-scatter(xTestTilde, zeros(1,nTestPoints), 50, cmap, 'filled')
-colormap('jet')
-xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
-title('Transformed nodes','interpreter', 'latex', 'FontSize', 16);
-set(gca,'YTick',[],'FontSize', 14);
+    scatter(xTestTilde, zeros(1,nTestPoints), 50, cmap, 'filled')
+    colormap('jet')
+    xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
+    title('Transformed nodes','interpreter', 'latex', 'FontSize', 16);
+    set(gca,'YTick',[],'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig3_x_to_xTilde'), figSaveType);
+
 
 % Verify estCdf(xTrain) vs. polyCdf(xTest)
 xTestGrid = linspace(xMin,xMax,2000)';
@@ -114,38 +118,35 @@ for p = 1:pCdfDegree+1
     
 end
 
-figure('Name', 'Verify estCdfPoly');
+fig = figure('Name', 'Demonstrate T');
 subplot(2,2,1)
-plot(xTrainGrid, estCdf_xTrainGrid,'.');
-hold on;
-plot(xTestGrid, polyCdf_xTestGrid, '.');
-ylim([0 1])
-title(['Est. vs. poly CDF (degree ' num2str(pCdfDegree) ')'], 'interpreter', 'latex', 'FontSize', 16);
-xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
-legend('${\bf eCDF}_{{\bf X}}(x_{{\bf train}})$', '$\hat{F}_{X}(x_{{\bf test}})$', ...
-    'location', 'southeast', 'interpreter', 'latex', 'FontSize', 14)
-set(gca,'FontSize', 14);
-
-% figure('Name', 'xTilde = T(xTest) = icdf(polyCdf(xTest))');
+    plot(xTrainGrid, estCdf_xTrainGrid,'.');
+    hold on;
+    plot(xTestGrid, polyCdf_xTestGrid, '.');
+    ylim([0 1])
+    title(['Est. vs. poly CDF (degree ' num2str(pCdfDegree) ')'], 'interpreter', 'latex', 'FontSize', 16);
+    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
+    ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
+    legend('${\bf eCDF}_{{\bf X}}(x_{{\bf train}})$', '$\hat{F}_{X}(x_{{\bf test}})$', ...
+        'location', 'southeast', 'interpreter', 'latex', 'FontSize', 14)
+    set(gca,'FontSize', 14);
 subplot(2,2,2)
-plot(xTildeTestGrid,polyCdf_xTestGrid,'.')
-title('$\tilde{x} = T(x) = F_{\tilde{X}}^{-1}(\hat{F}_{X}(x))$', 'interpreter', 'latex', 'FontSize', 16);
-ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
-xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
-set(gca,'FontSize', 14);
-
+    plot(xTildeTestGrid,polyCdf_xTestGrid,'.')
+    title(['$\tilde{x} = T(x) = F_{\tilde{X}}^{-1}(\hat{F}_{X}(x))$' newline '(flipped axes)'], 'interpreter', 'latex', 'FontSize', 16);
+    ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
+    xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
+    set(gca,'FontSize', 14);
 subplot(2,2,3)
-histogram(xTestGrid ,100);
-title('Histogram of $x_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
-set(gca,'FontSize', 14);
-
+    histogram(xTestGrid ,100);
+    title('Histogram of $x_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
+    set(gca,'FontSize', 14);
 subplot(2,2,4)
-histfit(xTildeTestGrid ,100);
-title('Histogram of $\tilde{x}_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
-set(gca,'FontSize', 14);
-
+    histfit(xTildeTestGrid ,100);
+    title('Histogram of $\tilde{x}_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
+    set(gca,'FontSize', 14);
 sgtitle(['$\hat{F}_{X}(x) = ' pCdfStr '$'], 'interpreter', 'latex', 'FontSize', 16);
+saveas(fig,strcat(outputFolder, filesep, 'fig4_polyfit'), figSaveType);
+
 
 %% Build G tilde
 omegaTilde = 0.3;
@@ -159,62 +160,71 @@ MTilde = 20;
 VTilde = FlipSign(PhiTilde, VTilde);
 lambdaNumericTilde = diag(LambdaNumericTilde);
 
-figure('Name', '(Numeric) Eigenvectors of W_Gtilde');
+fig = figure('Name', 'evecs vs. efuncs of WTilde');
 plot(xTildeTrain, VTilde(:,vInd),'o');
 hold on
 plot(xTildeTrain, PhiTilde(:,vInd),'.');
 legend([strcat('$\tilde{v}_',string(vInd),'$') strcat('$\tilde{\phi}_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
-title('Eigenfunctions and eigenvectors of $W_{\tilde{G}}$ on $x_{{\bf train}}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+title('Eigenfunctions vs. eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig5_evecs_vs_efuncs'), figSaveType);
 
 %% Functional maps
 C = pinv(PhiTilde)*V;
 pinvC = pinv(C);
 
-figure('Name', 'C');
+fig = figure('Name', 'C');
 imagesc(C);
 colorbar();
-title('${\bf C}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
-figure('Name', 'pinv(C)');
+title('${\bf C} = \tilde{{\bf \Phi}}^\dagger {\bf V}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig6_C'), figSaveType);
+
+fig = figure('Name', 'pinv(C)');
 imagesc(pinvC);
 colorbar();
 title('${\bf C}^\dagger$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig7_pinvC'), figSaveType);
 
 %% V in terms of Phi_tilde
 xEstTrain = invT(invpCdf, muTilde, sigmaTilde, xTildeTrain);
 VRec = PhiTilde*C;
 
-figure('Name', 'Rec. evecs of W_G');
+fig = figure('Name', 'V in terms of PhiTilde');
 plot(xTrain, V(:,vInd),'o');
 hold on
 plot(xEstTrain, VRec(:,vInd),'.');
 legend([strcat('$v_{',string(vInd),'}$') strcat('$v_{{\bf rec},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
-title(['Reconstructed eigenvectors on $G$ (no interpolation)' newline '${\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+title(['${\bf V}$ in terms of ${\bf \tilde{\Phi}}$' newline '${\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); 
+set(gca,'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig8_VRec'), figSaveType);
 
 %% Interpolate
 N = 5000;
 xTildeInt = linspace(-2*sigmaTilde+muTilde,2*sigmaTilde+muTilde, N)';
 [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
 
-figure('Name', '(Analytic) Eigenfunctions of W_Gtilde on the entire axis');
+fig = figure('Name', 'Eigenfunctions of WTilde on the entire axis');
 plot(xTildeInt, PhiTildeInt(:,vInd),'LineWidth',2);
 legend(strcat('$\tilde{\phi}_',string(vInd),'$'), 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
-title(['(Analytic) Eigenfunctions of $W_{\tilde{G}}$ on the entire axis' newline ...
+title(['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' newline ...
     '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
     '; $\tilde{\sigma}$ = ' num2str(sigmaTilde, '%.2f') ...
-    '; $\tilde{\mu}$ = ' num2str(muTilde, '%.2f') ], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+    '; $\tilde{\mu}$ = ' num2str(muTilde, '%.2f') ], 'interpreter', 'latex', 'FontSize', 16); 
+set(gca,'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig9_efuncs_WTilde_int'), figSaveType);
 
 xInt = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
 VInt = PhiTildeInt*C;
 
-interpRatio = n/N;
-VIntRenormed =(1/sqrt(interpRatio))*VInt;
+interpRatio = N/n;
+VIntRenormed = sqrt(interpRatio)*VInt;
 
-figure('Name', 'Rec. evecs of W_G \w interp');
+fig = figure('Name', 'Interpolated evecs of W');
 plot(xTrain, V(:,vInd),'o');
 hold on
 plot(xInt, VIntRenormed(:,vInd),'.');
-legend([strcat('$v_{',string(vInd),'}$') strcat('$v_{{\bf rec},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
-title(['Reconstructed eigenvectors on $G$ (with interpolation)' newline '${\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+legend([strcat('$v_{',string(vInd),'}$') strcat('$v_{{\bf int},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+title(['Interpolated eigenvectors of ${\bf W}$' newline '${\bf V}_{{\bf int}} = \sqrt{\frac{N}{n}}{\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig10_VInt'), figSaveType);
 
 %% T(x)
 function xTilde = T(pCdf, b_saturate, mu, sigma, x)

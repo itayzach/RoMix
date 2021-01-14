@@ -11,7 +11,7 @@ if strcmp(verticesPDF, 'Uniform_1D')
     xMin = -10;
     xTrain = (xMax - xMin)*rand(n,1) + xMin; %linspace(minVal,maxVal,N)';
 elseif strcmp(verticesPDF, 'Gaussian_1D')
-    sigma = 1;
+    sigma = 10;
     mu = 0;
     xMax = 3*sigma;
     xMin = -3*sigma;
@@ -58,35 +58,7 @@ muTilde = 0;
 sigmaTilde = 1;
 xTildeTrain = T(pCdf, true, muTilde, sigmaTilde, xTrain);
 
-%% Just a demonstrantion of the transformation
-nTestPoints = 50;
-xSmallTest = linspace(xMin+0.5,xMax-0.5,nTestPoints)';
-
-xTestTilde = T(pCdf, true, muTilde, sigmaTilde, xSmallTest);
-xSmallTestEst = invT(invpCdf, muTilde, sigmaTilde, xTestTilde);
-
-sz = 25;
-cmap = xSmallTest;
-fig = figure('Name', 'x <-> xTilde');
-subplot(2,1,1)
-    scatter(xSmallTest, zeros(1,nTestPoints), 100, cmap, 'o')
-    hold on;
-    scatter(xSmallTestEst, zeros(1,nTestPoints), 50, cmap, 'filled')
-    colormap('jet')
-    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-    legend('$x_{{\bf test}}$', '$T^{-1}(T(x_{{\bf test}}))$','interpreter', 'latex', 'FontSize', 14);
-    title('Original nodes','interpreter', 'latex', 'FontSize', 16);
-    set(gca,'YTick',[],'FontSize', 14);
-subplot(2,1,2);
-    scatter(xTestTilde, zeros(1,nTestPoints), 50, cmap, 'filled')
-    colormap('jet')
-    xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
-    title('Transformed nodes','interpreter', 'latex', 'FontSize', 16);
-    set(gca,'YTick',[],'FontSize', 14);
-saveas(fig,strcat(outputFolder, filesep, 'fig3_x_to_xTilde'), figSaveType);
-
-
-% Verify estCdf(xTrain) vs. polyCdf(xTest)
+%% Demonstrate T (1/2)
 xTestGrid = linspace(xMin,xMax,2000)';
 polyCdf_xTestGrid = polyval(pCdf, xTestGrid);
 b_saturate = false;
@@ -96,10 +68,9 @@ if b_saturate && (any(polyCdf_xTestGrid > 1) || any(polyCdf_xTestGrid < 0))
     polyCdf_xTestGrid(polyCdf_xTestGrid < 0) = eps; % saturate
 end
 
-muTilde = 0;
-sigmaTilde = 1;
 xTildeTestGrid = icdf('Normal',polyCdf_xTestGrid,muTilde,sigmaTilde);
 
+% Generate the polynomial title
 pCdfStr = [];
 for p = 1:pCdfDegree+1
     if abs(pCdf(p)) < 1e-4
@@ -117,8 +88,7 @@ for p = 1:pCdfDegree+1
     end
     
 end
-
-fig = figure('Name', 'Demonstrate T');
+fig = figure('Name', 'Demonstrate T (1/2)');
 subplot(2,2,1)
     plot(xTrainGrid, estCdf_xTrainGrid,'.');
     hold on;
@@ -145,8 +115,33 @@ subplot(2,2,4)
     title('Histogram of $\tilde{x}_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'FontSize', 14);
 sgtitle(['$\hat{F}_{X}(x) = ' pCdfStr '$'], 'interpreter', 'latex', 'FontSize', 16);
-saveas(fig,strcat(outputFolder, filesep, 'fig4_polyfit'), figSaveType);
+saveas(fig,strcat(outputFolder, filesep, 'fig3_polyfit'), figSaveType);
 
+%% Demonstrate T (2/2)
+nTestPoints = 50;
+xSmallTest = linspace(xMin+0.5,xMax-0.5,nTestPoints)';
+
+xTestTilde = T(pCdf, true, muTilde, sigmaTilde, xSmallTest);
+xSmallTestEst = invT(invpCdf, muTilde, sigmaTilde, xTestTilde);
+
+cmap = xSmallTest;
+fig = figure('Name', 'Demonstrate T (2/2)');
+subplot(2,1,1)
+    scatter(xSmallTest, zeros(1,nTestPoints), 100, cmap, 'o')
+    hold on;
+    scatter(xSmallTestEst, zeros(1,nTestPoints), 50, cmap, 'filled')
+    colormap('jet')
+    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
+    legend('$x_{{\bf test}}$', '$T^{-1}(T(x_{{\bf test}}))$','interpreter', 'latex', 'FontSize', 14);
+    title('Original nodes','interpreter', 'latex', 'FontSize', 16);
+    set(gca,'YTick',[],'FontSize', 14);
+subplot(2,1,2);
+    scatter(xTestTilde, zeros(1,nTestPoints), 50, cmap, 'filled')
+    colormap('jet')
+    xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
+    title('Transformed nodes','interpreter', 'latex', 'FontSize', 16);
+    set(gca,'YTick',[],'FontSize', 14);
+saveas(fig,strcat(outputFolder, filesep, 'fig4_x_to_xTilde'), figSaveType);
 
 %% Build G tilde
 omegaTilde = 0.3;
@@ -199,7 +194,8 @@ saveas(fig,strcat(outputFolder, filesep, 'fig8_VRec'), figSaveType);
 
 %% Interpolate
 N = 5000;
-xTildeInt = linspace(-2*sigmaTilde+muTilde,2*sigmaTilde+muTilde, N)';
+xInt = linspace(xMin+0.5, xMax-0.5, N)';
+xTildeInt = T(pCdf, true, muTilde, sigmaTilde, xInt);
 [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
 
 fig = figure('Name', 'Eigenfunctions of WTilde on the entire axis');
@@ -212,7 +208,7 @@ title(['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' newline ...
 set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig9_efuncs_WTilde_int'), figSaveType);
 
-xInt = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
+xIntInvT = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
 VInt = PhiTildeInt*C;
 
 interpRatio = N/n;
@@ -221,7 +217,7 @@ VIntRenormed = sqrt(interpRatio)*VInt;
 fig = figure('Name', 'Interpolated evecs of W');
 plot(xTrain, V(:,vInd),'o');
 hold on
-plot(xInt, VIntRenormed(:,vInd),'.');
+plot(xIntInvT, VIntRenormed(:,vInd),'.');
 legend([strcat('$v_{',string(vInd),'}$') strcat('$v_{{\bf int},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Interpolated eigenvectors of ${\bf W}$' newline '${\bf V}_{{\bf int}} = \sqrt{\frac{N}{n}}{\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig10_VInt'), figSaveType);

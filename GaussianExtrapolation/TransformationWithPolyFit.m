@@ -39,7 +39,7 @@ vInd = 1:5;
 fig = figure('Name', 'Eigenvectors of W');
 plot(xTrain, V(:,vInd),'.');
 title('Eigenvectors of ${\bf W}$ ', 'interpreter', 'latex', 'FontSize', 16);
-legend(strcat('$v_',string(vInd),'$'), 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+legend(strcat('$v_{',string(vInd),'}$'), 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig2_evecs_W'), figSaveType);
 
@@ -159,7 +159,7 @@ fig = figure('Name', 'evecs vs. efuncs of WTilde');
 plot(xTildeTrain, VTilde(:,vInd),'o');
 hold on
 plot(xTildeTrain, PhiTilde(:,vInd),'.');
-legend([strcat('$\tilde{v}_',string(vInd),'$') strcat('$\tilde{\phi}_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+legend([strcat('$\tilde{v}_{',string(vInd),'}$') strcat('$\tilde{\phi}_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title('Eigenfunctions vs. eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig5_evecs_vs_efuncs'), figSaveType);
 

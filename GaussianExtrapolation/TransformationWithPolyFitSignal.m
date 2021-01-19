@@ -4,7 +4,7 @@ set(0,'DefaultFigureWindowStyle','docked')
 outputFolder = 'figs'; figSaveType = 'png';
 
 %% Random data
-signalType = 'Synthetic_1D'; % 'Harmonics_1D' / 'Audio_1D'
+signalType = 'Synthetic_1D'; % 'Synthetic_1D' / 'Audio_1D'
 n = 1000;
 signalInterpRatio = 1;
 
@@ -102,6 +102,7 @@ ylabel('$S(f)$ [dB]', 'interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 %% Project
 alpha = pinv(V)*signalTrain;
+projSignalFft = fftshift(fft(V*alpha, fftLen));   
 figure('Name', 'Signal projection'); 
 subplot(2,1,1)
     plot(tTrain*1e3, signalTrain, 'o');
@@ -115,7 +116,7 @@ subplot(2,1,2);
     plot(freqAxis/1e3, 20*log10(abs(signalFft)));
 %     xlim([-1.5 1.5]*max([f1 f2 f3]));
     hold on;
-    plot(freqAxis/1e3, 20*log10(abs(VFft*alpha)));
+    plot(freqAxis/1e3, 20*log10(abs(projSignalFft)));
     title('$S(f) = {\bf FFT}\{s(t)\}$', 'interpreter', 'latex', 'FontSize', 16); 
     legend('$S(f)$', '$\sum_{i=1}^M \alpha_i V_i(f)$', 'interpreter', 'latex', 'FontSize', 14)
     xlabel('$f$ [KHz]', 'interpreter', 'latex', 'FontSize', 14); 
@@ -240,7 +241,7 @@ plot(tTildeTrain*1e3, VTilde(:,vInd),'o');
 hold on
 plot(tTildeTrain*1e3, PhiTilde(:,vInd),'.');
 xlabel('$\tilde{t}$ [ms]', 'interpreter', 'latex', 'FontSize', 14);
-legend([strcat('$\tilde{v}_',string(vInd),'$') strcat('$\tilde{\phi}_',string(vInd),'$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+legend([strcat('$\tilde{v}_{',string(vInd),'}$') strcat('$\tilde{\phi}_{',string(vInd),'}$') ], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title('Eigenfunctions vs. eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig5_evecs_vs_efuncs'), figSaveType);
 
@@ -283,7 +284,7 @@ tTildeInt = T(pCdf, true, muTilde, sigmaTilde, tInt);
 
 fig = figure('Name', 'Eigenfunctions of WTilde on the entire axis');
 plot(tTildeInt*1e3, PhiTildeInt(:,vInd),'LineWidth',2);
-legend(strcat('$\tilde{\phi}_',string(vInd),'$'), 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
+legend(strcat('$\tilde{\phi}_{',string(vInd),'}$'), 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' newline ...
     '$\tilde{\omega}$ = ' num2str(omegaTilde*1e3, '%.2f') ...
     '[ms]; $\tilde{\sigma}$ = ' num2str(sigmaTilde*1e3, '%.2f') ...

@@ -6,66 +6,58 @@ outputFolder = 'figs'; figSaveType = 'png';
 %% Random data
 signalType = 'Synthetic_1D'; % 'Synthetic_1D' / 'Audio_1D'
 n = 1000;
-signalInterpRatio = 1;
 
 fs = 48e3;
 Ts = 1/fs;
-t = Ts*(0:signalInterpRatio*n-1)';
-tTrain = t(1:signalInterpRatio:end);
+tTrain = Ts*(0:n-1)';
 tMax = max(tTrain);
 tMin = min(tTrain);
 if strcmp(signalType, 'Synthetic_1D')
-    f1 = 1*0.5*fs/n; % m*(0.5fs)/n
-    f2 = 3*0.5*fs/n;
-    f3 = 5*0.5*fs/n;
+    f1 = 1*0.5/(n*Ts); % m*(0.5fs/n)
+    f2 = 3*0.5/(n*Ts);
+    f3 = 5*0.5/(n*Ts);
 
-    signal = sin(2*pi*f1*t) + sin(2*pi*f2*t) + sin(2*pi*f3*t);
+    signalTrain = sin(2*pi*f1*tTrain) + sin(2*pi*f2*tTrain) + sin(2*pi*f3*tTrain);
 elseif strcmp(signalType, 'Audio_1D')
-    [signal, fs_audioread] = audioread('data/signal.m4a');
+    [signalTrain, fs_audioread] = audioread('data/signal.m4a');
     assert(fs == fs_audioread);
-    signal = signal(:,1); % mono-channel
-    signal = signal(abs(signal) > 0); % take only samples with energy
-    
+    signalTrain = signalTrain(:,1); % mono-channel
+    signalTrain = signalTrain(abs(signalTrain) > 0); % take only samples with energy
+    signalTrain = signalTrain(1:n); % take only first n samples (n*Ts=20ms for fs=48KHz, n = 1000)
     % filter
     windowSize = 100; 
     b = ones(1,windowSize);
     a = 1;
-    signal = (1/windowSize)*filter(b,a,signal);
-    
-    signal = signal(1:signalInterpRatio*n,1);
+    signalTrain = (1/windowSize)*filter(b,a,signalTrain);
 %     soundsc(signal, fs);
     
 else
     error('invalid verticesPDF');
 end
 
-signalTrain = signal(1:signalInterpRatio:end);
-
 fftLen = n;
-signalFft = fftshift(fft(signal, fftLen));
+signalFft = fftshift(fft(signalTrain, fftLen));
 freqAxis = ((fs/fftLen)*(0:fftLen-1))' - fs/2; % [-fs/2, fs/2-fs/fftLen]
 
 fig = figure('Name', 'Signal'); 
 subplot(2,1,1)
-    plot(t*1e3,signal, 'o')    
-    hold on
-    plot(tTrain*1e3,signalTrain, '.')
+    plot(tTrain*1e3,signalTrain, 'LineWidth', 2)
     title('$s(t)$', 'interpreter', 'latex', 'FontSize', 16); 
     xlabel('$t$ [ms]', 'interpreter', 'latex', 'FontSize', 14); 
-    legend('$s(t)$', '$s_{{\bf train}}(t)$', 'interpreter', 'latex', 'FontSize', 14)
+    legend('$s_{{\bf train}}(t)$', 'interpreter', 'latex', 'FontSize', 14)
     set(gca,'FontSize', 14);
 subplot(2,1,2);
     plot(freqAxis/1e3, 20*log10(abs(signalFft)));
-%     xlim([-1.5 1.5]*max([f1 f2 f3]));
+    xlim([-0.5 0.5]*fs/1e3);
     title('$S(f) = {\bf FFT}\{s(t)\}$', 'interpreter', 'latex', 'FontSize', 16); 
     xlabel('$f$ [KHz]', 'interpreter', 'latex', 'FontSize', 14); 
     ylabel('$S(f)$ [dB]', 'interpreter', 'latex', 'FontSize', 14); 
     set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig0_signal'), figSaveType);
 
-fig = figure('Name', 'Histogram of t'); 
+fig = figure('Name', 'Histogram of tTrain'); 
 histogram(tTrain*1e3,100);
-title('Histogram of ${\bf t}$', 'interpreter', 'latex', 'FontSize', 16); 
+title('Histogram of $t_{{\bf train}}$', 'interpreter', 'latex', 'FontSize', 16); 
 xlabel('$t$ [ms]', 'interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig1_histogram_X'), figSaveType);
@@ -114,7 +106,7 @@ subplot(2,1,1)
     set(gca,'FontSize', 14);
 subplot(2,1,2);
     plot(freqAxis/1e3, 20*log10(abs(signalFft)));
-%     xlim([-1.5 1.5]*max([f1 f2 f3]));
+	xlim([-0.5 0.5]*fs/1e3);
     hold on;
     plot(freqAxis/1e3, 20*log10(abs(projSignalFft)));
     title('$S(f) = {\bf FFT}\{s(t)\}$', 'interpreter', 'latex', 'FontSize', 16); 
@@ -278,7 +270,7 @@ saveas(fig,strcat(outputFolder, filesep, 'fig8_VRec'), figSaveType);
 %% Interpolate
 interpRatio = 10;
 N = interpRatio*n;
-tInt = linspace(t(signalInterpRatio*10), t(end-signalInterpRatio*10), N)';
+tInt = linspace(tTrain(10), tTrain(end-10), N)'; % cut edges
 tTildeInt = T(pCdf, true, muTilde, sigmaTilde, tInt);
 [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(tTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
 
@@ -315,7 +307,7 @@ intFreqAxis = ((interpRatio*fs/intFftLen)*(0:intFftLen-1))' - interpRatio*fs/2; 
 
 fig = figure('Name', 'Interpolated signal'); 
 subplot(2,1,1)
-    plot(t*1e3, signal, 'o');
+    plot(tTrain*1e3, signalTrain, 'o');
     hold on
     plot(tIntInvT*1e3, intSignal, '.')
     title('Interpolated $s(t)$', 'interpreter', 'latex', 'FontSize', 16); 

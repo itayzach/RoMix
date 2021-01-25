@@ -324,24 +324,3 @@ subplot(2,1,2);
     xlabel('$f$ [KHz]', 'interpreter', 'latex', 'FontSize', 14); 
     ylabel('$S(f)$ [dB]', 'interpreter', 'latex', 'FontSize', 14); 
     set(gca,'FontSize', 14);
-%% T(x)
-function xTilde = T(pCdf, b_saturate, mu, sigma, x)
-polyCdf = polyval(pCdf, x);
-if (any(polyCdf > 1) || any(polyCdf < 0))
-    warning('CDF must be in [0,1]...');
-    if b_saturate
-        polyCdf(polyCdf > 0.99) = 0.99; % saturate
-        polyCdf(polyCdf < 0.01) = 0.01; % saturate
-    end
-end
-xTilde = icdf('Normal',polyCdf,mu,sigma);
-assert(~any(isnan(xTilde)),['xTilde contain NaNs since because of x = ', num2str(x(isnan(xTilde))')]);
-end
-
-%% invT(x)
-function x = invT(invpCdf, mu, sigma, xTilde)
-assert(~any(isnan(xTilde)),'xTilde contain NaNs...');
-xTildeCdf = cdf('Normal', xTilde, mu, sigma);
-x = polyval(invpCdf, xTildeCdf);
-assert(~any(isnan(x)),'x contain NaNs...');
-end

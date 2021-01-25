@@ -221,25 +221,3 @@ plot(xIntInvT, VIntRenormed(:,vInd),'.');
 legend([strcat('$v_{',string(vInd),'}$') strcat('$v_{{\bf int},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Interpolated eigenvectors of ${\bf W}$' newline '${\bf V}_{{\bf int}} = \sqrt{\frac{N}{n}}{\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig10_VInt'), figSaveType);
-
-%% T(x)
-function xTilde = T(pCdf, b_saturate, mu, sigma, x)
-polyCdf = polyval(pCdf, x);
-if (any(polyCdf > 1) || any(polyCdf < 0))
-    warning('CDF must be in [0,1]...');
-    if b_saturate
-        polyCdf(polyCdf > 0.99) = 0.99; % saturate
-        polyCdf(polyCdf < 0.01) = 0.01; % saturate
-    end
-end
-xTilde = icdf('Normal',polyCdf,mu,sigma);
-assert(~any(isnan(xTilde)),['xTilde contain NaNs since because of x = ', num2str(x(isnan(xTilde))')]);
-end
-
-%% invT(x)
-function x = invT(invpCdf, mu, sigma, xTilde)
-assert(~any(isnan(xTilde)),'xTilde contain NaNs...');
-xTildeCdf = cdf('Normal', xTilde, mu, sigma);
-x = polyval(invpCdf, xTildeCdf);
-assert(~any(isnan(x)),'x contain NaNs...');
-end

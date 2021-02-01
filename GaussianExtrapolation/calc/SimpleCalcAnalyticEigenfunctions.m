@@ -1,21 +1,22 @@
 function [Phi, lambdaAnalytic] = SimpleCalcAnalyticEigenfunctions(X, omega, sigma, mu, nEigs)
-%% Kernel parameters
-sKernelParams.kernelType = 'gaussian';
-sKernelParams.beta{1} = 2*sigma^2/omega^2;
-sKernelParams.constsType = 2;
-sKernelParams.omega = omega;
+dim = size(X,2);
+nComponents = 1;
 
 %% Distribution parameters
-sKernelParams.sDistParams.mu{1} = mu;
-sKernelParams.sDistParams.mu_1D{1} = mu;
-sKernelParams.sDistParams.cov{1} = sigma;
-sKernelParams.sDistParams.sigma{1} = sigma;
-sKernelParams.sDistParams.sigma_eigv{1} = sigma;
-sKernelParams.sDistParams.u{1} = 1;
-sKernelParams.sDistParams.estNumComponents = 1;
+sDistParams.cov{1} = sigma;
+sDistParams.sigma{1} = diag(sigma);
+sDistParams.sigma_eigv{1} = sigma;
+[sDistParams.u{1}, sDistParams.sigma_eigv{1}] = eig(sDistParams.cov{1});
+sDistParams.mu{1} = mu;
+sDistParams.mu_1D{1} = sDistParams.mu{1}*sDistParams.u{1};
+sDistParams.estNumComponents = nComponents;
 
-nComponents = 1;
-dim = size(X,2);
+%% Kernel parameters
+sKernelParams.kernelType = 'gaussian';
+sKernelParams.beta{1} = 2*sDistParams.sigma{1}.^2./omega^2;
+sKernelParams.constsType = 2;
+sKernelParams.omega = omega;
+sKernelParams.sDistParams = sDistParams;
 
 %% Calculate eigenvalues (and matching indices)
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...

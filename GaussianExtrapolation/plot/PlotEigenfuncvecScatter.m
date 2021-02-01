@@ -35,11 +35,14 @@ elseif dim == 2
     y0     = 200;
     width  = 1200; 1800;
     height = 600; 900;
-    nRows = floor(sqrt(sSimParams.PlotEigenFuncsM+1));
+    windowStyle = get(0,'DefaultFigureWindowStyle');
+    set(0,'DefaultFigureWindowStyle','normal')
+    nEigenFuncsToPlot = lastEigIdx-firstEigenIdx+1;
+    nRows = floor(sqrt(nEigenFuncsToPlot+1));
     if nRows > 4
         nRows = 4;
     end
-    nCols = ceil(sSimParams.PlotEigenFuncsM/nRows);
+    nCols = ceil(nEigenFuncsToPlot/nRows);
     %% Plot
     fig = figure('Name', '2D Scatter');
     for m = firstEigenIdx:lastEigIdx
@@ -87,6 +90,6 @@ else
     simPrefix = strcat(actualDataDist, num2str(dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
 end
 saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
-
+set(0,'DefaultFigureWindowStyle',windowStyle)
 
 end

@@ -19,16 +19,16 @@ if dim == 1
         histogram(v, 100);
     end
 elseif dim == 2
-    hist3(v,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'flat');
-    colormap(gca, 'hot')
+    hist3(v,'CdataMode','auto', 'Nbins', [50 50], 'edgecolor', 'none','FaceColor','interp');
+%     colormap(gca, 'hot')
     colorbar()
-    view(2)
+%     view(2)
     xlim([ min(v(:,1)) max(v(:,1))])
     ylim([ min(v(:,2)) max(v(:,2))])
 end
 title(strcat(plt_title, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
-set(gcf,'Position', [x0 y0 width height])
+% set(gcf,'Position', [x0 y0 width height])
 
 %% Save
 if ~exist(sSimParams.outputFolder, 'dir')

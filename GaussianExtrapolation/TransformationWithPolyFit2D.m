@@ -8,7 +8,7 @@ sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = false;
 %% Random data
 verticesPDF = 'Uniform'; % 'Gaussian' / 'Uniform'
-n = 2000;
+n = 500;
 dim = 2;
 if strcmp(verticesPDF, 'Uniform')
     xMax = [1 1];
@@ -46,17 +46,17 @@ assert(dim == 2, 'following function only works for 2D')
 
 pCdfDegree = 2;
 invpCdfDegree = 2;
-pCdf{1} = polyfit(xTrainGrid{1}, estMarginalCdf_xTrain{1}, pCdfDegree); % to have analytic expression for the cdf
-invpCdf{1} = polyfit(estMarginalCdf_xTrain{1}, xTrainGrid{1}, invpCdfDegree); % to have analytic expression for the cdf
-pCdf{2} = polyfit(xTrainGrid{2}, estMarginalCdf_xTrain{2}, pCdfDegree); % to have analytic expression for the cdf
-invpCdf{2} = polyfit(estMarginalCdf_xTrain{2}, xTrainGrid{2}, invpCdfDegree); % to have analytic expression for the cdf
+pCdf(:,1) = polyfit(xTrainGrid(:,1), estMarginalCdf_xTrain(:,1), pCdfDegree); % to have analytic expression for the cdf
+invpCdf(:,1) = polyfit(estMarginalCdf_xTrain(:,1), xTrainGrid(:,1), invpCdfDegree); % to have analytic expression for the cdf
+pCdf(:,2) = polyfit(xTrainGrid(:,2), estMarginalCdf_xTrain(:,2), pCdfDegree); % to have analytic expression for the cdf
+invpCdf(:,2) = polyfit(estMarginalCdf_xTrain(:,2), xTrainGrid(:,2), invpCdfDegree); % to have analytic expression for the cdf
 
 
 %% Transform to Gtilde
 muTilde = [0 0];
 sigmaTilde = [1 0; 0 1];
-xTildeTrain(:,1) = T(pCdf{1}, true, muTilde(1), sigmaTilde(1,1), xTrain(:,1));
-xTildeTrain(:,2) = T(pCdf{2}, true, muTilde(2), sigmaTilde(2,2), xTrain(:,2));
+xTildeTrain(:,1) = T(pCdf(:,1), true, muTilde(1), sigmaTilde(1,1), xTrain(:,1));
+xTildeTrain(:,2) = T(pCdf(:,2), true, muTilde(2), sigmaTilde(2,2), xTrain(:,2));
 
 figure('Name', 'x vs. xTilde');
 subplot(1,2,1)
@@ -72,12 +72,12 @@ set(gca,'FontSize', 14);
 
 PlotHistogram(sSimParams, xTildeTrain, 'Gaussian', 'Histogram of X', false);
 %% Demonstrate T (1/2)
-PlotPolyCdfDemonstration1(xMin(1), xMax(1), pCdf{1}, xTrainGrid{1}, estMarginalCdf_xTrain{1}, muTilde(1), sigmaTilde(1,1));
-PlotPolyCdfDemonstration1(xMin(2), xMax(2), pCdf{2}, xTrainGrid{2}, estMarginalCdf_xTrain{2}, muTilde(2), sigmaTilde(2,2));
+PlotPolyCdfDemonstration1(xMin(1), xMax(1), pCdf(:,1), xTrainGrid(:,1), estMarginalCdf_xTrain(:,1), muTilde(1), sigmaTilde(1,1));
+PlotPolyCdfDemonstration1(xMin(2), xMax(2), pCdf(:,2), xTrainGrid(:,2), estMarginalCdf_xTrain(:,2), muTilde(2), sigmaTilde(2,2));
 
 %% Demonstrate T (2/2)
-PlotPolyCdfDemonstration2(xMin(1), xMax(1), pCdf{1}, invpCdf{1}, muTilde(1), sigmaTilde(1,1));
-PlotPolyCdfDemonstration2(xMin(2), xMax(2), pCdf{2}, invpCdf{2}, muTilde(2), sigmaTilde(2,2));
+PlotPolyCdfDemonstration2(xMin(1), xMax(1), pCdf(:,1), invpCdf(:,1), muTilde(1), sigmaTilde(1,1));
+PlotPolyCdfDemonstration2(xMin(2), xMax(2), pCdf(:,2), invpCdf(:,2), muTilde(2), sigmaTilde(2,2));
 
 %% Build G tilde
 omegaTilde = 0.3;
@@ -96,18 +96,11 @@ figTitle = 'Eigenfunctions $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
 PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeTrain, [], vInd(1)-1, vInd(end)-1, PhiTilde, lambdaAnalyticTilde, 'Analytic', [], [], figTitle)
 %% Functional maps
 C = pinv(PhiTilde)*V;
-pinvC = pinv(C);
 
 figure('Name', 'C');
 imagesc(C);
 colorbar();
 title('${\bf C} = \tilde{{\bf \Phi}}^\dagger {\bf V}$', 'interpreter', 'latex', 'FontSize', 16); 
-set(gca,'FontSize', 14);
-
-figure('Name', 'pinv(C)');
-imagesc(pinvC);
-colorbar();
-title('${\bf C}^\dagger$', 'interpreter', 'latex', 'FontSize', 16); 
 set(gca,'FontSize', 14);
 
 %% V in terms of Phi_tilde
@@ -119,8 +112,8 @@ PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end
 N = 5000;
 [X1, X2] = meshgrid(linspace(xMin(1),xMax(1),sqrt(N)),linspace(xMin(2),xMax(2),sqrt(N)));
 xInt = [X1(:) X2(:)];
-xTildeInt(:,1) = T(pCdf{1}, true, muTilde(1), sigmaTilde(1,1), xInt(:,1));
-xTildeInt(:,2) = T(pCdf{2}, true, muTilde(2), sigmaTilde(2,2), xInt(:,2));
+xTildeInt(:,1) = T(pCdf(:,1), true, muTilde(1), sigmaTilde(1,1), xInt(:,1));
+xTildeInt(:,2) = T(pCdf(:,2), true, muTilde(2), sigmaTilde(2,2), xInt(:,2));
 [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
 
 figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' ];%newline ...
@@ -130,8 +123,8 @@ figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' ];%newline 
 PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeInt, [], vInd(1)-1, vInd(end)-1, PhiTildeInt, lambdaAnalyticTilde, 'Numeric', [], [], figTitle)
 
 
-xIntInvT(:,1) = invT(invpCdf{1}, muTilde(1), sigmaTilde(1,1), xTildeInt(:,1));
-xIntInvT(:,2) = invT(invpCdf{2}, muTilde(2), sigmaTilde(2,2), xTildeInt(:,2));
+xIntInvT(:,1) = invT(invpCdf(:,1), muTilde(1), sigmaTilde(1,1), xTildeInt(:,1));
+xIntInvT(:,2) = invT(invpCdf(:,2), muTilde(2), sigmaTilde(2,2), xTildeInt(:,2));
 VInt = PhiTildeInt*C;
 
 interpRatio = N/n;
@@ -143,10 +136,12 @@ PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xIntInvT, [], vInd(1)-1, vInd(en
 
 %% ecdf2d
 function [estCdf_xGrid, xGrid, estMarginalCdf] = ecdf2(x, bins)
-[hist_xGrid, xGrid] = hist3(x, 'Nbins', bins);
+[hist_xGrid, xGridCells] = hist3(x, 'Nbins', bins);
+xGrid(:,1) = (xGridCells{1})';
+xGrid(:,2) = (xGridCells{2})';
 n = length(x);
 pdf_xGrid = (1/n)*hist_xGrid;
-estCdf_xGrid = cumsum(cumsum(pdf_xGrid,1),2);  % CDF_x1x2
-estMarginalCdf{1} = cumsum(sum(pdf_xGrid,2));  % CDF_x1
-estMarginalCdf{2} = cumsum(sum(pdf_xGrid,1))'; % CDF_x2
+estCdf_xGrid = cumsum(cumsum(pdf_xGrid,1),2);    % CDF_x1x2
+estMarginalCdf(:,1) = cumsum(sum(pdf_xGrid,2));  % CDF_x1
+estMarginalCdf(:,2) = cumsum(sum(pdf_xGrid,1))'; % CDF_x2
 end

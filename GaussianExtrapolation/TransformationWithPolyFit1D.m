@@ -59,89 +59,10 @@ sigmaTilde = 1;
 xTildeTrain = T(pCdf, true, muTilde, sigmaTilde, xTrain);
 
 %% Demonstrate T (1/2)
-xTestGrid = linspace(xMin,xMax,2000)';
-polyCdf_xTestGrid = polyval(pCdf, xTestGrid);
-b_saturate = false;
-if b_saturate && (any(polyCdf_xTestGrid > 1) || any(polyCdf_xTestGrid < 0))
-    warning('CDF must be in [0,1], saturating...');
-    polyCdf_xTestGrid(polyCdf_xTestGrid > 1) = 1-eps; % saturate
-    polyCdf_xTestGrid(polyCdf_xTestGrid < 0) = eps; % saturate
-end
-
-xTildeTestGrid = icdf('Normal',polyCdf_xTestGrid,muTilde,sigmaTilde);
-
-% Generate the polynomial title
-pCdfStr = [];
-for p = 1:pCdfDegree+1
-    if abs(pCdf(p)) < 1e-4
-        continue;
-    end
-    if p > 1 && pCdf(p) > 0 && ~isempty(pCdfStr)
-        pCdfStr = strcat(pCdfStr,'+');
-    end
-    if p == pCdfDegree+1
-        pCdfStr = strcat(pCdfStr, num2str(pCdf(pCdfDegree+1),'%.5f'));
-    elseif p == pCdfDegree
-        pCdfStr = strcat(pCdfStr, num2str(pCdf(pCdfDegree),'%.5f'),'x');
-    else
-        pCdfStr = strcat(pCdfStr, num2str(pCdf(p),'%.5f'),'x^{',num2str(pCdfDegree-p+1),'}');
-    end
-    
-end
-fig = figure('Name', 'Demonstrate T (1/2)');
-subplot(2,2,1)
-    plot(xTrainGrid, estCdf_xTrainGrid,'.');
-    hold on;
-    plot(xTestGrid, polyCdf_xTestGrid, '.');
-    ylim([0 1])
-    title(['Est. vs. poly CDF (degree ' num2str(pCdfDegree) ')'], 'interpreter', 'latex', 'FontSize', 16);
-    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-    ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
-    legend('${\bf eCDF}_{{\bf X}}(x_{{\bf train}})$', '$\hat{F}_{X}(x_{{\bf test}})$', ...
-        'location', 'southeast', 'interpreter', 'latex', 'FontSize', 14)
-    set(gca,'FontSize', 14);
-subplot(2,2,2)
-    plot(xTildeTestGrid,polyCdf_xTestGrid,'.')
-    title(['$\tilde{x} = T(x) = F_{\tilde{X}}^{-1}(\hat{F}_{X}(x))$' newline '(flipped axes)'], 'interpreter', 'latex', 'FontSize', 16);
-    ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
-    xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
-    set(gca,'FontSize', 14);
-subplot(2,2,3)
-    histogram(xTestGrid ,100);
-    title('Histogram of $x_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
-    set(gca,'FontSize', 14);
-subplot(2,2,4)
-    histfit(xTildeTestGrid ,100);
-    title('Histogram of $\tilde{x}_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
-    set(gca,'FontSize', 14);
-sgtitle(['$\hat{F}_{X}(x) = ' pCdfStr '$'], 'interpreter', 'latex', 'FontSize', 16);
-saveas(fig,strcat(outputFolder, filesep, 'fig3_polyfit'), figSaveType);
+PlotPolyCdfDemonstration1(xMin, xMax, pCdf, xTrainGrid, estCdf_xTrainGrid, muTilde, sigmaTilde)
 
 %% Demonstrate T (2/2)
-nTestPoints = 50;
-xSmallTest = linspace(xMin+0.5,xMax-0.5,nTestPoints)';
-
-xTestTilde = T(pCdf, true, muTilde, sigmaTilde, xSmallTest);
-xSmallTestEst = invT(invpCdf, muTilde, sigmaTilde, xTestTilde);
-
-cmap = xSmallTest;
-fig = figure('Name', 'Demonstrate T (2/2)');
-subplot(2,1,1)
-    scatter(xSmallTest, zeros(1,nTestPoints), 100, cmap, 'o')
-    hold on;
-    scatter(xSmallTestEst, zeros(1,nTestPoints), 50, cmap, 'filled')
-    colormap('jet')
-    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-    legend('$x_{{\bf test}}$', '$T^{-1}(T(x_{{\bf test}}))$','interpreter', 'latex', 'FontSize', 14);
-    title('Original nodes','interpreter', 'latex', 'FontSize', 16);
-    set(gca,'YTick',[],'FontSize', 14);
-subplot(2,1,2);
-    scatter(xTestTilde, zeros(1,nTestPoints), 50, cmap, 'filled')
-    colormap('jet')
-    xlabel('$\tilde{x}$', 'interpreter', 'latex', 'FontSize', 16);
-    title('Transformed nodes','interpreter', 'latex', 'FontSize', 16);
-    set(gca,'YTick',[],'FontSize', 14);
-saveas(fig,strcat(outputFolder, filesep, 'fig4_x_to_xTilde'), figSaveType);
+PlotPolyCdfDemonstration2(xMin, xMax, pCdf, invpCdf, muTilde, sigmaTilde)
 
 %% Build G tilde
 omegaTilde = 0.3;

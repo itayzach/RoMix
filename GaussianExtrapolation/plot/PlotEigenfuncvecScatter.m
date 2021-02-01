@@ -55,7 +55,7 @@ elseif dim == 2
             colormap(gca, 'default')
             colorbar()
             caxis([min(mPhi(:,m+1)) max(mPhi(:,m+1))])
-            view(2)
+            view(20,40); %view(2)
             xlim([ min(mData(:,1)) max(mData(:,1))])
             ylim([ min(mData(:,2)) max(mData(:,2))])
         end

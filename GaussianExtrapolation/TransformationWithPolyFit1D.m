@@ -86,19 +86,12 @@ saveas(fig,strcat(outputFolder, filesep, 'fig5_evecs_vs_efuncs'), figSaveType);
 
 %% Functional maps
 C = pinv(PhiTilde)*V;
-pinvC = pinv(C);
 
 fig = figure('Name', 'C');
 imagesc(C);
 colorbar();
 title('${\bf C} = \tilde{{\bf \Phi}}^\dagger {\bf V}$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig6_C'), figSaveType);
-
-fig = figure('Name', 'pinv(C)');
-imagesc(pinvC);
-colorbar();
-title('${\bf C}^\dagger$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
-saveas(fig,strcat(outputFolder, filesep, 'fig7_pinvC'), figSaveType);
 
 %% V in terms of Phi_tilde
 xEstTrain = invT(invpCdf, muTilde, sigmaTilde, xTildeTrain);

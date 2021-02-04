@@ -1,4 +1,5 @@
-function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, firstEigenIdx, lastEigIdx, mPhi, vLambda, figName, c, G, suptitle)
+function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, ...
+    firstEigenIdx, lastEigIdx, mPhi, vLambda, evecsName, c, G, suptitle, figureName)
 dim = size(mData, 2);
 assert(dim <= 2, 'Not supported')
 if dim == 1
@@ -9,11 +10,11 @@ if dim == 1
     height = 400;
     fig = figure('Name', '1D Scatter');
     for m = firstEigenIdx:lastEigIdx
-        if strcmp(figName, 'Analytic')
+        if strcmp(evecsName, 'Analytic')
             dispName = ['$\phi_{' num2str(m) '},$ $\lambda^{\phi}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
-        elseif strcmp(figName, 'Numeric')
+        elseif strcmp(evecsName, 'Numeric')
             dispName = ['$v_{' num2str(m) '},$ $\lambda^{v}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
-        elseif strcmp(figName, 'Nystrom')
+        elseif strcmp(evecsName, 'Nystrom')
             dispName = ['$\hat{v}_{' num2str(m) '},$ $\lambda^{\hat{v}}_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
         else
             assert('invalid option')
@@ -55,18 +56,18 @@ elseif dim == 2
             colormap(gca, 'default')
             colorbar()
             caxis([min(mPhi(:,m+1)) max(mPhi(:,m+1))])
-            view(20,40); %view(2)
+            view(2); %view(20,40);
             xlim([ min(mData(:,1)) max(mData(:,1))])
             ylim([ min(mData(:,2)) max(mData(:,2))])
         end
-        if strcmp(figName, 'Analytic')
+        if strcmp(evecsName, 'Analytic')
             dispName = ['$\phi_{' num2str(m) '}({\bf x_i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
             if exist('c', 'var') && ~isempty(c)
                 dispName = strcat(dispName, ', $c = ', num2str(c(m+1), '%.4f'), '$');
             end
-        elseif strcmp(figName, 'Numeric')
+        elseif strcmp(evecsName, 'Numeric')
             dispName = ['$v_{' num2str(m) '}({\bf i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
-        elseif strcmp(figName, 'Nystrom')
+        elseif strcmp(evecsName, 'Nystrom')
             dispName = [ '$\hat{v}_{' num2str(m) '}({\bf i}),$ $\lambda_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
         else
             assert('invalid option')
@@ -89,7 +90,11 @@ if isempty(nysRatio)
 else
     simPrefix = strcat(actualDataDist, num2str(dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
 end
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
+if ~exist('figureName', 'var')
+    figureName = evecsName;
+end
+saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, ...
+    '_', figureName, '_eigenvectors', '_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'png');
 set(0,'DefaultFigureWindowStyle',windowStyle)
 
 end

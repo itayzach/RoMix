@@ -7,8 +7,8 @@ sSimParams.b_showGraphMatricesFigures = false;
 sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = false;
 %% Random data
-verticesPDF = 'Uniform'; % 'Gaussian' / 'Uniform'
-n = 2000;
+verticesPDF = 'TwoMoons'; % 'Gaussian' / 'Uniform' / 'TwoMoons'
+n = 500;
 dim = 2;
 if strcmp(verticesPDF, 'Uniform')
     xMax = [1 1];
@@ -17,19 +17,29 @@ if strcmp(verticesPDF, 'Uniform')
 %     [X1, X2] = meshgrid(linspace(xMin(1),xMax(1),sqrt(n)),linspace(xMin(2),xMax(2),sqrt(n)));
 %     xTrain = [X1(:) X2(:)];
     xTrain = (xMax - xMin).*rand(n,dim) + xMin;
+    omega = 0.1;
 elseif strcmp(verticesPDF, 'Gaussian')
-    sigma = 10;
+    sigma = 1;
     mu = 0;
-    xMax = 3*sigma;
-    xMin = -3*sigma;
+    xMax = 3*sigma*ones(1,dim);
+    xMin = -3*sigma*ones(1,dim);
     xTrain = sigma*randn(n,dim) + mu;
+    omega = 1;
+elseif strcmp(verticesPDF, 'TwoMoons')
+    b_loadTwoMoonsMatFile = false;
+    N = 5000;
+    sDataset = GenerateTwoMoonsDataset(n, N, b_loadTwoMoonsMatFile);
+    xTrain = sDataset.x;
+    n = length(xTrain);
+    xMax = max(xTrain);
+    xMin = min(xTrain);
+    omega = 0.3;
 else
     error('invalid verticesPDF');
 end
 
 PlotHistogram(sSimParams, xTrain, verticesPDF, 'Histogram of X', false);
 %% Generate graph
-omega = 0.1;
 dist = pdist2(xTrain, xTrain);
 W = exp(-dist.^2/(2*omega^2));
 
@@ -42,10 +52,10 @@ vInd = 1:12;
 PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, V, lambda, 'Numeric', [], [], 'Eigenvectors of ${\bf W}$')
 %% Learn CDF(x) from xTrain by fitting ecdf to a polynomial
 assert(dim == 2, 'following function only works for 2D')
-[estCdf_xTrainGrid, xTrainGrid, estMarginalCdf_xTrain] = ecdf2(xTrain, [n n]);
+[xTrainGrid, estMarginalCdf_xTrain] = ecdf2(xTrain, [n n]);
 
-pCdfDegree = 2;
-invpCdfDegree = 2;
+pCdfDegree = 10;
+invpCdfDegree = 10;
 pCdf(1,:) = polyfit(xTrainGrid(:,1), estMarginalCdf_xTrain(:,1), pCdfDegree); % to have analytic expression for the cdf
 invpCdf(1,:) = polyfit(estMarginalCdf_xTrain(:,1), xTrainGrid(:,1), invpCdfDegree); % to have analytic expression for the cdf
 pCdf(2,:) = polyfit(xTrainGrid(:,2), estMarginalCdf_xTrain(:,2), pCdfDegree); % to have analytic expression for the cdf
@@ -106,11 +116,17 @@ set(gca,'FontSize', 14);
 VRec = PhiTilde*C;
 
 figTitle = ['${\bf V}$ in terms of ${\bf \tilde{\Phi}} \quad ({\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C})$'];
-PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, VRec, lambda, 'Numeric', [], [], figTitle)
+figName = 'VRec';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, VRec, lambda, 'Numeric', [], [], figTitle, figName)
 %% Interpolate
-N = 5000;
-[X1, X2] = meshgrid(linspace(xMin(1),xMax(1),sqrt(N)),linspace(xMin(2),xMax(2),sqrt(N)));
-xInt = [X1(:) X2(:)];
+if ~exist('N', 'var')
+    N = 5000;
+    [X1, X2] = meshgrid(linspace(xMin(1),xMax(1),sqrt(N)),linspace(xMin(2),xMax(2),sqrt(N)));
+    xInt = [X1(:) X2(:)];
+else
+    xInt = sDataset.xt;
+end
+
 xTildeInt = T(pCdf, true, muTilde, sigmaTilde, xInt);
 [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
 
@@ -123,24 +139,25 @@ figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire plane' newline ..
 PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeInt, [], vInd(1)-1, vInd(end)-1, PhiTildeInt, lambdaAnalyticTilde, 'Numeric', [], [], figTitle)
 
 
-xIntInvT = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
+% xIntInvT = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
 VInt = PhiTildeInt*C;
 
 interpRatio = N/n;
 VIntRenormed = sqrt(interpRatio)*VInt;
 
 figTitle = ['Interpolated eigenvectors of ${\bf W}$'];% newline '${\bf V}_{{\bf int}} = \sqrt{\frac{N}{n}}{\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'];
-PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xIntInvT, [], vInd(1)-1, vInd(end)-1, VIntRenormed, lambda, 'Numeric', [], [], figTitle)
+figName = 'VInt';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, VIntRenormed, lambda, 'Numeric', [], [], figTitle, figName)
 
 
-%% ecdf2d
-function [estCdf_xGrid, xGrid, estMarginalCdf] = ecdf2(x, bins)
+%% ecdf2
+function [xGrid, estMarginalCdf] = ecdf2(x, bins)
 [hist_xGrid, xGridCells] = hist3(x, 'Nbins', bins);
 xGrid(:,1) = (xGridCells{1})';
 xGrid(:,2) = (xGridCells{2})';
 n = length(x);
 pdf_xGrid = (1/n)*hist_xGrid;
-estCdf_xGrid = cumsum(cumsum(pdf_xGrid,1),2);    % CDF_x1x2
+% estCdf_xGrid = cumsum(cumsum(pdf_xGrid,1),2);    % CDF_x1x2
 estMarginalCdf(:,1) = cumsum(sum(pdf_xGrid,2));  % CDF_x1
 estMarginalCdf(:,2) = cumsum(sum(pdf_xGrid,1))'; % CDF_x2
 end

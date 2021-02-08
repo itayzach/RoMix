@@ -46,26 +46,17 @@ muTilde = mean(xTrain);
 sigmaTilde = diag(std(xTrain));
 xTildeTrain = T(pCdf, true, muTilde, sigmaTilde, xTrain);
 
-if dim == 2
-    figure('Name', 'x vs. xTilde');
-    subplot(1,2,1)
-    scatter(xTrain(:,1),xTrain(:,2),50,1:n,'filled');
-    xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
-    ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
-    set(gca,'FontSize', 14);
-    subplot(1,2,2)
-    scatter(xTildeTrain(:,1),xTildeTrain(:,2),50,1:n,'filled');
-    xlabel('$\tilde{x}_1$', 'interpreter', 'latex', 'FontSize', 16);
-    ylabel('$\tilde{x}_2$', 'interpreter', 'latex', 'FontSize', 16);
-    set(gca,'FontSize', 14);
+if dim <= 2
+    PlotHistogram(sSimParams, xTildeTrain, 'Gaussian', 'Histogram of $\tilde{X}$', false);
 end
-PlotHistogram(sSimParams, xTildeTrain, 'Gaussian', 'Histogram of $\tilde{X}$', false);
 %% Demonstrate T
 for d = 1:dim
     PlotPolyCdfDemonstration1(xMin(d), xMax(d), pCdf(d,:), xTrainGrid(:,d), estMarginalCdf_xTrain(:,d), muTilde(d), sigmaTilde(d,d));
     PlotPolyCdfDemonstration2(xMin(d), xMax(d), pCdf(d,:), invpCdf(d,:), muTilde(d), sigmaTilde(d,d));
 end
-
+if dim == 2
+    PlotPolyCdfDemonstration3_2D(xTrain,xTildeTrain)
+end
 %% Build G tilde
 omegaTilde = 0.3;
 distTilde = pdist2(xTildeTrain, xTildeTrain);

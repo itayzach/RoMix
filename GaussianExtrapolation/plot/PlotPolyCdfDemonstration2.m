@@ -6,7 +6,7 @@ xTestTilde = T(pCdf, true, muTilde, sigmaTilde, xSmallTest);
 xSmallTestEst = invT(invpCdf, muTilde, sigmaTilde, xTestTilde);
 
 cmap = xSmallTest;
-fig = figure('Name', 'Demonstrate T (2/2)');
+fig = figure('Name', 'Demonstrate T #2');
 subplot(2,1,1)
     scatter(xSmallTest, zeros(1,nTestPoints), 100, cmap, 'o')
     hold on;

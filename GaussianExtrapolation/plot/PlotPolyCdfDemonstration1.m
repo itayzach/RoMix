@@ -12,10 +12,16 @@ end
 xTildeTestGrid = icdf('Normal',polyCdf_xTestGrid,muTilde,sigmaTilde);
 
 % Generate the polynomial title
-pCdfStr = [];
+pCdfStr = '\hat{F}_{X}(x) = ';
+pCdfCells = {};
 for p = 1:pCdfDegree+1
     if abs(pCdf(p)) < 1e-4
         continue;
+    end
+    if pCdfDegree > 5
+        b_splitToTwoLines = true;
+    else
+        b_splitToTwoLines = false;
     end
     if p > 1 && pCdf(p) > 0 && ~isempty(pCdfStr)
         pCdfStr = strcat(pCdfStr,'+');
@@ -26,10 +32,15 @@ for p = 1:pCdfDegree+1
         pCdfStr = strcat(pCdfStr, num2str(pCdf(pCdfDegree),'%.5f'),'x');
     else
         pCdfStr = strcat(pCdfStr, num2str(pCdf(p),'%.5f'),'x^{',num2str(pCdfDegree-p+1),'}');
+        if p == floor(pCdfDegree/2) && b_splitToTwoLines
+            pCdfCells{end+1} = [ '$' pCdfStr '$'];
+            pCdfStr = [];
+        end
     end
-    
 end
-fig = figure('Name', 'Demonstrate T (1/2)');
+pCdfCells{end+1} = [ '$' pCdfStr '$'];
+
+fig = figure('Name', 'Demonstrate T #1');
 subplot(2,2,1)
     plot(xTrainGrid, estCdf_xTrainGrid,'.');
     hold on;
@@ -55,7 +66,7 @@ subplot(2,2,4)
     histfit(xTildeTestGrid ,100);
     title('Histogram of $\tilde{x}_{{\bf test}}$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'FontSize', 14);
-sgtitle(['$\hat{F}_{X}(x) = ' pCdfStr '$'], 'interpreter', 'latex', 'FontSize', 16);
+sgtitle(pCdfCells ,'interpreter', 'latex', 'FontSize', 16);
 % saveas(fig,strcat(outputFolder, filesep, 'fig3_polyfit'), figSaveType);
 end
 

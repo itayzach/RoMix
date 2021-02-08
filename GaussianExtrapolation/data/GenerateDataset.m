@@ -12,12 +12,27 @@ if ~exist('nTest', 'var')
 end
 nTotal = nTrain + nTest;
 %% Generate data
-if strcmp(actualDataDist, 'Two_moons')
-    assert(dim == 2);
+if strcmp(actualDataDist, 'TwoMoons')
     sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile);
-elseif strcmp(actualDataDist, 'Two_spirals')
-    assert(dim == 2);
+    omega = 0.3;
+    dim = 2;
+    xMax = max(sDataset.sData.x);
+    xMin = min(sDataset.sData.x);
+elseif strcmp(actualDataDist, 'TwoSpirals')
     sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
+    omega = 0.3;
+    dim = 2;
+    xMax = max(sDataset.sData.x);
+    xMin = min(sDataset.sData.x);
+elseif strcmp(actualDataDist, 'SwissRoll')
+    sDataset.sData.x = GenerateSwissRoll(nTrain);
+    sDataset.sData.xt = GenerateSwissRoll(nTest);
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    omega = 0.3;
+    dim = 3;
+    xMax = max(sDataset.sData.x);
+    xMin = min(sDataset.sData.x);
 else
     if strcmp(actualDataDist, 'Gaussian')
         if dim == 2
@@ -44,12 +59,12 @@ else
             end
         elseif dim == 1
             if nComponents == 1
-                sigma = 0.5;
-                mu = 100;
-
-                % xTotal = sigma*chi2rnd(1, nTotal, 1) + mu;
-
+                sigma = 1;
+                mu = 0;
                 xTotal = sigma*randn(nTotal, 1) + mu;
+                xMax = 3*sigma;
+                xMin = -3*sigma;
+                omega = 0.3;
             elseif nComponents == 2
                 mu = [2; 7];       % Means
                 sigma = [0.4 0.5]; % Covariances
@@ -66,6 +81,7 @@ else
         xMin = -1;
         xMax = 1;
         xTotal = (xMax - xMin)*rand(nTotal, dim) + xMin;
+        omega = 0.3;
     else
         error('unknown pdf')
     end
@@ -76,6 +92,9 @@ else
 
 end
 
+sDataset.recommendedOmega = omega;
+sDataset.xMax = xMax;
+sDataset.xMin = xMin;
 sDataset.nTrain = nTrain;
 sDataset.nTest = nTest;
 sDataset.nTotal = nTrain + nTest;

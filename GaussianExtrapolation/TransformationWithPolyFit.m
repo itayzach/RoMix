@@ -7,64 +7,28 @@ sSimParams.b_showGraphMatricesFigures = false;
 sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = false;
 %% Random data
-verticesPDF = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'TwoMoons' / 'TwoSpirals'
-n = 1000;
-dim = 3;
-if strcmp(verticesPDF, 'Uniform')
-    xMax = 1*ones(1,dim);
-    xMin = -1*ones(1,dim);
-%     n = round(sqrt(n))^2;
-%     [X1, X2] = meshgrid(linspace(xMin(1),xMax(1),sqrt(n)),linspace(xMin(2),xMax(2),sqrt(n)));
-%     xTrain = [X1(:) X2(:)];
-    xTrain = (xMax - xMin).*rand(n,dim) + xMin;
-    omega = 0.1;
-elseif strcmp(verticesPDF, 'Gaussian')
-    sigma = 1;
-    mu = 0;
-    xMax = 3*sigma*ones(1,dim);
-    xMin = -3*sigma*ones(1,dim);
-    xTrain = sigma*randn(n,dim) + mu;
-    omega = 1;
-elseif strcmp(verticesPDF, 'TwoMoons')
-    b_loadTwoMoonsMatFile = false;
-    N = 5000;
-    sDataset = GenerateTwoMoonsDataset(n, N, b_loadTwoMoonsMatFile);
-    xTrain = sDataset.x;
-    n = length(xTrain);
-    N = length(xTest);
-    xMax = max(xTrain);
-    xMin = min(xTrain);
-    omega = 0.3;
-    assert(dim == 2);
-elseif strcmp(verticesPDF, 'TwoSpirals')
-    N = 5000;
-    sTwoSpirals = GenerateTwoSpiralsDataset(n, N);
-    xTrain = sTwoSpirals.x;
-    xMax = max(xTrain);
-    xMin = min(xTrain);
-    omega = 0.3;
-    assert(dim == 2);
-elseif strcmp(verticesPDF, 'SwissRoll')
-    xTrain = GenerateSwissRoll(n);
-    xMax = max(xTrain);
-    xMin = min(xTrain);
-    omega = 0.3;
-    assert(dim == 3);
-    N = 5000;
-    sDataset.xt = GenerateSwissRoll(N);
-else
-    error('invalid verticesPDF');
-end
+dim = 1;
+nComponents = 1;
+n = 800;
+N = 5000;
+verticesPDF = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
+sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N);
+dim = sDataset.dim;
+xTrain = sDataset.sData.x;
+xMax = sDataset.xMax;
+xMin = sDataset.xMin;
 
+%% Histogram
 if dim <= 2
     PlotHistogram(sSimParams, xTrain, verticesPDF, 'Histogram of X', false);
 end
 %% Generate graph
+omega = sDataset.recommendedOmega;
 dist = pdist2(xTrain, xTrain);
 W = exp(-dist.^2/(2*omega^2));
 
 %% Calculate (numeric) eigenvectors of G
-M = 20;
+M = 50;
 [V, Lambda] = eigs(W,M);
 lambda = diag(Lambda);
 vInd = 1:4;
@@ -95,7 +59,7 @@ if dim == 2
     ylabel('$\tilde{x}_2$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'FontSize', 14);
 end
-PlotHistogram(sSimParams, xTildeTrain, 'Gaussian', 'Histogram of X', false);
+PlotHistogram(sSimParams, xTildeTrain, 'Gaussian', 'Histogram of $\tilde{X}$', false);
 %% Demonstrate T
 for d = 1:dim
     PlotPolyCdfDemonstration1(xMin(d), xMax(d), pCdf(d,:), xTrainGrid(:,d), estMarginalCdf_xTrain(:,d), muTilde(d), sigmaTilde(d,d));
@@ -107,7 +71,7 @@ omegaTilde = 0.3;
 distTilde = pdist2(xTildeTrain, xTildeTrain);
 WTilde = exp(-distTilde.^2/(2*omegaTilde^2));
 %% Calculate analytic eigenfunctions of W_tilde, and numeric eigenvectors for comparison
-MTilde = 20;
+MTilde = 50;
 [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
 [VTilde, LambdaNumericTilde] = eigs(WTilde, MTilde);
 VTilde = FlipSign(PhiTilde, VTilde);
@@ -135,9 +99,12 @@ if dim <= 3
     figTitle = ['${\bf V}$ in terms of ${\bf \tilde{\Phi}} \quad ({\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C})$'];
     figName = 'VRec';
     PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, VRec, lambda, 'Numeric', [], [], figTitle, figName)
+    
+    b_plotErrVsNodeInd = true;
+    PlotEigenDiffs(sSimParams, sDataset, [], vInd(1)-1, vInd(end)-1, VRec, V, 'VRec_vs_V', 'v^{{\bf rec}}', 'v', b_plotErrVsNodeInd)
 end
 %% Interpolate
-if ~exist('N', 'var')
+if isempty(sDataset.sData.xt)
     N = 5000;
     if dim == 2
         [X1, X2] = meshgrid(linspace(xMin(1),xMax(1),sqrt(N)),linspace(xMin(2),xMax(2),sqrt(N)));
@@ -146,7 +113,7 @@ if ~exist('N', 'var')
         xInt = linspace(xMin, xMax, N)';
     end
 else
-    xInt = sDataset.xt;
+    xInt = sDataset.sData.xt;
 end
 
 xTildeInt = T(pCdf, true, muTilde, sigmaTilde, xInt);
@@ -189,4 +156,6 @@ if dim <= 3
     figName = 'VInt';
     PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, VIntRenormed, lambda, 'Numeric', [], [], figTitle, figName)
 end
+
+
 

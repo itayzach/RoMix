@@ -7,7 +7,7 @@ sSimParams.b_showGraphMatricesFigures = false;
 sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = false;
 %% Random data
-dim = 1;
+dim = 3;
 nComponents = 1;
 n = 800;
 N = 5000;
@@ -33,17 +33,17 @@ M = 50;
 lambda = diag(Lambda);
 vInd = 1:4;
 
-if dim <= 3
-    PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, V, lambda, 'Numeric', [], [], 'Eigenvectors of ${\bf W}$')
-end
+figTitle = 'Eigenvectors of ${\bf W}$';
+figName = 'V';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, V, lambda, [], [], figTitle, figName, 'v')
 %% Learn CDF(x) from xTrain by fitting ecdf to a polynomial
 pCdfDegree = 10;
 invpCdfDegree = 10;
 [xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = PolyfitEstCdf(xTrain, n*ones(1,dim), pCdfDegree, invpCdfDegree);
 
 %% Transform to Gtilde
-muTilde = 0*ones(1,dim);
-sigmaTilde = 1*eye(dim);
+muTilde = mean(xTrain);
+sigmaTilde = diag(std(xTrain));
 xTildeTrain = T(pCdf, true, muTilde, sigmaTilde, xTrain);
 
 if dim == 2
@@ -77,12 +77,13 @@ MTilde = 50;
 VTilde = FlipSign(PhiTilde, VTilde);
 lambdaNumericTilde = diag(LambdaNumericTilde);
 
-if dim <= 3
-    figTitle = 'Eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-    PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeTrain, [], vInd(1)-1, vInd(end)-1, VTilde, lambdaNumericTilde, 'Numeric', [], [], figTitle)
-    figTitle = 'Eigenfunctions of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-    PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeTrain, [], vInd(1)-1, vInd(end)-1, PhiTilde, lambdaAnalyticTilde, 'Analytic', [], [], figTitle)
-end
+figTitle = 'Eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+figName = 'VTilde';
+PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeTrain, [], vInd(1)-1, vInd(end)-1, VTilde, lambdaNumericTilde, [], [], figTitle, figName, '\tilde{v}')
+figTitle = 'Eigenfunctions of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+figName = 'PhiTilde';
+PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeTrain, [], vInd(1)-1, vInd(end)-1, PhiTilde, lambdaAnalyticTilde, [], [], figTitle, figName, '\tilde{\phi}')
+
 %% Functional maps
 C = pinv(PhiTilde)*V;
 
@@ -95,14 +96,12 @@ set(gca,'FontSize', 14);
 %% V in terms of Phi_tilde
 VRec = PhiTilde*C;
 
-if dim <= 3
-    figTitle = ['${\bf V}$ in terms of ${\bf \tilde{\Phi}} \quad ({\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C})$'];
-    figName = 'VRec';
-    PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, VRec, lambda, 'Numeric', [], [], figTitle, figName)
-    
-    b_plotErrVsNodeInd = true;
-    PlotEigenDiffs(sSimParams, sDataset, [], vInd(1)-1, vInd(end)-1, VRec, V, 'VRec_vs_V', 'v^{{\bf rec}}', 'v', b_plotErrVsNodeInd)
-end
+figTitle = ['${\bf V}$ in terms of ${\bf \tilde{\Phi}} \quad ({\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C})$'];
+figName = 'VRec';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, VRec, lambda, [], [], figTitle, figName, 'v^{{\bf rec}}')
+
+b_plotErrVsNodeInd = true;
+PlotEigenDiffs(sSimParams, sDataset, [], vInd(1)-1, vInd(end)-1, VRec, V, 'VRec_vs_V', 'v^{{\bf rec}}', 'v', b_plotErrVsNodeInd)
 %% Interpolate
 if isempty(sDataset.sData.xt)
     N = 5000;
@@ -119,31 +118,9 @@ end
 xTildeInt = T(pCdf, true, muTilde, sigmaTilde, xInt);
 [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
 
-if dim <= 3
-    if dim == 3
-        figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire plane' newline ...
-            '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
-            '; $\tilde{\Sigma} =  \left[ {\matrix{ ',num2str(sigmaTilde(1,1)),' & ',  num2str(sigmaTilde(1,2)),' & ',  num2str(sigmaTilde(1,3)),...
-            ' \cr ', num2str(sigmaTilde(2,1)) , ' &  ',  num2str(sigmaTilde(2,2)),' & ',  num2str(sigmaTilde(2,3)),...
-            ' \cr ', num2str(sigmaTilde(3,1)) , ' &  ',  num2str(sigmaTilde(3,2)),' & ',  num2str(sigmaTilde(3,3)),' } }  \right]$', ...
-            '; $\tilde{\mu} =  \left[ {\matrix{ ',num2str(muTilde(1)), ...
-            ' \cr ', num2str(muTilde(3)), ...
-            ' \cr ', num2str(muTilde(2)),' } }  \right]$' ];
-    elseif dim == 2
-        figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire plane' newline ...
-            '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
-            '; $\tilde{\Sigma} =  \left[ {\matrix{ ',num2str(sigmaTilde(1,1)),' & ',  num2str(sigmaTilde(1,2)),...
-            ' \cr ', num2str(sigmaTilde(2,1)) , ' &  ',  num2str(sigmaTilde(2,2)),' } }  \right]$', ...
-            '; $\tilde{\mu} =  \left[ {\matrix{ ',num2str(muTilde(1)), ...
-            ' \cr ', num2str(muTilde(2)),' } }  \right]$' ];
-    elseif dim == 1
-        figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' newline ...
-        '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
-        '; $\tilde{\sigma}$ = ' num2str(sigmaTilde, '%.2f') ...
-        '; $\tilde{\mu}$ = ' num2str(muTilde, '%.2f') ];
-    end
-    PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeInt, [], vInd(1)-1, vInd(end)-1, PhiTildeInt, lambdaAnalyticTilde, 'Numeric', [], [], figTitle)
-end
+figName = 'PhiTildeInt';
+figTitle = GetInterpFigTitle(dim, omegaTilde, sigmaTilde, muTilde);
+PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeInt, [], vInd(1)-1, vInd(end)-1, PhiTildeInt, lambdaAnalyticTilde, [], [], figTitle, figName, '\tilde{\phi}^{{\bf int}}')
 
 % xIntInvT = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
 VInt = PhiTildeInt*C;
@@ -151,11 +128,35 @@ VInt = PhiTildeInt*C;
 interpRatio = N/n;
 VIntRenormed = sqrt(interpRatio)*VInt;
 
-if dim <= 3
-    figTitle = ['Interpolated eigenvectors of ${\bf W}$'];% newline '${\bf V}_{{\bf int}} = \sqrt{\frac{N}{n}}{\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'];
-    figName = 'VInt';
-    PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, VIntRenormed, lambda, 'Numeric', [], [], figTitle, figName)
+figTitle = ['Interpolated eigenvectors of ${\bf W}$'];% newline '${\bf V}_{{\bf int}} = \sqrt{\frac{N}{n}}{\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'];
+figName = 'VInt';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, VIntRenormed, lambda, [], [], figTitle, figName, 'v^{{\bf int}}')
+
+
+function figTitle = GetInterpFigTitle(dim, omegaTilde, sigmaTilde, muTilde)
+if dim == 3
+    figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire plane' newline ...
+        '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
+        '; $\tilde{\Sigma} =  \left[ {\matrix{ ',num2str(sigmaTilde(1,1)),' & ',  num2str(sigmaTilde(1,2)),' & ',  num2str(sigmaTilde(1,3)),...
+        ' \cr ', num2str(sigmaTilde(2,1)) , ' &  ',  num2str(sigmaTilde(2,2)),' & ',  num2str(sigmaTilde(2,3)),...
+        ' \cr ', num2str(sigmaTilde(3,1)) , ' &  ',  num2str(sigmaTilde(3,2)),' & ',  num2str(sigmaTilde(3,3)),' } }  \right]$', ...
+        '; $\tilde{\mu} =  \left[ {\matrix{ ',num2str(muTilde(1)), ...
+        ' \cr ', num2str(muTilde(3)), ...
+        ' \cr ', num2str(muTilde(2)),' } }  \right]$' ];
+elseif dim == 2
+    figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire plane' newline ...
+        '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
+        '; $\tilde{\Sigma} =  \left[ {\matrix{ ',num2str(sigmaTilde(1,1)),' & ',  num2str(sigmaTilde(1,2)),...
+        ' \cr ', num2str(sigmaTilde(2,1)) , ' &  ',  num2str(sigmaTilde(2,2)),' } }  \right]$', ...
+        '; $\tilde{\mu} =  \left[ {\matrix{ ',num2str(muTilde(1)), ...
+        ' \cr ', num2str(muTilde(2)),' } }  \right]$' ];
+elseif dim == 1
+    figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' newline ...
+    '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
+    '; $\tilde{\sigma}$ = ' num2str(sigmaTilde, '%.2f') ...
+    '; $\tilde{\mu}$ = ' num2str(muTilde, '%.2f') ];
 end
 
+end
 
 

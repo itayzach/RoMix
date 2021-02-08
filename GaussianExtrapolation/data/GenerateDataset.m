@@ -16,14 +16,10 @@ if strcmp(actualDataDist, 'TwoMoons')
     sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile);
     omega = 0.3;
     dim = 2;
-    xMax = max(sDataset.sData.x);
-    xMin = min(sDataset.sData.x);
 elseif strcmp(actualDataDist, 'TwoSpirals')
     sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
     omega = 0.3;
     dim = 2;
-    xMax = max(sDataset.sData.x);
-    xMin = min(sDataset.sData.x);
 elseif strcmp(actualDataDist, 'SwissRoll')
     sDataset.sData.x = GenerateSwissRoll(nTrain);
     sDataset.sData.xt = GenerateSwissRoll(nTest);
@@ -31,11 +27,14 @@ elseif strcmp(actualDataDist, 'SwissRoll')
     sDataset.sData.yt = [];
     omega = 0.3;
     dim = 3;
-    xMax = max(sDataset.sData.x);
-    xMin = min(sDataset.sData.x);
 else
     if strcmp(actualDataDist, 'Gaussian')
-        if dim == 2
+        if dim >= 3
+            sigma = 1;
+            mu = 0;
+            xTotal = sigma*randn(nTotal,dim) + mu;
+            omega = 0.3;
+        elseif dim == 2
             if nComponents == 1
                 cov = [0.25    0.01; 
                        0.01   0.25];
@@ -54,6 +53,8 @@ else
                 
                 vSel = rand(nTotal, 1) < 0.5;
                 xTotal = (1-vSel).*x1 + vSel.*x2;
+                
+                omega = 0.3;
             else
                 error('not supported')
             end
@@ -62,8 +63,6 @@ else
                 sigma = 1;
                 mu = 0;
                 xTotal = sigma*randn(nTotal, 1) + mu;
-                xMax = 3*sigma;
-                xMin = -3*sigma;
                 omega = 0.3;
             elseif nComponents == 2
                 mu = [2; 7];       % Means
@@ -93,8 +92,8 @@ else
 end
 
 sDataset.recommendedOmega = omega;
-sDataset.xMax = xMax;
-sDataset.xMin = xMin;
+sDataset.xMax = max(sDataset.sData.x);
+sDataset.xMin = min(sDataset.sData.x);
 sDataset.nTrain = nTrain;
 sDataset.nTest = nTest;
 sDataset.nTotal = nTrain + nTest;

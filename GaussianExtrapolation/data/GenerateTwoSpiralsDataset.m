@@ -33,7 +33,7 @@ spiral_2x = cos(n).*n + rand(N2,1)*noiseSigma;
 spiral_2y = -sin(n).*n + rand(N2,1)*noiseSigma;
 
 % concate
-data = [spiral_1x ,spiral_1y; spiral_2x, spiral_2y];
+data = 0.1*[spiral_1x ,spiral_1y; spiral_2x, spiral_2y];
 labels = [ones(N1,1); -ones(N2,1)];
 
 end

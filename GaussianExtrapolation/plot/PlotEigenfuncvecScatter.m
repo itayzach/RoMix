@@ -1,5 +1,5 @@
 function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, ...
-    firstEigenIdx, lastEigIdx, mPhi, vLambda, evecsName, c, G, suptitle, figureName)
+    firstEigenIdx, lastEigIdx, mPhi, vLambda, c, G, suptitle, figureName, phiStr, lambdaStr)
 dim = size(mData, 2);
 assert(dim <= 3, 'Not supported')
 windowStyle = get(0,'DefaultFigureWindowStyle');

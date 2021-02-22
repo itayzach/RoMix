@@ -1,27 +1,33 @@
 %% Restart
-clc; clear; close all; rng('default');
+clc; clear; rng('default');
+close all; 
 set(0,'DefaultFigureWindowStyle','docked')
 sSimParams.outputFolder               = 'figs';
 sSimParams.b_showEigenFigures         = false;
 sSimParams.b_showGraphMatricesFigures = false;
 sSimParams.b_showVerticesTransform    = false;
 sSimParams.b_GSPBoxPlots              = false;
+sSimParams.b_showLaplacianEvecs       = false;
+sSimParams.b_plotWeights              = false;
 %% Random data
-dim = 3;
+dim = 2;
 nComponents = 1;
-n = 800;
+n = 1000;
 N = 5000;
-verticesPDF = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
+verticesPDF = 'SwissRoll'; % 'SwissRoll' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
 sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N);
 dim = sDataset.dim;
 xTrain = sDataset.sData.x;
 xMax = sDataset.xMax;
 xMin = sDataset.xMin;
+n = length(sDataset.sData.x);
+N = length(sDataset.sData.xt);
 
 %% Histogram
 if dim <= 2
     PlotHistogram(sSimParams, xTrain, verticesPDF, 'Histogram of X', false);
 end
+PlotDataset(sSimParams, xTrain, verticesPDF, 'Training set');
 %% Generate graph
 omega = sDataset.recommendedOmega;
 dist = pdist2(xTrain, xTrain);
@@ -31,15 +37,43 @@ W = exp(-dist.^2/(2*omega^2));
 M = 50;
 [V, Lambda] = eigs(W,M);
 lambda = diag(Lambda);
-vInd = 1:4;
+if dim > 1
+    vInd = 1:12;
+else
+    vInd = 1:4;
+end
 
-figTitle = 'Eigenvectors of ${\bf W}$';
+figTitle = [ 'Eigenvectors of ${\bf W}$ with $\omega = ' num2str(omega) '\quad n = ' num2str(n) '$'];
 figName = 'V';
-PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, V, lambda, [], [], figTitle, figName, 'v')
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, ...
+    V(:,vInd), lambda, [], [], figTitle, figName, 'v')
+
+%% Plot W on first 4 nodes
+if sSimParams.b_plotWeights
+    figTitle = [ '${\bf W}(:,i)$ for first $i=1:4$ nodes with $\omega = ' num2str(omega) ...
+        '\quad n = ' num2str(n) '$'];
+    figName = 'W';
+    PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], 0, 3, W(:,1:4), lambda, [], [], ...
+        figTitle, figName, 'w')
+end
+%% Laplacian eigenvectors
+if sSimParams.b_showLaplacianEvecs
+    D = sum(W,1);
+    L = D - W;
+    [U, LambdaL] = eigs(L,M);
+    lambdaL = diag(LambdaL);
+    U = real(U);
+    U = FlipSign(V, U);
+    figTitle = 'Eigenvectors of ${\bf L}$';
+    figName = 'U';
+    PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, ...
+        U(:,vInd), lambdaL, [], [], figTitle, figName, 'v')
+end
 %% Learn CDF(x) from xTrain by fitting ecdf to a polynomial
 pCdfDegree = 10;
 invpCdfDegree = 10;
-[xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = PolyfitEstCdf(xTrain, n*ones(1,dim), pCdfDegree, invpCdfDegree);
+bins = min(700, n);
+[xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = PolyfitEstCdf(xTrain, bins, pCdfDegree, invpCdfDegree);
 
 %% Transform to Gtilde
 muTilde = mean(xTrain);
@@ -57,16 +91,16 @@ end
 if dim == 2
     PlotPolyCdfDemonstration3_2D(xTrain,xTildeTrain)
 end
-%% Build G tilde
-omegaTilde = 0.3;
+%% Build G tilde and numeric eigenvectors for comparison
+omegaTilde = omega;
+MTilde = 50;
 distTilde = pdist2(xTildeTrain, xTildeTrain);
 WTilde = exp(-distTilde.^2/(2*omegaTilde^2));
-%% Calculate analytic eigenfunctions of W_tilde, and numeric eigenvectors for comparison
-MTilde = 50;
-[PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
 [VTilde, LambdaNumericTilde] = eigs(WTilde, MTilde);
-VTilde = FlipSign(PhiTilde, VTilde);
 lambdaNumericTilde = diag(LambdaNumericTilde);
+%% Calculate analytic eigenfunctions of W_tilde
+[PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
+VTilde = FlipSign(PhiTilde, VTilde);
 
 figTitle = 'Eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
 figName = 'VTilde';
@@ -87,7 +121,7 @@ set(gca,'FontSize', 14);
 %% V in terms of Phi_tilde
 VRec = PhiTilde*C;
 
-figTitle = ['${\bf V}$ in terms of ${\bf \tilde{\Phi}} \quad ({\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C})$'];
+figTitle = '${\bf V}$ in terms of ${\bf \tilde{\Phi}} \quad ({\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C})$';
 figName = 'VRec';
 PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1)-1, vInd(end)-1, VRec, lambda, [], [], figTitle, figName, 'v^{{\bf rec}}')
 
@@ -119,35 +153,16 @@ VInt = PhiTildeInt*C;
 interpRatio = N/n;
 VIntRenormed = sqrt(interpRatio)*VInt;
 
-figTitle = ['Interpolated eigenvectors of ${\bf W}$'];% newline '${\bf V}_{{\bf int}} = \sqrt{\frac{N}{n}}{\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'];
+figTitle = 'Interpolated eigenvectors of ${\bf W}$ - Ours';
 figName = 'VInt';
 PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, VIntRenormed, lambda, [], [], figTitle, figName, 'v^{{\bf int}}')
 
+%% Interpolate with Nystrom
+distN = pdist2(xTrain, xInt);
+WN = exp(-distN.^2/(2*omega^2));
 
-function figTitle = GetInterpFigTitle(dim, omegaTilde, sigmaTilde, muTilde)
-if dim == 3
-    figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire plane' newline ...
-        '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
-        '; $\tilde{\Sigma} =  \left[ {\matrix{ ',num2str(sigmaTilde(1,1)),' & ',  num2str(sigmaTilde(1,2)),' & ',  num2str(sigmaTilde(1,3)),...
-        ' \cr ', num2str(sigmaTilde(2,1)) , ' &  ',  num2str(sigmaTilde(2,2)),' & ',  num2str(sigmaTilde(2,3)),...
-        ' \cr ', num2str(sigmaTilde(3,1)) , ' &  ',  num2str(sigmaTilde(3,2)),' & ',  num2str(sigmaTilde(3,3)),' } }  \right]$', ...
-        '; $\tilde{\mu} =  \left[ {\matrix{ ',num2str(muTilde(1)), ...
-        ' \cr ', num2str(muTilde(3)), ...
-        ' \cr ', num2str(muTilde(2)),' } }  \right]$' ];
-elseif dim == 2
-    figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire plane' newline ...
-        '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
-        '; $\tilde{\Sigma} =  \left[ {\matrix{ ',num2str(sigmaTilde(1,1)),' & ',  num2str(sigmaTilde(1,2)),...
-        ' \cr ', num2str(sigmaTilde(2,1)) , ' &  ',  num2str(sigmaTilde(2,2)),' } }  \right]$', ...
-        '; $\tilde{\mu} =  \left[ {\matrix{ ',num2str(muTilde(1)), ...
-        ' \cr ', num2str(muTilde(2)),' } }  \right]$' ];
-elseif dim == 1
-    figTitle = ['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' newline ...
-    '$\tilde{\omega}$ = ' num2str(omegaTilde, '%.2f') ...
-    '; $\tilde{\sigma}$ = ' num2str(sigmaTilde, '%.2f') ...
-    '; $\tilde{\mu}$ = ' num2str(muTilde, '%.2f') ];
-end
+VNys = WN.'*V*diag(1./lambda);
 
-end
-
-
+figTitle = 'Interpolated eigenvectors of ${\bf W}$ - Nystrom';
+figName = 'VNys';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, VNys, lambda, [], [], figTitle, figName, 'v^{{\bf nys}}')

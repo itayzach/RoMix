@@ -30,16 +30,17 @@ if dim == 1
     set(gcf,'Position', [x0 y0 width height])
 elseif dim == 2 || dim == 3
     %% Plot params
-    x0     = 10;
-    y0     = 100;
-    width  = 1200; 1800;
-    height = 600; 900;
     nEigenFuncsToPlot = lastEigIdx-firstEigenIdx+1;
     nRows = floor(sqrt(nEigenFuncsToPlot+1));
     if nRows > 4
         nRows = 4;
     end
     nCols = ceil(nEigenFuncsToPlot/nRows);
+    
+    x0     = 10;
+    y0     = 50;
+    height = 300*nRows;
+    width  = 400*nCols;
     %% Plot
     fig = figure('Name', [ num2str(dim) 'D Scatter']);
     for m = firstEigenIdx:lastEigIdx
@@ -55,7 +56,9 @@ elseif dim == 2 || dim == 3
             end
             colormap(gca, 'default')
             colorbar()
-            caxis([min(mPhi(:,m+1)) max(mPhi(:,m+1))])
+            cMin = min(mPhi(:,m+1));
+            cMax = max(mPhi(:,m+1));
+            caxis([cMin cMax])
             xlim([ min(mData(:,1)) max(mData(:,1))])
             ylim([ min(mData(:,2)) max(mData(:,2))])
             if dim == 2

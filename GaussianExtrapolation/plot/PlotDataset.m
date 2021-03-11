@@ -4,7 +4,7 @@ function fig = PlotDataset(sSimParams, x, actualDataDist, plt_title)
 
 fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
 if dim == 1
-    scatter(x, zeros(1,n), 50, cmap, 'filled')
+    scatter(x, zeros(1,n), 50, ones(1,n), 'filled')
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'YTick',[],'FontSize', 14);
 elseif dim == 2

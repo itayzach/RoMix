@@ -1,5 +1,5 @@
 function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, ...
-    firstEigenIdx, lastEigIdx, mPhi, vLambda, c, G, suptitle, figureName, phiStr, lambdaStr)
+    firstEigenIdx, lastEigIdx, mPhi, vLambda, c, G, suptitle, figureName, phiStr, mPhi2, phi2Str)
 dim = size(mData, 2);
 assert(dim <= 3, 'Not supported')
 windowStyle = get(0,'DefaultFigureWindowStyle');
@@ -12,15 +12,18 @@ if dim == 1
     height = 400;
     fig = figure('Name', '1D Scatter');
     for m = firstEigenIdx:lastEigIdx
-        if exist('lambdaStr', 'var')
-            dispName = ['$' phiStr '_{' num2str(m) '},$ $' lambdaStr '_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
-        else
-            dispName = ['$' phiStr '_{' num2str(m) '}$'];
+        dispName = ['$' phiStr '_{' num2str(m) '}$'];
+        if exist('phi2Str', 'var')
+            dispName2 = ['$' phi2Str '_{' num2str(m) '}$'];
+        end
+        if exist('mPhi2', 'var')
+            plot(mData(:), mPhi2(:,m+1), 'o', 'DisplayName', dispName2);
+            hold on;
         end
         plot(mData(:), mPhi(:,m+1), '.', 'DisplayName', dispName);
-%         scatter(mData(:), V(:,m+1), 'filled', 'DisplayName', dispName);
         xlim([ min(mData) max(mData) ])
         hold on;
+        
         set(gca,'FontSize', 14);
     end
     if exist('suptitle', 'var')
@@ -68,11 +71,7 @@ elseif dim == 2 || dim == 3
                 zlim([ min(mData(:,3)) max(mData(:,3))])
             end
         end
-        if exist('lambdaStr', 'var')
-            dispName = ['$' phiStr '_{' num2str(m) '},$ $' lambdaStr '_{' num2str(m)  '} = ' num2str(vLambda(m+1), '%.4f') '$'];
-        else
-            dispName = ['$' phiStr '_{' num2str(m) '}$'];
-        end
+        dispName = ['$' phiStr '_{' num2str(m) '}$'];
         if exist('c', 'var') && ~isempty(c)
             dispName = strcat(dispName, ', $c = ', num2str(c(m+1), '%.4f'), '$');
         end

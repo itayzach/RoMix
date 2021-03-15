@@ -3,20 +3,20 @@ clc; clear; rng('default');
 close all; 
 set(0,'DefaultFigureWindowStyle','docked')
 sSimParams.outputFolder               = 'figs';
-sSimParams.b_plotAllEvecs             = true;
+sSimParams.b_plotAllEvecs             = false;
 sSimParams.b_GSPBoxPlots              = false;
 sSimParams.b_plotLaplacianEvecs       = false;
 sSimParams.b_plotWeights              = false;
 sSimParams.b_plotVRec                 = false;
 sSimParams.b_plotTransDemos           = false;
-sSimParams.b_plotOrigAndInterpEvecs   = true;
+sSimParams.b_plotOrigVsInterpEvecs    = true;
 
 %% Random data
-dim = 2;
+dim = 1;
 nComponents = 1;
 n = 1000;
 N = 5000;
-verticesPDF = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
+verticesPDF = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
 origGraphAdjacency = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 interpMethod = 'AddPoints'; % 'NewPoints' / 'AddPoints'
 sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod);
@@ -51,7 +51,7 @@ if dim > 1
 else
     vInd = 1:4;
 end
-if sSimParams.b_plotOrigAndInterpEvecs || sSimParams.b_plotAllEvecs
+if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
     if strcmp(origGraphAdjacency, 'GaussianKernel')
         figTitle = [ 'Eigenvectors of ${\bf W}$ (Gaussian kernel) with $\omega = ' num2str(omega) '\quad n = ' num2str(n) '$'];
     elseif strcmp(origGraphAdjacency, 'NearestNeighbor')
@@ -96,7 +96,8 @@ bins = min(700, n);
 %% Transform to Gtilde
 muTilde = mean(xTrain);
 sigmaTilde = diag(std(xTrain));
-xTildeTrain = T(pCdf, true, muTilde, sigmaTilde, xTrain);
+b_saturateT = true;
+xTildeTrain = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain);
 
 if dim <= 2
     PlotHistogram(sSimParams, xTildeTrain, 'Gaussian', 'Histogram of $\tilde{X}$', false);
@@ -171,7 +172,7 @@ VInt = PhiTildeInt*C;
 interpRatio = N/n;
 VIntRenormed = sqrt(interpRatio)*VInt;
 
-if sSimParams.b_plotOrigAndInterpEvecs || sSimParams.b_plotAllEvecs
+if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
     figTitle = 'Interpolated eigenvectors of ${\bf W}$ - Ours';
     figName = 'VInt';
     PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, ...
@@ -184,7 +185,7 @@ if strcmp(interpMethod, 'AddPoints')
 
     VNys = B.'*V*diag(1./lambda);
     VNys = (1/sqrt(interpRatio))*VNys;
-    if sSimParams.b_plotOrigAndInterpEvecs || sSimParams.b_plotAllEvecs
+    if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
 
         figTitle = 'Interpolated eigenvectors of ${\bf W}$ - Nystrom';
         figName = 'VNys';
@@ -202,18 +203,33 @@ WRef = exp(-distRef.^2/(2*omega^2));
 VRef = FlipSign(V, VRef);
 lambdaRef = diag(LambdaRef);
 
-if sSimParams.b_plotOrigAndInterpEvecs || sSimParams.b_plotAllEvecs
+if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
     figTitle = 'Reference eigenvectors of ${\bf W}^{{\bf ref}}$';
     figName = 'VRef';
     PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, ...
         VRef, lambdaRef, [], [], figTitle, figName, 'v^{{\bf ref}}')
 end
 %% Compare
+figTitle = 'Ours vs. Nystrom';
+figName = 'VInt_vs_VNys';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, ...
+    VInt, lambdaRef, [], [], figTitle, figName, 'v^{{\bf int}}', VNys, 'v^{{\bf nys}}');
+
+figTitle = 'Ours vs. Reference';
+figName = 'VInt_vs_VRef';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, ...
+    VInt, lambdaRef, [], [], figTitle, figName, 'v^{{\bf int}}', VRef, 'v^{{\bf ref}}');
+figTitle = 'Nystrom vs. Reference';
+figName = 'VNys_vs_VRef';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, ...
+    VNys, lambdaRef, [], [], figTitle, figName, 'v^{{\bf nys}}', VRef, 'v^{{\bf ref}}');
+
 b_plotErrVsNodeInd = true;
 PlotEigenDiffs(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, VInt, VRef, ...
     'VInt_vs_VRef', 'v^{{\bf int}}', 'v^{{\bf ref}}', b_plotErrVsNodeInd)
 PlotEigenDiffs(sSimParams, verticesPDF, xInt, [], vInd(1)-1, vInd(end)-1, VNys, VRef, ...
     'VNys_vs_VRef', 'v^{{\bf nys}}', 'v^{{\bf ref}}', b_plotErrVsNodeInd)
+
 
 vRmseInt = CalcRMSE(reshape(VInt, [1 size(VInt)]), reshape(VRef, [1, size(VRef)]), 'Analytic');
 vRmseNys = CalcRMSE(reshape(VNys, [1 size(VNys)]), reshape(VRef, [1, size(VRef)]), 'Nystrom');

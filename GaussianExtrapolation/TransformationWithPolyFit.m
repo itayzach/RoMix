@@ -8,7 +8,7 @@ sSimParams.b_GSPBoxPlots              = false;
 sSimParams.b_plotLaplacianEvecs       = false;
 sSimParams.b_plotWeights              = false;
 sSimParams.b_plotVRec                 = false;
-sSimParams.b_plotTransDemos           = true;
+sSimParams.b_plotTransDemos           = false;
 sSimParams.b_plotOrigVsInterpEvecs    = true;
 
 %% Random data
@@ -16,7 +16,7 @@ dim = 1;
 nComponents = 1;
 n = 1000;
 N = 5000;
-verticesPDF = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
+verticesPDF = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
 origGraphAdjacency = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 interpMethod = 'AddPoints'; % 'NewPoints' / 'AddPoints'
 sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod);
@@ -38,14 +38,13 @@ k = 3;
 W = SimpleCalcAdjacency(xTrain, origGraphAdjacency, omega, k);
 
 %% Calculate (numeric) eigenvectors of G
-M = 30;
+M = 50;
 [V, Lambda] = eigs(W,M);
 lambda = diag(Lambda);
-if dim > 1
-    vInd = 0:3;
-else
-    vInd = 0:5;
-end
+% sqrtLambdaV = abs(sqrt(lambda))'.*V;
+vInd = 0:4;
+% vInd = M-5:M-1;
+
 if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
     if strcmp(origGraphAdjacency, 'GaussianKernel')
         figTitle = [ 'Eigenvectors of ${\bf W}$ (Gaussian kernel) with $\omega = ' num2str(omega) '\quad n = ' num2str(n) '$'];
@@ -107,26 +106,34 @@ if sSimParams.b_plotTransDemos
         PlotPolyCdfDemonstration3_2D(xTrain,xTildeTrain)
     end
 end
-%% Build G tilde and numeric eigenvectors for comparison
+%% G tilde parameters
 omegaTilde = sDataset.recommendedOmega;
-MTilde = 30;
-distTilde = pdist2(xTildeTrain, xTildeTrain);
-WTilde = exp(-distTilde.^2/(2*omegaTilde^2));
-[VTilde, LambdaNumericTilde] = eigs(WTilde, MTilde);
-lambdaNumericTilde = diag(LambdaNumericTilde);
+MTilde = 50;
+
 %% Calculate analytic eigenfunctions of W_tilde
 [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
-VTilde = FlipSign(PhiTilde, VTilde);
+sqrtnLambdaPhiTilde = sqrt(n*lambdaAnalyticTilde)'.*PhiTilde;
 
 if sSimParams.b_plotAllEvecs
-    figTitle = 'Eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-    figName = 'VTilde';
+    % Build W tilde and numeric eigenvectors for comparison
+    distTilde = pdist2(xTildeTrain, xTildeTrain);
+    WTilde = exp(-distTilde.^2/(2*omegaTilde^2));
+    [VTilde, LambdaNumericTilde] = eigs(WTilde, MTilde);
+    lambdaNumericTilde = diag(LambdaNumericTilde);
+    sqrtLambdaVTilde = abs(sqrt(lambdaNumericTilde))'.*VTilde;
+    VTilde = FlipSign(PhiTilde, VTilde);
+
+    figTitle = 'Eigenfunctions \& eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+    figName = 'PhiTilde_VTilde';
     PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeTrain, [], vInd(1), vInd(end), ...
-        VTilde, lambdaNumericTilde, [], [], figTitle, figName, '\tilde{v}')
-    figTitle = 'Eigenfunctions of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-    figName = 'PhiTilde';
-    PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeTrain, [], vInd(1), vInd(end), ...
-        PhiTilde, lambdaAnalyticTilde, [], [], figTitle, figName, '\tilde{\phi}')
+        sqrtnLambdaPhiTilde, lambdaAnalyticTilde, [], [], figTitle, figName, ...
+        '\sqrt{n \tilde{\lambda}^{\phi}}\tilde{\phi}', sqrtLambdaVTilde, '\sqrt{\tilde{\lambda}^{v}}\tilde{v}')
+    
+    PlotSpectrum(sSimParams, sDataset, [], n*lambdaAnalyticTilde, lambdaNumericTilde, [], 'n \tilde{\lambda}^{\phi}_m', '\tilde{\lambda}^{v}_m');
+
+    vPrTilde = SimpleEstPorbablityArea(xTildeTrain, sigmaTilde, muTilde);
+    PlotInnerProductMatrix(sSimParams, dim, vPrTilde, 'IP_Matrix', [], PhiTilde, 'Analytic');
+    PlotInnerProductMatrix(sSimParams, dim, [], 'IP_Matrix', [], PhiTilde, 'Numeric');
 end
 %% Functional maps
 C = pinv(PhiTilde)*V;
@@ -154,7 +161,7 @@ xInt = sDataset.sData.xt;
 
 xTildeInt = T(pCdf, true, muTilde, sigmaTilde, xInt);
 [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
-
+% PhiTildeInt = sqrt(n*lambdaAnalyticTilde)'.*PhiTildeInt;
 if sSimParams.b_plotAllEvecs
     figName = 'PhiTildeInt';
     figTitle = GetInterpFigTitle(dim, omegaTilde, sigmaTilde, muTilde);
@@ -162,16 +169,14 @@ if sSimParams.b_plotAllEvecs
         PhiTildeInt, lambdaAnalyticTilde, [], [], figTitle, figName, '\tilde{\phi}^{{\bf int}}')
 end
 % xIntInvT = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
-VInt = PhiTildeInt*C;
-
 interpRatio = N/n;
-VIntRenormed = sqrt(interpRatio)*VInt;
+VInt = sqrt(interpRatio)*PhiTildeInt*C;
 
 if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
     figTitle = 'Interpolated eigenvectors of ${\bf W}$ - Ours';
     figName = 'VInt';
     PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), ...
-        VIntRenormed, lambda, [], [], figTitle, figName, 'v^{{\bf int}}')
+        VInt, lambda, [], [], figTitle, figName, 'v^{{\bf int}}')
 end
 %% Interpolate with Nystrom
 if strcmp(interpMethod, 'AddPoints')
@@ -179,7 +184,7 @@ if strcmp(interpMethod, 'AddPoints')
     B = exp(-distLUBlockRUBlock.^2/(2*omega^2));
 
     VNys = B.'*V*diag(1./lambda);
-    VNys = (1/sqrt(interpRatio))*VNys;
+%     VNys = (1/sqrt(interpRatio))*VNys;
     if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
 
         figTitle = 'Interpolated eigenvectors of ${\bf W}$ - Nystrom';
@@ -196,6 +201,7 @@ WRef = SimpleCalcAdjacency(xInt, origGraphAdjacency, omega, k);
 [VRef, LambdaRef] = eigs(WRef,M);
 lambdaRef = diag(LambdaRef);
 VRef = FlipSign(VInt, VRef);
+% VRef = (sqrt(lambdaRef))'.*VRef;
 
 if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
     figTitle = 'Reference eigenvectors of ${\bf W}^{{\bf ref}}$';
@@ -204,31 +210,52 @@ if sSimParams.b_plotOrigVsInterpEvecs || sSimParams.b_plotAllEvecs
         VRef, lambdaRef, [], [], figTitle, figName, 'v^{{\bf ref}}')
 end
 %% Compare
+lambdaRenormedToCompare = interpRatio*lambda;
+PlotSpectrum(sSimParams, sDataset, [], lambdaRenormedToCompare, lambdaRef, [], '\frac{N}{n} \lambda_m', '\lambda^{{\bf ref}}');
+
+VRenormedToCompare = (sqrt(lambda))'.*V;
+VRefRenormedToCompare = (sqrt(lambdaRef))'.*VRef;
+figTitle = '$\sqrt{\Lambda} V$ vs. $\sqrt{\Lambda^{{\bf ref}}} V^{{\bf ref}}_{(1:n,:)}$';
+figName = 'V_vs_VRef';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xTrain, [], vInd(1), vInd(end), ...
+    VRenormedToCompare, [], [], [], figTitle, figName, '\sqrt{\lambda} v', VRefRenormedToCompare(1:n,:), '\sqrt{\lambda}^{{\bf ref}} v^{{\bf ref}}');
+
+VIntRenormedToCompare = (sqrt(lambda))'.*VInt;
+figTitle = 'Ours vs. Reference';
+figName = 'VInt_vs_VRef';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), ...
+    VIntRenormedToCompare, lambdaRef, [], [], figTitle, figName, 'v^{{\bf int}}', VRefRenormedToCompare, 'v^{{\bf ref}}');
+
+
+VNysRenormedToCompare = (sqrt(lambda))'.*VNys;
+figTitle = 'Nystrom vs. Reference';
+figName = 'VNys_vs_VRef';
+PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), ...
+    VNysRenormedToCompare, lambdaRef, [], [], figTitle, figName, 'v^{{\bf nys}}', VRefRenormedToCompare, 'v^{{\bf ref}}');
+
+
 figTitle = 'Ours vs. Nystrom';
 figName = 'VInt_vs_VNys';
 PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), ...
     VInt, lambdaRef, [], [], figTitle, figName, 'v^{{\bf int}}', VNys, 'v^{{\bf nys}}');
 
-figTitle = 'Ours vs. Reference';
-figName = 'VInt_vs_VRef';
+figTitle = 'Ours vs. Nystrom';
+figName = 'VIntRenormedToCompare_vs_VNysRenormedToCompare';
 PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), ...
-    VInt, lambdaRef, [], [], figTitle, figName, 'v^{{\bf int}}', VRef, 'v^{{\bf ref}}');
-figTitle = 'Nystrom vs. Reference';
-figName = 'VNys_vs_VRef';
-PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), ...
-    VNys, lambdaRef, [], [], figTitle, figName, 'v^{{\bf nys}}', VRef, 'v^{{\bf ref}}');
+    VIntRenormedToCompare, lambdaRef, [], [], figTitle, figName, 'v^{{\bf int}}', VNysRenormedToCompare, 'v^{{\bf nys}}');
+
 
 b_plotErrVsNodeInd = true;
-PlotEigenDiffs(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), VInt, VRef, ...
+PlotEigenDiffs(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), VIntRenormedToCompare, VRefRenormedToCompare, ...
     'VInt_vs_VRef', 'v^{{\bf int}}', 'v^{{\bf ref}}', b_plotErrVsNodeInd)
-PlotEigenDiffs(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), VNys, VRef, ...
+PlotEigenDiffs(sSimParams, verticesPDF, xInt, [], vInd(1), vInd(end), VNysRenormedToCompare, VRefRenormedToCompare, ...
     'VNys_vs_VRef', 'v^{{\bf nys}}', 'v^{{\bf ref}}', b_plotErrVsNodeInd)
 
 %% RMSE
 R = 10;
-mVInt = zeros(R, N, M);
-mVNys = zeros(R, N, M);
-mVRef = zeros(R, N, M);
+mVIntToCompare = zeros(R, N, M);
+mVNysToCompare = zeros(R, N, M);
+mVRefToCompare = zeros(R, N, M);
 for r = 1:R
     % Generate dataset
     sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod);
@@ -243,38 +270,65 @@ for r = 1:R
     % Transform with pCdf, calc eigen functions and C
     [~, ~, pCdf, invpCdf] = PolyfitEstCdf(xTrain, bins, pCdfDegree, invpCdfDegree);
     xTildeTrain = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain);
-    
-    % Interpolate with our method
     [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
     C = pinv(PhiTilde)*V;
-    VInt = PhiTildeInt*C;
+    
+    % Interpolate with our method
+    xTildeInt = T(pCdf, true, muTilde, sigmaTilde, xInt);
+    [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
+    VInt = sqrt(interpRatio)*PhiTildeInt*C;
+%     VIntToCompare = abs((sqrt(lambda))'.*VInt);
+    VIntToCompare = abs(VInt);
     
     % Interpolate with Nystrom
     distLUBlockRUBlock = pdist2(xTrain, xInt);
     B = exp(-distLUBlockRUBlock.^2/(2*omega^2));
     VNys = B.'*V*diag(1./lambda);
-    VNys = (1/sqrt(interpRatio))*VNys;
-    
+%     VNysToCompare = abs((sqrt(lambda))'.*VNys);
+    VNysToCompare = abs(VNys);
+
     % Calculate reference
     WRef = SimpleCalcAdjacency(xInt, origGraphAdjacency, omega, k);
     [VRef, LambdaRef] = eigs(WRef,M);
     VRef = FlipSign(VInt, VRef);
+%     VRefToCompare = abs(abs((sqrt(lambdaRef)))'.*VRef);
+    VRefToCompare = sqrt(interpRatio)*abs(VRef);
+    if r == 1
+        figTitle = 'Ours vs. Reference';
+        figName = 'VInt_vs_VRef';
+        PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], 22, 24, ...
+            VIntToCompare, lambdaRef, [], [], figTitle, figName, 'v^{{\bf int}}', VRefToCompare, 'v^{{\bf ref}}');
+
+        figTitle = 'Nystrom vs. Reference';
+        figName = 'VNys_vs_VRef';
+        PlotEigenfuncvecScatter(sSimParams, verticesPDF, xInt, [], 22, 24, ...
+            VNysToCompare, lambdaRef, [], [], figTitle, figName, 'v^{{\bf nys}}', VRefToCompare, 'v^{{\bf ref}}');
+    end
     
     % Save
-    mVInt(r,:,:) = VInt;
-    mVNys(r,:,:) = VNys;
-    mVRef(r,:,:) = VRef;
+    mVIntToCompare(r,:,:) = VIntToCompare;
+    mVNysToCompare(r,:,:) = VNysToCompare;
+    mVRefToCompare(r,:,:) = VRefToCompare;
 
 end
-vRmseInt = CalcRMSE(mVInt, mVRef, 'Analytic');
-vRmseNys = CalcRMSE(mVNys, mVRef, 'Nystrom');
+vRmseInt = CalcRMSE(mVIntToCompare, mVRefToCompare, 'Analytic');
+vRmseNys = CalcRMSE(mVNysToCompare, mVRefToCompare, 'Nystrom');
 
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 figure;
+% subplot(2,1,1)
 plot((0:M-1)', [vRmseInt.' vRmseNys.'], 'LineWidth', 2)
+ylim([0 0.5]);
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('RMSE', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Ours', 'Nystrom', 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
 set(gca,'FontSize', 14);
+% subplot(2,1,2)
+% plot((0:M-1)', [10*log10(vRmseInt).' 10*log10(vRmseNys).'], 'LineWidth', 2)
+% % set(gca, 'YScale', 'log')
+% xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
+% ylabel('RMSE', 'Interpreter', 'latex', 'FontSize', 14)
+% legend('Ours', 'Nystrom', 'Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
+% set(gca,'FontSize', 14);
 set(0,'DefaultFigureWindowStyle',windowStyle)

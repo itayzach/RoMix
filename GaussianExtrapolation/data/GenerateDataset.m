@@ -12,24 +12,51 @@ if ~exist('nTest', 'var')
 end
 %% Generate data
 if strcmp(actualDataDist, 'TwoMoons')
-    sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile);
+    if strcmp(interpMethod, 'NewPoints')
+        sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile);
+    elseif strcmp(interpMethod, 'AddPoints')
+        sData = GenerateTwoMoonsDataset(nTest, 0, b_loadTwoMoonsMatFile);
+        data = sData.x;
+        dataRearranged = data(randperm(nTest),:);
+        sDataset.sData.x = dataRearranged(1:nTrain,:);
+        sDataset.sData.xt = dataRearranged;
+    end
     omega = 0.3;
     dim = 2;
 elseif strcmp(actualDataDist, 'TwoSpirals')
-    sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
+    if strcmp(interpMethod, 'NewPoints')
+        sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
+    elseif strcmp(interpMethod, 'AddPoints')
+        sData = GenerateTwoSpiralsDataset(nTest);
+        data = sData.x;
+        sDataset.sData.x = data(1:nTrain,:);
+        sDataset.sData.xt = data;
+    end
     omega = 0.3;
     dim = 2;
 elseif strcmp(actualDataDist, 'SwissRoll')
-    sDataset.sData.x = GenerateSwissRoll(nTrain);
-    sDataset.sData.xt = GenerateSwissRoll(nTest);
+    if strcmp(interpMethod, 'NewPoints')
+        sDataset.sData.x = GenerateSwissRoll(nTrain);
+        sDataset.sData.xt = GenerateSwissRoll(nTest);
+    elseif strcmp(interpMethod, 'AddPoints')
+        data = GenerateSwissRoll(nTest);
+        sDataset.sData.x = data(1:nTrain,:);
+        sDataset.sData.xt = data;
+    end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
     omega = 0.15;
     dim = 3;
 elseif strcmp(actualDataDist, 'Gaussian')
-    sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain);
+    if strcmp(interpMethod, 'NewPoints')
+        sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain);
+        sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest);
+    elseif strcmp(interpMethod, 'AddPoints')
+        data = GenerateGaussianData(dim, nComponents, nTest);
+        sDataset.sData.x = data(1:nTrain,:);
+        sDataset.sData.xt = data;
+    end
     sDataset.sData.y = [];
-    sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest);
     sDataset.sData.yt = [];
     omega = 0.3;
 elseif strcmp(actualDataDist, 'Uniform')
@@ -51,9 +78,10 @@ elseif strcmp(actualDataDist, 'Grid')
     elseif strcmp(interpMethod, 'AddPoints')
         r = round(nTest/nTrain);
         data = GenerateGridData(dim, nTest);
+        nTrain = length(1:r:nTest);
         dataRearranged(1:nTrain,:) = data(1:r:nTest,:);
         data(1:r:nTest,:) = [];
-        dataRearranged(nTrain+1:nTest,:) = data;
+        dataRearranged(nTrain+1:nTrain+length(data),:) = data;
         
         sDataset.sData.x = dataRearranged(1:nTrain,:);
         sDataset.sData.xt = dataRearranged;
@@ -68,9 +96,6 @@ end
 sDataset.recommendedOmega = omega;
 sDataset.xMax = max(sDataset.sData.x);
 sDataset.xMin = min(sDataset.sData.x);
-sDataset.nTrain = nTrain;
-sDataset.nTest = nTest;
-sDataset.nTotal = nTrain + nTest;
 sDataset.dataDist = actualDataDist;
 sDataset.dim = dim;
 sDataset.actualNumComponents = nComponents;

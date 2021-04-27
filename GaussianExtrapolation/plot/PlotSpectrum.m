@@ -1,15 +1,18 @@
-function fig = PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambdaAnalytic, vLambdaNumeric, mLambdaNystrom)
+function fig = PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambda1, vLambda2, mLambda3, lambda1Str, lambda2Str, lambda3Str)
+windowStyle = get(0,'DefaultFigureWindowStyle');
+set(0,'DefaultFigureWindowStyle','normal')
+
 
 fig = figure('Name', 'Spectrum');
-M = length(vLambdaAnalytic);
+M = length(vLambda1);
 subplot(2,1,1);
-stem(0:M-1, vLambdaAnalytic(1:M), 'x', 'DisplayName', '$\lambda^{\phi}_m$');
+stem(0:M-1, vLambda1(1:M), 'x', 'DisplayName', ['$' lambda1Str '$']);
 hold on;
-stem(0:M-1, vLambdaNumeric(1:M), 'DisplayName', '$\lambda^{v}_m$');
+stem(0:M-1, vLambda2(1:M), 'DisplayName', ['$' lambda2Str '$']);
 if ~isempty(vNysRatio)
     for r = 1:length(vNysRatio)
         nysRatio = vNysRatio(r);
-        stem(0:M-1, mLambdaNystrom(r,:), '*', 'DisplayName', ['$\lambda^{\hat{v}}_m$' ' (' num2str(nysRatio*100, '%d') '\%)']);
+        stem(0:M-1, mLambda3(r,:), '*', 'DisplayName', [['$' lambda3Str '$'] ' (' num2str(nysRatio*100, '%d') '\%)']);
     end
 end
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast');
@@ -20,16 +23,16 @@ title('Eigenvalues', 'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 
 subplot(2,1,2);
-stem(0:M-1, log(vLambdaAnalytic(1:M)),'x', 'LineStyle','none', 'DisplayName', '$\log(\lambda^{\phi}_m)$');
+stem(0:M-1, log10(abs(vLambda1(1:M))),'x', 'LineStyle','none', 'DisplayName', ['$\log|' lambda1Str '|$']);
 hold on;
-stem(0:M-1, log(vLambdaNumeric(1:M)),'LineStyle','none', 'DisplayName', '$\log(\lambda^{v}_m)$');
+stem(0:M-1, log10(abs(vLambda2(1:M))),'LineStyle','none', 'DisplayName', ['$\log|' lambda2Str '|$']);
 if ~isempty(vNysRatio)
     for r = 1:length(vNysRatio)
         nysRatio = vNysRatio(r);
-        stem(0:M-1, log(mLambdaNystrom(r,:)),'*', 'LineStyle','none', 'DisplayName', ['$\log(\lambda^{\hat{v}}_m)$' ' (' num2str(nysRatio*100, '%d') '\%)']);
+        stem(0:M-1, mLambda3(r,:),'*', 'LineStyle','none', 'DisplayName', [['$\log(' lambda3Str ')$'] ' (' num2str(nysRatio*100, '%d') '\%)']);
     end
 end
-
+% set(gca, 'YScale', 'log')
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast');
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 xlim([0 M + 8])
@@ -37,7 +40,7 @@ title('Eigenvalues log-scale', ...
     'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 set(gcf,'Position',[100 100 600 500])
-
+set(0,'DefaultFigureWindowStyle',windowStyle)
 %% Save
 try
     if ~exist(sSimParams.outputFolder, 'dir')

@@ -11,6 +11,16 @@ for d = 1:dim
         end
     end
     xTilde(:,d) = icdf('Normal',polyCdf,mu(d),sigma(d,d));
+    nanInd = find(isnan(xTilde(:,d)));
+    assert(~any(isnan(xTilde(:,d))), ...
+        ['xTilde contain NaNs because of x(', num2str(nanInd), ',', num2str(d), ') = ', num2str(x(nanInd,d)), ...
+        newline '    ---> polyCdf(', num2str(nanInd), ',', num2str(d), ') = ', num2str(polyCdf(nanInd))]);
+    
+    infInd = find(isinf(xTilde(:,d)));
+    assert(~any(isinf(xTilde(:,d))), ...
+        ['xTilde contain infs because of x(', num2str(infInd), ',', num2str(d), ') = ', num2str(x(infInd,d)), ...
+        newline '    ---> polyCdf(', num2str(infInd), ',', num2str(d), ') = ', num2str(polyCdf(infInd))]);
 end
-assert(~any(isnan(xTilde(:))),['xTilde contain NaNs since because of x = ', num2str(x(isnan(xTilde(:)))')]);
+assert(~any(isnan(xTilde(:))),['xTilde contain NaNs because of x = ', num2str(x(isnan(xTilde(:)))')]);
+assert(~any(isinf(xTilde(:))),['xTilde contain Infs because of x = ', num2str(x(isinf(xTilde(:)))')]);
 end

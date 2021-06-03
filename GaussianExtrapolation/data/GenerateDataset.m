@@ -17,9 +17,15 @@ if strcmp(actualDataDist, 'TwoMoons')
     elseif strcmp(interpMethod, 'AddPoints')
         sData = GenerateTwoMoonsDataset(nTest, 0, sDatasetParams.b_loadTwoMoonsMatFile);
         data = sData.x;
-        dataRearranged = data(randperm(nTest),:);
+        rperm = randperm(nTest);
+        dataRearranged = data(rperm,:);
         sDataset.sData.x = dataRearranged(1:nTrain,:);
         sDataset.sData.xt = dataRearranged;
+        labels = sData.y;
+        labelsRearranged = labels(rperm,:);
+        sDataset.sData.y = labelsRearranged(1:nTrain,:);
+        sDataset.sData.yt = labelsRearranged;
+        
     end
     omega = 0.3;
     dim = 2;

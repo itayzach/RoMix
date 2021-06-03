@@ -41,7 +41,10 @@ fprintf('Phi time = %.2f ms\n', run_time*1e3);
 if sSimParams.b_plotEigenfunctions
     firstEigenIdxToPlot = 0;
     lastEigIdxToPlot = sSimParams.PlotEigenFuncsM-1;
-    PlotEigenfuncvecScatter(sSimParams, 'Two_moons', X, [], firstEigenIdxToPlot, lastEigIdxToPlot, mPhi_m_X, vLambdaAnalytic, 'Analytic',sClassifier.c)
+    figTitle = 'Eigenfunctions';
+    figName = 'Eigenfunctions';
+    PlotEigenfuncvecScatter(sSimParams, 'Two_moons', X, [], firstEigenIdxToPlot, lastEigIdxToPlot, ...
+            mPhi_m_X, vLambdaAnalytic, [], [], figTitle, figName, '\phi')
 end
 
 sClassifier.mPhi_X_c = reshape(mPhi_m_X*c, length(x1), length(x2));

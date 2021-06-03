@@ -7,14 +7,15 @@ M = 8;
 sSimParams = GetSimParams(M);
 
 %% Load dataset
-actualDataDist = "Two_moons";
+actualDataDist = 'TwoMoons';
 nComponents = 2;
 dataDim = 2;
 nTrain = 200;
 nTest = 400;
-b_loadTwoMoonsMatFile = false;
+sDatasetParams.b_loadTwoMoonsMatFile = false;
+interpMethod = 'NewPoints';
 
-sDataset = GenerateDataset(actualDataDist, dataDim, nComponents, nTrain, nTest, b_loadTwoMoonsMatFile);
+sDataset = GenerateDataset(actualDataDist, dataDim, nComponents, nTrain, nTest, interpMethod, sDatasetParams);
 PlotTwoMoons(sSimParams, sDataset)
 
 %%

@@ -1,9 +1,6 @@
-function sDataset = GenerateDataset(actualDataDist, dim, nComponents, nTrain, nTest, interpMethod, b_loadTwoMoonsMatFile)
+function sDataset = GenerateDataset(actualDataDist, dim, nComponents, nTrain, nTest, interpMethod, sDatasetParams)
 
 %% Set defaults
-if ~exist('b_loadTwoMoonsMatFile', 'var')
-    b_loadTwoMoonsMatFile = false;
-end
 if ~exist('nTrain', 'var')
     nTrain = 4000;
 end
@@ -12,10 +9,13 @@ if ~exist('nTest', 'var')
 end
 %% Generate data
 if strcmp(actualDataDist, 'TwoMoons')
+    if ~exist('sDatasetParams', 'var') || (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams, 'b_loadTwoMoonsMatFile'))
+        sDatasetParams.b_loadTwoMoonsMatFile = false;
+    end
     if strcmp(interpMethod, 'NewPoints')
-        sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile);
+        sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, sDatasetParams.b_loadTwoMoonsMatFile);
     elseif strcmp(interpMethod, 'AddPoints')
-        sData = GenerateTwoMoonsDataset(nTest, 0, b_loadTwoMoonsMatFile);
+        sData = GenerateTwoMoonsDataset(nTest, 0, sDatasetParams.b_loadTwoMoonsMatFile);
         data = sData.x;
         dataRearranged = data(randperm(nTest),:);
         sDataset.sData.x = dataRearranged(1:nTrain,:);
@@ -47,12 +47,18 @@ elseif strcmp(actualDataDist, 'SwissRoll')
     sDataset.sData.yt = [];
     omega = 0.15;
     dim = 3;
+    sDatasetParams = [];
 elseif strcmp(actualDataDist, 'Gaussian')
+    if ~exist('sDatasetParams', 'var') || ...
+            (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'mu') && ~isfield(sDatasetParams,'sigma'))
+        sDatasetParams.mu = 0*ones(1,dim);
+        sDatasetParams.sigma = 1*eye(dim);
+    end
     if strcmp(interpMethod, 'NewPoints')
-        sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain);
-        sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest);
+        sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain, sDatasetParams.mu, sDatasetParams.sigma);
+        sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
     elseif strcmp(interpMethod, 'AddPoints')
-        data = GenerateGaussianData(dim, nComponents, nTest);
+        data = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
     end
@@ -60,11 +66,16 @@ elseif strcmp(actualDataDist, 'Gaussian')
     sDataset.sData.yt = [];
     omega = 0.3;
 elseif strcmp(actualDataDist, 'Uniform')
+    if ~exist('sDatasetParams', 'var') || ...
+            (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
+        sDatasetParams.xMin = -1*ones(dim,1);
+        sDatasetParams.xMax = 1*ones(dim,1);
+    end
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData.x = GenerateUniformData(dim, nTrain);
         sDataset.sData.xt = GenerateUniformData(dim, nTest);
     elseif strcmp(interpMethod, 'AddPoints')
-        data = GenerateUniformData(dim, nTest);
+        data = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
     end
@@ -72,12 +83,18 @@ elseif strcmp(actualDataDist, 'Uniform')
     sDataset.sData.yt = [];
     omega = 0.15;
 elseif strcmp(actualDataDist, 'Grid')
+    if ~exist('sDatasetParams', 'var') || ...
+            (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
+        sDatasetParams.xMin = -1*ones(dim,1);
+        sDatasetParams.xMax = 1*ones(dim,1);
+    end
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData.x = GenerateGridData(dim, nTrain);
         sDataset.sData.xt = GenerateGridData(dim, nTest);
     elseif strcmp(interpMethod, 'AddPoints')
-        r = round(nTest/nTrain);
-        data = GenerateGridData(dim, nTest);
+        data = GenerateGridData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
+        nTest = length(data);
+        r = ceil(nTest/nTrain);
         nTrain = length(1:r:nTest);
         dataRearranged(1:nTrain,:) = data(1:r:nTest,:);
         data(1:r:nTest,:) = [];
@@ -101,4 +118,5 @@ sDataset.dim = dim;
 sDataset.actualNumComponents = nComponents;
 sDataset.actualDataDist = actualDataDist;
 sDataset.estDataDist = 'Gaussian';
+sDataset.sDatasetParams = sDatasetParams;
 end

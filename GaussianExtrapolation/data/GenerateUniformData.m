@@ -1,5 +1,5 @@
-function x = GenerateUniformData(dim, n)
-xMin = -1;
-xMax = 1;
-x = (xMax - xMin)*rand(n, dim) + xMin;
+function x = GenerateUniformData(dim, n, xMin, xMax)
+x = zeros(n, dim);
+for d = 1:dim
+    x(:,d) = (xMax(d) - xMin(d))*rand(n, 1) + xMin(d);
 end

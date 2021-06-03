@@ -1,7 +1,7 @@
-function x = GenerateGaussianData(dim, nComponents, n)
+function x = GenerateGaussianData(dim, nComponents, n, mu, sigma)
 if dim >= 3
-    sigma = 1;
-    mu = 0;
+%     sigma = 1;
+%     mu = 0;
     x = sigma*randn(n,dim) + mu;
     
 elseif dim == 2
@@ -29,12 +29,12 @@ elseif dim == 2
     end
 elseif dim == 1
     if nComponents == 1
-        sigma = 1;
-        mu = 0;
+%         sigma = 1;
+%         mu = 0;
         x = sigma*randn(n, 1) + mu;
     elseif nComponents == 2
-        mu = [2; 7];       % Means
-        sigma = [0.4 0.5]; % Covariances
+%         mu = [2; 7];       % Means
+%         sigma = [0.4 0.5]; % Covariances
         vSel = rand(n, 1) < 0.5;
         x = (1-vSel).*(sigma(1)*randn(n, 1) + mu(1)) + ...
             vSel.*(sigma(2)*randn(n, 1) + mu(2));

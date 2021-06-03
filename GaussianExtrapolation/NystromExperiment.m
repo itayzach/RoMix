@@ -4,7 +4,9 @@ rng('default'); % For reproducibility
 set(0,'DefaultFigureWindowStyle','normal')
 set(0,'DefaultFigureVisible','on')
 %% Parameters
-vActualDataDist = [ "Gaussian", "Two_moons" ];
+interpMethod = 'NewPoints';
+vActualDataDist = [ "Gaussian", "TwoMoons" ];
+
 vNysRatio = [0.8 0.4 0.05];
 actualNumComponents = 2;
 estNumComponents = actualNumComponents;
@@ -20,15 +22,21 @@ nTotal = nTrain + nTest;
 R = length(vNysRatio);
 for dataDim = vDataDim
     for actualDataDist = vActualDataDist
-        if strcmp(actualDataDist, "Two_moons") && dataDim ~= 2
+        if strcmp(actualDataDist, "TwoMoons") && dataDim ~= 2
             continue
         end
         tPhiAnalytic = zeros(T, nTrain, sSimParams.CalcEigenFuncsM);
         tPhiNumeric  = zeros(T, nTrain, sSimParams.CalcEigenFuncsM);
         tPhiNystrom  = zeros(R, T, nTrain, sSimParams.CalcEigenFuncsM);
         for t = 1:T
-            sDataset = GenerateDataset(actualDataDist, dataDim, actualNumComponents, nTrain, nTest);
-            if strcmp(actualDataDist, "Two_moons")
+            if actualNumComponents == 2 && strcmp(actualDataDist, "Gaussian")
+                sDatasetParams.mu = [2; 7];       % Means
+                sDatasetParams.sigma = [0.4 0.5]; % Covariances
+            else
+                sDatasetParams = [];
+            end
+            sDataset = GenerateDataset(actualDataDist, dataDim, actualNumComponents, nTrain, nTest, interpMethod, sDatasetParams);
+            if strcmp(actualDataDist, "TwoMoons")
                 GMMRegVal = 0.1;
             else
                 GMMRegVal = 0;
@@ -50,13 +58,15 @@ for dataDim = vDataDim
             if t == 1 && sSimParams.b_plotEigenfunctions
                 % Plot histogram and eigenvectors of the first iteration
                 PlotHistogram(sSimParams, [ sDataset.sData.x; sDataset.sData.xt], actualDataDist, 'Histogram');
-                PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambdaAnalytic, vLambdaNumeric, mLambdaNystrom);
+                PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambdaAnalytic, vLambdaNumeric, ...
+                    mLambdaNystrom, '\lambda^{{\bf ana}}', '\lambda^{{\bf num}}', '\lambda^{{\bf nys}}');
 
-                PlotInnerProductMatrix(sSimParams, sDistParams, actualDataDist, [], squeeze(tPhiAnalytic(1,:,:)), 'Analytic');
-                PlotInnerProductMatrix(sSimParams, sDistParams, actualDataDist, [], squeeze(tPhiNumeric(1,:,:)), 'Numeric');
+                graphName = 'ipmatrix';
+                PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, [], squeeze(tPhiAnalytic(1,:,:)), 'Analytic')
+                PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, [], squeeze(tPhiNumeric(1,:,:)), 'Numeric')
                 for r = 1:R
                     nysRatio = vNysRatio(r);
-                    PlotInnerProductMatrix(sSimParams, sDistParams, actualDataDist, nysRatio, squeeze(tPhiNystrom(r,1,:,:)), 'Nystrom');
+                    PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, nysRatio, squeeze(tPhiNystrom(r,1,:,:)), 'Nystrom')
                 end
                 if dataDim == 1
                     firstEigenIdxToPlot = 0;
@@ -68,21 +78,25 @@ for dataDim = vDataDim
                     end
                     firstEigenIdxToPlot = 0;
                     lastEigIdxToPlot = sSimParams.PlotEigenFuncsM-1;
+                    b_plotErrVsNodeInd = true;
+                    PlotEigenDiffs(sSimParams, sDataset.dataDist, sDataset.sData.x, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), squeeze(tPhiNumeric(1,:,:)), 'Phi_vs_V', '\phi', 'v', b_plotErrVsNodeInd)
                     for r = 1:R
                         nysRatio = vNysRatio(r);
                         PlotEigenSamePlot(sSimParams, sDataset, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), squeeze(tPhiNumeric(1,:,:)), squeeze(tPhiNystrom(r,1,:,:)))
-                        PlotEigenDiffs(sSimParams, sDataset, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), squeeze(tPhiNumeric(1,:,:)), squeeze(tPhiNystrom(r,1,:,:)))
+                        
+                        PlotEigenDiffs(sSimParams, sDataset.dataDist, sDataset.sData.x, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNystrom(r,1,:,:)), squeeze(tPhiNumeric(1,:,:)), 'Nys_vs_V', '\hat{v}', 'v', b_plotErrVsNodeInd)
                     end
                 elseif dataDim == 2
                     firstEigenIdxToPlot = 0;
                     lastEigIdxToPlot = sSimParams.PlotEigenFuncsM-1;
-                    PlotEigenfuncvecScatter(sSimParams, sDataset.actualDataDist, sDataset.sData.x, [], firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), vLambdaAnalytic, 'Analytic')
-                    PlotEigenfuncvecScatter(sSimParams, sDataset.actualDataDist, sDataset.sData.x, [], firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNumeric(1,:,:)), vLambdaNumeric, 'Numeric')
-                    PlotEigenDiffs2D(sSimParams, sDataset, [], firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), squeeze(tPhiNumeric(1,:,:)), 'Analytic')
+                    b_plotErrVsNodeInd = true;
+                    PlotEigenfuncvecScatter(sSimParams, sDataset.actualDataDist, sDataset.sData.x, [], firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), vLambdaAnalytic, [], [], 'Eigenfunctions', 'Phi', '\phi')
+                    PlotEigenfuncvecScatter(sSimParams, sDataset.actualDataDist, sDataset.sData.x, [], firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNumeric(1,:,:)), vLambdaNumeric, [], [], 'Eigenvectors', 'V', 'v')
+                    PlotEigenDiffs(sSimParams, sDataset.dataDist, sDataset.sData.x, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiAnalytic(1,:,:)), squeeze(tPhiNumeric(1,:,:)), 'Phi_vs_V', '\phi', 'v', b_plotErrVsNodeInd)
                     for r = 1:R
                         nysRatio = vNysRatio(r);
-                        PlotEigenfuncvecScatter(sSimParams, sDataset.actualDataDist, sDataset.sData.x, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNystrom(r,1,:,:)), mLambdaNystrom(r,:), 'Nystrom')
-                        PlotEigenDiffs2D(sSimParams, sDataset, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNystrom(r,1,:,:)), squeeze(tPhiNumeric(1,:,:)), 'Nystrom')
+                        PlotEigenfuncvecScatter(sSimParams, sDataset.actualDataDist, sDataset.sData.x, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNystrom(r,1,:,:)), mLambdaNystrom(r,:), [], [], 'Eigenvectors', 'Nys', '\hat{v}')
+                        PlotEigenDiffs(sSimParams, sDataset.dataDist, sDataset.sData.x, nysRatio, firstEigenIdxToPlot, lastEigIdxToPlot, squeeze(tPhiNystrom(r,1,:,:)), squeeze(tPhiNumeric(1,:,:)), 'Nys_vs_V', '\hat{v}', 'v', b_plotErrVsNodeInd)
                     end
                 end
             end

@@ -27,6 +27,8 @@ xMin = sDataset.xMin;
 n = length(sDataset.sData.x);
 N = length(sDataset.sData.xt);
 
+b_kde = true;
+
 %% Histogram
 if dim <= 2
     PlotHistogram(sSimParams, xTrain, verticesPDF, 'Histogram of X', false);
@@ -85,7 +87,7 @@ end
 pCdfDegree = 10;
 invpCdfDegree = 10;
 bins = min(700, n);
-[xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = PolyfitEstCdf(xTrain, bins, pCdfDegree, invpCdfDegree);
+[xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = PolyfitEstCdf(xTrain, bins, pCdfDegree, invpCdfDegree, b_kde);
 
 %% Transform to Gtilde
 muTilde = mean(xTrain);
@@ -268,7 +270,7 @@ for r = 1:R
     [V, Lambda] = eigs(W,M);
     
     % Transform with pCdf, calc eigen functions and C
-    [~, ~, pCdf, invpCdf] = PolyfitEstCdf(xTrain, bins, pCdfDegree, invpCdfDegree);
+    [~, ~, pCdf, invpCdf] = PolyfitEstCdf(xTrain, bins, pCdfDegree, invpCdfDegree, b_kde);
     xTildeTrain = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain);
     [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
     C = pinv(PhiTilde)*V;

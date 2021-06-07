@@ -27,7 +27,7 @@ xMin = sDataset.xMin;
 n = length(sDataset.sData.x);
 N = length(sDataset.sData.xt);
 
-b_kde = true;
+b_kde = false;
 
 %% Histogram
 if dim <= 2

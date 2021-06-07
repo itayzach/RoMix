@@ -3,7 +3,7 @@ nTestPoints = 50;
 xSmallTest = linspace(xMin+0.5,xMax-0.5,nTestPoints)';
 
 xTestTilde = T(pCdf, true, muTilde, sigmaTilde, xSmallTest);
-xSmallTestEst = invT(invpCdf, muTilde, sigmaTilde, xTestTilde);
+xSmallTestEst = Tinv(invpCdf, muTilde, sigmaTilde, xTestTilde);
 
 cmap = xSmallTest;
 fig = figure('Name', 'Demonstrate T #2');

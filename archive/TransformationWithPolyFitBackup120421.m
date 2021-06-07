@@ -168,7 +168,7 @@ if sSimParams.b_plotAllEvecs
     PlotEigenfuncvecScatter(sSimParams, 'Gaussian', xTildeInt, [], vInd(1), vInd(end), ...
         PhiTildeInt, lambdaAnalyticTilde, [], [], figTitle, figName, '\tilde{\phi}^{{\bf int}}')
 end
-% xIntInvT = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
+% xIntTinv = Tinv(invpCdf, muTilde, sigmaTilde, xTildeInt);
 
 
 interpRatio = N/n;

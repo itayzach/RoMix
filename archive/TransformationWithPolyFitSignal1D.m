@@ -195,7 +195,7 @@ nTestPoints = 80;
 tSmallTest = linspace(tTrain(2),tTrain(end-1),nTestPoints)';
 
 tTestTilde = T(pCdf, true, muTilde, sigmaTilde, tSmallTest);
-tSmallTestEst = invT(invpCdf, muTilde, sigmaTilde, tTestTilde);
+tSmallTestEst = Tinv(invpCdf, muTilde, sigmaTilde, tTestTilde);
 
 cmap = tSmallTest;
 fig = figure('Name', 'Demonstrate T (2/2)');
@@ -254,7 +254,7 @@ title('${\bf C}^\dagger$', 'interpreter', 'latex', 'FontSize', 16); set(gca,'Fon
 saveas(fig,strcat(outputFolder, filesep, 'fig7_pinvC'), figSaveType);
 
 %% V in terms of Phi_tilde
-tEstTrain = invT(invpCdf, muTilde, sigmaTilde, tTildeTrain);
+tEstTrain = Tinv(invpCdf, muTilde, sigmaTilde, tTildeTrain);
 VRec = PhiTilde*C;
 
 fig = figure('Name', 'V in terms of PhiTilde');
@@ -285,7 +285,7 @@ xlabel('$t$ [ms]', 'interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig9_efuncs_WTilde_int'), figSaveType);
 
-tIntInvT = invT(invpCdf, muTilde, sigmaTilde, tTildeInt);
+tIntInvT = Tinv(invpCdf, muTilde, sigmaTilde, tTildeInt);
 VInt = PhiTildeInt*C;
 
 VIntRenormed = sqrt(interpRatio)*VInt;

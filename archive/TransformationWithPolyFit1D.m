@@ -94,7 +94,7 @@ title('${\bf C} = \tilde{{\bf \Phi}}^\dagger {\bf V}$', 'interpreter', 'latex', 
 saveas(fig,strcat(outputFolder, filesep, 'fig6_C'), figSaveType);
 
 %% V in terms of Phi_tilde
-xEstTrain = invT(invpCdf, muTilde, sigmaTilde, xTildeTrain);
+xEstTrain = Tinv(invpCdf, muTilde, sigmaTilde, xTildeTrain);
 VRec = PhiTilde*C;
 
 fig = figure('Name', 'V in terms of PhiTilde');
@@ -122,7 +122,7 @@ title(['Eigenfunctions of $\tilde{{\bf W}}$ on the entire axis' newline ...
 set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig9_efuncs_WTilde_int'), figSaveType);
 
-xIntInvT = invT(invpCdf, muTilde, sigmaTilde, xTildeInt);
+xIntTinv = Tinv(invpCdf, muTilde, sigmaTilde, xTildeInt);
 VInt = PhiTildeInt*C;
 
 interpRatio = N/n;
@@ -131,7 +131,7 @@ VIntRenormed = sqrt(interpRatio)*VInt;
 fig = figure('Name', 'Interpolated evecs of W');
 plot(xTrain, V(:,vInd),'o');
 hold on
-plot(xIntInvT, VIntRenormed(:,vInd),'.');
+plot(xIntTinv, VIntRenormed(:,vInd),'.');
 legend([strcat('$v_{',string(vInd),'}$') strcat('$v_{{\bf int},',string(vInd),'}$')], 'interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',length(vInd))
 title(['Interpolated eigenvectors of ${\bf W}$' newline '${\bf V}_{{\bf int}} = \sqrt{\frac{N}{n}}{\bf \tilde{\Phi}}_{{\bf int}} {\bf C}$'], 'interpreter', 'latex', 'FontSize', 16); set(gca,'FontSize', 14);
 saveas(fig,strcat(outputFolder, filesep, 'fig10_VInt'), figSaveType);

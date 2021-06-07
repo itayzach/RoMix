@@ -1,4 +1,4 @@
-function x = invT(invpCdf, mu, sigma, xTilde)
+function x = Tinv(invpCdf, mu, sigma, xTilde)
 assert(~any(isnan(xTilde(:))),'xTilde contain NaNs...');
 dim = size(xTilde,2);
 x = zeros(size(xTilde));

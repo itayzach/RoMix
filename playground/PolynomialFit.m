@@ -79,7 +79,7 @@ xTestTilde = T(pCdf, b_saturate, muTilde, sigmaTilde, xSmallTest);
 % --------------------------------------------------------------------------------------------------
 % T^{-1}(x)
 % --------------------------------------------------------------------------------------------------
-xSmallTestEst = invT(invpCdf, muTilde, sigmaTilde, xTestTilde);
+xSmallTestEst = Tinv(invpCdf, muTilde, sigmaTilde, xTestTilde);
 
 % --------------------------------------------------------------------------------------------------
 % Plot
@@ -118,8 +118,8 @@ xTilde = icdf('Normal',polyCdf,mu,sigma);
 assert(~any(isnan(xTilde)),'xTilde contain NaNs...');
 end
 
-%% invT(x)
-function x = invT(invpCdf, mu, sigma, xTilde)
+%% Tinv(x)
+function x = Tinv(invpCdf, mu, sigma, xTilde)
 assert(~any(isnan(xTilde)),'xTilde contain NaNs...');
 xTildeCdf = cdf('Normal', xTilde, mu, sigma);
 x = polyval(invpCdf, xTildeCdf);

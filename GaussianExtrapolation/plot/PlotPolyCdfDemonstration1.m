@@ -1,8 +1,12 @@
-function [] = PlotPolyCdfDemonstration1(xMin, xMax, pCdf, xTrainGrid, estCdf_xTrainGrid, muTilde, sigmaTilde, b_kde)
+function [] = PlotPolyCdfDemonstration1(xMin, xMax, pCdf, xTrainGrid, estCdf_xTrainGrid, muTilde, sigmaTilde, b_kde, kde_bw)
 xTestGrid = linspace(xMin,xMax,2000)';
-if b_kde
-    kdeCdf = ksdensity(xTrainGrid, xTestGrid, 'Function', 'cdf');
-    xTildeTestGrid = icdf('Normal',kdeCdf,muTilde,sigmaTilde);
+if b_kde   
+    if exist('kde_bw', 'var') && ~isempty(kde_bw) && kde_bw > 0
+        polyCdf_xTestGrid = ksdensity(xTrainGrid, xTestGrid, 'Function','cdf','Bandwidth',kde_bw);
+    else
+        polyCdf_xTestGrid = ksdensity(xTrainGrid, xTestGrid, 'Function','cdf');
+    end
+    xTildeTestGrid = icdf('Normal',polyCdf_xTestGrid,muTilde,sigmaTilde);
 else
     pCdfDegree = length(pCdf)-1;
     polyCdf_xTestGrid = polyval(pCdf, xTestGrid);
@@ -52,7 +56,11 @@ subplot(2,2,1)
     hold on;
     plot(xTestGrid, polyCdf_xTestGrid, '.');
     ylim([0 1])
-    title(['Est. vs. poly CDF (degree ' num2str(pCdfDegree) ')'], 'interpreter', 'latex', 'FontSize', 16);
+    if b_kde
+        title('Est. vs. KDE CDF', 'interpreter', 'latex', 'FontSize', 16);
+    else
+        title(['Est. vs. poly CDF (degree ' num2str(pCdfDegree) ')'], 'interpreter', 'latex', 'FontSize', 16);
+    end
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
     ylabel('$\hat{F}_{X}(x)$', 'interpreter', 'latex', 'FontSize', 16);
     legend('${\bf eCDF}_{{\bf X}}(x_{{\bf train}})$', '$\hat{F}_{X}(x_{{\bf test}})$', ...

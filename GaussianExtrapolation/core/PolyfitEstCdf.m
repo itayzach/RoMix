@@ -26,11 +26,7 @@ for d = 1:dim
         end
         pdf_1d = sum(pdf_1d,k);
     end
-    if b_kde
-        dx = (max(x(:,d))-min(x(:,d)))/nEvalPoints;
-    else
-        dx = 1;
-    end
+    dx = 1; % (max(x(:,d))-min(x(:,d)))/nEvalPoints;
     estMarginalCdf(:,d) = cumsum(pdf_1d*dx);  % CDF_x1
     
     % to have analytic expression for the cdf:

@@ -1,15 +1,19 @@
-function [xTilde, polyvalCdfMatrix] = T(pCdf, b_saturate, muTilde, sigmaTilde, x, xNew, b_kde)
+function [xTilde, polyvalCdfMatrix] = T(pCdf, b_saturate, muTilde, sigmaTilde, x, xTrain, b_kde, kde_bw)
 if ~exist('b_kde', 'var')
     b_kde = false;
 end
 dim = size(x,2);
 
 if b_kde
-    xTilde = zeros(size(xNew));
-    polyvalCdfMatrix = zeros(size(xNew));
+    xTilde = zeros(size(x));
+    polyvalCdfMatrix = zeros(size(x));
 %     kdeCdf = mvksdensity(x, xNew, 'Function', 'cdf');
     for d = 1:dim
-        kdeCdf = ksdensity(x(:,d), xNew(:,d), 'Function', 'cdf');
+        if exist('kde_bw', 'var') && ~isempty(kde_bw) && kde_bw > 0
+            kdeCdf = ksdensity(xTrain(:,d), x(:,d), 'Function', 'cdf', 'Bandwidth', kde_bw);
+        else
+            kdeCdf = ksdensity(xTrain(:,d), x(:,d), 'Function', 'cdf');
+        end
         xTilde(:,d) = icdf('Normal',kdeCdf,muTilde(d),sigmaTilde(d,d));
         polyvalCdfMatrix(:,d) = kdeCdf;
     end

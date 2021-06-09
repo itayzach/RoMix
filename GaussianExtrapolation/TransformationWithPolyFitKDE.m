@@ -21,6 +21,7 @@ b_saturateT        = true;
 pCdfDegree         = 10;
 invpCdfDegree      = 10;
 b_kde              = true;
+kde_bw             = []; 0.05;
 % Dataset parameters
 dim                = 1;
 nComponents        = 1;
@@ -92,9 +93,9 @@ for r = 1:R
         nEvalPoints = min(700, round(n/10));
         b_plotCdf = true;
         [xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = ...
-            PolyfitEstCdf(xTrain, nEvalPoints, pCdfDegree, invpCdfDegree, false, b_plotCdf);
+            PolyfitEstCdf(xTrain, nEvalPoints, pCdfDegree, invpCdfDegree, b_plotCdf);
     else
-        pCdf = [];
+        pCdf = NaN(dim,pCdfDegree+1);
         invpCdf = []; 
         xTrainGrid = xTrain;
         for d=1:dim
@@ -109,7 +110,7 @@ for r = 1:R
         xTildeTrain = xTrain;
         polyvalCdfMatrix = [];
     else
-        [xTildeTrain, polyvalCdfMatrix] = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain, xTrain, b_kde);
+        [xTildeTrain, polyvalCdfMatrix] = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain, xTrain, b_kde, kde_bw);
     end
     if r == 1 && dim <= 2
         PlotHistogram(sPlotParams, xTildeTrain, 'Gaussian', 'Histogram of $\tilde{X}$', false);
@@ -119,9 +120,9 @@ for r = 1:R
             sDebugParams.b_debugUseNormalCDF, xTrainGrid, estMarginalCdf_xTrain, polyvalCdfMatrix);
     end
 
-    if r == 1 && sPlotParams.b_plotTransDemos && ~b_kde
+    if r == 1 && sPlotParams.b_plotTransDemos
         for d = 1:dim
-            PlotPolyCdfDemonstration1(xMin(d), xMax(d), pCdf(d,:), xTrainGrid(:,d), estMarginalCdf_xTrain(:,d), muTilde(d), sigmaTilde(d,d));
+            PlotPolyCdfDemonstration1(xMin(d), xMax(d), pCdf(d,:), xTrainGrid(:,d), estMarginalCdf_xTrain(:,d), muTilde(d), sigmaTilde(d,d), b_kde, kde_bw);
 %             PlotPolyCdfDemonstration2(xMin(d), xMax(d), pCdf(d,:), invpCdf(d,:), muTilde(d), sigmaTilde(d,d));
         end
         if dim == 2
@@ -159,7 +160,7 @@ for r = 1:R
     if sDebugParams.b_debugUseNormalCDF
         xTildeInt = xInt;
     else
-        xTildeInt = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain, xInt, true);
+        xTildeInt = T(pCdf, b_saturateT, muTilde, sigmaTilde, xInt, xTrain, b_kde, kde_bw);
     end  
     
     [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);

@@ -78,8 +78,8 @@ elseif strcmp(actualDataDist, 'Uniform')
         sDatasetParams.xMax = 1*ones(dim,1);
     end
     if strcmp(interpMethod, 'NewPoints')
-        sDataset.sData.x = GenerateUniformData(dim, nTrain);
-        sDataset.sData.xt = GenerateUniformData(dim, nTest);
+        sDataset.sData.x = GenerateUniformData(dim, nTrain, sDatasetParams.xMin, sDatasetParams.xMax);
+        sDataset.sData.xt = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
     elseif strcmp(interpMethod, 'AddPoints')
         data = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
         sDataset.sData.x = data(1:nTrain,:);
@@ -95,8 +95,8 @@ elseif strcmp(actualDataDist, 'Grid')
         sDatasetParams.xMax = 1*ones(dim,1);
     end
     if strcmp(interpMethod, 'NewPoints')
-        sDataset.sData.x = GenerateGridData(dim, nTrain);
-        sDataset.sData.xt = GenerateGridData(dim, nTest);
+        sDataset.sData.x = GenerateGridData(dim, nTrain, sDatasetParams.xMin, sDatasetParams.xMax);
+        sDataset.sData.xt = GenerateGridData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
     elseif strcmp(interpMethod, 'AddPoints')
         data = GenerateGridData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
         nTest = length(data);

@@ -16,17 +16,17 @@ plotInd                                = [0,3]; %[M-4, M-1];
 %% Parameters
 % Method parameters
 M                  = 20;
-MTilde             = 20;
+MTilde             = 50;
 b_saturateT        = true;
 pCdfDegree         = 10;
 invpCdfDegree      = 10;
-b_kde              = false;
+b_kde              = true;
 % Dataset parameters
 dim                = 1;
 nComponents        = 1;
 n                  = 5000;
 N                  = 8000;
-verticesPDF        = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
+verticesPDF        = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
 origGraphAdjacency = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 interpMethod       = 'AddPoints'; % 'NewPoints' / 'AddPoints'
 %% Debug
@@ -37,6 +37,10 @@ assert(~sDebugParams.b_debugUseAnalytic || (sDebugParams.b_debugUseAnalytic && s
 assert(~sDebugParams.b_debugUseNormalCDF || (sDebugParams.b_debugUseNormalCDF && strcmp(verticesPDF,'Gaussian')))
 %% RMSE
 R = 1;
+sDatasetParams.mu = 0*ones(1,dim);
+sDatasetParams.sigma = 1*eye(dim);
+sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod, sDatasetParams);
+N = length(sDataset.sData.xt);
 mVIntToCompare = zeros(R, N, M);
 mVNysToCompare = zeros(R, N, M);
 mVRefToCompare = zeros(R, N, M);
@@ -81,13 +85,22 @@ for r = 1:R
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
             V, lambda, [], [], figTitle, figName, 'v')
     end
-    % ----------------------------------------------------------------------------------------------
-    % Estimate CDF, and model it with polyfit (PolyfitEstCdf)
-    % ----------------------------------------------------------------------------------------------
-    nEvalPoints = min(700, round(n/10));
-    b_plotCdf = true;
-    [xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = ...
-        PolyfitEstCdf(xTrain, nEvalPoints, pCdfDegree, invpCdfDegree, b_kde, b_plotCdf);
+    if ~b_kde
+        % ----------------------------------------------------------------------------------------------
+        % Estimate CDF, and model it with polyfit (PolyfitEstCdf)
+        % ----------------------------------------------------------------------------------------------
+        nEvalPoints = min(700, round(n/10));
+        b_plotCdf = true;
+        [xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = ...
+            PolyfitEstCdf(xTrain, nEvalPoints, pCdfDegree, invpCdfDegree, false, b_plotCdf);
+    else
+        pCdf = [];
+        invpCdf = []; 
+        xTrainGrid = xTrain;
+        for d=1:dim
+            estMarginalCdf_xTrain(:,d) = ksdensity(xTrain(:,d), xTrain(:,d), 'Function', 'cdf');
+        end
+    end
     
     % ----------------------------------------------------------------------------------------------
     % Transform using pCdf (T)
@@ -96,21 +109,17 @@ for r = 1:R
         xTildeTrain = xTrain;
         polyvalCdfMatrix = [];
     else
-        [xTildeTrain, polyvalCdfMatrix] = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain);
+        [xTildeTrain, polyvalCdfMatrix] = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain, xTrain, b_kde);
     end
     if r == 1 && dim <= 2
-        figure; 
-        plot(xTrain, xTildeTrain, '.', 'LineWidth', 2)
-        xlabel('$x$', 'Interpreter', 'latex', 'FontSize', 14)
-        ylabel('$\tilde{x}$', 'Interpreter', 'latex', 'FontSize', 14)
         PlotHistogram(sPlotParams, xTildeTrain, 'Gaussian', 'Histogram of $\tilde{X}$', false);
     end
     if r == 1 && strcmp(verticesPDF, 'Gaussian')
         PlotGaussianSanity(xTrain, xTildeTrain, muTilde, sigmaTilde, ...
             sDebugParams.b_debugUseNormalCDF, xTrainGrid, estMarginalCdf_xTrain, polyvalCdfMatrix);
     end
-    
-    if r == 1 && sPlotParams.b_plotTransDemos
+
+    if r == 1 && sPlotParams.b_plotTransDemos && ~b_kde
         for d = 1:dim
             PlotPolyCdfDemonstration1(xMin(d), xMax(d), pCdf(d,:), xTrainGrid(:,d), estMarginalCdf_xTrain(:,d), muTilde(d), sigmaTilde(d,d));
 %             PlotPolyCdfDemonstration2(xMin(d), xMax(d), pCdf(d,:), invpCdf(d,:), muTilde(d), sigmaTilde(d,d));
@@ -150,7 +159,7 @@ for r = 1:R
     if sDebugParams.b_debugUseNormalCDF
         xTildeInt = xInt;
     else
-        xTildeInt = T(pCdf, b_saturateT, muTilde, sigmaTilde, xInt);
+        xTildeInt = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain, xInt, true);
     end  
     
     [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
@@ -200,7 +209,7 @@ vRmseNys = CalcRMSE(mVNysToCompare, mVRefToCompare, 'Nystrom');
 
 % windowStyle = get(0,'DefaultFigureWindowStyle');
 % set(0,'DefaultFigureWindowStyle','normal')
-figure;
+figure('Name', 'RMSE');
 plot((0:M-1)', [vRmseInt.' vRmseNys.'], 'LineWidth', 2)
 rmseylim = max([vRmseInt vRmseNys]);
 ylim([0 rmseylim]);

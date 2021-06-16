@@ -34,8 +34,10 @@ for d = 1:dim
     invpCdf(d,:) = polyfit(estMarginalCdf(:,d), xGrid(:,d), invpCdfDegree);
     
     if b_plotCdf
-        figure; 
-        plot(xGrid(:,d), estMarginalCdf(:,d), 'LineWidth', 2)
+        figure('Name', 'Est. marginal CDF'); 
+        plot(xGrid(:,d), estMarginalCdf(:,d), '.', 'LineWidth', 2)
+        title(['Estimated marginal CDF (d = ', num2str(d), ')'], 'interpreter', 'latex', 'fontsize', 14)
+        set(gca, 'FontSize', 14)
     end
 end
 end

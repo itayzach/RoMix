@@ -28,6 +28,7 @@ if strcmp(actualDataDist, 'TwoMoons')
         
     end
     omega = 0.3;
+    omegaTilde = 0.3;
     dim = 2;
 elseif strcmp(actualDataDist, 'TwoSpirals')
     if strcmp(interpMethod, 'NewPoints')
@@ -39,6 +40,7 @@ elseif strcmp(actualDataDist, 'TwoSpirals')
         sDataset.sData.xt = data;
     end
     omega = 0.3;
+    omegaTilde = 0.3;
     dim = 2;
 elseif strcmp(actualDataDist, 'SwissRoll')
     if strcmp(interpMethod, 'NewPoints')
@@ -52,6 +54,7 @@ elseif strcmp(actualDataDist, 'SwissRoll')
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
     omega = 0.15;
+    omegaTilde = 0.15;
     dim = 3;
     sDatasetParams = [];
 elseif strcmp(actualDataDist, 'Gaussian')
@@ -70,7 +73,8 @@ elseif strcmp(actualDataDist, 'Gaussian')
     end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
-    omega = 0.3;
+    omega = 0.3*sDatasetParams.sigma(1,1);
+    omegaTilde = 0.3;
 elseif strcmp(actualDataDist, 'Uniform')
     if ~exist('sDatasetParams', 'var') || ...
             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
@@ -88,6 +92,7 @@ elseif strcmp(actualDataDist, 'Uniform')
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
     omega = 0.15;
+    omegaTilde = 0.15;
 elseif strcmp(actualDataDist, 'Grid')
     if ~exist('sDatasetParams', 'var') || ...
             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
@@ -112,11 +117,13 @@ elseif strcmp(actualDataDist, 'Grid')
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
     omega = 0.15;
+    omegaTilde = 0.15;
 else
     error('unknown pdf')
 end
 
 sDataset.recommendedOmega = omega;
+sDataset.recommendedOmegaTilde = omegaTilde;
 sDataset.xMax = max(sDataset.sData.x);
 sDataset.xMin = min(sDataset.sData.x);
 sDataset.dataDist = actualDataDist;

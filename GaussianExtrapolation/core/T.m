@@ -7,7 +7,8 @@ dim = size(x,2);
 if b_kde
     xTilde = zeros(size(x));
     polyvalCdfMatrix = zeros(size(x));
-%     kdeCdf = mvksdensity(x, xNew, 'Function', 'cdf');
+%     kdeCdf = mvksdensity(xTrain, x, 'Function', 'cdf','bandwidth', 1e-6);
+%     kdePdf = mvksdensity(xTrain, x, 'Function', 'pdf','bandwidth', 0.7);
     for d = 1:dim
         if exist('kde_bw', 'var') && ~isempty(kde_bw) && kde_bw > 0
             kdeCdf = ksdensity(xTrain(:,d), x(:,d), 'Function', 'cdf', 'Bandwidth', kde_bw);

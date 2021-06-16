@@ -8,7 +8,7 @@ elseif dim == 2
     y = linspace(xMin(2),xMax(2),round(sqrt(n)));
     [X, Y] = meshgrid(x, y);
     data = [X(:) Y(:)];
-elseif dim == 3
+else
     error('not supported');
 end
 end

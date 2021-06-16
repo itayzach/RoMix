@@ -1,23 +1,29 @@
 function x = GenerateGaussianData(dim, nComponents, n, mu, sigma)
 if dim >= 3
-%     sigma = 1;
-%     mu = 0;
-    x = sigma*randn(n,dim) + mu;
-    
+%     cov = [0.25,    0.01,   0.01;
+%            0.01,    0.25,   0.01;
+%            0.01,    0.01,   0.25];
+%     mu  = [0; 
+%            0; 
+%            0];
+    x = mvnrnd(mu, sigma, n);
+%     x = mvnrnd(mu,sigma,n);
 elseif dim == 2
     if nComponents == 1
-        cov = [0.25    0.01;
-            0.01   0.25];
-        mu  = [0; 0];
-        x = mvnrnd(mu, cov, n);
+%         cov = [0.25,    0.01;
+%                0.01,    0.25];
+%         mu  = [0; 
+%                0];
+        x = mvnrnd(mu, sigma, n);
     elseif nComponents == 2
-        cov1 = [0.25    0.01;
-            0.01   0.5];
+        assert('enable this')
+        cov1 = [0.25,    0.01;
+                0.01,    0.5];
         mu1  = [0; 0];
         x1 = mvnrnd(mu1, cov1, n);
         
-        cov2 = [0.7    -0.1;
-            -0.1   0.1];
+        cov2 = [0.7,    -0.1;
+               -0.1,     0.1];
         mu2  = [5; 5];
         x2 = mvnrnd(mu2, cov2, n);
         

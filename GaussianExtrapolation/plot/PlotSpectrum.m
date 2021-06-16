@@ -1,7 +1,10 @@
-function fig = PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambda1, vLambda2, mLambda3, lambda1Str, lambda2Str, lambda3Str)
+function fig = PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambda1, vLambda2, mLambda3, lambda1Str, lambda2Str, lambda3Str, figTitle)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
+if ~exist('figTitle', 'var')
+    figTitle = 'Eigenvalues';
+end
 
 fig = figure('Name', 'Spectrum');
 M = length(vLambda1);
@@ -19,7 +22,7 @@ legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast');
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 % ylabel('$\lambda_m$', 'Interpreter', 'latex', 'FontSize', 14)
 xlim([0 M + 8])
-title('Eigenvalues', 'Interpreter', 'latex', 'FontSize', 14);
+title(figTitle, 'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 
 subplot(2,1,2);
@@ -36,7 +39,7 @@ end
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast');
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 xlim([0 M + 8])
-title('Eigenvalues log-scale', ...
+title([figTitle, ' (log-scale)'], ...
     'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 set(gcf,'Position',[100 100 600 500])

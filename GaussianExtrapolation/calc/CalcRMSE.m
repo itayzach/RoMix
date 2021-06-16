@@ -1,22 +1,39 @@
 function vRMSE = CalcRMSE(tPhiToCompare, tPhiNumeric, compareTo)
 
-[T, nPoints, nEigenFuncs] = size(tPhiToCompare);
+% [R, ~, nEigenFuncs] = size(tPhiToCompare);
+% 
+% mSqNorm = zeros(R, nEigenFuncs);
+% fprintf('*********************************************************\n');
+% for r = 1:R
+%     fprintf([compareTo '. r = %d\n'], r);
+%     for m = 1:nEigenFuncs
+%         fprintf('m = %d; Ratio: %f\n', m-1, max(tPhiToCompare(r,:,m))/max(tPhiNumeric(r,:,m)))
+%         mSqNorm(r,m) = norm(tPhiToCompare(r,:,m) - tPhiNumeric(r,:,m));
+%     end
+%     fprintf('\n');
+% end
+% fprintf('*********************************************************\n');
+% vRMSE = sqrt(sum(mSqNorm.^2,1)/R);
 
-mSqNorm = zeros(T, nEigenFuncs);
+
+[R, nPoints, nEigenFuncs] = size(tPhiToCompare);
+
+mSqNorm = zeros(R, nEigenFuncs);
 fprintf('*********************************************************\n');
-for t = 1:T
-    fprintf([compareTo '. t = %d\n'], t);
+for r = 1:R
+    fprintf([compareTo '. t = %d\n'], r);
     for m = 1:nEigenFuncs
-        fprintf('m = %d; Ratio: %f\n', m-1, max(tPhiToCompare(t,:,m))/max(tPhiNumeric(t,:,m)))
+        fprintf('m = %d; Ratio: %f\n', m-1, max(tPhiToCompare(r,:,m))/max(tPhiNumeric(r,:,m)))
         if strcmp(compareTo, 'Analytic')
-            mSqNorm(t,m) = sqrt((1/nPoints)*sum((tPhiToCompare(t,:,m).' - tPhiNumeric(t,:,m).').^2));
+            mSqNorm(r,m) = sqrt((1/nPoints)*sum((tPhiToCompare(r,:,m).' - tPhiNumeric(r,:,m).').^2));
         elseif strcmp(compareTo, 'Nystrom')
-            mSqNorm(t,m) = sqrt((1/nPoints)*sum((tPhiToCompare(t,:,m).' - tPhiNumeric(t,:,m).').^2));
+            mSqNorm(r,m) = sqrt((1/nPoints)*sum((tPhiToCompare(r,:,m).' - tPhiNumeric(r,:,m).').^2));
         else
             error('unknown type')
         end
+        mSqNorm(r,m) = norm(tPhiToCompare(r,:,m) - tPhiNumeric(r,:,m));
     end
     fprintf('\n');
 end
 fprintf('*********************************************************\n');
-vRMSE = sqrt(sum(mSqNorm,1)/T);
+vRMSE = sqrt(sum(mSqNorm,1)/R);

@@ -1,6 +1,6 @@
 function sTwoMoons = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile, noiseSigma)
 
-if ~exist('sigmad', 'var')
+if ~exist('noiseSigma', 'var')
     noiseSigma = 0.1;
 end
 
@@ -21,7 +21,8 @@ y1(posTrainInd(ipos(1:ell))) = 1;
 y1(negTrainInd(ineg(1:ell))) = -1;
 sTwoMoons.y = y1;
 
-if b_loadTwoMoonsMatFile
+b_driftMoonsAway = true;
+if b_loadTwoMoonsMatFile && b_driftMoonsAway
     % Increase the distance between the two moons
     posTestInd = find(sTwoMoons.yt==1);
     negTestInd = find(sTwoMoons.yt==-1);

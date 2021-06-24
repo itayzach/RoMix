@@ -8,7 +8,49 @@ if ~exist('nTest', 'var')
     nTest = 1000;
 end
 %% Generate data
-if strcmp(actualDataDist, 'TwoMoons')
+if strcmp(actualDataDist, 'Minnesota')
+    assert(strcmp(interpMethod, 'AddPoints'))
+    G = gsp_minnesota();
+    data = G.coords;
+    trainTestRatio = nTrain/nTest;
+    nTest = length(data);
+    nTrain = min(round(trainTestRatio*nTest),nTest);
+    sDataset.sData.x = data(1:nTrain,:);
+    sDataset.sData.xt = data;
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    omega = 0.15;
+    omegaTilde = 0.15;
+    dim = 2;
+    sDatasetParams = [];    
+elseif strcmp(actualDataDist, 'Bunny')
+    assert(strcmp(interpMethod, 'AddPoints'))
+    G = gsp_bunny();
+    data = G.coords;
+    trainTestRatio = nTrain/nTest;
+    nTest = length(data);
+    nTrain = min(round(trainTestRatio*nTest),nTest);
+    sDataset.sData.x = data(1:nTrain,:);
+    sDataset.sData.xt = data;
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    omega = 0.15;
+    omegaTilde = 0.15;
+    dim = 3;
+    sDatasetParams = [];    
+elseif strcmp(actualDataDist, 'Sensor')
+    assert(strcmp(interpMethod, 'AddPoints'))
+    G = gsp_sensor(nTest);
+    data = G.coords;
+    sDataset.sData.x = data(1:nTrain,:);
+    sDataset.sData.xt = data;
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    omega = 0.15;
+    omegaTilde = 0.15;
+    dim = 2;
+    sDatasetParams = [];    
+elseif strcmp(actualDataDist, 'TwoMoons')
     if ~exist('sDatasetParams', 'var') || (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams, 'b_loadTwoMoonsMatFile'))
         sDatasetParams.b_loadTwoMoonsMatFile = false;
     end
@@ -25,7 +67,6 @@ if strcmp(actualDataDist, 'TwoMoons')
         labelsRearranged = labels(rperm,:);
         sDataset.sData.y = labelsRearranged(1:nTrain,:);
         sDataset.sData.yt = labelsRearranged;
-        
     end
     omega = 0.3;
     omegaTilde = 0.3;
@@ -73,7 +114,9 @@ elseif strcmp(actualDataDist, 'Gaussian')
     end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
-    omega = 0.3*sDatasetParams.sigma(1,1);
+%     warning('omega = 0.3*sigma(1,1)');
+%     omega = 0.3*sDatasetParams.sigma(1,1);
+    omega = 0.3;
     omegaTilde = 0.3;
 elseif strcmp(actualDataDist, 'Uniform')
     if ~exist('sDatasetParams', 'var') || ...

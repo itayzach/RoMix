@@ -12,7 +12,7 @@ actualNumComponents = 2;
 estNumComponents = actualNumComponents;
 sSimParams = GetSimParams();
 vDataDim = [1 2];
-
+omega = 0.3;
 %% Run
 b_normalize = true;
 T = 10;
@@ -41,8 +41,8 @@ for dataDim = vDataDim
             else
                 GMMRegVal = 0;
             end
-            sDistParams = EstimateDistributionParameters(sDataset, estNumComponents, GMMRegVal);
-            sKernelParams = GetKernelParams(sDataset, sDistParams);
+            sDistParams = EstimateDistributionParameters(sDataset.sData.x, estNumComponents, GMMRegVal);
+            sKernelParams = GetKernelParams(sDistParams, omega);
             [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
                 = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, estNumComponents);
             [ tPhiAnalytic(t,:,:), vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x, b_normalize);
@@ -62,11 +62,14 @@ for dataDim = vDataDim
                     mLambdaNystrom, '\lambda^{{\bf ana}}', '\lambda^{{\bf num}}', '\lambda^{{\bf nys}}');
 
                 graphName = 'ipmatrix';
-                PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, [], squeeze(tPhiAnalytic(1,:,:)), 'Analytic')
-                PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, [], squeeze(tPhiNumeric(1,:,:)), 'Numeric')
+                pltTitleAnalytic = 'Analytic - $\int \phi_i(x) \phi_j(x) p(x) dx = n^d \Phi^T$diag(Pr)$\Phi$';
+                pltTitleNumeric = 'Numeric - ${\bf V}^T {\bf V}$';
+                PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, [], squeeze(tPhiAnalytic(1,:,:)), pltTitleAnalytic, graphName);
+                PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, [], squeeze(tPhiNumeric(1,:,:)), pltTitleNumeric, graphName);
                 for r = 1:R
                     nysRatio = vNysRatio(r);
-                    PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, nysRatio, squeeze(tPhiNystrom(r,1,:,:)), 'Nystrom')
+                    pltTitleNys = ['Nystrom ($r=' num2str(r) '$)- ${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$'];
+                    PlotInnerProductMatrix(sSimParams, sDistParams.dim, sDistParams.vPr, graphName, nysRatio, squeeze(tPhiNystrom(r,1,:,:)), pltTitleNys, graphName)
                 end
                 if dataDim == 1
                     firstEigenIdxToPlot = 0;
@@ -106,7 +109,7 @@ for dataDim = vDataDim
         mRMSENysVsNum = zeros(R, sSimParams.CalcEigenFuncsM);
         for r = 1:R
             nysRatio = vNysRatio(r);
-            mRMSENysVsNum(r,:) = CalcRMSE(reshape(tPhiNystrom(r,:,:,1:nEig),[T, nTotal, nEig]), tPhiNumeric(:,:,1:nEig), 'Nystrom');        
+            mRMSENysVsNum(r,:) = CalcRMSE(reshape(tPhiNystrom(r,:,:,1:nEig),[T, nTrain, nEig]), tPhiNumeric(:,:,1:nEig), 'Nystrom');        
         end
         PlotRMSE(sSimParams, sDataset, vNysRatio, vRMSEAnaVsNum, mRMSENysVsNum);
     end

@@ -1,4 +1,4 @@
-function fig = PlotInnerProductMatrix(sSimParams, dim, vPr, graphName, nysRatio, mPhi, figName)
+function fig = PlotInnerProductMatrix(sSimParams, dim, vPr, graphName, nysRatio, mPhi, pltTitle, figName)
 
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
@@ -12,15 +12,10 @@ N = size(mPhi,1);
 
 fig = figure('Name', sprintf('%s IP matrix', figName));
 
-if strcmp(figName, 'Numeric')
+if isempty(vPr)
     mInnerProduct = mPhi.'*mPhi;
-    pltTitle = [figName ' - $V^T V$'];
-elseif strcmp(figName, 'Analytic')
+else
     mInnerProduct = N^dim * (mPhi.' * diag(vPr)* mPhi);
-    pltTitle = [figName ' - $\int \phi_i(x) \phi_j(x) p(x) dx = n^d \Phi^T$diag(Pr)$\Phi$'];
-elseif strcmp(figName, 'Nystrom')
-    mInnerProduct = mPhi.'*mPhi;
-    pltTitle = [figName ' - $\hat{V}^T \hat{V}$'];    
 end
 imagesc(mInnerProduct)
 % colormap(gca, 'hot')

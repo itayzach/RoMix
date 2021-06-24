@@ -1,7 +1,7 @@
-function sKernelParams = GetKernelParams(sDataset, sDistParams, omega)
-dim = size(sDataset.sData.x,2);
+function sKernelParams = GetKernelParams(sDistParams, omega)
+dim = sDistParams.dim;
 %% kernel and eigenfunctions constants type
-if strcmp(sDataset.estDataDist, 'Gaussian')
+if strcmp(sDistParams.estDataDist, 'Gaussian')
     sKernelParams.kernelType = 'gaussian';
     sKernelParams.constsType = 2;
     if sKernelParams.constsType == 1
@@ -28,11 +28,8 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
         fprintf('*            Using beta,omega constants                 *\n');
         fprintf('*********************************************************\n');
         
-        if ~exist('omega', 'var')
-            sKernelParams.omega = 0.3; 1/(6*sqrt(2)); % kernel width
-        else
-            sKernelParams.omega = omega;
-        end
+%         sKernelParams.omega = 0.3; 1/(6*sqrt(2)); % kernel width
+        sKernelParams.omega = omega;
         sKernelParams.t = 0.5*sKernelParams.omega^2;
         for c = 1:sDistParams.estNumComponents
             sKernelParams.beta{c} = 2*sDistParams.sigma{c}.^2/sKernelParams.omega^2;
@@ -67,7 +64,7 @@ if strcmp(sDataset.estDataDist, 'Gaussian')
     else
         error('Unknown constsType')
     end
-elseif strcmp(sDataset.estDataDist, 'uniform')
+elseif strcmp(sDistParams.estDataDist, 'uniform')
     sKernelParams.kernelType = 'sinc';
 else
     error('unknown pdf')

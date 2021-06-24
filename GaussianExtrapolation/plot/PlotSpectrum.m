@@ -1,6 +1,6 @@
 function fig = PlotSpectrum(sSimParams, sDataset, vNysRatio, vLambda1, vLambda2, mLambda3, lambda1Str, lambda2Str, lambda3Str, figTitle)
-windowStyle = get(0,'DefaultFigureWindowStyle');
-set(0,'DefaultFigureWindowStyle','normal')
+% windowStyle = get(0,'DefaultFigureWindowStyle');
+% set(0,'DefaultFigureWindowStyle','normal')
 
 if ~exist('figTitle', 'var')
     figTitle = 'Eigenvalues';
@@ -42,8 +42,8 @@ xlim([0 M + 8])
 title([figTitle, ' (log-scale)'], ...
     'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
-set(gcf,'Position',[100 100 600 500])
-set(0,'DefaultFigureWindowStyle',windowStyle)
+% set(gcf,'Position',[100 100 600 500])
+% set(0,'DefaultFigureWindowStyle',windowStyle)
 %% Save
 try
     if ~exist(sSimParams.outputFolder, 'dir')

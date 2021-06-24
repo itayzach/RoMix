@@ -8,21 +8,21 @@ sSimParams = GetSimParams(M);
 
 %% Load dataset
 actualDataDist = 'TwoMoons';
-nComponents = 2;
-dataDim = 2;
 nTrain = 200;
 nTest = 400;
 sDatasetParams.b_loadTwoMoonsMatFile = false;
 interpMethod = 'NewPoints';
 
-sDataset = GenerateDataset(actualDataDist, dataDim, nComponents, nTrain, nTest, interpMethod, sDatasetParams);
+sDataset = GenerateDataset(actualDataDist, [], [], nTrain, nTest, interpMethod, sDatasetParams);
 PlotTwoMoons(sSimParams, sDataset)
 
 %%
-sDistParams = EstimateDistributionParameters(sDataset, nComponents, 0.1);
-sKernelParams = GetKernelParams(sDataset, sDistParams);
+omega = 0.3;
+nEstComponents = 2;
+sDistParams = EstimateDistributionParameters(sDataset.sData.x, nEstComponents, 0.1);
+sKernelParams = GetKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, nComponents);
+                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, nEstComponents);
 %% LapRLS
 gamma_A_laprls = 0.03125;
 gamma_I_laprls = 1;

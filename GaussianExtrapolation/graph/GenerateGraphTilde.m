@@ -5,8 +5,8 @@ sDatasetTilde.dim = size(v_tilde,2);
 GMMRegVal = 0;
 
 % Estimate distribution and get kernel parameters
-sDistParamsTilde = EstimateDistributionParameters(sDatasetTilde, nTildeComponents, GMMRegVal);
-sKernelParamsTilde = GetKernelParams(sDatasetTilde, sDistParamsTilde, omega);
+sDistParamsTilde = EstimateDistributionParameters(sDatasetTilde.sData.x, nTildeComponents, GMMRegVal);
+sKernelParamsTilde = GetKernelParams(sDistParamsTilde, omega);
 [sKernelParamsTilde.vLambdaAnalytic, sKernelParamsTilde.vComponentIndex, sKernelParamsTilde.vEigIndex] ...
     = CalcAnalyticEigenvalues(nEigs, sKernelParamsTilde, sDatasetTilde.dim, nTildeComponents);
 % Adjacency (gaussian kernel)

@@ -75,7 +75,7 @@ elseif strcmp(actualDataDist, 'TwoSpirals')
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
     elseif strcmp(interpMethod, 'AddPoints')
-        sData = GenerateTwoSpiralsDataset(nTest);
+        sData = GenerateTwoSpiralsDataset(nTest, 0);
         data = sData.x;
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;

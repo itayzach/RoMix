@@ -156,10 +156,10 @@ for r = 1:R
         [ PhiTilde, lambdaAnalyticTilde ] = ...
             CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, true);
         if sPlotParams.b_plotGmm
-            PlotDataset(sPlotParams, xTrain, verticesPDF, 'Training set and GMM', sDistParams.GMModel);
-            nGmmPoints = 1000;
-            pltTitle = ['GMM with nPoints = ' num2str(nGmmPoints), ', nEstComp = ' num2str(gmmNumComponents)];
-            PlotGMM(pltTitle, sDistParams.GMModel, nGmmPoints);
+            nGmmPoints = 5000;
+            pltTitle = ['Dataset with n = ', num2str(n), ' points'];
+            plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
+            PlotDataset(sPlotParams, xTrain, verticesPDF, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title);
         end
     else
         [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
@@ -250,11 +250,9 @@ for r = 1:R
     VRefToCompare = sqrt(interpRatio)*abs(VRef);
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VIntToCompare, [], [], [], 'Ours vs. Reference', 'VInt_vs_VRef', 'v^{{\bf int}}', VRefToCompare, 'v^{{\bf ref}}');
+            VIntToCompare, [], [], [], ['Ours vs. Reference (N = ', num2str(N), ')'], 'VInt_vs_VRef', 'v^{{\bf int}}', VRefToCompare, 'v^{{\bf ref}}');
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VNysToCompare, [], [], [], 'Nystrom vs. Reference', 'VNys_vs_VRef', 'v^{{\bf nys}}', VRefToCompare, 'v^{{\bf ref}}');
-        PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VNysToCompare, [], [], [], 'Original vs. Reference', 'V_vs_VRef', 'v', VRefToCompare, 'v^{{\bf ref}}');
+            VNysToCompare, [], [], [], ['Nystrom vs. Reference (N = ', num2str(N), ')'], 'VNys_vs_VRef', 'v^{{\bf nys}}', VRefToCompare, 'v^{{\bf ref}}');
     end
     
     % Plot inner product of interpolated eigenvectors

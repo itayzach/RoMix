@@ -1,24 +1,35 @@
-function fig = PlotDataset(sSimParams, x, actualDataDist, plt_title, GMModel)
+function fig = PlotDataset(sSimParams, x, actualDataDist, pltTitle, GMModel, nGmmPoints, plt2Title)
 
 [n, dim] = size(x);
 
 fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
+%% GMM
 if exist('GMModel', 'var')
-    ax = linspace(min(x(:)),max(x(:)),100)';
+    subplot(1,2,2)
+    [xGmm,compIdx] = random(GMModel, nGmmPoints);
     if dim == 1
-        pdfVal = pdf(GMModel,ax);
-        plot(ax, pdfVal, '.')
+        scatter(xGmm, zeros(1,nGmmPoints), 50, ones(1,nGmmPoints), 'filled')
+        xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
+        set(gca,'YTick',[],'FontSize', 14);
     elseif dim == 2
-        [X,Y] = meshgrid(ax);
-        pdfVal = pdf(GMModel,[X(:),Y(:)]);
-        scatter(X(:),Y(:),[],pdfVal,'filled');
+        scatter(xGmm(:,1),xGmm(:,2),[],compIdx,'filled') % Scatter plot with points of size 10
+        colormap(parula(GMModel.NumComponents));
+        colorbar();
+        xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
+        ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
+        set(gca,'FontSize', 14);
     elseif dim == 3
-        [X,Y,Z] = meshgrid(ax);
-        pdfVal = pdf(GMModel,[X(:),Y(:),Z(:)]);
-        scatter3(X(:),Y(:),Z(:),[],pdfVal,'filled');
+        scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[],compIdx, 'filled');
+        xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
+        ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
+        zlabel('$z$', 'interpreter', 'latex', 'FontSize', 16);
+        view(10,5);
+        set(gca,'FontSize', 14);
     end
-    hold on
+    title(plt2Title, 'Interpreter', 'latex', 'FontSize', 14)
+    subplot(1,2,1)
 end
+%% Dataset
 if dim == 1
     scatter(x, zeros(1,n), 50, ones(1,n), 'filled')
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
@@ -36,7 +47,7 @@ elseif dim == 3
     view(10,5);
     set(gca,'FontSize', 14);
 end
-title(strcat(plt_title, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
+title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 
 %% Save
 if ~exist(sSimParams.outputFolder, 'dir')

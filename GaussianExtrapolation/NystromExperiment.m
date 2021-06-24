@@ -13,6 +13,8 @@ estNumComponents = actualNumComponents;
 sSimParams = GetSimParams();
 vDataDim = [1 2];
 omega = 0.3;
+gmmNumComponents= actualNumComponents;
+gmmMaxIter = 100;
 %% Run
 b_normalize = true;
 T = 10;
@@ -37,11 +39,11 @@ for dataDim = vDataDim
             end
             sDataset = GenerateDataset(actualDataDist, dataDim, actualNumComponents, nTrain, nTest, interpMethod, sDatasetParams);
             if strcmp(actualDataDist, "TwoMoons")
-                GMMRegVal = 0.1;
+                gmmRegVal = 0.1;
             else
-                GMMRegVal = 0;
+                gmmRegVal = 0;
             end
-            sDistParams = EstimateDistributionParameters(sDataset.sData.x, estNumComponents, GMMRegVal);
+            sDistParams = EstimateDistributionParameters(sDataset.sData.x, gmmNumComponents, gmmRegVal, gmmMaxIter);
             sKernelParams = GetKernelParams(sDistParams, omega);
             [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
                 = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, estNumComponents);

@@ -15,5 +15,4 @@ for i = 1:N
     end
 end
 % A = A - eye(N);
-
 end

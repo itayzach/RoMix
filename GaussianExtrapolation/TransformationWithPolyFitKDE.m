@@ -26,8 +26,9 @@ invpCdfDegree      = 10;
 %% KDE params
 kde_bw             = []; %1e-3;
 %% GMM params
-gmmRegVal          = 0.1;
-nEstComponents     = 2;
+gmmRegVal          = 0;
+gmmMaxIter         = 1000;
+gmmNumComponents   = 16;
 %% Method parameters
 b_debugUseAnalytic = false;
 b_applyT           = false;
@@ -36,8 +37,8 @@ b_gmmInsteadOfT    = true;
 %% Dataset parameters
 dim                = 1;
 nComponents        = 1;
-n                  = 1000;
-N                  = 2000;
+n                  = 2000;
+N                  = 3000;
 k                  = 100;
 nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 verticesPDF        = 'TwoMoons'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
@@ -148,16 +149,16 @@ for r = 1:R
     % Learn eigenvectors to eigenfunctions transformation (C)
     % ----------------------------------------------------------------------------------------------
     if b_gmmInsteadOfT
-        sDistParams = EstimateDistributionParameters(xTildeTrain, nEstComponents, 0.1);
+        sDistParams = EstimateDistributionParameters(xTildeTrain, gmmNumComponents, gmmRegVal, gmmMaxIter);
         sKernelParams = GetKernelParams(sDistParams, omegaTilde);
         [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-            = CalcAnalyticEigenvalues(MTilde, sKernelParams, dim, nEstComponents);
+            = CalcAnalyticEigenvalues(MTilde, sKernelParams, dim, gmmNumComponents);
         [ PhiTilde, lambdaAnalyticTilde ] = ...
             CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, true);
         if sPlotParams.b_plotGmm
             PlotDataset(sPlotParams, xTrain, verticesPDF, 'Training set and GMM', sDistParams.GMModel);
             nGmmPoints = 1000;
-            pltTitle = ['GMM with nPoints = ' num2str(nGmmPoints), ', nEstComp = ' num2str(nEstComponents)];
+            pltTitle = ['GMM with nPoints = ' num2str(nGmmPoints), ', nEstComp = ' num2str(gmmNumComponents)];
             PlotGMM(pltTitle, sDistParams.GMModel, nGmmPoints);
         end
     else
@@ -219,7 +220,7 @@ for r = 1:R
     end
     
     if b_gmmInsteadOfT
-        [ PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeInt, true);
+        [PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeInt, true);
     else
         [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
     end

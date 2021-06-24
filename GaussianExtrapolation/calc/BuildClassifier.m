@@ -48,5 +48,5 @@ if sSimParams.b_plotEigenfunctions
 end
 
 sClassifier.mPhi_X_c = reshape(mPhi_m_X*c, length(x1), length(x2));
-
+sClassifier.vLambdaAnalytic = vLambdaAnalytic;
 end

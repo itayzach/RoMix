@@ -1,4 +1,4 @@
-function sDistParams = EstimateDistributionParameters(x, estNumComponents, gmmRegVal)
+function sDistParams = EstimateDistributionParameters(x, gmmNumComponents, gmmRegVal, gmmMaxIter)
 
 sDistParams.estDataDist = 'Gaussian';
 dim = size(x,2);
@@ -6,8 +6,8 @@ sDistParams.dim = dim;
 
 lastwarn('')
 try
-    GMModel = fitgmdist(x, estNumComponents, 'RegularizationValue', gmmRegVal);
-%     GMModel = fitgmdist(x, estNumComponents, 'RegularizationValue', 0, 'SharedCovariance', true);
+    options = statset('MaxIter',gmmMaxIter);
+    GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
 catch exception
     sprintf('GM error: %s\n', exception.message)
 end
@@ -18,9 +18,9 @@ end
 assert(GMModel.Converged)
 sDistParams.GMModel = GMModel;
 
-sDistParams.estNumComponents = estNumComponents;
+sDistParams.estNumComponents = gmmNumComponents;
 sDistParams.componentProportion = GMModel.ComponentProportion;
-for c = 1:estNumComponents
+for c = 1:gmmNumComponents
     sDistParams.cov{c} = GMModel.Sigma(:,:,c);
     sDistParams.mu{c} = GMModel.mu(c,:);
     [sDistParams.u{c}, sDistParams.sigma_eigv{c}] = eig(sDistParams.cov{c});
@@ -39,7 +39,7 @@ end
 
 % Caluclate the probability for each data point x
 sDistParams.vPr = zeros(length(x),1);
-for c = 1:estNumComponents
+for c = 1:gmmNumComponents
     prop = sDistParams.componentProportion(c);
     vDensity = prop*p(sDistParams, c, x);
     vDiffs = ones(length(x),1);

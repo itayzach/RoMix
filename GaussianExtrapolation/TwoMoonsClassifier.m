@@ -1,9 +1,14 @@
 %% Restart run
 close all; clear; clc;
 rng('default');
+set(0,'DefaultFigureWindowStyle','normal')
 
 %% Set params
-M = 8;
+M                = 8;
+omega            = 0.3;
+gmmNumComponents = 2;
+gmmRegVal        = 0.1;
+gmmMaxIter       = 100;
 sSimParams = GetSimParams(M);
 
 %% Load dataset
@@ -17,12 +22,12 @@ sDataset = GenerateDataset(actualDataDist, [], [], nTrain, nTest, interpMethod, 
 PlotTwoMoons(sSimParams, sDataset)
 
 %%
-omega = 0.3;
-nEstComponents = 2;
-sDistParams = EstimateDistributionParameters(sDataset.sData.x, nEstComponents, 0.1);
+sDistParams = EstimateDistributionParameters(sDataset.sData.x, gmmNumComponents, gmmRegVal, gmmMaxIter);
+nGmmPoints = 1000;
+PlotGMM('GMM', sDistParams.GMModel, nGmmPoints);
 sKernelParams = GetKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, nEstComponents);
+                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, gmmNumComponents);
 %% LapRLS
 gamma_A_laprls = 0.03125;
 gamma_I_laprls = 1;
@@ -42,10 +47,9 @@ plot_classifier(orig_laprlsc_classifier, sSimParams.outputFolder, sDataset.sData
 
 
 %% EigRLS params
-gamma_A_eigrls = 0;0.01;
+gamma_A_eigrls = 0; %0.01;
 gamma_I_eigrls = 0.1;  
 
 sClassifier = BuildClassifier(sSimParams, sDataset, sKernelParams, 'eigrls', gamma_A_eigrls, gamma_I_eigrls);
+% PlotCoefficients(sSimParams, sClassifier.c, sClassifier.vLambdaAnalytic);
 PlotClassifier(sSimParams, sDataset, sClassifier)
-
-% PlotCoefficients(sSimParams, c, vLambdaAnalytic);

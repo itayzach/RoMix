@@ -3,9 +3,9 @@ sDatasetTilde.sData.x = v_tilde;
 sDatasetTilde.estDataDist = 'Gaussian';
 sDatasetTilde.dim = size(v_tilde,2);
 GMMRegVal = 0;
-
+gmmMaxIter = 1000;
 % Estimate distribution and get kernel parameters
-sDistParamsTilde = EstimateDistributionParameters(sDatasetTilde.sData.x, nTildeComponents, GMMRegVal);
+sDistParamsTilde = EstimateDistributionParameters(sDatasetTilde.sData.x, nTildeComponents, GMMRegVal, gmmMaxIter);
 sKernelParamsTilde = GetKernelParams(sDistParamsTilde, omega);
 [sKernelParamsTilde.vLambdaAnalytic, sKernelParamsTilde.vComponentIndex, sKernelParamsTilde.vEigIndex] ...
     = CalcAnalyticEigenvalues(nEigs, sKernelParamsTilde, sDatasetTilde.dim, nTildeComponents);

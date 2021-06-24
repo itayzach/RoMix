@@ -49,7 +49,8 @@ if exist('G_tmp', 'var')
 end
 
 %% Estimate distribution and get kernel parameters
-sDistParams = EstimateDistributionParameters(sDataset.sData.x, nComponents, GMMRegVal);
+gmmMaxIter = 1000;
+sDistParams = EstimateDistributionParameters(sDataset.sData.x, nComponents, GMMRegVal, gmmMaxIter);
 sKernelParams = GetKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
     = CalcAnalyticEigenvalues(nEigs, sKernelParams, sDataset.dim, nComponents);

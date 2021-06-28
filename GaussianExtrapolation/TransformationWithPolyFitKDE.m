@@ -36,6 +36,7 @@ b_debugUseAnalytic = false;
 b_applyT           = false;
 b_kde              = true;
 b_gmmInsteadOfT    = true;
+b_forceCtoIdentity = false;
 %% Dataset parameters
 dim                = 1;
 nComponents        = 1;

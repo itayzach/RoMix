@@ -45,13 +45,12 @@ set(gca,'FontSize', 14);
 % set(gcf,'Position',[100 100 600 500])
 % set(0,'DefaultFigureWindowStyle',windowStyle)
 %% Save
-try
+if isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')
         mkdir(sSimParams.outputFolder)
     end
 
     simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
     saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_spectrum'), 'epsc');
-catch
 end
 end

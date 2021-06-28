@@ -32,6 +32,8 @@ if strcmp(sClassifier.name, 'eigrls')
     plot2D(sDataset.sData.xt,zeros(size(sDataset.sData.xt,1),1),15,'k*');
     set(gca,'FontSize', 14);
     set(gcf,'Position',[x0+width+width y0 width height])
-    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigrls_M_' num2str(sSimParams.CalcEigenFuncsM)], 'epsc');
+    if isfield(sSimParams, 'outputFolder')
+        saveas(fig,[sSimParams.outputFolder filesep 'fig_eigrls_M_' num2str(sSimParams.CalcEigenFuncsM)], 'epsc');
+    end
 end
 end

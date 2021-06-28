@@ -45,7 +45,8 @@ subplot(1,2,2);
            'using ' interpMethod newline...
            '$\tilde{f}_{\bf int}^T \tilde{L} \tilde{f}_{\bf int}$ = ' num2str(f_tilde_interp'*G_tilde.L*f_tilde_interp, '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
 set(gcf,'Position', [400 100 800 400])   
-saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_', verticesTransformation, '_', interpMethod, '_interp_with_transform_no_return_', num2str(round(samplingRatio*100), '%d'), 'prec_sampling'), 'epsc');
-
+if isfield(sSimParams, 'outputFolder')
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_', verticesTransformation, '_', interpMethod, '_interp_with_transform_no_return_', num2str(round(samplingRatio*100), '%d'), 'prec_sampling'), 'epsc');
+end
 end
 

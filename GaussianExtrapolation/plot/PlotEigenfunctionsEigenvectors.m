@@ -35,7 +35,7 @@ if sDataset.dim == 1
     set(gca,'FontSize', 14);
     title('Numeric', 'Interpreter', 'latex', 'FontSize', 14)
     legend('Location', 'best', 'Interpreter', 'latex', 'FontSize', 14)
-
+    
     %% Diff
     subplot(2,1,2);
     for m = firstEigenIdx:lastEigIdx
@@ -55,20 +55,22 @@ if sDataset.dim == 1
     title('Error', 'Interpreter', 'latex', 'FontSize', 14)
     legend('Location', 'best', 'Interpreter', 'latex', 'FontSize', 14)
     set(gcf,'Position',[100 100 1000 800])
-
+    
 else
     error('Not supporting')
 end
 
 %% Save
-if ~exist(sSimParams.outputFolder, 'dir')
-    mkdir(sSimParams.outputFolder)
+if isfield(sSimParams, 'outputFolder')
+    if ~exist(sSimParams.outputFolder, 'dir')
+        mkdir(sSimParams.outputFolder)
+    end
+    if isempty(nysRatio)
+        simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
+    else
+        simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+    end
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
 end
-if isempty(nysRatio)
-    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
-else
-    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
-end
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
 
 end

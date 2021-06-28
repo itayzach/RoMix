@@ -44,7 +44,9 @@ subplot(133);
         'error: ' num2str(norm(f - f_int_no_transform)/norm(f), '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
     view(0,90)
 set(gcf,'Position', [400 100 1200 400])   
-saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_interp_no_transform_', num2str(round(samplingRatio*100), '%d'), 'prec_sampling'), 'epsc');
+if isfield(sSimParams, 'outputFolder')
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_interp_no_transform_', num2str(round(samplingRatio*100), '%d'), 'prec_sampling'), 'epsc');
+end
 
 end
 

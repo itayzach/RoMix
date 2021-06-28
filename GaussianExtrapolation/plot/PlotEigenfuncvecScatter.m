@@ -60,7 +60,7 @@ elseif dim == 2 || dim == 3
             subplot(nRows, nCols,m-firstEigenIdx+1);
             if isfield(sSimParams, 'b_GSPBoxPlots') && sSimParams.b_GSPBoxPlots
                 param.show_edges = false;
-                gsp_plot_signal(G,mPhi(:,m+1),param); 
+                gsp_plot_signal(G,mPhi(:,m+1),param);
             else
                 if dim == 2
                     scatter3(mData(:,1), mData(:,2), mPhi(:,m+1), [], mPhi(:,m+1), 'filled');
@@ -96,19 +96,21 @@ elseif dim == 2 || dim == 3
 end
 
 %% Save
-if ~exist(sSimParams.outputFolder, 'dir')
-    mkdir(sSimParams.outputFolder)
+if isfield(sSimParams, 'outputFolder')
+    if ~exist(sSimParams.outputFolder, 'dir')
+        mkdir(sSimParams.outputFolder)
+    end
+    if isempty(nysRatio)
+        simPrefix = strcat(actualDataDist, num2str(dim), 'd');
+    else
+        simPrefix = strcat(actualDataDist, num2str(dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+    end
+    if ~exist('figureName', 'var')
+        figureName = evecsName;
+    end
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, ...
+        '_', figureName, '_eigenvectors', '_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'png');
 end
-if isempty(nysRatio)
-    simPrefix = strcat(actualDataDist, num2str(dim), 'd');
-else
-    simPrefix = strcat(actualDataDist, num2str(dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
-end
-if ~exist('figureName', 'var')
-    figureName = evecsName;
-end
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, ...
-    '_', figureName, '_eigenvectors', '_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'png');
 set(0,'DefaultFigureWindowStyle',windowStyle)
 
 end

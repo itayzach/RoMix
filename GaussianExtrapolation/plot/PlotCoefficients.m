@@ -19,5 +19,7 @@ set(gca,'FontSize', 14);
 set(gca, 'YScale', 'log');
 set(gca, 'XScale', 'linear');
 set(gcf,'Position', [x0 y0 width height])
-saveas(fig,[sSimParams.outputFolder filesep 'fig_rkhs_norm_decay'], 'epsc');
+if isfield(sSimParams, 'outputFolder')
+    saveas(fig,[sSimParams.outputFolder filesep 'fig_rkhs_norm_decay'], 'epsc');
+end
 end

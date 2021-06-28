@@ -50,9 +50,11 @@ end
 title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 
 %% Save
-if ~exist(sSimParams.outputFolder, 'dir')
-    mkdir(sSimParams.outputFolder)
+if isfield(sSimParams, 'outputFolder')
+    if ~exist(sSimParams.outputFolder, 'dir')
+        mkdir(sSimParams.outputFolder)
+    end
+    
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, actualDataDist, num2str(dim), 'd', '_histogram'), 'epsc');
 end
-
-saveas(fig,strcat(sSimParams.outputFolder, filesep, actualDataDist, num2str(dim), 'd', '_histogram'), 'epsc');
 end

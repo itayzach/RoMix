@@ -11,5 +11,7 @@ xlabel('$x_1$', 'Interpreter', 'latex')
 ylabel('$x_2$', 'Interpreter', 'latex')
 set(gca,'FontSize', 14);
 set(gcf,'Position',[x0 y0 width height])
-saveas(fig,[sSimParams.outputFolder filesep 'fig_two_moons'], 'epsc');
+if isfield(sSimParams, 'outputFolder')
+    saveas(fig,[sSimParams.outputFolder filesep 'fig_two_moons'], 'epsc');
+end
 end

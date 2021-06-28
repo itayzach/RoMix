@@ -56,6 +56,8 @@ if dataDim == 2 || dataDim == 3
     end    
 end
 set(gcf,'Position', [100 200 1000 histPlotRows*250])
-saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_', verticesTransformation, '_hists_transformed'), 'epsc');
+if isfield(sSimParams, 'outputFolder')
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_', verticesTransformation, '_hists_transformed'), 'epsc');
+end
 end
 

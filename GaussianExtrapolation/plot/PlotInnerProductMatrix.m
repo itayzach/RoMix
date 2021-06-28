@@ -25,7 +25,7 @@ set(gca,'FontSize', 14);
 set(gcf,'Position', [x0 y0 width height])
 set(0,'DefaultFigureWindowStyle',windowStyle)
 %% Save
-if ~isempty(sSimParams)
+if isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')
         mkdir(sSimParams.outputFolder)
     end

@@ -30,14 +30,15 @@ else
 end
 
 %% Save
-if ~exist(sSimParams.outputFolder, 'dir')
-    mkdir(sSimParams.outputFolder)
+if isfield(sSimParams, 'outputFolder')
+    if ~exist(sSimParams.outputFolder, 'dir')
+        mkdir(sSimParams.outputFolder)
+    end
+    if isempty(nysRatio)
+        simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
+    else
+        simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
+    end
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_same_plot_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'epsc');
 end
-if isempty(nysRatio)
-    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
-else
-    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
-end
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_same_plot_eigenvectors_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'epsc');
-
 end

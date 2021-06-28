@@ -108,15 +108,17 @@ else
                 'Interpreter', 'latex', 'FontSize', 14)
             set(gca,'FontSize', 14);
         end
-        set(gcf,'Position', [x0 y0 width height])    
+        set(gcf,'Position', [x0 y0 width height])
     else
         error('Not supporting')
     end
 end
 %% Save
-if ~exist(sSimParams.outputFolder, 'dir')
-    mkdir(sSimParams.outputFolder)
+if isfield(sSimParams, 'outputFolder')
+    if ~exist(sSimParams.outputFolder, 'dir')
+        mkdir(sSimParams.outputFolder)
+    end
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, actualDist, '_eigen_diffs_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'png');
 end
-saveas(fig,strcat(sSimParams.outputFolder, filesep, actualDist, '_eigen_diffs_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'png');
 set(0,'DefaultFigureWindowStyle',windowStyle)
 end

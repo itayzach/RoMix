@@ -57,6 +57,8 @@ subplot(1,3,3);
            '$f_{{\bf int}}^T L f_{{\bf int}}$ = ' num2str(f_tilde_interp'*G.L*f_tilde_interp, '%.3f') newline ...
            'error: ' num2str(norm(f - f_tilde_interp)/norm(f), '%.3f')], 'Interpreter', 'latex', 'FontSize', 14);
 set(gcf,'Position', [400 100 1200 400])   
-saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_', verticesTransformation, '_', interpMethod, '_interp_with_transform_', num2str(round(samplingRatio*100), '%d'), 'prec_sampling'), 'epsc');
+if isfield(sSimParams, 'outputFolder')
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, graphName, '_', verticesTransformation, '_', interpMethod, '_interp_with_transform_', num2str(round(samplingRatio*100), '%d'), 'prec_sampling'), 'epsc');
+end
 end
 

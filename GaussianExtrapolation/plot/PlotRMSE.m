@@ -23,12 +23,14 @@ ylim([0 1.5*max(max([vAnaVsNum; mNysVsNum]))])
 set(gca,'FontSize', 14);
 
 %% Save
-if ~exist(sSimParams.outputFolder, 'dir')
-    mkdir(sSimParams.outputFolder)
-end
+if isfield(sSimParams, 'outputFolder')
+    if ~exist(sSimParams.outputFolder, 'dir')
+        mkdir(sSimParams.outputFolder)
+    end
 
-simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
-saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_RMSE_', 'eigs_', num2str(length(vAnaVsNum))), 'epsc');
+    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_RMSE_', 'eigs_', num2str(length(vAnaVsNum))), 'epsc');
+end
 
 
 end

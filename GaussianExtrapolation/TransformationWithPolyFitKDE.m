@@ -4,17 +4,19 @@ close all;
 set(0,'DefaultFigureWindowStyle','docked')
 
 %% Plot params
-sPlotParams.outputFolder = 'figs';
+% sPlotParams.outputFolder = 'figs';
 sPlotParams.b_plotAllEvecs             = false;
 sPlotParams.b_GSPBoxPlots              = false;
 sPlotParams.b_plotLaplacianEvecs       = false;
 sPlotParams.b_plotWeights              = false;
 sPlotParams.b_plotVRec                 = false;
-sPlotParams.b_plotTransDemos           = true;
-sPlotParams.b_plotOrigVsInterpEvecs    = true;
-sPlotParams.b_plotTildeFiguresForDebug = true;
-sPlotParams.b_plotData                 = true;
-sPlotParams.b_plotGmm                  = true;
+sPlotParams.b_plotTransDemos           = false;
+sPlotParams.b_plotOrigVsInterpEvecs    = false;
+sPlotParams.b_plotTildeFiguresForDebug = false;
+sPlotParams.b_plotData                 = false;
+sPlotParams.b_plotGmm                  = false;
+sPlotParams.b_plotInnerProductMatrices = false;
+sPlotParams.b_plotC                    = false;
 plotInd                                = [0,3]; %[M-4, M-1];
 %% Number of eigenvectors/eigenfunctions
 M                  = 50;
@@ -56,8 +58,6 @@ end
 
 sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod, sDatasetParams);
 dim            = sDataset.dim;
-xTrain         = sDataset.sData.x;
-xInt           = sDataset.sData.xt;
 xMax           = sDataset.xMax;
 xMin           = sDataset.xMin;
 n              = length(sDataset.sData.x);
@@ -76,8 +76,9 @@ for r = 1:R
     % Generate dataset
     % ----------------------------------------------------------------------------------------------
     sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod, sDatasetParams);
-    
-    if r == 1 && sPlotParams.b_plotData
+    xTrain   = sDataset.sData.x;
+    xInt     = sDataset.sData.xt;
+    if r == 1 && sPlotParams.b_plotData && dim <= 3
         PlotDataset(sPlotParams, xTrain, verticesPDF, 'Training set');
     end
     % ----------------------------------------------------------------------------------------------
@@ -155,7 +156,7 @@ for r = 1:R
             = CalcAnalyticEigenvalues(MTilde, sKernelParams, dim, gmmNumComponents);
         [ PhiTilde, lambdaAnalyticTilde ] = ...
             CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, true);
-        if sPlotParams.b_plotGmm
+        if r == 1 && sPlotParams.b_plotGmm && dim <= 3
             nGmmPoints = 5000;
             pltTitle = ['Dataset with n = ', num2str(n), ' points'];
             plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
@@ -164,8 +165,13 @@ for r = 1:R
     else
         [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
     end
-    C = pinv(PhiTilde)*V;
-    if r == 1
+    if b_forceCtoIdentity
+        C = zeros(MTilde, M);
+        C(1:M,1:M) = eye(M);
+    else
+        C = pinv(PhiTilde)*V;
+    end
+    if r == 1 && sPlotParams.b_plotC
         figure('Name', 'C');
         imagesc(C);
         colorbar();
@@ -256,13 +262,14 @@ for r = 1:R
     end
     
     % Plot inner product of interpolated eigenvectors
-    pltTitle = 'VInt - ${\bf V}_{{\bf int}}^T {\bf V}_{{\bf int}}$';
-    figName = 'Vint';
-    PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VInt/sqrt(interpRatio), pltTitle, figName);
-    pltTitle = 'VNys - ${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$';
-    figName = 'VNys';
-    PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VNys/sqrt(interpRatio), pltTitle, figName);
-    
+    if r == 1 && sPlotParams.b_plotInnerProductMatrices
+        pltTitle = 'VInt - ${\bf V}_{{\bf int}}^T {\bf V}_{{\bf int}}$';
+        figName = 'Vint';
+        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VInt/sqrt(interpRatio), pltTitle, figName);
+        pltTitle = 'VNys - ${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$';
+        figName = 'VNys';
+        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VNys/sqrt(interpRatio), pltTitle, figName);
+    end
     % Save
     mVIntToCompare(r,:,:) = VIntToCompare;
     mVNysToCompare(r,:,:) = VNysToCompare;

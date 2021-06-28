@@ -4,17 +4,8 @@ sDistParams.estDataDist = 'Gaussian';
 dim = size(x,2);
 sDistParams.dim = dim;
 
-lastwarn('')
-try
-    options = statset('MaxIter',gmmMaxIter);
-    GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
-catch exception
-    sprintf('GM error: %s\n', exception.message)
-end
-[warnMsg, ~] = lastwarn;
-if ~isempty(warnMsg)
-    sprintf('GM error: %s\n', warnMsg)
-end
+options = statset('MaxIter',gmmMaxIter);
+GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
 assert(GMModel.Converged)
 sDistParams.GMModel = GMModel;
 

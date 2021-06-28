@@ -4,7 +4,7 @@ if dim >= 3
     x = mvnrnd(mu, sigma, n);
 elseif dim == 2
     if nComponents == 1
-        x = mvnrnd(mu, sigma, n);
+        x = mvnrnd(mu{1}, sigma{1}, n);
     elseif nComponents == 2
         msgBoxMsg = 'Note that cov and mu are fixed in this function';
         msgBoxTitle = 'GenerateGaussianData';

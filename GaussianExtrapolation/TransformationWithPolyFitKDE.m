@@ -7,20 +7,20 @@ set(0,'DefaultFigureWindowStyle','docked')
 % sPlotParams.outputFolder = 'figs';
 sPlotParams.b_plotAllEvecs             = false;
 sPlotParams.b_GSPBoxPlots              = false;
-sPlotParams.b_plotLaplacianEvecs       = false;
-sPlotParams.b_plotWeights              = false;
+sPlotParams.b_plotWeights              = true;
 sPlotParams.b_plotVRec                 = false;
 sPlotParams.b_plotTransDemos           = false;
-sPlotParams.b_plotOrigVsInterpEvecs    = false;
+sPlotParams.b_plotOrigVsInterpEvecs    = true;
 sPlotParams.b_plotTildeFiguresForDebug = false;
 sPlotParams.b_plotData                 = false;
-sPlotParams.b_plotGmm                  = false;
-sPlotParams.b_plotInnerProductMatrices = false;
-sPlotParams.b_plotC                    = false;
-plotInd                                = [0,3]; %[M-4, M-1];
+sPlotParams.b_plotDataVsGmm            = true;
+sPlotParams.b_plotInnerProductMatrices = true;
+sPlotParams.b_plotHistogram            = false;
+sPlotParams.b_plotC                    = true;
 %% Number of eigenvectors/eigenfunctions
 M                  = 50;
-MTilde             = 80;
+MTilde             = 150; % M
+plotInd            = [0,11]; %[M-4, M-1];
 %% PolyFit params
 b_saturateT        = true;
 pCdfDegree         = 10;
@@ -28,9 +28,9 @@ invpCdfDegree      = 10;
 %% KDE params
 kde_bw             = []; %1e-3;
 %% GMM params
-gmmRegVal          = 0;
-gmmMaxIter         = 1000;
-gmmNumComponents   = 16;
+gmmRegVal          = 1e-3;
+gmmMaxIter         = 2000;
+gmmNumComponents   = 16; % 1
 %% Method parameters
 b_debugUseAnalytic = false;
 b_applyT           = false;
@@ -38,13 +38,13 @@ b_kde              = true;
 b_gmmInsteadOfT    = true;
 b_forceCtoIdentity = false;
 %% Dataset parameters
-dim                = 1;
+dim                = 2;
 nComponents        = 1;
 n                  = 2000;
 N                  = 3000;
 k                  = 100;
 nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
-verticesPDF        = 'TwoMoons'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'TwoSpirals' / 'SwissRoll'
+verticesPDF        = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll'
 origGraphAdjacency = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 interpMethod       = 'AddPoints'; % 'NewPoints' / 'AddPoints'
 %% Verify
@@ -52,6 +52,9 @@ assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussia
 assert((b_gmmInsteadOfT == ~b_applyT) || (~b_gmmInsteadOfT && ~b_applyT))
 %% RMSE
 R = 1;
+sDatasetParams.xMin = [0 0];
+sDatasetParams.xMax = [4 1];
+
 for c = 1:nComponents
     sDatasetParams.mu{c} = 10*(c-1)*ones(1,dim);
     sDatasetParams.sigma{c} = 1*eye(dim);
@@ -96,16 +99,7 @@ for r = 1:R
     if r == 1 && sPlotParams.b_plotWeights
         PlotWeightsMatrix(sPlotParams, W, xTrain, origGraphAdjacency, verticesPDF, omega, k);
     end
-    if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
-        if strcmp(origGraphAdjacency, 'GaussianKernel')
-            figTitle = [ 'Eigenvectors of ${\bf W}$ (Gaussian kernel) with $\omega = ' num2str(omega) '\quad n = ' num2str(n) '$'];
-        elseif strcmp(origGraphAdjacency, 'NearestNeighbor')
-            figTitle = [ 'Eigenvectors of ${\bf W}$ (k-NN) with $k = ' num2str(k) '\quad n = ' num2str(n) '$'];
-        end
-        figName = 'V';
-        PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
-            V, lambda, [], [], figTitle, figName, 'v')
-     end
+
     if ~b_kde && dim <= 3
         % ----------------------------------------------------------------------------------------------
         % Estimate CDF, and model it with polyfit (PolyfitEstCdf)
@@ -130,7 +124,7 @@ for r = 1:R
     else
         [xTildeTrain, polyvalCdfMatrix] = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain, xTrain, b_kde, kde_bw);
     end
-    if r == 1 && dim <= 2
+    if r == 1 && dim <= 2 && sPlotParams.b_plotHistogram
         PlotHistogram(sPlotParams, xTildeTrain, 'Gaussian', 'Histogram of $\tilde{X}$', false);
     end
     if r == 1 && strcmp(verticesPDF, 'Gaussian')
@@ -157,11 +151,14 @@ for r = 1:R
             = CalcAnalyticEigenvalues(MTilde, sKernelParams, dim, gmmNumComponents);
         [ PhiTilde, lambdaAnalyticTilde ] = ...
             CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, true);
-        if r == 1 && sPlotParams.b_plotGmm && dim <= 3
+        if r == 1 && sPlotParams.b_plotDataVsGmm && dim <= 3
             nGmmPoints = 5000;
             pltTitle = ['Dataset with n = ', num2str(n), ' points'];
             plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
-            PlotDataset(sPlotParams, xTrain, verticesPDF, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title);
+            
+            windowStyle = 'normal';
+            PlotDataset(sPlotParams, xTrain, verticesPDF, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
+            
         end
     else
         [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
@@ -175,33 +172,41 @@ for r = 1:R
     if r == 1 && sPlotParams.b_plotC
         figure('Name', 'C');
         imagesc(C);
+        colormap('jet');
         colorbar();
         title('${\bf C} = \tilde{{\bf \Phi}}^\dagger {\bf V}$', 'interpreter', 'latex', 'FontSize', 16); 
         set(gca,'FontSize', 14);
     end
     
     if r == 1 && sPlotParams.b_plotTildeFiguresForDebug && dim <= 3
-        sqrtnLambdaPhiTilde = sqrt(n*lambdaAnalyticTilde)'.*PhiTilde;
-        % Build W tilde and numeric eigenvectors for comparison
-        distTilde = pdist2(xTildeTrain, xTildeTrain);
-        WTilde = exp(-distTilde.^2/(2*omegaTilde^2));
-        [VTilde, LambdaNumericTilde] = eigs(WTilde, MTilde);
-        lambdaNumericTilde = diag(LambdaNumericTilde);
-        sqrtLambdaVTilde = abs(sqrt(lambdaNumericTilde))'.*VTilde;
-        VTilde = FlipSign(PhiTilde, VTilde);
+        if b_gmmInsteadOfT && ~strcmp(verticesPDF,'Gaussian')
+            msgBoxTitle = 'plotTildeFiguresForDebug warning';
+            msgBoxMsg = 'gmmInsteadOfT is true and data is not Gaussian, this plot has no meaning...';
+            b_waitForOk = true;
+            MyMsgBox(msgBoxMsg, msgBoxTitle, b_waitForOk)
+        else
+            sqrtnLambdaPhiTilde = sqrt(n*lambdaAnalyticTilde)'.*PhiTilde;
+            % Build W tilde and numeric eigenvectors for comparison
+            distTilde = pdist2(xTildeTrain, xTildeTrain);
+            WTilde = exp(-distTilde.^2/(2*omegaTilde^2));
+            [VTilde, LambdaNumericTilde] = eigs(WTilde, MTilde);
+            lambdaNumericTilde = diag(LambdaNumericTilde);
+            sqrtLambdaVTilde = abs(sqrt(lambdaNumericTilde))'.*VTilde;
+            VTilde = FlipSign(PhiTilde, VTilde);
 
-        figTitle = 'Eigenfunctions vs. eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-        figName = 'PhiTilde_VTilde';
-        PlotEigenfuncvecScatter(sPlotParams, 'Gaussian', xTildeTrain, [], plotInd(1), plotInd(end), ...
-            sqrtnLambdaPhiTilde, [], [], [], figTitle, figName, ...
-            '\sqrt{n \tilde{\lambda}^{\phi}}\tilde{\phi}', sqrtLambdaVTilde, '\sqrt{\tilde{\lambda}^{v}}\tilde{v}')
-        figTitle = 'Numeric vs. analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-        PlotSpectrum(sPlotParams, sDataset, [], n*lambdaAnalyticTilde, lambdaNumericTilde, [], ...
-            'n \tilde{\lambda}^{\phi}_m', '\tilde{\lambda}^{v}_m', [], figTitle);
-        vPrTilde = SimpleEstPorbablityArea(xTildeTrain, sigmaTilde, muTilde);
-        pltTitle = 'Analytic - $\int \phi_i(x) \phi_j(x) p(x) dx = n^d \Phi^T$diag(Pr)$\Phi$';
-        figName = 'PhiTilde';
-        PlotInnerProductMatrix(sPlotParams, dim, vPrTilde, 'IP_Matrix', [], PhiTilde, pltTitle, figName);
+            figTitle = 'Eigenfunctions vs. eigenvectors of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+            figName = 'PhiTilde_VTilde';
+            PlotEigenfuncvecScatter(sPlotParams, 'Gaussian', xTildeTrain, [], plotInd(1), plotInd(end), ...
+                sqrtnLambdaPhiTilde, [], [], [], figTitle, figName, ...
+                '\sqrt{n \tilde{\lambda}^{\phi}}\tilde{\phi}', sqrtLambdaVTilde, '\sqrt{\tilde{\lambda}^{v}}\tilde{v}')
+            figTitle = 'Numeric vs. analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+            PlotSpectrum(sPlotParams, sDataset, [], n*lambdaAnalyticTilde, lambdaNumericTilde, [], ...
+                'n \tilde{\lambda}^{\phi}_m', '\tilde{\lambda}^{v}_m', [], figTitle);
+            vPrTilde = SimpleEstPorbablityArea(xTildeTrain, sigmaTilde, muTilde);
+            pltTitle = 'Analytic - $\int \phi_i(x) \phi_j(x) p(x) dx = n^d \Phi^T$diag(Pr)$\Phi$';
+            figName = 'PhiTilde';
+            PlotInnerProductMatrix(sPlotParams, dim, vPrTilde, 'IP_Matrix', [], PhiTilde, pltTitle, figName);
+        end
     end
     if r == 1 && sPlotParams.b_plotVRec && dim <= 3
         VRec = PhiTilde*C;
@@ -218,6 +223,24 @@ for r = 1:R
     end
     
     % ----------------------------------------------------------------------------------------------
+    % Plot original V for comparison
+    % ----------------------------------------------------------------------------------------------
+    if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
+%         figTitle = 'Numeric vs. analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+%         PlotSpectrum(sPlotParams, sDataset, [], n*lambdaAnalyticTilde, lambdaNumericTilde, [], ...
+%             'n \tilde{\lambda}^{\phi}_m', '\tilde{\lambda}^{v}_m', [], figTitle);
+        
+        if strcmp(origGraphAdjacency, 'GaussianKernel')
+            figTitle = [ 'Eigenvectors of ${\bf W}$ (Gaussian kernel) with $\omega = ' num2str(omega) '\quad n = ' num2str(n) '$'];
+        elseif strcmp(origGraphAdjacency, 'NearestNeighbor')
+            figTitle = [ 'Eigenvectors of ${\bf W}$ (k-NN) with $k = ' num2str(k) '\quad n = ' num2str(n) '$'];
+        end
+        figName = 'V';
+        PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
+            V, lambda, '\lambda^{v}', [], figTitle, figName, 'v')
+     end
+
+    % ----------------------------------------------------------------------------------------------
     % Interpolate with our method
     % ----------------------------------------------------------------------------------------------
     if ~b_applyT
@@ -232,7 +255,7 @@ for r = 1:R
         [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
     end
     VInt = sqrt(interpRatio)*PhiTildeInt*C;
-    VIntToCompare = abs(VInt);
+    VIntToCompare = VInt;
     
     % ----------------------------------------------------------------------------------------------
     % Interpolate with Nystrom
@@ -240,7 +263,7 @@ for r = 1:R
     distLUBlockRUBlock = pdist2(xTrain, xInt);
     B = exp(-distLUBlockRUBlock.^2/(2*omegaNys^2));
     VNys = B.'*V*diag(1./lambda);
-    VNysToCompare = abs(VNys);
+    VNysToCompare = VNys;
     
     % ----------------------------------------------------------------------------------------------
     % Calculate reference
@@ -253,13 +276,14 @@ for r = 1:R
         [VRef, LambdaRef] = eigs(WRef,M);
         lambdaRef = diag(LambdaRef);
     end
-    VRef = FlipSign(VInt, VRef);
-    VRefToCompare = sqrt(interpRatio)*abs(VRef);
+    VRefToCompare = FlipSign(VInt, sqrt(interpRatio)*VRef);
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VIntToCompare, [], [], [], ['Ours vs. Reference (N = ', num2str(N), ')'], 'VInt_vs_VRef', 'v^{{\bf int}}', VRefToCompare, 'v^{{\bf ref}}');
+            VRefToCompare, lambdaRef, '\lambda^{{\bf ref}}', [], ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VNysToCompare, [], [], [], ['Nystrom vs. Reference (N = ', num2str(N), ')'], 'VNys_vs_VRef', 'v^{{\bf nys}}', VRefToCompare, 'v^{{\bf ref}}');
+            VNysToCompare, interpRatio*lambda, '\frac{N}{n}\lambda^{v}', [], ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
+        PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
+            VIntToCompare, lambdaAnalyticTilde, '\lambda^{{\bf int}}', [], ['Ours (N = ', num2str(N), ')'], 'VInt', 'v^{{\bf int}}');    
     end
     
     % Plot inner product of interpolated eigenvectors

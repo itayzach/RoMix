@@ -1,4 +1,9 @@
-function fig = PlotDataset(sSimParams, x, actualDataDist, pltTitle, GMModel, nGmmPoints, plt2Title)
+function fig = PlotDataset(sSimParams, x, actualDataDist, pltTitle, GMModel, nGmmPoints, plt2Title, windowStyle)
+prevWindowStyle = get(0,'DefaultFigureWindowStyle');
+if ~exist('windowStyle', 'var')
+    windowStyle = prevWindowStyle;
+end
+set(0,'DefaultFigureWindowStyle',windowStyle)
 
 [n, dim] = size(x);
 
@@ -23,7 +28,8 @@ if exist('GMModel', 'var')
         xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
         ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
         zlabel('$z$', 'interpreter', 'latex', 'FontSize', 16);
-        view(10,5);
+%         view(10,5);
+        view(30,70);
         set(gca,'FontSize', 14);
     end
     title(plt2Title, 'Interpreter', 'latex', 'FontSize', 14)
@@ -44,11 +50,21 @@ elseif dim == 3
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
     ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
     zlabel('$z$', 'interpreter', 'latex', 'FontSize', 16);
-    view(10,5);
+%     view(10,5);
+    view(30,70);
     set(gca,'FontSize', 14);
 end
 title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 
+%% Size
+if strcmp(windowStyle, 'normal')
+    x0     = 400;
+    y0     = 400;
+    height = 400;
+    width  = 1200;
+    set(gcf,'Position', [x0 y0 width height])
+end
+set(0,'DefaultFigureWindowStyle',prevWindowStyle)
 %% Save
 if isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')

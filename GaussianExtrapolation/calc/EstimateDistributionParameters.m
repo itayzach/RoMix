@@ -6,7 +6,7 @@ sDistParams.dim = dim;
 
 options = statset('MaxIter',gmmMaxIter);
 GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
-assert(GMModel.Converged)
+assert(GMModel.Converged, 'GMM couldn''t converge...')
 sDistParams.GMModel = GMModel;
 
 sDistParams.estNumComponents = gmmNumComponents;

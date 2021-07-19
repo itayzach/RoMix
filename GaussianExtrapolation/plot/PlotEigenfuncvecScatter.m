@@ -1,5 +1,5 @@
 function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, ...
-    firstEigenIdx, lastEigIdx, mPhi, vLambda, c, G, suptitle, figureName, phiStr, mPhi2, phi2Str)
+    firstEigenIdx, lastEigIdx, mPhi, vLambda, lambdaStr, G, suptitle, figureName, phiStr, mPhi2, phi2Str)
 dim = size(mData, 2);
 assert(dim <= 3, 'Not supported')
 windowStyle = get(0,'DefaultFigureWindowStyle');
@@ -67,7 +67,7 @@ elseif dim == 2 || dim == 3
                 else % dim == 3
                     scatter3(mData(:,1), mData(:,2), mData(:,3), [], mPhi(:,m+1), 'filled');
                 end
-                colormap(gca, 'default')
+                colormap(gca, 'jet')
                 colorbar()
                 cMin = min(mPhi(:,m+1));
                 cMax = max(mPhi(:,m+1));
@@ -77,13 +77,14 @@ elseif dim == 2 || dim == 3
                 if dim == 2
                     view(2); %view(20,40);
                 else % dim == 3
-                    view(10,5);
+                    view(30,70);
                     zlim([ min(mData(:,3)) max(mData(:,3))])
                 end
             end
             dispName = ['$' phiStr '_{' num2str(m) '}$'];
-            if exist('c', 'var') && ~isempty(c)
-                dispName = strcat(dispName, ', $c = ', num2str(c(m+1), '%.4f'), '$');
+            if exist('vLambda', 'var') && ~isempty(vLambda)
+                lambda_m_str = ['$' lambdaStr '_{' num2str(m) '} = ' num2str(vLambda(m+1), '%.4f') '$'];
+                dispName = strcat(dispName, ', ', lambda_m_str);
             end
             title(dispName, 'Interpreter', 'latex', 'FontSize', 14)
             set(gca,'FontSize', 14);

@@ -8,7 +8,33 @@ if ~exist('nTest', 'var')
     nTest = 1000;
 end
 %% Generate data
-if strcmp(actualDataDist, 'Minnesota')
+if strcmp(actualDataDist, 'SineCosine')
+    assert(strcmp(interpMethod, 'AddPoints'))
+    [data, theta] = GenerateSineCosineData(dim, nTest);
+    sDataset.sData.x = data(1:nTrain,:);
+    sDataset.sData.xt = data;
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    sDataset.sData.theta = theta;
+    omega = 0.5*sum(sqrt(std(sDataset.sData.xt)))/dim; %0.15;
+    omegaTilde = 0.5*sum(sqrt(std(sDataset.sData.xt)))/dim; %0.15;
+    
+elseif strcmp(actualDataDist, 'MnistDist')
+    assert(strcmp(interpMethod, 'AddPoints'))
+    mnist = load('data\mnist.mat');
+    dist = pdist2(mnist.testX(1:nTest,:), mnist.testX(1:nTest,:));
+    data = triu(dist,1);
+    data = data(data > 0);
+    nTest = length(data);
+    trainTestRatio = nTrain/nTest;    
+    nTrain = min(round(trainTestRatio*nTest),nTest);
+    sDataset.sData.x = data(1:nTrain,:);
+    sDataset.sData.xt = data;
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    dim = 2;
+    sDatasetParams = [];    
+elseif strcmp(actualDataDist, 'Minnesota')
     assert(strcmp(interpMethod, 'AddPoints'))
     G = gsp_minnesota();
     data = G.coords;
@@ -37,7 +63,10 @@ elseif strcmp(actualDataDist, 'Bunny')
     omega = 0.15;
     omegaTilde = 0.15;
     dim = 3;
-    sDatasetParams = [];    
+    sDatasetParams = [];
+    msgBoxTitle = 'GenerateDataset warning';
+    msgBoxMsg = 'This dataset requires adjustments...';
+    MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'Sensor')
     assert(strcmp(interpMethod, 'AddPoints'))
     G = gsp_sensor(nTest);
@@ -68,9 +97,9 @@ elseif strcmp(actualDataDist, 'TwoMoons')
         sDataset.sData.y = labelsRearranged(1:nTrain,:);
         sDataset.sData.yt = labelsRearranged;
     end
-    omega = 0.3;
-    omegaTilde = 0.3;
     dim = 2;
+    omega = 0.15;
+    omegaTilde = 0.15;
 elseif strcmp(actualDataDist, 'TwoSpirals')
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
@@ -80,9 +109,12 @@ elseif strcmp(actualDataDist, 'TwoSpirals')
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
     end
-    omega = 0.3;
-    omegaTilde = 0.3;
     dim = 2;
+    omega = 0.15;
+    omegaTilde = 0.15;
+    msgBoxTitle = 'GenerateDataset warning';
+    msgBoxMsg = 'This dataset requires adjustments...';
+    MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'SwissRoll')
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData.x = GenerateSwissRoll(nTrain);
@@ -94,9 +126,12 @@ elseif strcmp(actualDataDist, 'SwissRoll')
     end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
-    omega = 0.15;
-    omegaTilde = 0.15;
     dim = 3;
+%     omega = sqrt(5); %0.15;
+%     omegaTilde = sqrt(5); %0.15;
+    omega = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
+    omegaTilde = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
+    
     sDatasetParams = [];
 elseif strcmp(actualDataDist, 'Gaussian')
     if ~exist('sDatasetParams', 'var') || ...
@@ -159,8 +194,13 @@ elseif strcmp(actualDataDist, 'Grid')
     end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
-    omega = 0.15;
-    omegaTilde = 0.15;
+    dist = norm(data(2,:)-data(1,:));
+    omega = 2*sqrt(dist);
+    omegaTilde = 2*sqrt(dist);
+%     omega = 0.5*std(sDataset.sData.xt)^2;
+%     omegaTilde = 0.5*std(sDataset.sData.xt)^2;
+%     omega = 0.15;
+%     omegaTilde = 0.15;
 else
     error('unknown pdf')
 end

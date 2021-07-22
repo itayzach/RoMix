@@ -2,65 +2,48 @@
 clc; clear; rng('default');
 close all; 
 set(0,'DefaultFigureWindowStyle','docked')
-
 %% Plot params
-% sPlotParams.outputFolder = 'figs';
-sPlotParams.b_plotAllEvecs             = false;
-sPlotParams.b_GSPBoxPlots              = false;
-sPlotParams.b_plotWeights              = true;
-sPlotParams.b_plotVRec                 = false;
-sPlotParams.b_plotTransDemos           = false;
-sPlotParams.b_plotOrigVsInterpEvecs    = true;
-sPlotParams.b_plotTildeFiguresForDebug = false;
-sPlotParams.b_plotData                 = false;
-sPlotParams.b_plotDataVsGmm            = true;
-sPlotParams.b_plotInnerProductMatrices = true;
-sPlotParams.b_plotHistogram            = false;
-sPlotParams.b_plotC                    = true;
+sPlotParams = GetPlotParams();
+%% Dataset parameters
+dim                 = 2;
+nComponents         = 1;
+n                   = 2048;
+N                   = 4096;
+k                   = 3;
+nnValue             = 'ZeroOne'; % 'ZeroOne' / 'Distance'
+verticesPDF         = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE'
+origGraphAdjacency  = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
+interpMethod        = 'AddPoints'; % 'NewPoints' / 'AddPoints'
+matrixForEigs       = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian', 'NormLap'
+sDatasetParams.xMin = [0 0];
+sDatasetParams.xMax = [4 1];
+for c = 1:nComponents
+    sDatasetParams.mu{c} = 10*(c-1)*ones(1,dim);
+    sDatasetParams.sigma{c} = 1*eye(dim);
+end
 %% Number of eigenvectors/eigenfunctions
 M                  = 50;
 MTilde             = 150; % M
-%% PolyFit params
+%% T params
+% PolyFit
 b_saturateT        = true;
 pCdfDegree         = 10;
 invpCdfDegree      = 10;
-%% KDE params
+% KDE params
 kde_bw             = []; %1e-3;
+% Tilde domain mu and sigma
+muTilde            = zeros(1,dim); % was mean(xTrain);
+sigmaTilde         = diag(ones(dim,1)); % was diag(std(xTrain));
 %% GMM params
 gmmRegVal          = 1e-3;
 gmmMaxIter         = 2000;
-gmmNumComponents   = 10; % 1
+gmmNumComponents   = 20; % 1
 %% Method parameters
 b_debugUseAnalytic = false;
 b_applyT           = false;
 b_kde              = true;
 b_gmmInsteadOfT    = true;
 b_forceCtoIdentity = false;
-%% Dataset parameters
-dim                = 2;
-nComponents        = 1;
-n                  = 2048;
-N                  = 4096;
-k                  = 100;
-nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
-verticesPDF        = 'MnistLatentVAE'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE'
-origGraphAdjacency = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-interpMethod       = 'AddPoints'; % 'NewPoints' / 'AddPoints'
-matrixType         = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'NormLap'
-%% Parameters for Gaussian / Grid / Uniform data
-sDatasetParams.xMin = [0 0];
-sDatasetParams.xMax = [4 1];
-
-for c = 1:nComponents
-    sDatasetParams.mu{c} = 10*(c-1)*ones(1,dim);
-    sDatasetParams.sigma{c} = 1*eye(dim);
-end
-%% plotInd
-if dim == 1
-    plotInd = [0,4];
-else
-    plotInd = [0,11];
-end
 %% Verify
 assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
 assert((b_gmmInsteadOfT == ~b_applyT) || (~b_gmmInsteadOfT && ~b_applyT))
@@ -71,12 +54,16 @@ xMax           = sDataset.xMax;
 xMin           = sDataset.xMin;
 n              = length(sDataset.sData.x);
 N              = length(sDataset.sData.xt);
+interpRatio    = N/n;
 omega          = sDataset.recommendedOmega;
 omegaTilde     = sDataset.recommendedOmegaTilde;
 omegaNys       = sDataset.recommendedOmega;
-muTilde        = zeros(1,dim); % was mean(xTrain);
-sigmaTilde     = diag(ones(dim,1)); % was diag(std(xTrain));
-interpRatio    = N/n;
+%% plotInd
+if dim == 1
+    plotInd = [0,4];
+else
+    plotInd = [0,11];
+end
 %% Run
 R = 1;
 mVIntToCompare = zeros(R, N, M);
@@ -101,7 +88,7 @@ for r = 1:R
         lambda = n*lambda;
     else
         [W, dist] = SimpleCalcAdjacency(xTrain, origGraphAdjacency, omega, k, nnValue);
-        [V, lambda] = EigsByType(W, M, matrixType);
+        [V, lambda] = EigsByType(W, M, matrixForEigs);
     end
     if r == 1 && sPlotParams.b_plotWeights
         PlotWeightsMatrix(sPlotParams, W, dist, xTrain, origGraphAdjacency, verticesPDF, omega, k);
@@ -285,7 +272,7 @@ for r = 1:R
         VRef = PhiRef;
     else
         WRef = SimpleCalcAdjacency(xInt, origGraphAdjacency, omega, k, nnValue);
-        [VRef, lambdaRef] = EigsByType(WRef, M, matrixType);
+        [VRef, lambdaRef] = EigsByType(WRef, M, matrixForEigs);
     end
     VRefToCompare = FlipSign(VInt, VRef);
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3

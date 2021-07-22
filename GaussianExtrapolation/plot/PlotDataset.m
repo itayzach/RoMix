@@ -1,4 +1,4 @@
-function fig = PlotDataset(sSimParams, x, actualDataDist, pltTitle, GMModel, nGmmPoints, plt2Title, windowStyle)
+function fig = PlotDataset(sSimParams, x, y, actualDataDist, pltTitle, GMModel, nGmmPoints, plt2Title, windowStyle)
 prevWindowStyle = get(0,'DefaultFigureWindowStyle');
 if ~exist('windowStyle', 'var')
     windowStyle = prevWindowStyle;
@@ -18,7 +18,7 @@ if exist('GMModel', 'var')
         set(gca,'YTick',[],'FontSize', 14);
     elseif dim == 2
         scatter(xGmm(:,1),xGmm(:,2),[],compIdx,'filled') % Scatter plot with points of size 10
-        colormap(parula(GMModel.NumComponents));
+        colormap(jet(GMModel.NumComponents));
         colorbar();
         xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
         ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
@@ -41,7 +41,13 @@ if dim == 1
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'YTick',[],'FontSize', 14);
 elseif dim == 2
-    scatter(x(:,1), x(:,2), 'filled');
+    if ~isempty(y)
+        scatter(x(:,1), x(:,2), [], y, 'filled');
+        colormap(jet(max(y)-min(y))); 
+        colorbar;
+    else
+        scatter(x(:,1), x(:,2), 'filled');
+    end
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
     ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'FontSize', 14);

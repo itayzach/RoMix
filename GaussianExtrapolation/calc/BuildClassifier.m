@@ -44,7 +44,7 @@ if sSimParams.b_plotEigenfunctions
     figTitle = 'Eigenfunctions';
     figName = 'Eigenfunctions';
     PlotEigenfuncvecScatter(sSimParams, 'Two_moons', X, [], firstEigenIdxToPlot, lastEigIdxToPlot, ...
-            mPhi_m_X, vLambdaAnalytic, [], [], figTitle, figName, '\phi')
+            mPhi_m_X, vLambdaAnalytic, '\lambda', [], figTitle, figName, '\phi')
 end
 
 sClassifier.mPhi_X_c = reshape(mPhi_m_X*c, length(x1), length(x2));

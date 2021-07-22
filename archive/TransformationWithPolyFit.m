@@ -22,6 +22,7 @@ interpMethod = 'AddPoints'; % 'NewPoints' / 'AddPoints'
 sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod);
 dim = sDataset.dim;
 xTrain = sDataset.sData.x;
+yTrain = sDataset.sData.y;
 xMax = sDataset.xMax;
 xMin = sDataset.xMin;
 n = length(sDataset.sData.x);
@@ -31,7 +32,7 @@ N = length(sDataset.sData.xt);
 if dim <= 2
     PlotHistogram(sSimParams, xTrain, verticesPDF, 'Histogram of X', false);
 end
-PlotDataset(sSimParams, xTrain, verticesPDF, 'Training set');
+PlotDataset(sSimParams, xTrain, yTrain, verticesPDF, 'Training set');
 %% Generate graph
 omega = sDataset.recommendedOmega;
 k = 3;

@@ -20,7 +20,6 @@ sPlotParams.b_plotC                    = true;
 %% Number of eigenvectors/eigenfunctions
 M                  = 50;
 MTilde             = 150; % M
-plotInd            = [0,11]; %[M-4, M-1];
 %% PolyFit params
 b_saturateT        = true;
 pCdfDegree         = 10;
@@ -48,11 +47,7 @@ verticesPDF        = 'MnistLatentVAE'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoM
 origGraphAdjacency = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 interpMethod       = 'AddPoints'; % 'NewPoints' / 'AddPoints'
 matrixType         = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'NormLap'
-%% Verify
-assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
-assert((b_gmmInsteadOfT == ~b_applyT) || (~b_gmmInsteadOfT && ~b_applyT))
-%% RMSE
-R = 1;
+%% Parameters for Gaussian / Grid / Uniform data
 sDatasetParams.xMin = [0 0];
 sDatasetParams.xMax = [4 1];
 
@@ -60,7 +55,16 @@ for c = 1:nComponents
     sDatasetParams.mu{c} = 10*(c-1)*ones(1,dim);
     sDatasetParams.sigma{c} = 1*eye(dim);
 end
-
+%% plotInd
+if dim == 1
+    plotInd = [0,4];
+else
+    plotInd = [0,11];
+end
+%% Verify
+assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
+assert((b_gmmInsteadOfT == ~b_applyT) || (~b_gmmInsteadOfT && ~b_applyT))
+%% Dataset parameters
 sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod, sDatasetParams);
 dim            = sDataset.dim;
 xMax           = sDataset.xMax;
@@ -73,6 +77,8 @@ omegaNys       = sDataset.recommendedOmega;
 muTilde        = zeros(1,dim); % was mean(xTrain);
 sigmaTilde     = diag(ones(dim,1)); % was diag(std(xTrain));
 interpRatio    = N/n;
+%% Run
+R = 1;
 mVIntToCompare = zeros(R, N, M);
 mVNysToCompare = zeros(R, N, M);
 mVRefToCompare = zeros(R, N, M);
@@ -283,12 +289,19 @@ for r = 1:R
     end
     VRefToCompare = FlipSign(VInt, VRef);
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
-        PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VRefToCompare, lambdaRef, '\lambda^{{\bf ref}}', [], ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
-        PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VNysToCompare, lambdaNys, '\lambda^{{\bf nys}}', [], ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
-        PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VIntToCompare, lambdaAnalyticTilde, '\lambda^{{\bf int}}', [], ['Ours (N = ', num2str(N), ')'], 'VInt', 'v^{{\bf int}}');    
+        if dim == 1
+            PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
+                VRefToCompare, [], [], [], ['Reference vs. Nystrom (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}', VNysToCompare, 'v^{{\bf nys}}');
+            PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
+                VRefToCompare, [], [], [], ['Reference vs. Ours (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}', VIntToCompare, 'v^{{\bf int}}');
+        else
+            PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
+                VRefToCompare, lambdaRef, '\lambda^{{\bf ref}}', [], ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
+            PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
+                VNysToCompare, lambdaNys, '\lambda^{{\bf nys}}', [], ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
+            PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
+                VIntToCompare, lambdaAnalyticTilde, '\lambda^{{\bf int}}', [], ['Ours (N = ', num2str(N), ')'], 'VInt', 'v^{{\bf int}}');   
+        end
     end
     
     % Plot inner product of interpolated eigenvectors

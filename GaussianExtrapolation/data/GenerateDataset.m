@@ -25,16 +25,32 @@ elseif strcmp(actualDataDist, 'MnistDist')
     dist = pdist2(mnist.testX(1:nTest,:), mnist.testX(1:nTest,:));
     data = triu(dist,1);
     data = data(data > 0);
-    nTest = length(data);
-    trainTestRatio = nTrain/nTest;    
-    nTrain = min(round(trainTestRatio*nTest),nTest);
     sDataset.sData.x = data(1:nTrain,:);
     sDataset.sData.xt = data;
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
     dim = 2;
-    sDatasetParams = [];    
-elseif strcmp(actualDataDist, 'Minnesota')
+    sDatasetParams = [];
+elseif strcmp(actualDataDist, 'MnistLatentVAE')
+    assert(strcmp(interpMethod, 'AddPoints'))
+    mnistLatent = load('data\mnistLatentVAE.mat');
+    z = double(mnistLatent.z);
+    y = double(mnistLatent.labels');
+    possibleLabels = 0:9; %[0, 1, 4];
+    ind = find(ismember(y, possibleLabels));
+    z = z(ind,:);
+    y = y(ind);
+    data = double(z(1:nTest,:));
+    labels = y(1:nTest)';
+    sDataset.sData.x = data(1:nTrain,:);
+    sDataset.sData.xt = data;
+    sDataset.sData.y = double(labels(1:nTrain)');
+    sDataset.sData.yt = double(labels');
+    omega = 0.5;
+    omegaTilde = 0.5;
+    dim = size(data, 2);
+    sDatasetParams = [];
+elseif strcmp(actualDataDist, 'Minnesota')   
     assert(strcmp(interpMethod, 'AddPoints'))
     G = gsp_minnesota();
     data = G.coords;
@@ -48,7 +64,11 @@ elseif strcmp(actualDataDist, 'Minnesota')
     omega = 0.15;
     omegaTilde = 0.15;
     dim = 2;
-    sDatasetParams = [];    
+    sDatasetParams = [];
+    msgBoxTitle = 'GenerateDataset warning';
+    msgBoxMsg = ['This dataset has a fixed number of points.', newline, ...
+        'updated to N = ' num2str(nTest), ', n = ', num2str(nTrain)];
+    MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'Bunny')
     assert(strcmp(interpMethod, 'AddPoints'))
     G = gsp_bunny();
@@ -65,7 +85,11 @@ elseif strcmp(actualDataDist, 'Bunny')
     dim = 3;
     sDatasetParams = [];
     msgBoxTitle = 'GenerateDataset warning';
-    msgBoxMsg = 'This dataset requires adjustments...';
+    msgBoxMsg = ['This dataset has a fixed number of points.', newline, ...
+        'updated to N = ' num2str(nTest), ', n = ', num2str(nTrain)];
+    MyMsgBox(msgBoxMsg, msgBoxTitle)
+    msgBoxTitle = 'GenerateDataset warning';
+    msgBoxMsg = 'This dataset requires omega adjustments...';
     MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'Sensor')
     assert(strcmp(interpMethod, 'AddPoints'))
@@ -113,7 +137,7 @@ elseif strcmp(actualDataDist, 'TwoSpirals')
     omega = 0.15;
     omegaTilde = 0.15;
     msgBoxTitle = 'GenerateDataset warning';
-    msgBoxMsg = 'This dataset requires adjustments...';
+    msgBoxMsg = 'This dataset requires omega adjustments...';
     MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'SwissRoll')
     if strcmp(interpMethod, 'NewPoints')
@@ -127,10 +151,10 @@ elseif strcmp(actualDataDist, 'SwissRoll')
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
     dim = 3;
-%     omega = sqrt(5); %0.15;
-%     omegaTilde = sqrt(5); %0.15;
-    omega = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
-    omegaTilde = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
+    omega = sqrt(5)/sqrt(2); %0.15;
+    omegaTilde = sqrt(5)/sqrt(2); %0.15;
+%     omega = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
+%     omegaTilde = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
     
     sDatasetParams = [];
 elseif strcmp(actualDataDist, 'Gaussian')
@@ -182,13 +206,20 @@ elseif strcmp(actualDataDist, 'Grid')
         sDataset.sData.xt = GenerateGridData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
     elseif strcmp(interpMethod, 'AddPoints')
         data = GenerateGridData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
-        nTest = length(data);
+        msgBoxMsg = [];
+        if nTest ~= length(data)
+            nTest = length(data);
+            msgBoxMsg = [msgBoxMsg, 'updated to N = ' num2str(nTest)];
+        end
         r = ceil(nTest/nTrain);
-        nTrain = length(1:r:nTest);
+        if nTrain ~= length(1:r:nTest)
+            nTrain = length(1:r:nTest);
+            msgBoxMsg = [msgBoxMsg, 'updated to n = ' num2str(nTrain)];
+        end
+        
         dataRearranged(1:nTrain,:) = data(1:r:nTest,:);
         data(1:r:nTest,:) = [];
-        dataRearranged(nTrain+1:nTrain+length(data),:) = data;
-        
+        dataRearranged(nTrain+1:nTrain+length(data),:) = data;        
         sDataset.sData.x = dataRearranged(1:nTrain,:);
         sDataset.sData.xt = dataRearranged;
     end
@@ -201,6 +232,11 @@ elseif strcmp(actualDataDist, 'Grid')
 %     omegaTilde = 0.5*std(sDataset.sData.xt)^2;
 %     omega = 0.15;
 %     omegaTilde = 0.15;
+    if ~isempty(msgBoxMsg)
+        msgBoxTitle = 'GenerateDataset warning';
+        msgBoxMsg = ['This dataset has a fixed number of points.', newline, msgBoxMsg];
+        MyMsgBox(msgBoxMsg, msgBoxTitle)
+    end
 else
     error('unknown pdf')
 end

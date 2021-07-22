@@ -30,7 +30,7 @@ kde_bw             = []; %1e-3;
 %% GMM params
 gmmRegVal          = 1e-3;
 gmmMaxIter         = 2000;
-gmmNumComponents   = 16; % 1
+gmmNumComponents   = 10; % 1
 %% Method parameters
 b_debugUseAnalytic = false;
 b_applyT           = false;
@@ -40,13 +40,14 @@ b_forceCtoIdentity = false;
 %% Dataset parameters
 dim                = 2;
 nComponents        = 1;
-n                  = 2000;
-N                  = 3000;
+n                  = 2048;
+N                  = 4096;
 k                  = 100;
 nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
-verticesPDF        = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll'
+verticesPDF        = 'MnistLatentVAE'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE'
 origGraphAdjacency = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 interpMethod       = 'AddPoints'; % 'NewPoints' / 'AddPoints'
+matrixType         = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'NormLap'
 %% Verify
 assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
 assert((b_gmmInsteadOfT == ~b_applyT) || (~b_gmmInsteadOfT && ~b_applyT))
@@ -81,9 +82,10 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     sDataset = GenerateDataset(verticesPDF, dim, nComponents, n, N, interpMethod, sDatasetParams);
     xTrain   = sDataset.sData.x;
+    yTrain   = sDataset.sData.y;
     xInt     = sDataset.sData.xt;
     if r == 1 && sPlotParams.b_plotData && dim <= 3
-        PlotDataset(sPlotParams, xTrain, verticesPDF, 'Training set');
+        PlotDataset(sPlotParams, xTrain, yTrain, verticesPDF, 'Training set');
     end
     % ----------------------------------------------------------------------------------------------
     % Original graph
@@ -92,12 +94,11 @@ for r = 1:R
         [V, lambda] = SimpleCalcAnalyticEigenfunctions(xTrain, omega, sDatasetParams.sigma, sDatasetParams.mu, M);
         lambda = n*lambda;
     else
-        W = SimpleCalcAdjacency(xTrain, origGraphAdjacency, omega, k, nnValue);
-        [V, Lambda] = eigs(W,M);
-        lambda = diag(Lambda);
+        [W, dist] = SimpleCalcAdjacency(xTrain, origGraphAdjacency, omega, k, nnValue);
+        [V, lambda] = EigsByType(W, M, matrixType);
     end
     if r == 1 && sPlotParams.b_plotWeights
-        PlotWeightsMatrix(sPlotParams, W, xTrain, origGraphAdjacency, verticesPDF, omega, k);
+        PlotWeightsMatrix(sPlotParams, W, dist, xTrain, origGraphAdjacency, verticesPDF, omega, k);
     end
 
     if ~b_kde && dim <= 3
@@ -157,7 +158,7 @@ for r = 1:R
             plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
             
             windowStyle = 'normal';
-            PlotDataset(sPlotParams, xTrain, verticesPDF, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
+            PlotDataset(sPlotParams, xTrain, yTrain, verticesPDF, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
             
         end
     else
@@ -254,7 +255,7 @@ for r = 1:R
     else
         [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
     end
-    VInt = sqrt(interpRatio)*PhiTildeInt*C;
+    VInt = PhiTildeInt*C;
     VIntToCompare = VInt;
     
     % ----------------------------------------------------------------------------------------------
@@ -262,8 +263,13 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     distLUBlockRUBlock = pdist2(xTrain, xInt);
     B = exp(-distLUBlockRUBlock.^2/(2*omegaNys^2));
-    VNys = B.'*V*diag(1./lambda);
+    normFactor = lambda*sqrt(interpRatio);
+    lambdaNys = interpRatio*lambda;
+    VNys = B.'*V*diag(1./normFactor);
+%     VNys = VNys./norm(VNys(:,1));
+%     VNysToCompare = sqrt(interpRatio)*VNys;
     VNysToCompare = VNys;
+
     
     % ----------------------------------------------------------------------------------------------
     % Calculate reference
@@ -273,27 +279,29 @@ for r = 1:R
         VRef = PhiRef;
     else
         WRef = SimpleCalcAdjacency(xInt, origGraphAdjacency, omega, k, nnValue);
-        [VRef, LambdaRef] = eigs(WRef,M);
-        lambdaRef = diag(LambdaRef);
+        [VRef, lambdaRef] = EigsByType(WRef, M, matrixType);
     end
-    VRefToCompare = FlipSign(VInt, sqrt(interpRatio)*VRef);
+    VRefToCompare = FlipSign(VInt, VRef);
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
             VRefToCompare, lambdaRef, '\lambda^{{\bf ref}}', [], ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-            VNysToCompare, interpRatio*lambda, '\frac{N}{n}\lambda^{v}', [], ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
+            VNysToCompare, lambdaNys, '\lambda^{{\bf nys}}', [], ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
             VIntToCompare, lambdaAnalyticTilde, '\lambda^{{\bf int}}', [], ['Ours (N = ', num2str(N), ')'], 'VInt', 'v^{{\bf int}}');    
     end
     
     % Plot inner product of interpolated eigenvectors
     if r == 1 && sPlotParams.b_plotInnerProductMatrices
+        pltTitle = 'VRef - ${\bf V}_{{\bf ref}}^T {\bf V}_{{\bf ref}}$';
+        figName = 'VRef';
+        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VRef, pltTitle, figName);
         pltTitle = 'VInt - ${\bf V}_{{\bf int}}^T {\bf V}_{{\bf int}}$';
         figName = 'Vint';
-        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VInt/sqrt(interpRatio), pltTitle, figName);
+        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VInt, pltTitle, figName);
         pltTitle = 'VNys - ${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$';
         figName = 'VNys';
-        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VNys/sqrt(interpRatio), pltTitle, figName);
+        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VNys, pltTitle, figName);
     end
     % Save
     mVIntToCompare(r,:,:) = VIntToCompare;

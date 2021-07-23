@@ -1,6 +1,6 @@
-function A = NearestNeighborsAdjacency(X, K, nnValue)
+function A = NearestNeighborsAdjacency(X, k, nnValue)
 
-[idx, D] = knnsearch(X, X, 'K', K);
+[idx, D] = knnsearch(X, X, 'K', k);
 N = length(X);
 A = zeros(N,N);
 for i = 1:N
@@ -14,5 +14,4 @@ for i = 1:N
         error('invalid nnValue')
     end
 end
-% A = A - eye(N);
 end

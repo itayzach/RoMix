@@ -28,17 +28,17 @@ elseif strcmp(matrixForEigs, 'NormLap')
     I = eye(length(W));
     Ln = I - Wn;
     [V, Lambda] = eig(Ln);
-    V = V(:,2:M+1);
+    V = V(:,1:M);
     lambda = diag(Lambda);
-    lambda = lambda(2:M+1);
+    lambda = lambda(1:M);
 elseif strcmp(matrixForEigs, 'Laplacian')
     d = sum(W,2);
     D = diag(d);
     L = D - W;
     [V, Lambda] = eig(L);
-    V = V(:,2:M+1);
+    V = V(:,1:M);
     lambda = diag(Lambda);
-    lambda = lambda(2:M+1);
+    lambda = lambda(1:M);
 
 else
     error('invalid matrixType = %s', matrixForEigs);

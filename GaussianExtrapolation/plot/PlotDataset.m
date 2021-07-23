@@ -13,7 +13,7 @@ if exist('GMModel', 'var')
     subplot(1,2,2)
     [xGmm,compIdx] = random(GMModel, nGmmPoints);
     if dim == 1
-        scatter(xGmm, zeros(1,nGmmPoints), 50, ones(1,nGmmPoints), 'filled')
+        scatter(xGmm, zeros(1,nGmmPoints), 50, compIdx, 'filled')
         xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
         set(gca,'YTick',[],'FontSize', 14);
     elseif dim == 2

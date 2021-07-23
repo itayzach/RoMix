@@ -6,7 +6,6 @@ set(0,'DefaultFigureWindowStyle','docked')
 sPlotParams = GetPlotParams();
 %% Dataset parameters
 dim                 = 2;
-nComponents         = 1;
 n                   = 2048;
 N                   = 4096;
 k                   = 3;
@@ -14,9 +13,12 @@ nnValue             = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 verticesPDF         = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE'
 origGraphAdjacency  = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 interpMethod        = 'AddPoints'; % 'NewPoints' / 'AddPoints'
-matrixForEigs       = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian', 'NormLap'
+matrixForEigs       = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+%% Params for Grid/Uniform
 sDatasetParams.xMin = [0 0];
 sDatasetParams.xMax = [4 1];
+%% Params for Gaussian
+nComponents = 1;
 for c = 1:nComponents
     sDatasetParams.mu{c} = 10*(c-1)*ones(1,dim);
     sDatasetParams.sigma{c} = 1*eye(dim);
@@ -174,10 +176,11 @@ for r = 1:R
     
     if r == 1 && sPlotParams.b_plotTildeFiguresForDebug && dim <= 3
         if b_gmmInsteadOfT && ~strcmp(verticesPDF,'Gaussian')
-            msgBoxTitle = 'plotTildeFiguresForDebug warning';
-            msgBoxMsg = 'gmmInsteadOfT is true and data is not Gaussian, this plot has no meaning...';
-            b_waitForOk = true;
-            MyMsgBox(msgBoxMsg, msgBoxTitle, b_waitForOk)
+            figTitle = 'Eigenfunctions of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+            figName = 'PhiTilde_VTilde';
+            PlotEigenfuncvecScatter(sPlotParams, 'Gaussian', xTildeTrain, [], 70, 80, ...
+                PhiTilde, lambdaAnalyticTilde, '\tilde{\lambda}^{\phi}}', [], figTitle, figName, ...
+                '\tilde{\phi}' )
         else
             sqrtnLambdaPhiTilde = sqrt(n*lambdaAnalyticTilde)'.*PhiTilde;
             % Build W tilde and numeric eigenvectors for comparison
@@ -225,9 +228,11 @@ for r = 1:R
 %             'n \tilde{\lambda}^{\phi}_m', '\tilde{\lambda}^{v}_m', [], figTitle);
         
         if strcmp(origGraphAdjacency, 'GaussianKernel')
-            figTitle = [ 'Eigenvectors of ${\bf W}$ (Gaussian kernel) with $\omega = ' num2str(omega) '\quad n = ' num2str(n) '$'];
+            figTitle = [ 'Eigenvectors of ', matrixForEigs, ...
+                ' (generated from Gaussian kernel with $\omega = ' num2str(omega) '$) $\quad n = ' num2str(n) '$'];
         elseif strcmp(origGraphAdjacency, 'NearestNeighbor')
-            figTitle = [ 'Eigenvectors of ${\bf W}$ (k-NN) with $k = ' num2str(k) '\quad n = ' num2str(n) '$'];
+            figTitle = [ 'Eigenvectors of ', matrixForEigs, ...
+                ' (generated from k-NN with $k = ' num2str(k) '$) $\quad n = ' num2str(n) '$'];
         end
         figName = 'V';
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...

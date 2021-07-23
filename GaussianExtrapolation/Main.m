@@ -11,7 +11,7 @@ N                   = 4096;
 k                   = 3;
 nnValue             = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 verticesPDF         = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE'
-origGraphAdjacency  = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
+adjacencyType       = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 interpMethod        = 'AddPoints'; % 'NewPoints' / 'AddPoints'
 matrixForEigs       = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% Params for Grid/Uniform
@@ -89,11 +89,11 @@ for r = 1:R
         [V, lambda] = SimpleCalcAnalyticEigenfunctions(xTrain, omega, sDatasetParams.sigma, sDatasetParams.mu, M);
         lambda = n*lambda;
     else
-        [W, dist] = SimpleCalcAdjacency(xTrain, origGraphAdjacency, omega, k, nnValue);
-        [V, lambda] = EigsByType(W, M, matrixForEigs);
+        [W, dist] = SimpleCalcAdjacency(xTrain, adjacencyType, omega, k, nnValue);
+        [V, adjLambda] = EigsByType(W, M, matrixForEigs);
     end
     if r == 1 && sPlotParams.b_plotWeights
-        PlotWeightsMatrix(sPlotParams, W, dist, xTrain, origGraphAdjacency, verticesPDF, omega, k);
+        PlotWeightsMatrix(sPlotParams, W, dist, xTrain, adjacencyType, verticesPDF, omega, k);
     end
 
     if ~b_kde && dim <= 3
@@ -227,16 +227,16 @@ for r = 1:R
 %         PlotSpectrum(sPlotParams, sDataset, [], n*lambdaAnalyticTilde, lambdaNumericTilde, [], ...
 %             'n \tilde{\lambda}^{\phi}_m', '\tilde{\lambda}^{v}_m', [], figTitle);
         
-        if strcmp(origGraphAdjacency, 'GaussianKernel')
+        if strcmp(adjacencyType, 'GaussianKernel')
             figTitle = [ 'Eigenvectors of ', matrixForEigs, ...
                 ' (generated from Gaussian kernel with $\omega = ' num2str(omega) '$) $\quad n = ' num2str(n) '$'];
-        elseif strcmp(origGraphAdjacency, 'NearestNeighbor')
+        elseif strcmp(adjacencyType, 'NearestNeighbor')
             figTitle = [ 'Eigenvectors of ', matrixForEigs, ...
                 ' (generated from k-NN with $k = ' num2str(k) '$) $\quad n = ' num2str(n) '$'];
         end
         figName = 'V';
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
-            V, lambda, '\lambda^{v}', [], figTitle, figName, 'v')
+            V, adjLambda, '\lambda^{v}', [], figTitle, figName, 'v')
      end
 
     % ----------------------------------------------------------------------------------------------
@@ -261,8 +261,8 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     distLUBlockRUBlock = pdist2(xTrain, xInt);
     B = exp(-distLUBlockRUBlock.^2/(2*omegaNys^2));
-    normFactor = lambda*sqrt(interpRatio);
-    lambdaNys = interpRatio*lambda;
+    normFactor = adjLambda*sqrt(interpRatio);
+    lambdaNys = interpRatio*adjLambda;
     VNys = B.'*V*diag(1./normFactor);
 %     VNys = VNys./norm(VNys(:,1));
 %     VNysToCompare = sqrt(interpRatio)*VNys;
@@ -273,11 +273,11 @@ for r = 1:R
     % Calculate reference
     % ----------------------------------------------------------------------------------------------
     if b_debugUseAnalytic
-        [PhiRef, lambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, sDatasetParams.sigma, sDatasetParams.mu, M);
+        [PhiRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, sDatasetParams.sigma, sDatasetParams.mu, M);
         VRef = PhiRef;
     else
-        WRef = SimpleCalcAdjacency(xInt, origGraphAdjacency, omega, k, nnValue);
-        [VRef, lambdaRef] = EigsByType(WRef, M, matrixForEigs);
+        WRef = SimpleCalcAdjacency(xInt, adjacencyType, omega, k, nnValue);
+        [VRef, adjLambdaRef] = EigsByType(WRef, M, matrixForEigs);
     end
     VRefToCompare = FlipSign(VInt, VRef);
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
@@ -288,7 +288,7 @@ for r = 1:R
                 VRefToCompare, [], [], [], ['Reference vs. Ours (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}', VIntToCompare, 'v^{{\bf int}}');
         else
             PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-                VRefToCompare, lambdaRef, '\lambda^{{\bf ref}}', [], ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
+                VRefToCompare, adjLambdaRef, '\lambda^{{\bf ref}}', [], ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
             PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
                 VNysToCompare, lambdaNys, '\lambda^{{\bf nys}}', [], ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
             PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...

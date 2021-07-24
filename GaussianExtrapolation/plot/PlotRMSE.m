@@ -1,35 +1,25 @@
-function [] = PlotRMSE(sSimParams, sDataset, vNysRatio, vAnaVsNum, mNysVsNum)
+function [] = PlotRMSE(sPlotParams, vRmseInt, vRmseNys)
 
-%% eigen index
-vM = 0:length(vAnaVsNum)-1;
+M = length(vRmseInt);
 
-%% Plot
-fig = figure('Name', 'RMSE');
-plot(vM, vAnaVsNum, 'LineWidth', 2, 'DisplayName',  'RMSE$(\phi_m, v_m)$' );
-hold on
-if ~isempty(vNysRatio)
-    for r = 1:length(vNysRatio)
-        nysRatio = vNysRatio(r);
-        plot(vM, mNysVsNum(r,:), 'LineWidth', 2, 'DisplayName',  ['RMSE$(\hat{v}_m, v_m)$' ' (' num2str(nysRatio*100, '%d') '\%)']);
-    end
-end
+figure('Name', 'RMSE');
+plot((0:M-1)', vRmseInt.', '-o', 'LineWidth', 2, 'DisplayName', ...
+    'RMSE$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$'), hold on;
+plot((0:M-1)', vRmseNys.', '-x', 'LineWidth', 2, 'DisplayName', ...
+    'RMSE$(v^{{\bf nys}}_m, v^{{\bf ref}}_m)$')
+rmseylim = max([vRmseInt vRmseNys]);
+ylim([0 rmseylim]);
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('RMSE', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
-% title(strcat('$nNys = $',  num2str(nysRatio*sDataset.nTotal), '$\quad N = $', num2str(sDataset.nTotal), ...
-%     '$\quad \bigr(\frac{nNys}{N} = $', num2str(nysRatio, '%.2f'), '$\bigr)$'), ...
-%     'Interpreter', 'latex', 'FontSize', 14);
-ylim([0 1.5*max(max([vAnaVsNum; mNysVsNum]))])
 set(gca,'FontSize', 14);
 
 %% Save
-if isfield(sSimParams, 'outputFolder')
-    if ~exist(sSimParams.outputFolder, 'dir')
-        mkdir(sSimParams.outputFolder)
+if isfield(sPlotParams, 'outputFolder')
+    if ~exist(sPlotParams.outputFolder, 'dir')
+        mkdir(sPlotParams.outputFolder)
     end
-
-    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_RMSE_', 'eigs_', num2str(length(vAnaVsNum))), 'epsc');
+    saveas(fig,strcat(sPlotParams.outputFolder, filesep, 'RMSE_', 'eigs_', num2str(length(vRmseInt))), 'epsc');
 end
 
 

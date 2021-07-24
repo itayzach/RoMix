@@ -10,8 +10,10 @@ fig = figure('Name', 'Spectrum');
 M = length(vLambda1);
 subplot(2,1,1);
 stem(0:M-1, vLambda1(1:M), 'x', 'DisplayName', ['$' lambda1Str '$']);
-hold on;
-stem(0:M-1, vLambda2(1:M), 'DisplayName', ['$' lambda2Str '$']);
+if ~isempty(vLambda2)
+    hold on;
+    stem(0:M-1, vLambda2(1:M), 'DisplayName', ['$' lambda2Str '$']);
+end
 if ~isempty(vNysRatio)
     for r = 1:length(vNysRatio)
         nysRatio = vNysRatio(r);
@@ -27,8 +29,10 @@ set(gca,'FontSize', 14);
 
 subplot(2,1,2);
 stem(0:M-1, log10(abs(vLambda1(1:M))),'x', 'LineStyle','none', 'DisplayName', ['$\log|' lambda1Str '|$']);
-hold on;
-stem(0:M-1, log10(abs(vLambda2(1:M))),'LineStyle','none', 'DisplayName', ['$\log|' lambda2Str '|$']);
+if ~isempty(vLambda2)
+    hold on;
+    stem(0:M-1, log10(abs(vLambda2(1:M))),'LineStyle','none', 'DisplayName', ['$\log|' lambda2Str '|$']);
+end
 if ~isempty(vNysRatio)
     for r = 1:length(vNysRatio)
         nysRatio = vNysRatio(r);

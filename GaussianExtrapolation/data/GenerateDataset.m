@@ -1,5 +1,6 @@
 function sDataset = GenerateDataset(actualDataDist, dim, nComponents, nTrain, nTest, interpMethod, sDatasetParams)
-
+assert( (strcmp(interpMethod, 'AddPoints') && nTrain <= nTest) || ...
+       ~(strcmp(interpMethod, 'AddPoints')))
 %% Set defaults
 if ~exist('nTrain', 'var')
     nTrain = 4000;
@@ -46,8 +47,8 @@ elseif strcmp(actualDataDist, 'MnistLatentVAE')
     sDataset.sData.xt = data;
     sDataset.sData.y = double(labels(1:nTrain)');
     sDataset.sData.yt = double(labels');
-    omega = 0.5;
-    omegaTilde = 0.5;
+    omega = 0.3;
+    omegaTilde = 0.3;
     dim = size(data, 2);
     sDatasetParams = [];
 elseif strcmp(actualDataDist, 'Minnesota')   
@@ -217,21 +218,31 @@ elseif strcmp(actualDataDist, 'Grid')
             msgBoxMsg = [msgBoxMsg, 'updated to n = ' num2str(nTrain)];
         end
         
-        dataRearranged(1:nTrain,:) = data(1:r:nTest,:);
-        data(1:r:nTest,:) = [];
-        dataRearranged(nTrain+1:nTrain+length(data),:) = data;        
-        sDataset.sData.x = dataRearranged(1:nTrain,:);
-        sDataset.sData.xt = dataRearranged;
+        sDataset.sData.x = data(1:r:nTest,:);
+        sDataset.sData.xt = data;
     end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
+    
+    
+    %% option #1
     dist = norm(data(2,:)-data(1,:));
     omega = 2*sqrt(dist);
     omegaTilde = 2*sqrt(dist);
+    
+    %% option #2
 %     omega = 0.5*std(sDataset.sData.xt)^2;
 %     omegaTilde = 0.5*std(sDataset.sData.xt)^2;
 %     omega = 0.15;
 %     omegaTilde = 0.15;
+    
+    %% option #3
+% %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTrain-1)^(1/dim)));
+% %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTest-1)^(1/dim)));
+%     dist = min(pdist(sDataset.sData.xt));
+%     omega = sqrt(dist);
+%     omegaTilde = sqrt(dist);
+    %%
     if ~isempty(msgBoxMsg)
         msgBoxTitle = 'GenerateDataset warning';
         msgBoxMsg = ['This dataset has a fixed number of points.', newline, msgBoxMsg];

@@ -86,20 +86,21 @@ for r = 1:R
     % Original graph
     % ----------------------------------------------------------------------------------------------
     if b_debugUseAnalytic
-        [V, lambda] = SimpleCalcAnalyticEigenfunctions(xTrain, omega, sDatasetParams.sigma, sDatasetParams.mu, M);
-        lambda = n*lambda;
+        [V, adjLambda] = SimpleCalcAnalyticEigenfunctions(xTrain, omega, ...
+            sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
+        adjLambda = n*adjLambda;
     else
         [W, dist] = SimpleCalcAdjacency(xTrain, adjacencyType, omega, k, nnValue);
-        [V, adjLambda] = EigsByType(W, M, matrixForEigs);
-    end
+        [V, adjLambda, matLambda] = EigsByType(W, M, matrixForEigs);
     if r == 1 && sPlotParams.b_plotWeights
         PlotWeightsMatrix(sPlotParams, W, dist, xTrain, adjacencyType, verticesPDF, omega, k);
     end
+    end
 
-    if ~b_kde && dim <= 3
-        % ----------------------------------------------------------------------------------------------
+    % ----------------------------------------------------------------------------------------------
         % Estimate CDF, and model it with polyfit (PolyfitEstCdf)
-        % ----------------------------------------------------------------------------------------------
+    % ----------------------------------------------------------------------------------------------
+    if ~b_kde && dim <= 3
         nEvalPoints = min(700, round(n/10));
         b_plotCdf = true;
         [xTrainGrid, estMarginalCdf_xTrain, pCdf, invpCdf] = ...
@@ -118,7 +119,8 @@ for r = 1:R
         xTildeTrain = xTrain;
         polyvalCdfMatrix = [];
     else
-        [xTildeTrain, polyvalCdfMatrix] = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain, xTrain, b_kde, kde_bw);
+        [xTildeTrain, polyvalCdfMatrix] = T(pCdf, b_saturateT, muTilde, sigmaTilde, xTrain, xTrain, ...
+            b_kde, kde_bw);
     end
     if r == 1 && dim <= 2 && sPlotParams.b_plotHistogram
         PlotHistogram(sPlotParams, xTildeTrain, 'Gaussian', 'Histogram of $\tilde{X}$', false);
@@ -130,15 +132,17 @@ for r = 1:R
 
     if r == 1 && sPlotParams.b_plotTransDemos && b_applyT
         for d = 1:dim
-            PlotPolyCdfDemonstration1(xMin(d), xMax(d), pCdf(d,:), xTrainGrid(:,d), estMarginalCdf_xTrain(:,d), muTilde(d), sigmaTilde(d,d), b_kde, kde_bw);
-            PlotPolyCdfDemonstration2(xMin(d), xMax(d), pCdf(d,:), invpCdf(d,:), muTilde(d), sigmaTilde(d,d), xTrain, b_kde, kde_bw);
+            PlotPolyCdfDemonstration1(xMin(d), xMax(d), pCdf(d,:), xTrainGrid(:,d), ...
+                estMarginalCdf_xTrain(:,d), muTilde(d), sigmaTilde(d,d), b_kde, kde_bw);
+            PlotPolyCdfDemonstration2(xMin(d), xMax(d), pCdf(d,:), invpCdf(d,:), ...
+                muTilde(d), sigmaTilde(d,d), xTrain, b_kde, kde_bw);
         end
         if dim == 2
             PlotPolyCdfDemonstration3_2D(xTrain,xTildeTrain)
         end
     end
     % ----------------------------------------------------------------------------------------------
-    % Learn eigenvectors to eigenfunctions transformation (C)
+    % Calculate lambdaAnalyticTilde and PhiTilde(xTildeTrain)
     % ----------------------------------------------------------------------------------------------
     if b_gmmInsteadOfT
         sDistParams = EstimateDistributionParameters(xTildeTrain, gmmNumComponents, gmmRegVal, gmmMaxIter);
@@ -157,8 +161,12 @@ for r = 1:R
             
         end
     else
-        [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, omegaTilde, sigmaTilde, muTilde, MTilde);
+        [PhiTilde, lambdaAnalyticTilde] = SimpleCalcAnalyticEigenfunctions(xTildeTrain, ...
+            omegaTilde, sigmaTilde, muTilde, MTilde);
     end
+    % ----------------------------------------------------------------------------------------------
+    % Learn eigenvectors to eigenfunctions transformation (C)
+    % ----------------------------------------------------------------------------------------------
     if b_forceCtoIdentity
         C = zeros(MTilde, M);
         C(1:M,1:M) = eye(M);
@@ -178,9 +186,15 @@ for r = 1:R
         if b_gmmInsteadOfT && ~strcmp(verticesPDF,'Gaussian')
             figTitle = 'Eigenfunctions of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
             figName = 'PhiTilde_VTilde';
-            PlotEigenfuncvecScatter(sPlotParams, 'Gaussian', xTildeTrain, [], 70, 80, ...
-                PhiTilde, lambdaAnalyticTilde, '\tilde{\lambda}^{\phi}}', [], figTitle, figName, ...
-                '\tilde{\phi}' )
+            PlotEigenfuncvecScatter(sPlotParams, 'Gaussian', xTildeTrain, [], 40, 50, ...
+                PhiTilde, lambdaAnalyticTilde, '\tilde{\lambda}^{{\phi}}', [], ...
+                figTitle, figName, '\tilde{\phi}' )
+            figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+            PlotSpectrum(sPlotParams, sDataset, [], lambdaAnalyticTilde, [], [], ...
+                '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
+%             pltTitle = 'Analytic - $\int \phi_i(x) \phi_j(x) p(x) dx = n^d \Phi^T$diag(Pr)$\Phi$';
+%             figName = 'PhiTilde';
+%             PlotInnerProductMatrix(sPlotParams, dim, vPrTilde, 'IP_Matrix', [], PhiTilde(:,1:10), pltTitle, figName);
         else
             sqrtnLambdaPhiTilde = sqrt(n*lambdaAnalyticTilde)'.*PhiTilde;
             % Build W tilde and numeric eigenvectors for comparison
@@ -208,10 +222,11 @@ for r = 1:R
     if r == 1 && sPlotParams.b_plotVRec && dim <= 3
         VRec = PhiTilde*C;
 
-        figTitle = '${\bf V}$ in terms of ${\bf \tilde{\Phi}} \quad ({\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C})$';
+        figTitle = ['${\bf V}$ in terms of ${\bf \tilde{\Phi}} ', ...
+            '\quad ({\bf V}_{{\bf rec}} = {\bf \tilde{\Phi}} {\bf C})$'];
         figName = 'VRec';
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
-            VRec, lambda, [], [], figTitle, figName, 'v^{{\bf rec}}')
+            VRec, [], [], [], figTitle, figName, 'v^{{\bf rec}}')
 
         b_plotErrVsNodeInd = true;
         PlotEigenDiffs(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), VRec, V, ...
@@ -223,20 +238,16 @@ for r = 1:R
     % Plot original V for comparison
     % ----------------------------------------------------------------------------------------------
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
-%         figTitle = 'Numeric vs. analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-%         PlotSpectrum(sPlotParams, sDataset, [], n*lambdaAnalyticTilde, lambdaNumericTilde, [], ...
-%             'n \tilde{\lambda}^{\phi}_m', '\tilde{\lambda}^{v}_m', [], figTitle);
-        
+        figTitle = ['Eigenvectors of ', matrixForEigs];
         if strcmp(adjacencyType, 'GaussianKernel')
-            figTitle = [ 'Eigenvectors of ', matrixForEigs, ...
-                ' (generated from Gaussian kernel with $\omega = ' num2str(omega) '$) $\quad n = ' num2str(n) '$'];
+            figTitle2 = [' (generated from Gaussian kernel with $\omega = ', num2str(omega), '$)'];
         elseif strcmp(adjacencyType, 'NearestNeighbor')
-            figTitle = [ 'Eigenvectors of ', matrixForEigs, ...
-                ' (generated from k-NN with $k = ' num2str(k) '$) $\quad n = ' num2str(n) '$'];
+            figTitle2 = [' (generated from k-NN with $k = ', num2str(k), '$)'];
         end
+        figTitle3 = [' $\quad n = ', num2str(n), '$ points'];
         figName = 'V';
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
-            V, adjLambda, '\lambda^{v}', [], figTitle, figName, 'v')
+            V, matLambda, '\lambda^{v}', [], [figTitle, figTitle2, figTitle3], figName, 'v')
      end
 
     % ----------------------------------------------------------------------------------------------
@@ -251,7 +262,8 @@ for r = 1:R
     if b_gmmInsteadOfT
         [PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeInt, true);
     else
-        [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, sigmaTilde, muTilde, MTilde);
+        [PhiTildeInt, ~] = SimpleCalcAnalyticEigenfunctions(xTildeInt, omegaTilde, ...
+            sigmaTilde, muTilde, MTilde);
     end
     VInt = PhiTildeInt*C;
     VIntToCompare = VInt;
@@ -273,26 +285,32 @@ for r = 1:R
     % Calculate reference
     % ----------------------------------------------------------------------------------------------
     if b_debugUseAnalytic
-        [PhiRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, sDatasetParams.sigma, sDatasetParams.mu, M);
+        [PhiRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, ...
+            sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
         VRef = PhiRef;
     else
         WRef = SimpleCalcAdjacency(xInt, adjacencyType, omega, k, nnValue);
-        [VRef, adjLambdaRef] = EigsByType(WRef, M, matrixForEigs);
+        [VRef, adjLambdaRef, matLambdaRef] = EigsByType(WRef, M, matrixForEigs);
     end
     VRefToCompare = FlipSign(VInt, VRef);
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
         if dim == 1
             PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-                VRefToCompare, [], [], [], ['Reference vs. Nystrom (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}', VNysToCompare, 'v^{{\bf nys}}');
+                VRefToCompare, [], [], [], ['Reference vs. Nystrom (N = ', num2str(N), ')'], ...
+                'VRef', 'v^{{\bf ref}}', VNysToCompare, 'v^{{\bf nys}}');
             PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-                VRefToCompare, [], [], [], ['Reference vs. Ours (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}', VIntToCompare, 'v^{{\bf int}}');
+                VRefToCompare, [], [], [], ['Reference vs. Ours (N = ', num2str(N), ')'], ...
+                'VRef', 'v^{{\bf ref}}', VIntToCompare, 'v^{{\bf int}}');
         else
             PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-                VRefToCompare, adjLambdaRef, '\lambda^{{\bf ref}}', [], ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
+                VRefToCompare, matLambdaRef, '\lambda^{{\bf ref}}', [], ...
+                ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
             PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-                VNysToCompare, lambdaNys, '\lambda^{{\bf nys}}', [], ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
+                VNysToCompare, lambdaNys, '\lambda^{{\bf nys}}', [], ...
+                ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
             PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
-                VIntToCompare, lambdaAnalyticTilde, '\lambda^{{\bf int}}', [], ['Ours (N = ', num2str(N), ')'], 'VInt', 'v^{{\bf int}}');   
+                VIntToCompare, lambdaAnalyticTilde, '\lambda^{{\bf int}}', [], ...
+                ['Ours (N = ', num2str(N), ')'], 'VInt', 'v^{{\bf int}}');   
         end
     end
     
@@ -320,8 +338,10 @@ vRmseNys = CalcRMSE(mVNysToCompare, mVRefToCompare, 'Nystrom');
 % windowStyle = get(0,'DefaultFigureWindowStyle');
 % set(0,'DefaultFigureWindowStyle','normal')
 figure('Name', 'RMSE');
-plot((0:M-1)', vRmseInt.', '-o', 'LineWidth', 2, 'DisplayName', 'RMSE$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$'), hold on;
-plot((0:M-1)', vRmseNys.', '-x', 'LineWidth', 2, 'DisplayName', 'RMSE$(v^{{\bf nys}}_m, v^{{\bf ref}}_m)$')
+plot((0:M-1)', vRmseInt.', '-o', 'LineWidth', 2, 'DisplayName', ...
+    'RMSE$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$'), hold on;
+plot((0:M-1)', vRmseNys.', '-x', 'LineWidth', 2, 'DisplayName', ...
+    'RMSE$(v^{{\bf nys}}_m, v^{{\bf ref}}_m)$')
 rmseylim = max([vRmseInt vRmseNys]);
 ylim([0 rmseylim]);
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)

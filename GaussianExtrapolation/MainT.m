@@ -5,10 +5,10 @@ set(0,'DefaultFigureWindowStyle','docked')
 %% Plot params
 sPlotParams = GetPlotParams();
 %% Dataset parameters
-dim                 = 2;
-n                   = 2048;
-N                   = 4096;
-k                   = 3;
+dim                 = 1;
+n                   = 1024;
+N                   = 2048;
+k                   = round(0.01*N);
 nnValue             = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 verticesPDF         = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE'
 adjacencyType       = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
@@ -16,7 +16,7 @@ interpMethod        = 'AddPoints'; % 'NewPoints' / 'AddPoints'
 matrixForEigs       = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% Params for Grid/Uniform
 sDatasetParams.xMin = [0 0];
-sDatasetParams.xMax = [4 1];
+sDatasetParams.xMax = [2 1];
 %% Params for Gaussian
 nComponents = 1;
 for c = 1:nComponents
@@ -25,7 +25,7 @@ for c = 1:nComponents
 end
 %% Number of eigenvectors/eigenfunctions
 M                  = 50;
-MTilde             = 150; % M
+MTilde             = 500; % M
 %% T params
 % PolyFit
 b_saturateT        = true;
@@ -39,7 +39,7 @@ sigmaTilde         = diag(ones(dim,1)); % was diag(std(xTrain));
 %% GMM params
 gmmRegVal          = 1e-3;
 gmmMaxIter         = 2000;
-gmmNumComponents   = 20; % 1
+gmmNumComponents   = 16; % 1
 %% Method parameters
 b_debugUseAnalytic = false;
 b_applyT           = false;
@@ -92,13 +92,13 @@ for r = 1:R
     else
         [W, dist] = SimpleCalcAdjacency(xTrain, adjacencyType, omega, k, nnValue);
         [V, adjLambda, matLambda] = EigsByType(W, M, matrixForEigs);
-    if r == 1 && sPlotParams.b_plotWeights
-        PlotWeightsMatrix(sPlotParams, W, dist, xTrain, adjacencyType, verticesPDF, omega, k);
-    end
+        if r == 1 && sPlotParams.b_plotWeights
+            PlotWeightsMatrix(sPlotParams, W, dist, xTrain, adjacencyType, verticesPDF, omega, k);
+        end
     end
 
     % ----------------------------------------------------------------------------------------------
-        % Estimate CDF, and model it with polyfit (PolyfitEstCdf)
+    % Estimate CDF, and model it with polyfit (PolyfitEstCdf)
     % ----------------------------------------------------------------------------------------------
     if ~b_kde && dim <= 3
         nEvalPoints = min(700, round(n/10));

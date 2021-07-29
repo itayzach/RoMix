@@ -66,7 +66,7 @@ title(strcat('$K^{(\alpha)} = Q^{-\alpha}KQ^{-\alpha}, \quad \varepsilon = ', nu
     'interpreter','latex', 'FontSize', 16); set(gca,'FontSize', 14);
 %% RW matrix
 Pa = Da^-1*Ka;
-isalmostequal(diag(sum(Pa,2)),eye(N),1e-14) % make sure W is row stochastic
+isalmostequal(diag(sum(Pa,2)),eye(N),1e-14) % make sure Pa is row stochastic
 
 figure('Name', 'Pa');
 imagesc(Pa);
@@ -79,7 +79,6 @@ set(gca,'FontSize', 14);
 M = 6; % number of eigenvectors
 [Psi, Lambda, Phi] = eigs(Pa,M);
 assert(~any(isnan(diag(Lambda))), 'You have at least one NaN');
-Psi = Psi./Psi(:,1);
 %% Psi^T D Psi
 PsiT_Da_Psi = Psi'*Da*Psi;
 figure('Name', 'Psi^T D Psi');

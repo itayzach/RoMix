@@ -226,7 +226,7 @@ elseif strcmp(actualDataDist, 'Grid')
     
     
     %% option #1
-    dist = norm(data(2,:)-data(1,:));
+    dist = min(pdist(sDataset.sData.x));
     omega = 2*sqrt(dist);
     omegaTilde = 2*sqrt(dist);
     
@@ -239,7 +239,7 @@ elseif strcmp(actualDataDist, 'Grid')
     %% option #3
 % %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTrain-1)^(1/dim)));
 % %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTest-1)^(1/dim)));
-%     dist = min(pdist(sDataset.sData.xt));
+%     dist = min(pdist(sDataset.sData.x));
 %     omega = sqrt(dist);
 %     omegaTilde = sqrt(dist);
     %%

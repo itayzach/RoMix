@@ -1,4 +1,4 @@
-function PlotWeightsMatrix(sPlotParams, W, dist, xTrain, adjacencyType, verticesPDF, omega, k)
+function PlotWeightsMatrix(sPlotParams, W, dist, D, xTrain, adjacencyType, verticesPDF, omega, k)
 
 figure('Name', 'Distance matrix');
 imagesc(dist);
@@ -14,6 +14,10 @@ colorbar();
 title('Weight matrix', 'FontSize', 14, 'interpreter', 'latex')
 set(gca,'FontSize', 14);
 
+figure('Name', 'Node degrees');
+plot(diag(D), '.', 'MarkerSize', 10);
+title('Node degrees', 'FontSize', 14, 'interpreter', 'latex')
+set(gca,'FontSize', 14);
 
 [n, dim] = size(xTrain);
 if dim <= 3

@@ -75,10 +75,10 @@ for r = 1:R
             sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
         adjLambda = n*adjLambda;
     else
-        [W, dist] = SimpleCalcAdjacency(xTrain, adjacencyType, omega, k, nnValue);
-        [V, adjLambda, matLambda] = EigsByType(W, M, matrixForEigs);
+        [W, dist, D] = SimpleCalcAdjacency(xTrain, adjacencyType, omega, k, nnValue);
+        [V, adjLambda, matLambda] = EigsByType(W, D, M, matrixForEigs);
         if r == 1 && sPlotParams.b_plotWeights
-            PlotWeightsMatrix(sPlotParams, W, dist, xTrain, adjacencyType, verticesPDF, omega, k);
+            PlotWeightsMatrix(sPlotParams, W, dist, D, xTrain, adjacencyType, verticesPDF, omega, k);
         end
     end
 
@@ -93,7 +93,7 @@ for r = 1:R
     [ PhiTilde, lambdaAnalyticTilde ] = ...
         CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, true);
     if r == 1 && sPlotParams.b_plotDataVsGmm && dim <= 3
-        nGmmPoints = 5000;
+        nGmmPoints = n;
         pltTitle = ['Dataset with n = ', num2str(n), ' points'];
         plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
 
@@ -169,9 +169,8 @@ for r = 1:R
     B = exp(-distLUBlockRUBlock.^2/(2*omegaNys^2));
     normFactor = adjLambda*sqrt(interpRatio);
     VNys = B.'*V*diag(1./normFactor);
-    if ~strcmp(matrixForEigs, 'Adjacency')
         VNys = VNys./norm(VNys(:,1));
-    end
+    VNys = FlipSign(VInt, VNys);
     VNysToCompare = VNys;
     lambdaNys = interpRatio*adjLambda;
 
@@ -184,8 +183,8 @@ for r = 1:R
             sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
         VRef = PhiRef;
     else
-        WRef = SimpleCalcAdjacency(xInt, adjacencyType, omega, k, nnValue);
-        [VRef, adjLambdaRef, matLambdaRef] = EigsByType(WRef, M, matrixForEigs);
+        [WRef, ~, DRef] = SimpleCalcAdjacency(xInt, adjacencyType, omega, k, nnValue);
+        [VRef, adjLambdaRef, matLambdaRef] = EigsByType(WRef, DRef, M, matrixForEigs);
     end
     VRefToCompare = FlipSign(VInt, VRef);
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3

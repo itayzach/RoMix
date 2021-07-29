@@ -1,12 +1,14 @@
 function PlotWeightsMatrix(sPlotParams, W, dist, D, xTrain, adjacencyType, verticesPDF, omega, k)
 
-figure('Name', 'Distance matrix');
-imagesc(dist);
-colorbar();
-title(['Distance matrix', newline, ...
-    'omega = ', num2str(omega, '%.2f'), ', max(dist) = ', num2str(max(dist(:)), '%.2f')], ...
-    'FontSize', 14, 'interpreter', 'latex')
-set(gca,'FontSize', 14);
+if ~isempty(dist)
+    figure('Name', 'Distance matrix');
+    imagesc(dist);
+    colorbar();
+    title(['Distance matrix', newline, ...
+        'omega = ', num2str(omega, '%.2f'), ', max(dist) = ', num2str(max(dist(:)), '%.2f')], ...
+        'FontSize', 14, 'interpreter', 'latex')
+    set(gca,'FontSize', 14);
+end
 
 figure('Name', 'Weight matrix');
 imagesc(W);

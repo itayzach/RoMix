@@ -1,9 +1,10 @@
-function [] = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, nysRatio, ...
+function localCmap = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, cmap, ...
     firstEigenIdx, lastEigIdx, mPhi, vLambda, lambdaStr, G, suptitle, figureName, phiStr, mPhi2, phi2Str)
 dim = size(mData, 2);
 assert(dim <= 3, 'Not supported')
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
+localCmap = zeros(2,length(firstEigenIdx:lastEigIdx));
 if dim == 1
     %% Plot params
     x0     = 10;
@@ -57,7 +58,7 @@ elseif dim == 2 || dim == 3
         end
         fig = figure('Name', [ num2str(dim) 'D Scatter']);
         for m = firstEigenIdx:lastEigIdx
-            subplot(nRows, nCols,m-firstEigenIdx+1);
+            subplot(nRows, nCols,m+1-firstEigenIdx);
             if isfield(sSimParams, 'b_GSPBoxPlots') && sSimParams.b_GSPBoxPlots
                 param.show_edges = false;
                 gsp_plot_signal(G,mPhi(:,m+1),param);
@@ -69,8 +70,15 @@ elseif dim == 2 || dim == 3
                 end
                 colormap(gca, 'jet')
                 colorbar()
-                cMin = min(mPhi(:,m+1));
-                cMax = max(mPhi(:,m+1));
+                if isempty(cmap)
+                    localCmap(1,m+1-firstEigenIdx) = min(mPhi(:,m+1));
+                    localCmap(2,m+1-firstEigenIdx) = max(mPhi(:,m+1));
+                else
+                    localCmap(1,m+1-firstEigenIdx) = cmap(1,m+1-firstEigenIdx);
+                    localCmap(2,m+1-firstEigenIdx) = cmap(2,m+1-firstEigenIdx);
+                end
+                cMin = localCmap(1,m+1-firstEigenIdx);
+                cMax = localCmap(2,m+1-firstEigenIdx);
                 caxis([cMin cMax])
                 xlim([ min(mData(:,1)) max(mData(:,1))])
                 ylim([ min(mData(:,2)) max(mData(:,2))])
@@ -101,11 +109,7 @@ if isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')
         mkdir(sSimParams.outputFolder)
     end
-    if isempty(nysRatio)
-        simPrefix = strcat(actualDataDist, num2str(dim), 'd');
-    else
-        simPrefix = strcat(actualDataDist, num2str(dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
-    end
+    simPrefix = strcat(actualDataDist, num2str(dim), 'd');
     if ~exist('figureName', 'var')
         figureName = evecsName;
     end

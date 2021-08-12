@@ -33,6 +33,6 @@ if dim <= 3
 
     figName = 'W';
     PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], 0, 3, W(:,1:4), [], [], [], ...
-        figTitle, figName, 'w')
+        figTitle, figName, 'w');
 end
 end

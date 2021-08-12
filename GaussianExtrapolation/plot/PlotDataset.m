@@ -9,7 +9,7 @@ set(0,'DefaultFigureWindowStyle',windowStyle)
 fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
 %% GMM
 if exist('GMModel', 'var')
-    subplot(1,2,2)
+    ax(1) = subplot(1,2,2);
     [xGmm,compIdx] = random(GMModel, nGmmPoints);
     xMax = max([max(xGmm); max(x)]);
     xMin = min([min(xGmm); min(x)]);
@@ -20,7 +20,7 @@ if exist('GMModel', 'var')
         xlim([xMin(1), xMax(1)])
     elseif dim == 2
         scatter(xGmm(:,1),xGmm(:,2),[],compIdx,'filled') % Scatter plot with points of size 10
-        colormap(jet(GMModel.NumComponents));
+        colormap(ax(1), jet(GMModel.NumComponents));
         colorbar();
         xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
         ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
@@ -40,7 +40,7 @@ if exist('GMModel', 'var')
         zlim([xMin(3), xMax(3)])
     end
     title(plt2Title, 'Interpreter', 'latex', 'FontSize', 14)
-    subplot(1,2,1)
+    ax(2) = subplot(1,2,1);
 end
 %% Dataset
 if dim == 1
@@ -51,7 +51,11 @@ if dim == 1
 elseif dim == 2
     if ~isempty(y)
         scatter(x(:,1), x(:,2), [], y, 'filled');
-        colormap(jet(max(y)-min(y))); 
+        if exist('ax', 'var')
+            colormap(ax(2), jet(max(y)-min(y))); 
+        else
+            colormap(jet(max(y)-min(y))); 
+        end
         colorbar;
     else
         scatter(x(:,1), x(:,2), 'filled');

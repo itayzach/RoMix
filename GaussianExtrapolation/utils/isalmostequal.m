@@ -7,14 +7,19 @@ end
 if ~exist('do_assert', 'var')
     do_assert = true;
 end
-errormsg = ['You got max error of: ' num2str(max(max(abs(A - B)))) '. Threshold = ' num2str(threshold)];
-if do_assert
-    if exist('msg', 'var')
-        assert(all(all(abs(A - B) <= threshold)), [newline msg newline newline errormsg]);
+[maxVal, maxInd] = max(max(abs(A - B)));
+[maxRow, maxCol] = ind2sub(size(A), maxInd);
+errormsg = sprintf('You got max error of: %d. Threshold = %d.\nA(%d,%d) = %d\nB(%d,%d) = %d\n', ...
+   maxVal, threshold, maxRow, maxCol, A(maxRow, maxCol), maxRow, maxCol, B(maxRow, maxCol));
+if all(all(abs(A - B) > threshold))
+    if do_assert
+        if exist('msg', 'var')
+            error([newline msg newline newline errormsg]);
+        else
+            error([newline newline errormsg]);
+        end
     else
-        assert(all(all(abs(A - B) <= threshold)), [newline newline errormsg]);
+        fprintf([newline newline errormsg newline newline])
     end
-else
-    fprintf([newline newline errormsg '\n'])
 end
 end

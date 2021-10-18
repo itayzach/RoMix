@@ -6,11 +6,11 @@ if ~exist('M', 'var')
     sSimParams.PlotSpectM = 12;
 else
     sSimParams.CalcEigenFuncsM = M;
-    sSimParams.PlotEigenFuncsM = M;
-    sSimParams.PlotSpectM = M;
+    sSimParams.PlotEigenFuncsM = min(M,12);
+    sSimParams.PlotSpectM =  min(M,12);
 end
 %% Figures
-sSimParams.outputFolder = 'figs';
+% sSimParams.outputFolder = 'figs';
 sSimParams.b_plotEigenfunctions = true;
 sSimParams.b_GSPBoxPlots = false;
 end

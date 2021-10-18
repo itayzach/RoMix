@@ -19,6 +19,41 @@ if strcmp(actualDataDist, 'SineCosine')
     sDataset.sData.theta = theta;
     omega = 0.5*sum(sqrt(std(sDataset.sData.xt)))/dim; %0.15;
     omegaTilde = 0.5*sum(sqrt(std(sDataset.sData.xt)))/dim; %0.15;
+elseif strcmp(actualDataDist, 'BrazilWeather') 
+    T = readtable(fullfile('data','Brazilian_Weather_Stations-Temperature_1961-1990.xlsx'));
+    
+    T(isnan(T.Annual),:) = [];
+    
+    nPoints = height(T);
+    latStr = cell2mat(T.Latitude);
+    lonStr = cell2mat(T.Longitude);
+    % Add seconds to lat/lon to have a valid str2angle input format:
+    %     '07°38''S' --> '07°38''00"S'
+    latStrFormatted = [latStr(:,1:5), repmat('''00"',nPoints,1), latStr(:,7)];
+    latitude = str2angle(latStrFormatted);
+    lonStrFormatted = [lonStr(:,1:5), repmat('''00"',nPoints,1), lonStr(:,7)];
+    longitude = str2angle(lonStrFormatted);
+    data = [longitude, latitude];
+    
+    trainTestRatio = nTrain/nTest;
+    nTest = length(data);
+    nTrain = min(round(trainTestRatio*nTest),nTest);
+    nTest = length(data);
+    rperm = randperm(nTest);
+    dataRearranged = data(rperm,:);
+    
+    sDataset.sData.x = dataRearranged(1:nTrain,:);
+    sDataset.sData.xt = dataRearranged;
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    dim = 2;
+    sDatasetParams = [];
+    
+    omega = 3;
+    omegaTilde = omega;
+    
+    sDataset.graphSignalInt = T.Annual(rperm);
+    sDataset.graphSignal = sDataset.graphSignalInt(1:nTrain);
     
 elseif strcmp(actualDataDist, 'MnistDist')
     assert(strcmp(interpMethod, 'AddPoints'))
@@ -51,6 +86,19 @@ elseif strcmp(actualDataDist, 'MnistLatentVAE')
     omegaTilde = 0.3;
     dim = size(data, 2);
     sDatasetParams = [];
+elseif strcmp(actualDataDist, 'CoraLatentVGAE')
+    assert(strcmp(interpMethod, 'AddPoints'))
+    coraLatent = load('data\coraLatentVGAE.mat');
+    z = double(coraLatent.z_mean);
+    data = double(z(1:nTest,:));
+    sDataset.sData.x = data(1:nTrain,:);
+    sDataset.sData.xt = data;
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    omega = 1.5;
+    omegaTilde = 1.5;
+    dim = size(data, 2);
+    sDatasetParams = [];
 elseif strcmp(actualDataDist, 'Minnesota')   
     assert(strcmp(interpMethod, 'AddPoints'))
     G = gsp_minnesota();
@@ -58,12 +106,16 @@ elseif strcmp(actualDataDist, 'Minnesota')
     trainTestRatio = nTrain/nTest;
     nTest = length(data);
     nTrain = min(round(trainTestRatio*nTest),nTest);
-    sDataset.sData.x = data(1:nTrain,:);
-    sDataset.sData.xt = data;
+    
+    rperm = randperm(nTest);
+    dataRearranged = data(rperm,:);
+   
+    sDataset.sData.x = dataRearranged(1:nTrain,:);
+    sDataset.sData.xt = dataRearranged;
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
-    omega = 0.15;
-    omegaTilde = 0.15;
+    omega = 0.5;
+    omegaTilde = 0.5;
     dim = 2;
     sDatasetParams = [];
     msgBoxTitle = 'GenerateDataset warning';
@@ -218,8 +270,9 @@ elseif strcmp(actualDataDist, 'Grid')
             msgBoxMsg = [msgBoxMsg, 'updated to n = ' num2str(nTrain)];
         end
         
-        sDataset.sData.x = data(1:r:nTest,:);
-        sDataset.sData.xt = data;
+        xTrainInd = 1:r:nTest;
+        sDataset.sData.x = data(xTrainInd,:);
+        sDataset.sData.xt = [data(xTrainInd,:); data(setdiff(1:end,xTrainInd),:)];
     end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];

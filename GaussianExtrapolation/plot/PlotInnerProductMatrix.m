@@ -15,7 +15,8 @@ fig = figure('Name', sprintf('%s IP matrix', figName));
 if isempty(vPr)
     mInnerProduct = mPhi.'*mPhi;
 else
-    mInnerProduct = N^dim * (mPhi.' * diag(vPr)* mPhi);
+%     mInnerProduct = N^(dim-1) * (mPhi.' * diag(vPr)* mPhi);
+    mInnerProduct = mPhi.' * diag(vPr)* mPhi;
 end
 imagesc(mInnerProduct)
 % colormap(gca, 'hot')

@@ -23,6 +23,9 @@ for m = 1:M
         vNorms(k) = norm(phi1_m - mPhi2AlignedToPhi1(:,k));
     end
     [~,minInd] = min(vNorms);
+    if minInd ~= m
+        warning('m = %d, minInd = %d', m, minInd)
+    end
     vMinInd(m) = minInd;
     mPhi2Flipped(:,m) = mPhi2AlignedToPhi1(:,minInd);
 end
@@ -31,7 +34,9 @@ end
 end
 
 function phi2Flipped = FlipTwoByNormDiff(phi1,phi2)
-    if norm(phi1 - phi2) > norm(phi1 + phi2)
+    normSum = norm(phi1 + phi2);
+    normDiff = norm(phi1 - phi2);
+    if (normDiff > normSum) && normSum > 1
         phi2Flipped = -phi2;
     else
         phi2Flipped = phi2;

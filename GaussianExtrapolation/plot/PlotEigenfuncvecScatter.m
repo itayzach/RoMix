@@ -1,10 +1,13 @@
 function localCmap = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, cmap, ...
-    firstEigenIdx, lastEigIdx, mPhi, vLambda, lambdaStr, G, suptitle, figureName, phiStr, mPhi2, phi2Str)
+    firstEigenIdx, lastEigIdx, mPhi, vLambda, lambdaStr, G, suptitle, figureName, phiStr, mPhi2, phi2Str, mData2)
 dim = size(mData, 2);
 assert(dim <= 3, 'Not supported')
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 localCmap = zeros(2,length(firstEigenIdx:lastEigIdx));
+if ~exist('mData2', 'var')
+    mData2 = mData;
+end
 if dim == 1
     %% Plot params
     x0     = 10;
@@ -18,7 +21,7 @@ if dim == 1
             dispName2 = ['$' phi2Str '_{' num2str(m) '}$'];
         end
         if exist('mPhi2', 'var')
-            plot(mData(:), mPhi2(:,m+1), 'o', 'DisplayName', dispName2);
+            plot(mData2(:), mPhi2(:,m+1), 'o', 'DisplayName', dispName2);
             hold on;
         end
         plot(mData(:), mPhi(:,m+1), '.', 'DisplayName', dispName);

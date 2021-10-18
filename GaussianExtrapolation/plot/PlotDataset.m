@@ -22,16 +22,16 @@ if exist('GMModel', 'var')
         scatter(xGmm(:,1),xGmm(:,2),[],compIdx,'filled') % Scatter plot with points of size 10
         colormap(ax(1), jet(GMModel.NumComponents));
         colorbar();
-        xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-        ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
+        xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
+        ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
         set(gca,'FontSize', 14);
         xlim([xMin(1), xMax(1)])
         ylim([xMin(2), xMax(2)])
     elseif dim == 3
         scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[],compIdx, 'filled');
-        xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-        ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
-        zlabel('$z$', 'interpreter', 'latex', 'FontSize', 16);
+        xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
+        ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
+        zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
 %         view(10,5);
         view(30,70);
         set(gca,'FontSize', 14);
@@ -60,22 +60,26 @@ elseif dim == 2
     else
         scatter(x(:,1), x(:,2), 'filled');
     end
-    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-    ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
+    xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
+    ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'FontSize', 14);
-    xlim([xMin(1), xMax(1)])
-    ylim([xMin(2), xMax(2)])
+    if exist('xMin', 'var') && exist('xMax', 'var')
+        xlim([xMin(1), xMax(1)])
+        ylim([xMin(2), xMax(2)])
+    end
 elseif dim == 3
     scatter3(x(:,1), x(:,2), x(:,3), 'filled');
-    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-    ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
-    zlabel('$z$', 'interpreter', 'latex', 'FontSize', 16);
+    xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
+    ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
+    zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
 %     view(10,5);
     view(30,70);
     set(gca,'FontSize', 14);
-    xlim([xMin(1), xMax(1)])
-    ylim([xMin(2), xMax(2)])
-    zlim([xMin(3), xMax(3)])    
+    if exist('xMin', 'var') && exist('xMax', 'var')
+        xlim([xMin(1), xMax(1)])
+        ylim([xMin(2), xMax(2)])
+        zlim([xMin(3), xMax(3)])
+    end
 end
 title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 

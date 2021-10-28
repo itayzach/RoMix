@@ -1,4 +1,4 @@
-function fig = PlotInnerProductMatrix(sSimParams, dim, vPr, graphName, nysRatio, mPhi, pltTitle, figName)
+function fig = PlotInnerProductMatrix(mPhi, vPr, sSimParams, pltTitle, figName)
 
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
@@ -8,11 +8,9 @@ y0     = 50;
 width  = 600;
 height = 400;
 
-N = size(mPhi,1);
-
 fig = figure('Name', sprintf('%s IP matrix', figName));
 
-if isempty(vPr)
+if ~exist('vPr', 'var') || isempty(vPr)
     mInnerProduct = mPhi.'*mPhi;
 else
 %     mInnerProduct = N^(dim-1) * (mPhi.' * diag(vPr)* mPhi);
@@ -29,11 +27,6 @@ set(0,'DefaultFigureWindowStyle',windowStyle)
 if isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')
         mkdir(sSimParams.outputFolder)
-    end
-    if isempty(nysRatio)
-        simPrefix = strcat(graphName, num2str(dim), 'd');
-    else
-        simPrefix = strcat(graphName, num2str(dim), 'd', '_', num2str(nysRatio*100, '%d'), 'prec');
     end
     saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix,  '_inner_product_matrix_', figName), 'epsc');
 end

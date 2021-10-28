@@ -24,14 +24,15 @@ for r = 1:R
     fprintf([compareTo '. t = %d\n'], r);
     for m = 1:nEigenFuncs
         fprintf('m = %d; Ratio: %f\n', m-1, max(abs(tPhiToCompare(r,:,m)))/max(abs(tPhiNumeric(r,:,m))))
-        if strcmp(compareTo, 'Analytic')
-            mSqNorm(r,m) = sqrt((1/nPoints)*sum((tPhiToCompare(r,:,m).' - tPhiNumeric(r,:,m).').^2));
-        elseif strcmp(compareTo, 'Nystrom')
-            mSqNorm(r,m) = sqrt((1/nPoints)*sum((tPhiToCompare(r,:,m).' - tPhiNumeric(r,:,m).').^2));
-        else
-            error('unknown type')
-        end
-        mSqNorm(r,m) = norm(tPhiToCompare(r,:,m) - tPhiNumeric(r,:,m));
+%         if strcmp(compareTo, 'Analytic')
+%             mSqNorm(r,m) = sqrt((1/nPoints)*sum((tPhiToCompare(r,:,m).' - tPhiNumeric(r,:,m).').^2));
+%         elseif strcmp(compareTo, 'Nystrom')
+%             mSqNorm(r,m) = sqrt((1/nPoints)*sum((tPhiToCompare(r,:,m).' - tPhiNumeric(r,:,m).').^2));
+%         else
+%             error('unknown type')
+%         end
+        mSqNorm(r,m) = min(norm(tPhiToCompare(r,:,m) - tPhiNumeric(r,:,m)),...
+                           norm(tPhiToCompare(r,:,m) + tPhiNumeric(r,:,m)));
     end
     fprintf('\n');
 end

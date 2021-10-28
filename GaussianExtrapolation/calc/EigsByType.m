@@ -18,7 +18,7 @@ elseif strcmp(matrixForEigs, 'RandomWalk')
     Da = diag(da);
     Pa = Da^-1*Ka;
     isalmostequal(diag(sum(Pa,2)),eye(length(Pa)),1e-14) % make sure Pa is row stochastic
-    [Psi, Lambda, Phi] = eigs(Pa,M);
+    [Psi, Lambda] = eigs(Pa, M);
     matLambda = diag(Lambda);
     V = Psi;
     % Psi = Psi./norm(Psi(:,1));

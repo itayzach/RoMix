@@ -13,6 +13,7 @@ xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('RMSE', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'best')
 set(gca,'FontSize', 14);
+set(gca, 'XTick', 0:M-1)
 
 %% Save
 if isfield(sPlotParams, 'outputFolder')

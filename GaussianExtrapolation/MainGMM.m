@@ -34,6 +34,7 @@ b_debugUseAnalytic = false;
 b_forceCtoIdentity = false;
 b_normalizePhi     = false;
 b_takeEigsFromWRef = false;
+b_flipSign         = false;
 %% Verify
 assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
 assert(~strcmp(adjacencyType,'NearestNeighbor') || ...
@@ -94,14 +95,14 @@ for r = 1:R
             W = WRef(1:n,1:n);
             dist = distRef(1:n,1:n);
             D = DRef(1:n,1:n);
-            V = VRef(1:n,:);
-            adjLambda = adjLambdaRef;
-            matLambda = matLambdaRef;
+            V = sqrt(interpRatio)*VRef(1:n,:);
+            adjLambda = adjLambdaRef/interpRatio;
+            matLambda = matLambdaRef/interpRatio;
             VRefToCompare = VRef;
         else
             [W, dist, D] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue);
             [V, adjLambda, matLambda] = EigsByType(W, D, M, matrixForEigs);
-            V = V/sqrt(interpRatio);
+%             V = V/sqrt(interpRatio);
         end
         
         if r == 1 && sPlotParams.b_plotWeights
@@ -193,7 +194,7 @@ for r = 1:R
     [PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeInt, b_normalizePhi);
     PhiTildeIntCondNum = cond(PhiTildeInt);
 %     assert(PhiTildeIntCondNum < 1e3, 'Condition number is too large...');
-    VInt = PhiTildeInt*C;
+    VInt = (1/sqrt(interpRatio))*PhiTildeInt*C;
     VIntToCompare = VInt;
        
     % ----------------------------------------------------------------------------------------------
@@ -201,10 +202,12 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     distLUBlockRUBlock = CalcDistance(xTrain, xInt, distType);
     B = exp(-distLUBlockRUBlock.^2/(2*omegaNys^2));
-    VNys = B.'*V*diag(1./adjLambda);
+    lambdaNys = adjLambda*sqrt(interpRatio);
+    VNys = B.'*V*diag(1./lambdaNys);
+    if b_flipSign
     VNys = FlipSign(VInt, VNys);
+    end
     VNysToCompare = VNys;
-    lambdaNys = adjLambda;
     
     % ----------------------------------------------------------------------------------------------
     % Calculate reference
@@ -213,11 +216,15 @@ for r = 1:R
         [PhiRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, ...
             sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
         VRef = PhiRef;
+        if b_flipSign
         VRefToCompare = FlipSign(VInt, VRef);
+        end
     elseif ~b_takeEigsFromWRef
         [WRef, ~, DRef] = SimpleCalcAdjacency(xInt, adjacencyType, distType, omega, k, nnValue);
         [VRef, adjLambdaRef, matLambdaRef] = EigsByType(WRef, DRef, M, matrixForEigs);
+        if b_flipSign
         VRef = FlipSign(VInt, VRef);
+        end
         VRefToCompare = VRef;
     end
 
@@ -253,16 +260,17 @@ for r = 1:R
     if r == 1 && sPlotParams.b_plotInnerProductMatrices
         pltTitle = 'VRef - ${\bf V}_{{\bf ref}}^T {\bf V}_{{\bf ref}}$';
         figName = 'VRef';
-        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VRef, pltTitle, figName);
+        PlotInnerProductMatrix(VRef, [], sPlotParams, pltTitle, figName);
         pltTitle = 'VInt - ${\bf V}_{{\bf int}}^T {\bf V}_{{\bf int}}$';
         figName = 'Vint';
-        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VInt, pltTitle, figName);
+        PlotInnerProductMatrix(VInt, [], sPlotParams, pltTitle, figName);
         pltTitle = 'VNys - ${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$';
         figName = 'VNys';
-        PlotInnerProductMatrix(sPlotParams, dim, [], 'IP_Matrix', [], VNys, pltTitle, figName);
+        PlotInnerProductMatrix(VNys, [], sPlotParams, pltTitle, figName);
 %         pltTitle = '$\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$';
 %         figName = 'PhiTilde';
-%         PlotInnerProductMatrix(sPlotParams, dim, vPrTilde, 'IP_Matrix', [], PhiTilde, pltTitle, figName);
+%         PlotInnerProductMatrix(PhiTilde, vPrTilde, sPlotParams, pltTitle, figName);
+
     end
     
     % ----------------------------------------------------------------------------------------------
@@ -273,10 +281,11 @@ for r = 1:R
             sig = sDataset.graphSignal;
             sigRef = sDataset.graphSignalInt;
         else
-            [sig, sigRef] = GenerateSyntheticGraphSignal(V);
+            [sig, sigRef] = GenerateSyntheticGraphSignal(V, VRef);
         end
 
-        sigHatV = interpRatio*V'*sig; % same as pinv(V)*sig...
+%         sigHatV = interpRatio*V'*sig; % same as pinv(V)*sig...
+        sigHatV = V'*sig; % same as pinv(V)*sig...
         sigRecV = V*sigHatV;
 
         sigHatPhi = pinv(PhiTilde)*sig;

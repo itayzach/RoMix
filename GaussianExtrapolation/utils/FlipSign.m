@@ -14,9 +14,10 @@ vMinInd = zeros(M,1);
 mPhi2Flipped = zeros(size(mPhi2));
 for m = 1:M
     phi1_m = mPhi1(:,m);
-    mPhi2AlignedToPhi1 = zeros(size(mPhi2));
+    mPhi2AlignedToPhi1 = nan(size(mPhi2));
+    b_vFlippedIndicator = zeros(M,1);
     for k=1:M
-        mPhi2AlignedToPhi1(:,k) = FlipTwoByNormDiff(phi1_m, mPhi2(:,k));
+        [mPhi2AlignedToPhi1(:,k), b_vFlippedIndicator(k)] = FlipTwoByNormDiff(phi1_m, mPhi2(:,k));
     end
     vNorms = zeros(M,1);
     for k=1:M
@@ -33,12 +34,14 @@ end
 
 end
 
-function phi2Flipped = FlipTwoByNormDiff(phi1,phi2)
+function [phi2Flipped, b_flippedIndicator] = FlipTwoByNormDiff(phi1,phi2)
     normSum = norm(phi1 + phi2);
     normDiff = norm(phi1 - phi2);
     if (normDiff > normSum) && normSum > 1
         phi2Flipped = -phi2;
+        b_flippedIndicator = true;
     else
         phi2Flipped = phi2;
+        b_flippedIndicator = false;
     end
 end

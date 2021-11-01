@@ -34,7 +34,8 @@ b_debugUseAnalytic = false;
 b_forceCtoIdentity = false;
 b_normalizePhi     = false;
 b_takeEigsFromWRef = false;
-b_flipSign         = false;
+b_flipSign         = true;
+b_pairwiseFlipSign = true;
 %% Verify
 assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
 assert(~strcmp(adjacencyType,'NearestNeighbor') || ...
@@ -57,6 +58,10 @@ omega          = sDataset.recommendedOmega;
 omegaTilde     = sDataset.recommendedOmegaTilde;
 omegaNys       = sDataset.recommendedOmega;
 assert(isequal(sDataset.sData.x, sDataset.sData.xt(1:n,:)));
+%% Plot params
+sPlotParams = GetPlotParams();
+sPlotParams.sDataset = sDataset;
+sPlotParams.matrixForEigs = matrixForEigs;
 %% plotInd
 if dim == 1
     plotInd = [0,min(4,M-1)];
@@ -77,7 +82,7 @@ for r = 1:R
     yTrain   = sDataset.sData.y;
     xInt     = sDataset.sData.xt;
     if r == 1 && sPlotParams.b_plotData && dim <= 3
-        PlotDataset(sPlotParams, xTrain, yTrain, verticesPDF, 'Training set');
+        PlotDataset(sPlotParams, xTrain, yTrain, 'Training set');
     end
     % ----------------------------------------------------------------------------------------------
     % Original graph
@@ -106,7 +111,7 @@ for r = 1:R
         end
         
         if r == 1 && sPlotParams.b_plotWeights
-            PlotWeightsMatrix(sPlotParams, W, dist, D, xTrain, adjacencyType, verticesPDF, omega, k);
+            PlotWeightsMatrix(sPlotParams, W, dist, D, xTrain, adjacencyType, omega, k);
         end
         assert(isreal(V), 'V should be real...')
         assert(isreal(matLambda), 'matLambda should be real...')
@@ -130,7 +135,7 @@ for r = 1:R
         plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
 
         windowStyle = 'normal';
-        PlotDataset(sPlotParams, xTrain, yTrain, verticesPDF, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
+        PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
 
     end
     % ----------------------------------------------------------------------------------------------
@@ -174,11 +179,11 @@ for r = 1:R
     if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
         figTitle = ['Eigenvectors of ', matrixForEigs];
         if strcmp(adjacencyType, 'GaussianKernel')
-            figTitle2 = [' (generated from Gaussian kernel with $\omega = ', num2str(omega), '$)'];
+            figTitle2 = [' (Gaussian kernel, $\omega = ', num2str(omega), '$'];
         elseif strcmp(adjacencyType, 'NearestNeighbor')
-            figTitle2 = [' (generated from k-NN with $k = ', num2str(k), '$)'];
+            figTitle2 = [' (k-NN, $k = ', num2str(k), '$'];
         end
-        figTitle3 = [' $\quad n = ', num2str(n), '$ points'];
+        figTitle3 = [', $n = ', num2str(n), '$)'];
         figName = 'V';
         cmap = PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
             V, matLambda, '\lambda^{v}', [], [figTitle, figTitle2, figTitle3], figName, 'v');
@@ -205,7 +210,7 @@ for r = 1:R
     lambdaNys = adjLambda*sqrt(interpRatio);
     VNys = B.'*V*diag(1./lambdaNys);
     if b_flipSign
-    VNys = FlipSign(VInt, VNys);
+        VNys = FlipSign(VInt, VNys, b_pairwiseFlipSign);
     end
     VNysToCompare = VNys;
     
@@ -217,13 +222,13 @@ for r = 1:R
             sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
         VRef = PhiRef;
         if b_flipSign
-        VRefToCompare = FlipSign(VInt, VRef);
+            VRefToCompare = FlipSign(VInt, VRef, b_pairwiseFlipSign);
         end
     elseif ~b_takeEigsFromWRef
         [WRef, ~, DRef] = SimpleCalcAdjacency(xInt, adjacencyType, distType, omega, k, nnValue);
         [VRef, adjLambdaRef, matLambdaRef] = EigsByType(WRef, DRef, M, matrixForEigs);
         if b_flipSign
-        VRef = FlipSign(VInt, VRef);
+            VRef = FlipSign(VInt, VRef, b_pairwiseFlipSign);
         end
         VRefToCompare = VRef;
     end
@@ -298,7 +303,7 @@ for r = 1:R
         PlotGraphSignalAnalysis(sig, sigRecPhi, sigRecV, sigRef, sigInt, sigNys, ...
             sigHatPhi, sigHatV, sigRefHatPhi);
         
-        PlotGraphSignals(sPlotParams, 'interpolated graph signal', ...
+        PlotGraphSignals(sPlotParams, 'Graph signals', ...
             {xTrain, xTrain, xTrain, xInt, xInt, xInt}, ...
             {sig, sigRecPhi, sigRecV sigRef, sigInt, sigNys}, ...
             {'$s$ ($n$ nodes)', '$s_{\Phi}^{{\bf rec}}$ ($n$ nodes)', '$s_{V}^{{\bf rec}}$ ($n$ nodes)', ...
@@ -321,5 +326,5 @@ nGmmPoints = 50000;
 [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
 [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
 sigGmm = PhiTildeGmm*sigHatPhi;
-PlotGraphSignals(sPlotParams, 'interpolated graph signal', ...
+PlotGraphSignals(rmfield(sPlotParams, 'outputFolder'), 'GMM Graph signal', ...
     {xGmm}, {sigGmm}, {'$s^{{\bf gmm}}$'}, {n});

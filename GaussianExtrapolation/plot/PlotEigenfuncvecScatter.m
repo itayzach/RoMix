@@ -4,7 +4,6 @@ dim = size(mData, 2);
 assert(dim <= 3, 'Not supported')
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
-localCmap = zeros(2,length(firstEigenIdx:lastEigIdx));
 if ~exist('mData2', 'var')
     mData2 = mData;
 end
@@ -17,8 +16,10 @@ if dim == 1
     fig = figure('Name', '1D Scatter');
     if exist('mPhi2', 'var')
         nEigenFuncsToPlot = 2*(lastEigIdx-firstEigenIdx+1);
+        localCmap = [min([mPhi(:); mPhi2(:)]), max([mPhi(:); mPhi2(:)])];
     else
         nEigenFuncsToPlot = lastEigIdx-firstEigenIdx+1;
+        localCmap = [min(mPhi(:)), max(mPhi(:))];
     end
     for m = firstEigenIdx:lastEigIdx
         dispName = ['$' phiStr '_{' num2str(m) '}$'];
@@ -44,10 +45,16 @@ if dim == 1
         nRows = 2;
     end
     nCols = ceil(nEigenFuncsToPlot/nRows);
+    if isempty(cmap)
+        ylim(localCmap);
+    else
+        ylim(cmap);
+    end
     legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',nCols)
     set(gcf,'Position', [x0 y0 width height])
 elseif dim == 2 || dim == 3
     %% Plot params
+    localCmap = zeros(2,length(firstEigenIdx:lastEigIdx));
     nEigenFuncsToPlot = lastEigIdx-firstEigenIdx+1;
     nRows = floor(sqrt(nEigenFuncsToPlot+1));
     if nRows > 4

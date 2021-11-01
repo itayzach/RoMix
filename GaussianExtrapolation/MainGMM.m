@@ -34,6 +34,7 @@ b_normalizePhi     = false;
 b_takeEigsFromWRef = false;
 b_flipSign         = true;
 b_pairwiseFlipSign = true;
+b_runGraphSignals  = false;
 %% Verify
 assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
 assert(~strcmp(adjacencyType,'NearestNeighbor') || ...
@@ -279,7 +280,7 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Graph signal
     % ----------------------------------------------------------------------------------------------
-    if r == 1
+    if r == 1 && b_runGraphSignals
         if isfield(sDataset, 'graphSignal')
             sig = sDataset.graphSignal;
             sigRef = sDataset.graphSignalInt;
@@ -319,10 +320,11 @@ vRmseInt = CalcRMSE(mVIntToCompare, mVRefToCompare, 'Analytic');
 vRmseNys = CalcRMSE(mVNysToCompare, mVRefToCompare, 'Nystrom');
 PlotRMSE(sPlotParams, vRmseInt, vRmseNys);
 
-
-nGmmPoints = 50000;
-[xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
-[PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
-sigGmm = PhiTildeGmm*sigHatPhi;
-PlotGraphSignals(rmfield(sPlotParams, 'outputFolder'), 'GMM Graph signal', ...
-    {xGmm}, {sigGmm}, {'$s^{{\bf gmm}}$'}, {n});
+if b_runGraphSignals
+    nGmmPoints = 50000;
+    [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
+    [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
+    sigGmm = PhiTildeGmm*sigHatPhi;
+    PlotGraphSignals(rmfield(sPlotParams, 'outputFolder'), 'GMM Graph signal', ...
+        {xGmm}, {sigGmm}, {'$s^{{\bf gmm}}$'}, {n});
+end

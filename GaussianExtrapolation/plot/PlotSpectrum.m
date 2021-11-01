@@ -54,7 +54,8 @@ if isfield(sSimParams, 'outputFolder')
         mkdir(sSimParams.outputFolder)
     end
 
-    simPrefix = strcat(sDataset.actualDataDist, num2str(sDataset.dim), 'd');
+    simPrefix = strcat(sSimParams.sDataset.actualDataDist, num2str(sSimParams.sDataset.dim), ...
+        'd', '_', sSimParams.matrixForEigs);
     saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_spectrum'), 'epsc');
 end
 end

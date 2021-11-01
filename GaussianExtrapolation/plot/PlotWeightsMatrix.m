@@ -1,4 +1,4 @@
-function PlotWeightsMatrix(sPlotParams, W, dist, D, xTrain, adjacencyType, verticesPDF, omega, k)
+function PlotWeightsMatrix(sPlotParams, W, dist, D, xTrain, adjacencyType, omega, k)
 
 if ~isempty(dist)
     figure('Name', 'Distance matrix');
@@ -32,7 +32,7 @@ if dim <= 3
     end
 
     figName = 'W';
-    PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], 0, 3, W(:,1:4), [], [], [], ...
+    PlotEigenfuncvecScatter(sPlotParams, sPlotParams.sDataset.actualDataDist, xTrain, [], 0, 3, W(:,1:4), [], [], [], ...
         figTitle, figName, 'w');
 end
 end

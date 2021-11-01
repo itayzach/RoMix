@@ -15,6 +15,11 @@ if dim == 1
     width  = 800;
     height = 400;
     fig = figure('Name', '1D Scatter');
+    if exist('mPhi2', 'var')
+        nEigenFuncsToPlot = 2*(lastEigIdx-firstEigenIdx+1);
+    else
+        nEigenFuncsToPlot = lastEigIdx-firstEigenIdx+1;
+    end
     for m = firstEigenIdx:lastEigIdx
         dispName = ['$' phiStr '_{' num2str(m) '}$'];
         if exist('phi2Str', 'var')
@@ -33,7 +38,13 @@ if dim == 1
     if exist('suptitle', 'var')
         title(suptitle,'Interpreter', 'latex', 'FontSize', 14);
     end
-    legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',min(ceil(length(firstEigenIdx:lastEigIdx)/2),3))
+    
+    nRows = floor(sqrt(2*nEigenFuncsToPlot+1));
+    if nRows > 2
+        nRows = 2;
+    end
+    nCols = ceil(nEigenFuncsToPlot/nRows);
+    legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',nCols)
     set(gcf,'Position', [x0 y0 width height])
 elseif dim == 2 || dim == 3
     %% Plot params
@@ -112,12 +123,10 @@ if isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')
         mkdir(sSimParams.outputFolder)
     end
-    simPrefix = strcat(actualDataDist, num2str(dim), 'd');
-    if ~exist('figureName', 'var')
-        figureName = evecsName;
-    end
+    simPrefix = strcat(actualDataDist, num2str(sSimParams.sDataset.dim), ...
+        'd', '_', sSimParams.matrixForEigs);
     saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, ...
-        '_', figureName, '_eigenvectors', '_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'png');
+        '_', figureName, '_eigenvectors', '_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'epsc');
 end
 set(0,'DefaultFigureWindowStyle',windowStyle)
 

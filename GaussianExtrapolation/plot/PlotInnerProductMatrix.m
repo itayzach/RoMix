@@ -28,6 +28,9 @@ if isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')
         mkdir(sSimParams.outputFolder)
     end
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix,  '_inner_product_matrix_', figName), 'epsc');
+    simPrefix = strcat(sSimParams.sDataset.actualDataDist, num2str(sSimParams.sDataset.dim), ...
+        'd', '_', sSimParams.matrixForEigs);
+
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_ip_matrix_', figName), 'epsc');
 end
 end

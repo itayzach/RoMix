@@ -1,5 +1,5 @@
 function sPlotParams = GetPlotParams()
-% sPlotParams.outputFolder = 'figs';
+sPlotParams.outputFolder = 'figs';
 sPlotParams.b_plotAllEvecs             = false;
 sPlotParams.b_GSPBoxPlots              = false;
 sPlotParams.b_plotWeights              = true;

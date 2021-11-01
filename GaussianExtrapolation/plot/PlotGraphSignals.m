@@ -22,7 +22,12 @@ if dim == 1
     if exist('suptitle', 'var')
         title(suptitle,'Interpreter', 'latex', 'FontSize', 14);
     end
-    legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',nSignals)
+    nRows = floor(sqrt(2*nSignals+1));
+    if nRows > 2
+        nRows = 2;
+    end
+    nCols = ceil(nSignals/nRows);
+    legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',nCols)
     set(gcf,'Position', [x0 y0 width height])
 elseif dim == 2 || dim == 3
     %% Plot params
@@ -104,11 +109,8 @@ if ~isempty(sSimParams) && isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')
         mkdir(sSimParams.outputFolder)
     end
-    simPrefix = strcat(actualDataDist, num2str(dim), 'd');
-    if ~exist('figureName', 'var')
-        figureName = evecsName;
-    end
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_', figureName, '_signals'), 'png');
+    simPrefix = strcat(sSimParams.sDataset.actualDataDist, num2str(dim), 'd');
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_signals'), 'epsc');
 end
 set(0,'DefaultFigureWindowStyle',windowStyle)
 

@@ -118,7 +118,8 @@ if isfield(sSimParams, 'outputFolder')
     if ~exist(sSimParams.outputFolder, 'dir')
         mkdir(sSimParams.outputFolder)
     end
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, actualDist, '_eigen_diffs_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'png');
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, actualDist, ...
+        '_eigen_diffs_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx), '_', figName), 'epsc');
 end
 set(0,'DefaultFigureWindowStyle',windowStyle)
 end

@@ -1,4 +1,4 @@
-function fig = PlotDataset(sSimParams, x, y, actualDataDist, pltTitle, GMModel, nGmmPoints, plt2Title, windowStyle)
+function fig = PlotDataset(sSimParams, x, y, pltTitle, GMModel, nGmmPoints, plt2Title, windowStyle)
 prevWindowStyle = get(0,'DefaultFigureWindowStyle');
 if ~exist('windowStyle', 'var')
     windowStyle = prevWindowStyle;
@@ -6,7 +6,7 @@ end
 set(0,'DefaultFigureWindowStyle',windowStyle)
 
 [n, dim] = size(x);
-fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
+fig = figure('Name', sprintf('%d-D %s', dim, sSimParams.sDataset.actualDataDist));
 %% GMM
 if exist('GMModel', 'var')
     ax(1) = subplot(1,2,2);
@@ -81,7 +81,7 @@ elseif dim == 3
         zlim([xMin(3), xMax(3)])
     end
 end
-title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
+title(strcat(pltTitle, " (", sSimParams.sDataset.actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 
 %% Size
 if strcmp(windowStyle, 'normal')
@@ -98,6 +98,6 @@ if isfield(sSimParams, 'outputFolder')
         mkdir(sSimParams.outputFolder)
     end
     
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, actualDataDist, num2str(dim), 'd', '_histogram'), 'epsc');
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, sSimParams.sDataset.actualDataDist, num2str(dim), 'd', '_dataset'), 'epsc');
 end
 end

@@ -1,18 +1,16 @@
 %% Restart
 clc; clear; rng('default');
 close all; 
-set(0,'DefaultFigureWindowStyle','docked')
-%% Plot params
-sPlotParams = GetPlotParams();
+set(0,'DefaultFigureWindowStyle','normal')
 %% Dataset parameters
 dim                 = 1;
-n                   = 249;
-N                   = 299;
+n                   = 1500;
+N                   = 3000;
 k                   = round(0.01*N);
 nnValue             = 'ZeroOne'; % 'ZeroOne' / 'Distance'
-verticesPDF         = 'BrazilWeather'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
+verticesPDF         = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 adjacencyType       = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-matrixForEigs       = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+matrixForEigs       = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% Params for Grid/Uniform
 sDatasetParams.xMin = [0 0];
 sDatasetParams.xMax = [4 1];
@@ -23,12 +21,12 @@ for c = 1:nComponents
     sDatasetParams.sigma{c} = 1*eye(dim);
 end
 %% Number of eigenvectors/eigenfunctions
-M                  = 50;
-MTilde             = 50;
+M                  = 10;
+MTilde             = 30;
 %% GMM params
 gmmRegVal          = 1e-3;
 gmmMaxIter         = 2000;
-gmmNumComponents   = 3;
+gmmNumComponents   = 1;
 %% Method parameters
 b_debugUseAnalytic = false;
 b_forceCtoIdentity = false;

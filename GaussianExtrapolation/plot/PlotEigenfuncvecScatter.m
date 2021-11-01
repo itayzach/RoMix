@@ -78,6 +78,10 @@ elseif dim == 2 || dim == 3
             phiStr = phi2Str;
         end
         fig = figure('Name', [ num2str(dim) 'D Scatter']);
+        if isempty(cmap)
+            localCmap(1,:) = min(mPhi(:));
+            localCmap(2,:) = max(mPhi(:));
+        end
         for m = firstEigenIdx:lastEigIdx
             subplot(nRows, nCols,m+1-firstEigenIdx);
             if isfield(sSimParams, 'b_GSPBoxPlots') && sSimParams.b_GSPBoxPlots
@@ -91,10 +95,7 @@ elseif dim == 2 || dim == 3
                 end
                 colormap(gca, 'jet')
                 colorbar()
-                if isempty(cmap)
-                    localCmap(1,m+1-firstEigenIdx) = min(mPhi(:,m+1));
-                    localCmap(2,m+1-firstEigenIdx) = max(mPhi(:,m+1));
-                else
+                if ~isempty(cmap)
                     localCmap(1,m+1-firstEigenIdx) = cmap(1,m+1-firstEigenIdx);
                     localCmap(2,m+1-firstEigenIdx) = cmap(2,m+1-firstEigenIdx);
                 end

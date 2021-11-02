@@ -279,10 +279,14 @@ elseif strcmp(actualDataDist, 'Grid')
     
     
     %% option #1
-    dist = min(pdist(sDataset.sData.x));
-    omega = 2*sqrt(dist);
-    omegaTilde = 2*sqrt(dist);
-    
+    if dim > 1
+        dist = min(pdist(sDataset.sData.x));
+        omega = 2*sqrt(dist);
+    else % dim == 1
+        L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
+        omega = 2*sqrt(L/nTrain);
+    end
+    omegaTilde = omega;
     %% option #2
 %     omega = 0.5*std(sDataset.sData.xt)^2;
 %     omegaTilde = 0.5*std(sDataset.sData.xt)^2;

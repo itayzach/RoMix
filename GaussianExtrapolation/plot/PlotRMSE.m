@@ -14,7 +14,9 @@ xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('RMSE', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2)
 set(gca,'FontSize', 14);
-set(gca, 'XTick', 0:M-1);
+if M < 20
+    set(gca, 'XTick', 0:M-1);
+end
 x0     = 10;
 y0     = 50;
 height = 350;

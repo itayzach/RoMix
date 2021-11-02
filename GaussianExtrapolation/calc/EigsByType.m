@@ -12,16 +12,21 @@ elseif strcmp(matrixForEigs, 'RandomWalk')
 %     V = V./norm(V(:,1));
 
     d = diag(D);
-    alpha = 1;
+    alpha = 0;
     Ka = diag(d.^-alpha)*W*diag(d.^-alpha);
     da = sum(Ka,2);
     Da = diag(da);
     Pa = Da^-1*Ka;
     isalmostequal(diag(sum(Pa,2)),eye(length(Pa)),1e-14) % make sure Pa is row stochastic
-    [Psi, Lambda] = eigs(Pa, M);
+    % Reminder: the right and left eigenvectors of a non-symmetric matrix are not equal
+    %   [Psi, Lambda, Phi] = eig(Pa) ---> 
+    %       Pa*psi = lambda*psi       (Single column right eigenvector)
+    %       phi^T*Pa = lambda*phi^T   (Single row left eigenvector)
+    
+    % Take the right eigenvectors of Pa
+    [Psi, Lambda] = eigs(Pa, M); 
     matLambda = diag(Lambda);
     V = Psi;
-    % Psi = Psi./norm(Psi(:,1));
 elseif strcmp(matrixForEigs, 'NormLap')
     d = diag(D);
     Wn = diag(d.^-0.5)*W*diag(d.^-0.5);

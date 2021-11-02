@@ -14,7 +14,7 @@ elseif strcmp(distType, 'Haversine')
     DLAT = LAT2 - LAT1;
     DLON = LON2 - LON1;
     A = sin(DLAT/2).^2 + cos(LAT1).*cos(LAT2).*(sin(DLON/2).^2);
-    dist = 2 * earthRadius * atan2(sqrt(A), sqrt(1-A));
+    dist = 2 * earthRadius * asin(sqrt(A));
   
 else
     error('invalid distType')

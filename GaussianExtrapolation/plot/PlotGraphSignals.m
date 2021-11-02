@@ -1,4 +1,4 @@
-function localCmap = PlotGraphSignals(sSimParams, suptitle, cData, cSignals, cSigStr, cNumCircles, xylim, cmap)
+function localCmap = PlotGraphSignals(sSimParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, xylim, cmap)
 dim = size(cData{1}, 2);
 nSignals = numel(cData);
 assert(dim <= 3, 'Not supported')
@@ -19,7 +19,7 @@ if dim == 1
         hold on;
         set(gca,'FontSize', 14);
     end
-    if exist('suptitle', 'var')
+    if exist('suptitle', 'var') && ~isempty(suptitle)
         title(suptitle,'Interpreter', 'latex', 'FontSize', 14);
     end
     nRows = floor(sqrt(2*nSignals+1));
@@ -118,7 +118,7 @@ if ~isempty(sSimParams) && isfield(sSimParams, 'outputFolder')
         mkdir(sSimParams.outputFolder)
     end
     simPrefix = strcat(sSimParams.sDataset.actualDataDist, num2str(dim), 'd');
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_signals'), 'epsc');
+    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_', figName, '_signals'), 'epsc');
 end
 set(0,'DefaultFigureWindowStyle',windowStyle)
 

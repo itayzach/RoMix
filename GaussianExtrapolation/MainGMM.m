@@ -4,13 +4,13 @@ close all;
 set(0,'DefaultFigureWindowStyle','normal')
 %% Dataset parameters
 dim                 = 1;
-n                   = 4000;
-N                   = 5000;
+n                   = 246;
+N                   = 296;
 k                   = round(0.01*N);
 nnValue             = 'ZeroOne'; % 'ZeroOne' / 'Distance'
-verticesPDF         = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
+verticesPDF         = 'BrazilWeather'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 adjacencyType       = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-matrixForEigs       = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+matrixForEigs       = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% Params for Grid/Uniform
 sDatasetParams.xMin = [0 0];
 sDatasetParams.xMax = [4 1];
@@ -21,12 +21,12 @@ for c = 1:nComponents
     sDatasetParams.sigma{c} = 1*eye(dim);
 end
 %% Number of eigenvectors/eigenfunctions
-M                  = 9;
-MTilde             = 500;
+M                  = 50;
+MTilde             = 50;
 %% GMM params
 gmmRegVal          = 1e-3;
 gmmMaxIter         = 2000;
-gmmNumComponents   = 20;
+gmmNumComponents   = 3;
 %% Method parameters
 b_debugUseAnalytic = false;
 b_forceCtoIdentity = false;
@@ -34,7 +34,7 @@ b_normalizePhi     = false;
 b_takeEigsFromWRef = false;
 b_flipSign         = true;
 b_pairwiseFlipSign = true;
-b_runGraphSignals  = false;
+b_runGraphSignals  = true;
 %% Verify
 assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
 assert(~strcmp(adjacencyType,'NearestNeighbor') || ...
@@ -68,7 +68,7 @@ else
     plotInd = [0,min(8,M-1)];
 end
 %% Run
-R = 10;
+R = 1;
 mVIntToCompare = zeros(R, N, M);
 mVNysToCompare = zeros(R, N, M);
 mVRefToCompare = zeros(R, N, M);
@@ -301,13 +301,33 @@ for r = 1:R
 
         PlotGraphSignalAnalysis(sig, sigRecPhi, sigRecV, sigRef, sigInt, sigNys, ...
             sigHatPhi, sigHatV, sigRefHatPhi);
+       
+        PlotGraphSignalErrors(sPlotParams, [1, n], sig, sigRecPhi, sigRecV, '|s-s_{\Phi}^{{\bf rec}}|', ...
+            '|s-s_{V}^{{\bf rec}}|',  'Projection error ($n$ given nodes)')
         
-        PlotGraphSignals(sPlotParams, 'Graph signals', ...
+        PlotGraphSignalErrors(sPlotParams, [n+1, N], sigRef(n+1:N), sigInt(n+1:N), sigNys(n+1:N), '|s^{{\bf ref}}-s^{{\bf int}}|', ...
+            '|s^{{\bf ref}}-s_{{\bf nys}}|',  'Interpolation error ($N-n$ nodes)')
+        
+        PlotGraphSignalErrors(sPlotParams, [1, N], sigRef, sigInt, sigNys, '|s^{{\bf ref}}-s^{{\bf int}}|', ...
+            '|s^{{\bf ref}}-s_{{\bf nys}}|',  'Total error ($N$ nodes)')
+        
+        cmap = PlotGraphSignals(sPlotParams, 'Graph signals', 'RefIntNys', ...
             {xTrain, xTrain, xTrain, xInt, xInt, xInt}, ...
             {sig, sigRecPhi, sigRecV sigRef, sigInt, sigNys}, ...
             {'$s$ ($n$ nodes)', '$s_{\Phi}^{{\bf rec}}$ ($n$ nodes)', '$s_{V}^{{\bf rec}}$ ($n$ nodes)', ...
              '$s^{{\bf ref}}$ ($N$ nodes)', '$s^{{\bf int}}$ ($N$ nodes)', '$s^{{\bf nys}}$ ($N$ nodes)'}, ...
             {n, n, n, n, n, n});
+        
+        nGmmPoints = 1000;
+        [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
+        [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
+        sigGmm = PhiTildeGmm*sigHatPhi;
+        xylim(1) = min(xTrain(:,1));
+        xylim(2) = max(xTrain(:,1));
+        xylim(3) = min(xTrain(:,2));
+        xylim(4) = max(xTrain(:,2));
+        PlotGraphSignals(sPlotParams, 'GMM Graph signal', 'GMM', {xGmm}, {sigGmm}, ...
+            {'$s^{{\bf gmm}}$'}, {nGmmPoints}, xylim, cmap);
     end
     
     % Save
@@ -319,12 +339,3 @@ end
 vRmseInt = CalcRMSE(mVIntToCompare, mVRefToCompare, 'Analytic');
 vRmseNys = CalcRMSE(mVNysToCompare, mVRefToCompare, 'Nystrom');
 PlotRMSE(sPlotParams, vRmseInt, vRmseNys);
-
-if b_runGraphSignals
-    nGmmPoints = 50000;
-    [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
-    [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
-    sigGmm = PhiTildeGmm*sigHatPhi;
-    PlotGraphSignals(rmfield(sPlotParams, 'outputFolder'), 'GMM Graph signal', ...
-        {xGmm}, {sigGmm}, {'$s^{{\bf gmm}}$'}, {n});
-end

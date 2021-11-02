@@ -22,6 +22,7 @@ if strcmp(actualDataDist, 'SineCosine')
 elseif strcmp(actualDataDist, 'BrazilWeather') 
     T = readtable(fullfile('data','Brazilian_Weather_Stations-Temperature_1961-1990.xlsx'));
     
+    % Remove entries with NaN
     T(isnan(T.Annual),:) = [];
     
     nPoints = height(T);
@@ -52,7 +53,7 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
     omega = 3;
     omegaTilde = omega;
     
-    sDataset.graphSignalInt = T.Annual(rperm);
+    sDataset.graphSignalInt = T.Jul(rperm);
     sDataset.graphSignal = sDataset.graphSignalInt(1:nTrain);
     
 elseif strcmp(actualDataDist, 'MnistDist')

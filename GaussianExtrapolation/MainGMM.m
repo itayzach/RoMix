@@ -4,11 +4,11 @@ close all;
 set(0,'DefaultFigureWindowStyle','normal')
 %% Dataset parameters
 dim                 = 1;
-n                   = 1500;
-N                   = 3000;
+n                   = 4000;
+N                   = 5000;
 k                   = round(0.01*N);
 nnValue             = 'ZeroOne'; % 'ZeroOne' / 'Distance'
-verticesPDF         = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
+verticesPDF         = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 adjacencyType       = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 matrixForEigs       = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% Params for Grid/Uniform
@@ -21,12 +21,12 @@ for c = 1:nComponents
     sDatasetParams.sigma{c} = 1*eye(dim);
 end
 %% Number of eigenvectors/eigenfunctions
-M                  = 10;
-MTilde             = 30;
+M                  = 9;
+MTilde             = 500;
 %% GMM params
 gmmRegVal          = 1e-3;
 gmmMaxIter         = 2000;
-gmmNumComponents   = 1;
+gmmNumComponents   = 20;
 %% Method parameters
 b_debugUseAnalytic = false;
 b_forceCtoIdentity = false;
@@ -65,10 +65,10 @@ sPlotParams.matrixForEigs = matrixForEigs;
 if dim == 1
     plotInd = [0,min(4,M-1)];
 else
-    plotInd = [0,min(11,M-1)];
+    plotInd = [0,min(8,M-1)];
 end
 %% Run
-R = 1;
+R = 10;
 mVIntToCompare = zeros(R, N, M);
 mVNysToCompare = zeros(R, N, M);
 mVRefToCompare = zeros(R, N, M);

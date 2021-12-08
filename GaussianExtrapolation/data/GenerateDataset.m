@@ -45,17 +45,14 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
     
     sDataset.sData.x = dataRearranged(1:nTrain,:);
     sDataset.sData.xt = dataRearranged;
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
+    sDataset.sData.yt = T.Jul(rperm);
+    sDataset.sData.y = sDataset.sData.yt(1:nTrain);
+    
     dim = 2;
-    sDatasetParams = [];
     
-    omega = 3;
+    omega = 7;
     omegaTilde = omega;
-    
-    sDataset.graphSignalInt = T.Jul(rperm);
-    sDataset.graphSignal = sDataset.graphSignalInt(1:nTrain);
-    
+        
 elseif strcmp(actualDataDist, 'MnistDist')
     assert(strcmp(interpMethod, 'AddPoints'))
     mnist = load('data\mnist.mat');
@@ -67,26 +64,30 @@ elseif strcmp(actualDataDist, 'MnistDist')
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
     dim = 2;
-    sDatasetParams = [];
 elseif strcmp(actualDataDist, 'MnistLatentVAE')
     assert(strcmp(interpMethod, 'AddPoints'))
     mnistLatent = load('data\mnistLatentVAE.mat');
     z = double(mnistLatent.z);
     y = double(mnistLatent.labels');
-    possibleLabels = 0:9; %[0, 1, 4];
-    ind = find(ismember(y, possibleLabels));
+    if ~isfield(sDatasetParams, 'vPossibleLabels')
+        vPossibleLabels = 0:9;
+    else
+        vPossibleLabels = sDatasetParams.vPossibleLabels;
+    end
+    ind = find(ismember(y, vPossibleLabels));
     z = z(ind,:);
     y = y(ind);
+    y = y + 1;
+%     y(y == 0) = -1; % change y=0 to y=-1 for easier sepration
     data = double(z(1:nTest,:));
     labels = y(1:nTest)';
     sDataset.sData.x = data(1:nTrain,:);
     sDataset.sData.xt = data;
     sDataset.sData.y = double(labels(1:nTrain)');
     sDataset.sData.yt = double(labels');
-    omega = 0.3;
-    omegaTilde = 0.3;
+    omega = 0.1;
+    omegaTilde = 0.1;
     dim = size(data, 2);
-    sDatasetParams = [];
 elseif strcmp(actualDataDist, 'CoraLatentVGAE')
     assert(strcmp(interpMethod, 'AddPoints'))
     coraLatent = load('data\coraLatentVGAE.mat');
@@ -99,7 +100,6 @@ elseif strcmp(actualDataDist, 'CoraLatentVGAE')
     omega = 1.5;
     omegaTilde = 1.5;
     dim = size(data, 2);
-    sDatasetParams = [];
 elseif strcmp(actualDataDist, 'Minnesota')   
     assert(strcmp(interpMethod, 'AddPoints'))
     G = gsp_minnesota();
@@ -156,7 +156,6 @@ elseif strcmp(actualDataDist, 'Sensor')
     omega = 0.15;
     omegaTilde = 0.15;
     dim = 2;
-    sDatasetParams = [];    
 elseif strcmp(actualDataDist, 'TwoMoons')
     if ~exist('sDatasetParams', 'var') || (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams, 'b_loadTwoMoonsMatFile'))
         sDatasetParams.b_loadTwoMoonsMatFile = false;
@@ -176,8 +175,8 @@ elseif strcmp(actualDataDist, 'TwoMoons')
         sDataset.sData.yt = labelsRearranged;
     end
     dim = 2;
-    omega = 0.15;
-    omegaTilde = 0.15;
+    omega = 0.3;
+    omegaTilde = 0.3;
 elseif strcmp(actualDataDist, 'TwoSpirals')
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
@@ -188,11 +187,11 @@ elseif strcmp(actualDataDist, 'TwoSpirals')
         sDataset.sData.xt = data;
     end
     dim = 2;
-    omega = 0.15;
-    omegaTilde = 0.15;
-    msgBoxTitle = 'GenerateDataset warning';
-    msgBoxMsg = 'This dataset requires omega adjustments...';
-    MyMsgBox(msgBoxMsg, msgBoxTitle)
+    omega = 0.2;
+    omegaTilde = 0.2;
+%     msgBoxTitle = 'GenerateDataset warning';
+%     msgBoxMsg = 'This dataset requires omega adjustments...';
+%     MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'SwissRoll')
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData.x = GenerateSwissRoll(nTrain);
@@ -210,7 +209,6 @@ elseif strcmp(actualDataDist, 'SwissRoll')
 %     omega = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
 %     omegaTilde = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
     
-    sDatasetParams = [];
 elseif strcmp(actualDataDist, 'Gaussian')
     if ~exist('sDatasetParams', 'var') || ...
             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'mu') && ~isfield(sDatasetParams,'sigma'))

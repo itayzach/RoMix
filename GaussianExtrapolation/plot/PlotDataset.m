@@ -51,10 +51,14 @@ if dim == 1
 elseif dim == 2
     if ~isempty(y)
         scatter(x(:,1), x(:,2), [], y, 'filled');
-        if exist('ax', 'var')
-            colormap(ax(2), jet(max(y)-min(y))); 
+        if isequal(y, floor(y))
+            if exist('ax', 'var')
+                colormap(ax(2), jet(length(unique(y)))); 
+            else
+                colormap(jet(length(unique(y))));
+            end
         else
-            colormap(jet(max(y)-min(y))); 
+            colormap(jet);
         end
         colorbar;
     else

@@ -1,4 +1,4 @@
-function PlotWeightsMatrix(sPlotParams, W, dist, D, xTrain, adjacencyType, omega, k)
+function PlotWeightsMatrix(sPlotParams, W, dist, D, L, xTrain, adjacencyType, omega, k)
 
 if ~isempty(dist)
     figure('Name', 'Distance matrix');
@@ -19,6 +19,12 @@ set(gca,'FontSize', 14);
 figure('Name', 'Node degrees');
 plot(diag(D), '.', 'MarkerSize', 10);
 title('Node degrees', 'FontSize', 14, 'interpreter', 'latex')
+set(gca,'FontSize', 14);
+
+figure('Name', 'Laplacian matrix');
+imagesc(L);
+colorbar();
+title('$L_n = I - D^{-0.5}WD^{-0.5}$', 'FontSize', 14, 'interpreter', 'latex')
 set(gca,'FontSize', 14);
 
 [n, dim] = size(xTrain);

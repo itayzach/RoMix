@@ -48,7 +48,7 @@ set(gca,'FontSize', 14);
 nexttile;
 plot(1:n, sig, 'DisplayName', '$s$');
 hold on;
-plot(1:n, sigRecPhi, 'DisplayName', '$s_{\Phi}^{{\bf rec}}$');
+plot(1:n, sigRecPhi, 'o', 'DisplayName', '$s_{\Phi}^{{\bf rec}}$');
 %     plot(1:n, sigRecV,  'DisplayName', '$s_{V}^{{\bf rec}}$');
 legend('interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',2)
 title('graph signals on $n$ nodes', 'interpreter', 'latex', 'FontSize', 14)
@@ -57,7 +57,7 @@ set(gca,'FontSize', 14);
 nexttile;
 plot(1:N, sigRef, 'DisplayName', '$s^{{\bf ref}}$');
 hold on;
-plot(1:N, sigInt, 'DisplayName', '$s^{{\bf int}}$');
+plot(1:N, sigInt, 'o', 'DisplayName', '$s^{{\bf int}}$');
 legend('interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',2)
 title('graph signals on $N$ nodes', 'interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
@@ -65,7 +65,7 @@ set(gca,'FontSize', 14);
 nexttile;
 plot(1:N, sigRef, 'DisplayName', '$s^{{\bf ref}}$');
 hold on;
-plot(1:N, sigNys, 'DisplayName', '$s^{{\bf nys}}$');
+plot(1:N, sigNys, 'o', 'DisplayName', '$s^{{\bf nys}}$');
 legend('interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',2)
 title('graph signals on $N$ nodes', 'interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);

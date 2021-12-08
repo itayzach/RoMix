@@ -9,7 +9,7 @@ start = start * deg2rad;
 [sTwoSpirals.x, sTwoSpirals.y] = GenerateTwoSpirals(nTrain, degrees, start, deg2rad, noiseSigma);
 [sTwoSpirals.xt, sTwoSpirals.yt] = GenerateTwoSpirals(nTest, degrees, start, deg2rad, noiseSigma);
 
-ell = 4;
+ell = 1;
 posTrainInd = find(sTwoSpirals.y==1);
 negTrainInd = find(sTwoSpirals.y==-1);
 ipos = randperm(length(posTrainInd));

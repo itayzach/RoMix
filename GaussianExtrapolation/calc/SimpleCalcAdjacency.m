@@ -1,4 +1,4 @@
-function [W, dist, D] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue)
+function [W, dist, D, DsqrtInv] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue)
 if strcmp(adjacencyType, 'GaussianKernel')
     dist = CalcDistance(xTrain, xTrain, distType);
     W = exp(-dist.^2/(2*omega^2));
@@ -20,5 +20,7 @@ elseif strcmp(adjacencyType, 'NearestNeighbor')
 %     W(end-k+1,end) = 0;
 end
 
-D = diag(sum(W,2));
+d = sum(W,2);
+D = diag(d);
+DsqrtInv = diag(1./sqrt(d));
 end

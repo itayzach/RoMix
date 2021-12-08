@@ -14,12 +14,14 @@ if dim == 1
     width  = 800;
     height = 400;
     fig = figure('Name', '1D Scatter');
+    mPhiForCmap = mPhi(:,firstEigenIdx+1:lastEigIdx+1);
     if exist('mPhi2', 'var')
         nEigenFuncsToPlot = 2*(lastEigIdx-firstEigenIdx+1);
-        localCmap = [min([mPhi(:); mPhi2(:)]), max([mPhi(:); mPhi2(:)])];
+        mPhi2ForCmap = mPhi2(:,firstEigenIdx+1:lastEigIdx+1);
+        localCmap = [min([mPhiForCmap(:); mPhi2ForCmap(:)]), max([mPhiForCmap(:); mPhi2ForCmap(:)])];
     else
         nEigenFuncsToPlot = lastEigIdx-firstEigenIdx+1;
-        localCmap = [min(mPhi(:)), max(mPhi(:))];
+        localCmap = [min(mPhiForCmap(:)), max(mPhiForCmap(:))];
     end
     for m = firstEigenIdx:lastEigIdx
         dispName = ['$' phiStr '_{' num2str(m) '}$'];

@@ -3,7 +3,7 @@ sClassifier.name = name;
 sClassifier.gamma_A = gamma_A;
 sClassifier.gamma_I = gamma_I;
 sClassifier.omega = sKernelParams.omega;
-
+sClassifier.MTilde = sSimParams.CalcEigenFuncsM;
 b_normalize = false;
 
 %% Train
@@ -12,6 +12,8 @@ b_normalize = false;
 W = CalcAdjacency(sKernelParams, sDataset.sData.x);
 D = diag(sum(W,1));
 L = D - W;
+
+PlotWeightsMatrix(sSimParams, W, [], D, sDataset.sData.x, 'GaussianKernel', sKernelParams.omega);
 
 c = eigrls(sDataset.sData.y, mPhiAnalyticTrain, diag(vLambdaAnalytic), gamma_A, gamma_I, L);
 sClassifier.c = c;
@@ -25,8 +27,8 @@ vTestIdx = find(sDataset.sData.yt);
 sClassifier.error = 100*sum(vPredictions(vTestIdx) ~= sDataset.sData.yt(vTestIdx)) / length(vTestIdx);
 fprintf('error: %f\n', sClassifier.error);
 %% Extrapolate
-xMax = max(max(sDataset.sData.x,[],1));
-xMin = min(min(sDataset.sData.x,[],1));
+xMax = max([sDataset.sData.x(:); sDataset.sData.xt(:)]);
+xMin = min([sDataset.sData.x(:); sDataset.sData.xt(:)]);
 step = (xMax - xMin)/100;
 x1 = xMin:step:xMax;
 x2 = x1;

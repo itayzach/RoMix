@@ -15,11 +15,12 @@ if strcmp(sKernelParams.kernelType, 'gaussian')
     end
 
     normFactor = (1+2*beta)^(1/8)/sqrt(2^m*factorial(m));
-    if m <= 170
-        % factorial(171) = Inf, but hermite() is more efficient than hermiteH...
+    if m <= 50
+        % factorial(171) = Inf, but hermite() is more efficient than hermiteH... 
+        % note that for high m it might be numerically unstable
         vHm = hermite(m, (1/4 + beta/2)^(1/4)*(x-mu)/sigma);
      else
-        warning('m > 170, using hermiteH instead of factorial hermite')
+%         warning('m > 170, using hermiteH instead of factorial hermite')
         vHm = hermiteH(m, (1/4 + beta/2)^(1/4)*(x-mu)/sigma);
     end
     vPhi_m = normFactor * exp( -((x-mu).^2/(2*sigma^2)) * ((sqrt(1+2*beta)-1)/2) ) .* vHm;

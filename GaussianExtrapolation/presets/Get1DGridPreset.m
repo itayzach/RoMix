@@ -24,8 +24,10 @@ sPreset.gmmNumComponents   = 1;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
 sPreset.MTilde             = 30;
-sPreset.gamma1             = 0.05;
+sPreset.gamma1             = 0.001;
 sPreset.gamma2             = 0;
+%% Representer theorem
+sPreset.gamma1Rep          = 0.001;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;

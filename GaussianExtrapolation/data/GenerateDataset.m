@@ -45,7 +45,7 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
     
     sDataset.sData.x = dataRearranged(1:nTrain,:);
     sDataset.sData.xt = dataRearranged;
-    sDataset.sData.yt = T.Jul(rperm);
+    sDataset.sData.yt = T.(sDatasetParams.monthName)(rperm);
     sDataset.sData.y = sDataset.sData.yt(1:nTrain);
 elseif strcmp(actualDataDist, 'MnistDist')
 %     assert(strcmp(interpMethod, 'AddPoints'))

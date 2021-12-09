@@ -10,7 +10,8 @@ sPreset.verticesPDF        = 'BrazilWeather'; % 'Gaussian' / 'Uniform' / 'Grid' 
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sPreset.sDatasetParams     = [];
+sDatasetParams.monthName   = 'Jul';
+sPreset.sDatasetParams     = sDatasetParams;
 %% Gaussian kernel width
 sPreset.omega              = 7; % for nystrom kernel
 sPreset.omegaTilde         = 7; % for our method

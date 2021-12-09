@@ -23,6 +23,8 @@ sPreset.M                  = 9;
 sPreset.MTilde             = 25*sPreset.gmmNumComponents;
 sPreset.gamma1             = 0; %5;
 sPreset.gamma2             = 0;
+%% Representer theorem
+sPreset.gamma1Rep          = 0;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;

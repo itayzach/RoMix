@@ -1,13 +1,16 @@
-function [] = PlotRMSE(sPlotParams, vRmseInt, vRmseNys)
+function [] = PlotRMSE(sPlotParams, mRmse, cDispName)
 
-M = length(vRmseInt);
+[M, nMethods] = size(mRmse);
 
 fig = figure('Name', 'RMSE');
-plot((0:M-1)', vRmseInt.', '-o', 'LineWidth', 2, 'DisplayName', ...
-    'RMSE$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$'), hold on;
-plot((0:M-1)', vRmseNys.', '-x', 'LineWidth', 2, 'DisplayName', ...
-    'RMSE$(v^{{\bf nys}}_m, v^{{\bf ref}}_m)$')
-rmseylim = max([vRmseInt vRmseNys]);
+for methodId = 1:nMethods
+    vRmse = mRmse(:,methodId);
+plot((0:M-1)', vRmse, '-o', 'LineWidth', 2, 'DisplayName', cDispName{methodId});
+hold on;
+% plot((0:M-1)', vRmseNys.', '-x', 'LineWidth', 2, 'DisplayName', ...
+%     )
+end
+rmseylim = max(mRmse(:));
 ylim([0 rmseylim]);
 xlim([0 M-1]);
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)

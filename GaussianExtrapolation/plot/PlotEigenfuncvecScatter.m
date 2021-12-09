@@ -56,7 +56,6 @@ if dim == 1
     set(gcf,'Position', [x0 y0 width height])
 elseif dim == 2 || dim == 3
     %% Plot params
-    localCmap = zeros(2,length(firstEigenIdx:lastEigIdx));
     nEigenFuncsToPlot = lastEigIdx-firstEigenIdx+1;
     nRows = floor(sqrt(nEigenFuncsToPlot+1));
     if nRows > 4
@@ -74,16 +73,21 @@ elseif dim == 2 || dim == 3
     else
         nLoops = 1;
     end
+    if isempty(cmap)
+        mPhiForCmap = mPhi(:,firstEigenIdx+1:lastEigIdx+1);
+        if exist('mPhi2', 'var')
+            mPhi2ForCmap = mPhi2(:,firstEigenIdx+1:lastEigIdx+1);
+        else
+            mPhi2ForCmap = [];
+        end
+        localCmap = [min([mPhiForCmap(:); mPhi2ForCmap(:)]), max([mPhiForCmap(:); mPhi2ForCmap(:)])];
+    end
     for i = 1:nLoops
         if i == 2
             mPhi = mPhi2;
             phiStr = phi2Str;
         end
         fig = figure('Name', [ num2str(dim) 'D Scatter']);
-        if isempty(cmap)
-            localCmap(1,:) = min(mPhi(:));
-            localCmap(2,:) = max(mPhi(:));
-        end
         for m = firstEigenIdx:lastEigIdx
             subplot(nRows, nCols,m+1-firstEigenIdx);
             if isfield(sSimParams, 'b_GSPBoxPlots') && sSimParams.b_GSPBoxPlots
@@ -98,12 +102,10 @@ elseif dim == 2 || dim == 3
                 colormap(gca, 'jet')
                 colorbar()
                 if ~isempty(cmap)
-                    localCmap(1,m+1-firstEigenIdx) = cmap(1,m+1-firstEigenIdx);
-                    localCmap(2,m+1-firstEigenIdx) = cmap(2,m+1-firstEigenIdx);
+                    localCmap(1) = cmap(1);
+                    localCmap(2) = cmap(2);
                 end
-                cMin = localCmap(1,m+1-firstEigenIdx);
-                cMax = localCmap(2,m+1-firstEigenIdx);
-                caxis([cMin cMax])
+                caxis([localCmap(1) localCmap(2)])
                 xlim([ min(mData(:,1)) max(mData(:,1))])
                 ylim([ min(mData(:,2)) max(mData(:,2))])
                 if dim == 2

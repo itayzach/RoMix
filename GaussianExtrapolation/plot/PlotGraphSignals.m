@@ -1,4 +1,8 @@
 function localCmap = PlotGraphSignals(sSimParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, xylim, cmap)
+cData = reshape(cData,[],1);
+cSignals = reshape(cSignals,[],1);
+cSigStr = reshape(cSigStr,[],1);
+cNumCircles = reshape(cNumCircles,[],1);
 dim = size(cData{1}, 2);
 nSignals = numel(cData);
 assert(dim <= 3, 'Not supported')
@@ -29,6 +33,7 @@ if dim == 1
     nCols = ceil(nSignals/nRows);
     legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',nCols)
     set(gcf,'Position', [x0 y0 width height])
+    localCmap = [];
 elseif dim == 2 || dim == 3
     %% Plot params
     nRows = floor(sqrt(nSignals));

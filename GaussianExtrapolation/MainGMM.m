@@ -24,9 +24,11 @@ M                  = sPreset.M;
 MTilde             = sPreset.MTilde;
 omega              = sPreset.omega;
 omegaNys           = sPreset.omega;
+omegaRep           = sPreset.omega;
 omegaTilde         = sPreset.omegaTilde;
 gamma1             = sPreset.gamma1;
 gamma2             = sPreset.gamma2;
+gamma1Rep          = sPreset.gamma1Rep;
 gmmRegVal          = sPreset.gmmRegVal;
 gmmMaxIter         = sPreset.gmmMaxIter;
 gmmNumComponents   = sPreset.gmmNumComponents;
@@ -71,6 +73,7 @@ end
 R = 1;
 mVIntToCompare = zeros(R, N, M);
 mVNysToCompare = zeros(R, N, M);
+mVRepToCompare = zeros(R, N, M);
 mVRefToCompare = zeros(R, N, M);
 for r = 1:R
     % ----------------------------------------------------------------------------------------------
@@ -86,15 +89,24 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Original graph
     % ----------------------------------------------------------------------------------------------
+    [W, dist, D, DsqrtInv] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue);
+    Ln = eye(n) - DsqrtInv*W*DsqrtInv;
+    [WRef, distRef, DRef, DsqrtInvRef] = SimpleCalcAdjacency(xInt, adjacencyType, distType, omega, k, nnValue);
+    LnRef = eye(N) - DsqrtInvRef*WRef*DsqrtInvRef;
+
+    if r == 1 && sPlotParams.b_plotWeights
+        PlotWeightsMatrix(sPlotParams, W, dist, D, Ln, xTrain, adjacencyType, omega, k);
+    end
+    % ----------------------------------------------------------------------------------------------
+    % Perform numeric eigs
+    % ----------------------------------------------------------------------------------------------
     if b_debugUseAnalytic
+        warning('review the following {1}...')
         [VRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xTrainInt, omega, ...
             sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
         adjLambdaRef = N*adjLambdaRef;
         matLambda = adjLambdaRef;
     else
-        [WRef, distRef, DRef, DsqrtInvRef] = SimpleCalcAdjacency(xInt, adjacencyType, distType, omega, k, nnValue);
-        LnRef = eye(N) - DsqrtInvRef*WRef*DsqrtInvRef;
-
         if b_takeEigsFromWRef
             [VRef, adjLambdaRef, matLambdaRef] = EigsByType(WRef, DRef, M, matrixForEigs);
 
@@ -106,19 +118,31 @@ for r = 1:R
             matLambda = matLambdaRef/interpRatio;
             VRefToCompare = VRef;
         else
-            [W, dist, D, DsqrtInv] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue);
             [V, adjLambda, matLambda] = EigsByType(W, D, M, matrixForEigs);
-            Ln = eye(n) - DsqrtInv*W*DsqrtInv;
-%             V = V/sqrt(interpRatio);
         end
-        
-        if r == 1 && sPlotParams.b_plotWeights
-            PlotWeightsMatrix(sPlotParams, W, dist, D, Ln, xTrain, adjacencyType, omega, k);
-        end
-        assert(isreal(V), 'V should be real...')
-        assert(isreal(matLambda), 'matLambda should be real...')
     end
+    assert(isreal(V), 'V should be real...')
+    assert(isreal(matLambda), 'matLambda should be real...')
 
+    % ----------------------------------------------------------------------------------------------
+    % Plot numeric V
+    % ----------------------------------------------------------------------------------------------
+    if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
+        figTitle = ['Eigenvectors of ', matrixForEigs];
+        if strcmp(adjacencyType, 'GaussianKernel')
+            figTitle2 = [' (Gaussian kernel, $\omega = ', num2str(omega), '$'];
+        elseif strcmp(adjacencyType, 'NearestNeighbor')
+            figTitle2 = [' (k-NN, $k = ', num2str(k), '$'];
+        end
+        figTitle3 = [', $n = ', num2str(n), '$)'];
+        figName = 'V';
+        cmap = PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
+            V, matLambda, '\lambda^{v}', [], [figTitle, figTitle2, figTitle3], figName, 'v');
+        figTitle = 'Numeric eigenvalues of ${\bf V}$';
+        PlotSpectrum(sPlotParams, sDataset, [], matLambda, [], [], ...
+                '\tilde{\lambda}^{v}_m', [], [], figTitle);
+    end
+    
     % ----------------------------------------------------------------------------------------------
     % Calculate lambdaAnalyticTilde and PhiTilde(xTildeTrain)
     % ----------------------------------------------------------------------------------------------
@@ -131,6 +155,10 @@ for r = 1:R
     [ PhiTilde, lambdaAnalyticTilde ] = ...
         CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, b_normalizePhi);
     invLambda = diag(1./lambdaAnalyticTilde);
+
+    % ----------------------------------------------------------------------------------------------
+    % Plot GMM estimation and PhiTilde
+    % ----------------------------------------------------------------------------------------------
     if r == 1 && sPlotParams.b_plotDataVsGmm && dim <= 3
         nGmmPoints = n;
         pltTitle = ['Dataset with n = ', num2str(n), ' points'];
@@ -140,9 +168,6 @@ for r = 1:R
         PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
 
     end
-    % ----------------------------------------------------------------------------------------------
-    % Plot PhiTilde
-    % ----------------------------------------------------------------------------------------------
     if r == 1 && sPlotParams.b_plotTildeFiguresForDebug && dim <= 3
         figTitle = 'Eigenfunctions of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
         figName = 'PhiTilde';
@@ -152,6 +177,21 @@ for r = 1:R
         PlotSpectrum(sPlotParams, sDataset, [], lambdaAnalyticTilde, [], [], ...
             '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
     end
+    
+    % ----------------------------------------------------------------------------------------------
+    % Calculate eigenfunctions values at xInt
+    % ----------------------------------------------------------------------------------------------
+    xTildeInt = xInt;
+    [PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeInt, b_normalizePhi);
+
+    % ----------------------------------------------------------------------------------------------
+    % Interpolate with Nystrom
+    % ----------------------------------------------------------------------------------------------
+    distLUBlockRUBlock = CalcDistance(xTrain, xInt, distType);
+    WTrainInt = exp(-distLUBlockRUBlock.^2/(2*omegaNys^2));
+    lambdaNys = adjLambda*sqrt(interpRatio);
+    VNys = WTrainInt.'*V*diag(1./lambdaNys);
+    
     if b_interpEigenvecs
         % ----------------------------------------------------------------------------------------------
         % Learn eigenvectors to eigenfunctions transformation (C)
@@ -162,69 +202,37 @@ for r = 1:R
         else
             b_maskDataTermCMatrix = false;
             C = EigsRLS(PhiTilde, gamma1, gamma2, invLambda, Ln, V, b_maskDataTermCMatrix);
-    %         C = n^(dim-1) * (PhiTilde.' * diag(vPrTilde)* V);
         end
-
-        PhiTildeCondNum = cond((PhiTilde).'*(PhiTilde) + gamma1*invLambda);
-        recommendedMTilde = MTilde;
-        while(PhiTildeCondNum > 1e3 && recommendedMTilde >= 10)
-            fprintf('Condition number %.3f is too large. Checking with MTilde = %d\n', PhiTildeCondNum, recommendedMTilde)
-            recommendedMTilde = recommendedMTilde - 10;
-            PhiTildeCondNum = cond(PhiTilde(1:recommendedMTilde,:));
-        end
-        if MTilde ~= recommendedMTilde
-            warning('Consider MTilde = %d with condition number %.3f', recommendedMTilde, PhiTildeCondNum);
-            pause(1);
-        end
-
         % ----------------------------------------------------------------------------------------------
-        % Plot original V for comparison
+        % Interpolate with our method
         % ----------------------------------------------------------------------------------------------
-        if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
-            figTitle = ['Eigenvectors of ', matrixForEigs];
-            if strcmp(adjacencyType, 'GaussianKernel')
-                figTitle2 = [' (Gaussian kernel, $\omega = ', num2str(omega), '$'];
-            elseif strcmp(adjacencyType, 'NearestNeighbor')
-                figTitle2 = [' (k-NN, $k = ', num2str(k), '$'];
-            end
-            figTitle3 = [', $n = ', num2str(n), '$)'];
-            figName = 'V';
-            cmap = PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
-                V, matLambda, '\lambda^{v}', [], [figTitle, figTitle2, figTitle3], figName, 'v');
-            figTitle = 'Numeric eigenvalues of ${\bf V}$';
-            PlotSpectrum(sPlotParams, sDataset, [], matLambda, [], [], ...
-                    '\tilde{\lambda}^{v}_m', [], [], figTitle);
-        end
-    end
-    % ----------------------------------------------------------------------------------------------
-    % Interpolate with our method
-    % ----------------------------------------------------------------------------------------------
-    xTildeInt = xInt;
-    [PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeInt, b_normalizePhi);
-    PhiTildeIntCondNum = cond(PhiTildeInt);
-%     assert(PhiTildeIntCondNum < 1e3, 'Condition number is too large...');
-    if b_interpEigenvecs
         VInt = (1/sqrt(interpRatio))*PhiTildeInt*C;
         VIntToCompare = VInt;
-    end
-       
-    % ----------------------------------------------------------------------------------------------
-    % Interpolate with Nystrom
-    % ----------------------------------------------------------------------------------------------
-    distLUBlockRUBlock = CalcDistance(xTrain, xInt, distType);
-    B = exp(-distLUBlockRUBlock.^2/(2*omegaNys^2));
-    lambdaNys = adjLambda*sqrt(interpRatio);
-    VNys = B.'*V*diag(1./lambdaNys);
-    if b_interpEigenvecs
+        % ----------------------------------------------------------------------------------------------
+        % Interpolate with Nystrom
+        % ----------------------------------------------------------------------------------------------
         if b_flipSign
             VNys = FlipSign(VInt, VNys, b_pairwiseFlipSign);
         end
         VNysToCompare = VNys;
-    end
-    % ----------------------------------------------------------------------------------------------
-    % Calculate reference
-    % ----------------------------------------------------------------------------------------------
-    if b_interpEigenvecs
+        % ----------------------------------------------------------------------------------------------
+        % Learn alpha using the Representer theorem
+        % ----------------------------------------------------------------------------------------------
+        alpha = (W - gamma1Rep*eye(n)) \ V;
+        alpha = alpha/sqrt(interpRatio);
+        % ----------------------------------------------------------------------------------------------
+        % Interpolate with Representer theorem
+        % ----------------------------------------------------------------------------------------------
+        VRep = WTrainInt.'*alpha;
+        if b_interpEigenvecs
+            if b_flipSign
+                VRep = FlipSign(VInt, VRep, b_pairwiseFlipSign);
+            end
+            VRepToCompare = VRep;
+        end
+        % ----------------------------------------------------------------------------------------------
+        % Calculate reference
+        % ----------------------------------------------------------------------------------------------
         if b_debugUseAnalytic
             [PhiRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, ...
                 sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
@@ -249,6 +257,9 @@ for r = 1:R
         if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
             if dim == 1
                 PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
+                    VRefToCompare, [], [], [], ['Reference vs. Representer theorem (N = ', num2str(N), ')'], ...
+                    'VRep', 'v^{{\bf ref}}', VRepToCompare, 'v^{{\bf rep}}');
+                PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
                     VRefToCompare, [], [], [], ['Reference vs. Nystrom (N = ', num2str(N), ')'], ...
                     'VNys', 'v^{{\bf ref}}', VNysToCompare, 'v^{{\bf nys}}');
                 PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(2), ...
@@ -258,6 +269,9 @@ for r = 1:R
                 PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, cmap, plotInd(1), plotInd(2), ...
                     VRefToCompare, [], [], [], ...
                     ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
+                PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, cmap, plotInd(1), plotInd(2), ...
+                    VRepToCompare, [], [], [], ...
+                    ['Representer theorem (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf rep}}');
                 PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, cmap, plotInd(1), plotInd(2), ...
                     VNysToCompare, [], [], [], ...
                     ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
@@ -280,6 +294,9 @@ for r = 1:R
             pltTitle = 'VNys - ${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$';
             figName = 'VNys';
             PlotInnerProductMatrix(VNys, [], sPlotParams, pltTitle, figName);
+            pltTitle = 'VRep - ${\bf V}_{{\bf rep}}^T {\bf V}_{{\bf rep}}$';
+            figName = 'VRep';
+            PlotInnerProductMatrix(VRep, [], sPlotParams, pltTitle, figName);
     %         pltTitle = '$\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$';
     %         figName = 'PhiTilde';
     %         PlotInnerProductMatrix(PhiTilde, vPrTilde, sPlotParams, pltTitle, figName);
@@ -301,44 +318,57 @@ for r = 1:R
         % Coeffs
         sigHatV = V'*sig; % same as pinv(V)*sig...
         sigHatPhi = EigsRLS(PhiTilde, gamma1, gamma2, invLambda, Ln, sig, sPreset.b_maskDataFitTerm);
-        sigRefHatPhi = EigsRLS(PhiTildeInt, gamma1, gamma2, invLambda, LnRef, sigRef, sPreset.b_maskDataFitTerm);
+        alpha = (W - gamma1Rep*eye(n)) \ sig;
+        alpha = alpha/sqrt(interpRatio);
 
         % Signals
         sigRecV = V*sigHatV;
         sigRecPhi = PhiTilde*sigHatPhi;
+        sigRecRep = W.'*alpha;
         sigInt = PhiTildeInt*sigHatPhi;
         sigNys = VNys*sigHatV;
+        sigRep = WTrainInt.'*alpha;
         if (ismember(sPreset.verticesPDF, {'TwoMoons', 'TwoSpirals'})) || ...
                 (ismember(sPreset.verticesPDF, {'MnistLatentVAE'}) && isequal(sDatasetParams.vPossibleLabels, [0, 1]))
             sigRecV = sign(sigRecV);
             sigRecPhi = sign(sigRecPhi);
+            sigRecRep = sign(sigRecRep);
             sigInt = sign(sigInt);
             sigNys = sign(sigNys);
+            sigRep = sign(sigRep);
         elseif ismember(sPreset.verticesPDF, {'MnistLatentVAE'})    
             sigRecV = round(sigRecV);
             sigRecPhi = round(sigRecPhi);
+            sigRecRep = round(sigRecRep);
             sigInt = round(sigInt);
             sigNys = round(sigNys);
+            sigRep = round(sigRep);
         end
+        % Just for reference
+        sigRefHatPhi = EigsRLS(PhiTildeInt, gamma1, gamma2, invLambda, LnRef, sigRef, sPreset.b_maskDataFitTerm);
+        
         PlotGraphSignalAnalysis(sig, sigRecPhi, sigRecV, sigRef, sigInt, sigNys, ...
             sigHatPhi, sigHatV, sigRefHatPhi);
        
-        PlotGraphSignalErrors(sPlotParams, [1, n], sig, sigRecPhi, sigRecV, '|s-s_{\Phi}^{{\bf rec}}|', ...
-            '|s-s_{V}^{{\bf rec}}|',  'Projection error ($n$ given nodes)')
+        PlotGraphSignalErrors(sPlotParams, [1, n], sig, {sigRecPhi, sigRecV, sigRecRep}, ...
+            {'|s-s_{\Phi}^{{\bf rec}}|', '|s-s_{V}^{{\bf rec}}|', '|s-s_{{\bf K}}^{{\bf rec}}|'},  ...
+            'Projection error ($n$ given nodes)')
         if n+1 < N
-            PlotGraphSignalErrors(sPlotParams, [n+1, N], sigRef(n+1:N), sigInt(n+1:N), sigNys(n+1:N), '|s^{{\bf ref}}-s^{{\bf int}}|', ...
-                '|s^{{\bf ref}}-s_{{\bf nys}}|',  'Interpolation error ($N-n$ nodes)')
+            PlotGraphSignalErrors(sPlotParams, [n+1, N], sigRef(n+1:N), ...
+                {sigInt(n+1:N), sigNys(n+1:N), sigRep(n+1:N)}, ...
+                {'|s^{{\bf ref}}-s^{{\bf int}}|', '|s^{{\bf ref}}-s^{{\bf nys}}|', '|s^{{\bf ref}}-s^{{\bf rep}}|'},  ...
+                'Interpolation error ($N-n$ nodes)')
         end
         
-        PlotGraphSignalErrors(sPlotParams, [1, N], sigRef, sigInt, sigNys, '|s^{{\bf ref}}-s^{{\bf int}}|', ...
-            '|s^{{\bf ref}}-s_{{\bf nys}}|',  'Total error ($N$ nodes)')
+        PlotGraphSignalErrors(sPlotParams, [1, N], sigRef, {sigInt, sigNys, sigRep}, ...
+            {'|s^{{\bf ref}}-s^{{\bf int}}|', '|s^{{\bf ref}}-s^{{\bf nys}}|', '|s^{{\bf ref}}-s^{{\bf rep}}|'},  ...
+            'Total error ($N$ nodes)')
         
         cmap = PlotGraphSignals(sPlotParams, 'Graph signals', 'RefIntNys', ...
-            {xTrain, xTrain, xTrain, xInt, xInt, xInt}, ...
-            {sig, sigRecPhi, sigRecV sigRef, sigInt, sigNys}, ...
-            {'$s$ ($n$ nodes)', '$s_{\Phi}^{{\bf rec}}$ ($n$ nodes)', '$s_{V}^{{\bf rec}}$ ($n$ nodes)', ...
-             '$s^{{\bf ref}}$ ($N$ nodes)', '$s^{{\bf int}}$ ($N$ nodes)', '$s^{{\bf nys}}$ ($N$ nodes)'}, ...
-            {n, n, n, n, n, n});
+            {xTrain, xTrain, xTrain, xTrain, xInt, xInt, xInt, xInt}, ...
+            {sig, sigRecPhi, sigRecV, sigRecRep, sigRef, sigInt, sigNys, sigRep}, ...
+            {'$s$ ($n$ nodes)', '$s_{\Phi}^{{\bf rec}}$ ($n$ nodes)', '$s_{V}^{{\bf rec}}$ ($n$ nodes)', '$s_{K}^{{\bf rec}}$ ($n$ nodes)', '$s^{{\bf ref}}$ ($N$ nodes)', '$s^{{\bf int}}$ ($N$ nodes)', '$s^{{\bf nys}}$ ($N$ nodes)', '$s^{{\bf rep}}$ ($N$ nodes)'}, ...
+            {n, n, n, n, n, n, n, n});
         
         if (ismember(sPreset.verticesPDF, {'TwoMoons', 'TwoSpirals'})) || ...
                 (ismember(sPreset.verticesPDF, {'MnistLatentVAE'}) && isequal(sDatasetParams.vPossibleLabels, [0, 1]))
@@ -367,6 +397,13 @@ for r = 1:R
         
             PlotClassifier(sPlotParams, sDataset, sClassifier)
         elseif ismember(sPreset.verticesPDF, {'MnistLatentVAE'})
+            vPredictionsRecRep = sigRecRep;
+            testAccRecRep = 100*sum(vPredictionsRecRep == sDataset.sData.y) / n;
+            fprintf('\nRep Thm train accuracy = %.2f%%\n', testAccRecRep);
+            vPredictionsRep = sigRep;
+            testAccRep = 100*sum(vPredictionsRep == sDataset.sData.yt) / N;
+            fprintf('Rep Thm test accuracy  = %.2f%%\n', testAccRep);
+            
             vPredictionsRecV = sigRecV;
             testAccRecV = 100*sum(vPredictionsRecV == sDataset.sData.y) / n;
             fprintf('\nNystrom train accuracy = %.2f%%\n', testAccRecV);
@@ -376,11 +413,18 @@ for r = 1:R
             
             vPredictionsRecPhi = sigRecPhi;
             testAccRecPhi = 100*sum(vPredictionsRecPhi == sDataset.sData.y) / n;
-            fprintf('Ours train accuracy    = %.2f%%\n', testAccRecPhi);
+            fprintf('\nOurs train accuracy    = %.2f%%\n', testAccRecPhi);
             vPredictionsInt = sigInt;
             testAccInt = 100*sum(vPredictionsInt == sDataset.sData.yt) / N;
             fprintf('Ours test accuracy     = %.2f%%\n', testAccInt);
-        elseif ismember(sPreset.verticesPDF, {'BrazilWeather'})
+        else
+            vPredictionsRecRep = sigRecRep;
+            testAccRecRep = 100*(1 -norm(vPredictionsRecRep - sDataset.sData.y) / norm(sDataset.sData.y));
+            fprintf('\nRep Thm train accuracy = %.2f%%\n', testAccRecRep);
+            vPredictionsRep = sigRep;
+            testAccRep = 100*(1 -norm(vPredictionsRep - sDataset.sData.yt) / norm(sDataset.sData.yt));
+            fprintf('Rep Thm test accuracy  = %.2f%%\n', testAccRep);
+            
             vPredictionsRecV = sigRecV;
             testAccRecV = 100*(1 -norm(vPredictionsRecV - sDataset.sData.y) / norm(sDataset.sData.y));
             fprintf('\nNystrom train accuracy = %.2f%%\n', testAccRecV);
@@ -390,7 +434,7 @@ for r = 1:R
             
             vPredictionsRecPhi = sigRecPhi;
             testAccRecPhi = 100*(1 - norm(vPredictionsRecPhi - sDataset.sData.y) / norm(sDataset.sData.y));
-            fprintf('Ours train accuracy    = %.2f%%\n', testAccRecPhi);
+            fprintf('\nOurs train accuracy    = %.2f%%\n', testAccRecPhi);
             vPredictionsInt = sigInt;
             testAccInt = 100*(1 -norm(vPredictionsInt - sDataset.sData.yt) / norm(sDataset.sData.yt));
             fprintf('Ours test accuracy     = %.2f%%\n', testAccInt);            
@@ -399,10 +443,14 @@ for r = 1:R
         [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
         [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
         sigGmm = PhiTildeGmm*sigHatPhi;
-        xylim(1) = min(xTrain(:,1));
-        xylim(2) = max(xTrain(:,1));
-        xylim(3) = min(xTrain(:,2));
-        xylim(4) = max(xTrain(:,2));
+        if dim == 2
+            xylim(1) = min(xTrain(:,1));
+            xylim(2) = max(xTrain(:,1));
+            xylim(3) = min(xTrain(:,2));
+            xylim(4) = max(xTrain(:,2));
+        else
+            xylim = [];
+        end
         PlotGraphSignals(sPlotParams, 'GMM Graph signal', 'GMM', {xGmm}, {sigGmm}, ...
             {'$s^{{\bf gmm}}$'}, {nGmmPoints}, xylim, cmap);
     end
@@ -411,6 +459,7 @@ for r = 1:R
     if b_interpEigenvecs
         mVIntToCompare(r,:,:) = VIntToCompare;
         mVNysToCompare(r,:,:) = VNysToCompare;
+        mVRepToCompare(r,:,:) = VRepToCompare;
         mVRefToCompare(r,:,:) = VRefToCompare;
     end
     
@@ -418,5 +467,8 @@ end
 if b_interpEigenvecs
     vRmseInt = CalcRMSE(mVIntToCompare, mVRefToCompare, 'Analytic');
     vRmseNys = CalcRMSE(mVNysToCompare, mVRefToCompare, 'Nystrom');
-    PlotRMSE(sPlotParams, vRmseInt, vRmseNys);
+    vRmseRep = CalcRMSE(mVRepToCompare, mVRefToCompare, 'Representer');
+    PlotRMSE(sPlotParams, [vRmseInt, vRmseNys, vRmseRep], ...
+        {'RMSE$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$', 'RMSE$(v^{{\bf nys}}_m, v^{{\bf ref}}_m)$', ...
+        'RMSE$(v^{{\bf rep}}_m, v^{{\bf ref}}_m)$'});
 end

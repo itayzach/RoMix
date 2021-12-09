@@ -17,12 +17,14 @@ sPreset.omegaTilde         = 7; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
-sPreset.gmmNumComponents   = 5;
+sPreset.gmmNumComponents   = 4;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 25*sPreset.gmmNumComponents;
 sPreset.MTilde             = 25*sPreset.gmmNumComponents;
 sPreset.gamma1             = 0.1;
 sPreset.gamma2             = 0;
+%% Representer theorem
+sPreset.gamma1Rep          = 0.001;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;

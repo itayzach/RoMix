@@ -37,4 +37,4 @@ for r = 1:R
     fprintf('\n');
 end
 fprintf('*********************************************************\n');
-vRMSE = sqrt(sum(mSqNorm,1)/R);
+vRMSE = sqrt(sum(mSqNorm,1)/R).';

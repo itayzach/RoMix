@@ -1,13 +1,22 @@
-function PlotGraphSignalErrors(sPlotParams, xInd, sig1, sig2, sig3, sig2DispName, sig3DispName, pltTitle)
+function PlotGraphSignalErrors(sPlotParams, xInd, sig1, cSignals, cDispName, pltTitle)
 
+cSignals = reshape(cSignals,[],1);
+cDispName = reshape(cDispName,[],1);
 n = length(sig1);
-
+cMarkerType = {'x', '+', '*'};
 fig = figure('Name', 'Graph signals errors');
-plot(xInd(1):xInd(2), abs(sig1-sig2), 'x', 'DisplayName', ['$' sig2DispName '$']);
-hold on;
-plot(xInd(1):xInd(2), abs(sig1-sig3), '+', 'DisplayName', ['$' sig3DispName '$']);
-plot(xInd(1):xInd(2), mean(abs(sig1-sig2))*ones(1,n), 'LineWidth', 3, 'DisplayName', ['${{\bf avg}}({' sig2DispName '})$']);
-plot(xInd(1):xInd(2), mean(abs(sig1-sig3))*ones(1,n), 'LineWidth', 3, 'DisplayName', ['${{\bf avg}}({' sig3DispName '})$']);
+for sigInd = 1:numel(cSignals)
+    sigDispName = cDispName{sigInd};
+    sig = cSignals{sigInd};
+    plot(xInd(1):xInd(2), abs(sig1-sig), cMarkerType{sigInd}, 'DisplayName', ['$' sigDispName '$']);
+    hold on;
+end
+for sigInd = 1:numel(cSignals)
+    sigDispName = cDispName{sigInd};
+    sig = cSignals{sigInd};
+    plot(xInd(1):xInd(2), mean(abs(sig1-sig))*ones(1,n), 'LineWidth', 3, 'DisplayName', ['${{\bf avg}}({' sigDispName '})$']);
+    hold on;
+end
 xlim([xInd(1),xInd(2)]);
 legend('interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',2)
 title(pltTitle, 'interpreter', 'latex', 'FontSize', 14)

@@ -19,11 +19,12 @@ if exist('GMModel', 'var')
         set(gca,'YTick',[],'FontSize', 14);
         xlim([xMin(1), xMax(1)])
     elseif dim == 2
-        scatter(xGmm(:,1),xGmm(:,2),[],compIdx,'filled') % Scatter plot with points of size 10
+        scatter3(xGmm(:,1),xGmm(:,2),compIdx,[],compIdx,'filled');
         colormap(ax(1), jet(GMModel.NumComponents));
         colorbar();
         xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
         ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
+        view(2);
         set(gca,'FontSize', 14);
         xlim([xMin(1), xMax(1)])
         ylim([xMin(2), xMax(2)])
@@ -50,7 +51,7 @@ if dim == 1
     xlim([xMin(1), xMax(1)])
 elseif dim == 2
     if ~isempty(y)
-        scatter(x(:,1), x(:,2), [], y, 'filled');
+        scatter3(x(:,1), x(:,2), y, [], y, 'filled');
         if isequal(y, floor(y))
             if exist('ax', 'var')
                 colormap(ax(2), jet(length(unique(y)))); 
@@ -66,6 +67,7 @@ elseif dim == 2
     end
     xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
     ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
+    view(2);
     set(gca,'FontSize', 14);
     if exist('xMin', 'var') && exist('xMax', 'var')
         xlim([xMin(1), xMax(1)])

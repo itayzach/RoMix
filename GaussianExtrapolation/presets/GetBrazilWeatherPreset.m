@@ -1,6 +1,6 @@
 function sPreset = GetBrazilWeatherPreset()
 %% Dataset parameters
-sPreset.dim                = 1;
+sPreset.dim                = 2;
 sPreset.n                  = 246;
 sPreset.N                  = 296;
 sPreset.k                  = round(0.01*sPreset.N);
@@ -11,6 +11,9 @@ sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKe
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sPreset.sDatasetParams     = [];
+%% Gaussian kernel width
+sPreset.omega              = 7; % for nystrom kernel
+sPreset.omegaTilde         = 7; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;

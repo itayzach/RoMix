@@ -5,11 +5,11 @@ set(0,'DefaultFigureWindowStyle','normal')
 %% Load preset
 % sPreset = Get1DGridPreset();
 % sPreset = GetSwissRollPreset();
-% sPreset = GetBrazilWeatherPreset();
+sPreset = GetBrazilWeatherPreset();
 % sPreset = GetTwoMoonsPreset();
 % sPreset = GetTwoSpiralsPreset();
-sPreset = GetMnistLatentVAEPreset();
-%%
+% sPreset = GetMnistLatentVAEPreset();
+%% Parse sPreset
 dim                = sPreset.dim;
 n                  = sPreset.n;
 N                  = sPreset.N;
@@ -22,6 +22,9 @@ nGenDataCompnts    = sPreset.nGenDataCompnts;
 dataGenTechnique   = sPreset.dataGenTechnique;
 M                  = sPreset.M;
 MTilde             = sPreset.MTilde;
+omega              = sPreset.omega;
+omegaNys           = sPreset.omega;
+omegaTilde         = sPreset.omegaTilde;
 gamma1             = sPreset.gamma1;
 gamma2             = sPreset.gamma2;
 gmmRegVal          = sPreset.gmmRegVal;
@@ -48,10 +51,12 @@ dim            = sDataset.dim;
 n              = length(sDataset.sData.x);
 N              = length(sDataset.sData.xt);
 interpRatio    = N/n;
-omega          = sDataset.recommendedOmega;
-omegaTilde     = sDataset.recommendedOmegaTilde;
-omegaNys       = sDataset.recommendedOmega;
-% assert(isequal(sDataset.sData.x, sDataset.sData.xt(1:n,:)));
+if strcmp(sPreset.dataGenTechnique, 'NewPoints')
+    warning('sPreset.dataGenTechnique is NewPoints, should make sure its okay...')
+    pause(0.5)
+else
+    assert(isequal(sDataset.sData.x, sDataset.sData.xt(1:n,:)));
+end
 %% Plot params
 sPlotParams = GetPlotParams();
 sPlotParams.sDataset = sDataset;
@@ -362,49 +367,44 @@ for r = 1:R
         
             PlotClassifier(sPlotParams, sDataset, sClassifier)
         elseif ismember(sPreset.verticesPDF, {'MnistLatentVAE'})
-            vPredictionsRecPhi = sigRecPhi;
-            testAccRecPhi = 100*sum(vPredictionsRecPhi == sDataset.sData.y) / n;
-            fprintf('Ours train acc = %.2f%%\n', testAccRecPhi);
-            
-            vPredictionsInt = sigInt;
-            testAccInt = 100*sum(vPredictionsInt == sDataset.sData.yt) / N;
-            fprintf('Ours test acc = %.2f%%\n', testAccInt);
-            
             vPredictionsRecV = sigRecV;
             testAccRecV = 100*sum(vPredictionsRecV == sDataset.sData.y) / n;
-            fprintf('Nystrom train acc = %.2f%%\n', testAccRecV);
-            
+            fprintf('\nNystrom train accuracy = %.2f%%\n', testAccRecV);
             vPredictionsNys = sigNys;
             testAccNys = 100*sum(vPredictionsNys == sDataset.sData.yt) / N;
-            fprintf('Nystrom test acc = %.2f%%\n', testAccNys);
-        elseif ismember(sPreset.verticesPDF, {'BrazilWeather'})
+            fprintf('Nystrom test accuracy  = %.2f%%\n', testAccNys);
+            
             vPredictionsRecPhi = sigRecPhi;
-            testAccRecPhi = 100*(1 - norm(vPredictionsRecPhi - sDataset.sData.y) / norm(sDataset.sData.y));
-            fprintf('Ours train acc = %.2f%%\n', testAccRecPhi);
-            
+            testAccRecPhi = 100*sum(vPredictionsRecPhi == sDataset.sData.y) / n;
+            fprintf('Ours train accuracy    = %.2f%%\n', testAccRecPhi);
             vPredictionsInt = sigInt;
-            testAccInt = 100*(1 -norm(vPredictionsInt - sDataset.sData.yt) / norm(sDataset.sData.yt));
-            fprintf('Ours test acc = %.2f%%\n', testAccInt);
-            
+            testAccInt = 100*sum(vPredictionsInt == sDataset.sData.yt) / N;
+            fprintf('Ours test accuracy     = %.2f%%\n', testAccInt);
+        elseif ismember(sPreset.verticesPDF, {'BrazilWeather'})
             vPredictionsRecV = sigRecV;
             testAccRecV = 100*(1 -norm(vPredictionsRecV - sDataset.sData.y) / norm(sDataset.sData.y));
-            fprintf('Nystrom train acc = %.2f%%\n', testAccRecV);
-            
+            fprintf('\nNystrom train accuracy = %.2f%%\n', testAccRecV);
             vPredictionsNys = sigNys;
             testAccNys = 100*(1 -norm(vPredictionsNys - sDataset.sData.yt) / norm(sDataset.sData.yt));
-            fprintf('Nystrom test acc = %.2f%%\n', testAccNys);            
-%         else
-            nGmmPoints = 1000;
-            [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
-            [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
-            sigGmm = PhiTildeGmm*sigHatPhi;
-            xylim(1) = min(xTrain(:,1));
-            xylim(2) = max(xTrain(:,1));
-            xylim(3) = min(xTrain(:,2));
-            xylim(4) = max(xTrain(:,2));
-            PlotGraphSignals(sPlotParams, 'GMM Graph signal', 'GMM', {xGmm}, {sigGmm}, ...
-                {'$s^{{\bf gmm}}$'}, {nGmmPoints}, xylim, cmap);
+            fprintf('Nystrom test accuracy  = %.2f%%\n', testAccNys);
+            
+            vPredictionsRecPhi = sigRecPhi;
+            testAccRecPhi = 100*(1 - norm(vPredictionsRecPhi - sDataset.sData.y) / norm(sDataset.sData.y));
+            fprintf('Ours train accuracy    = %.2f%%\n', testAccRecPhi);
+            vPredictionsInt = sigInt;
+            testAccInt = 100*(1 -norm(vPredictionsInt - sDataset.sData.yt) / norm(sDataset.sData.yt));
+            fprintf('Ours test accuracy     = %.2f%%\n', testAccInt);            
         end
+        nGmmPoints = 1000;
+        [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
+        [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
+        sigGmm = PhiTildeGmm*sigHatPhi;
+        xylim(1) = min(xTrain(:,1));
+        xylim(2) = max(xTrain(:,1));
+        xylim(3) = min(xTrain(:,2));
+        xylim(4) = max(xTrain(:,2));
+        PlotGraphSignals(sPlotParams, 'GMM Graph signal', 'GMM', {xGmm}, {sigGmm}, ...
+            {'$s^{{\bf gmm}}$'}, {nGmmPoints}, xylim, cmap);
     end
     
     % Save

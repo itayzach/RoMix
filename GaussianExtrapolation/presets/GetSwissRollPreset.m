@@ -1,6 +1,6 @@
 function sPreset = GetSwissRollPreset()
 %% Dataset parameters
-sPreset.dim                = 1;
+sPreset.dim                = 3;
 sPreset.n                  = 4000;
 sPreset.N                  = 5000;
 sPreset.k                  = round(0.01*sPreset.N);
@@ -11,14 +11,17 @@ sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKe
 sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sPreset.sDatasetParams     = [];
+%% Gaussian kernel width
+sPreset.omega              = sqrt(5)/sqrt(2); % for nystrom kernel
+sPreset.omegaTilde         = sqrt(5)/sqrt(2); % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 20;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 9;
-sPreset.MTilde             = 500;
-sPreset.gamma1             = 0;
+sPreset.MTilde             = 25*sPreset.gmmNumComponents;
+sPreset.gamma1             = 0; %5;
 sPreset.gamma2             = 0;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;

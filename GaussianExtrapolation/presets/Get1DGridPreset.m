@@ -10,15 +10,21 @@ sPreset.verticesPDF        = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoo
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sPreset.sDatasetParams     = [];
+sDatasetParams.xMin        = -1*ones(sPreset.dim,1);
+sDatasetParams.xMax        = 1*ones(sPreset.dim,1);
+sPreset.sDatasetParams     = sDatasetParams;
+%% Gaussian kernel width
+L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
+sPreset.omega              = 2*sqrt(L/sPreset.n); % for nystrom kernel
+sPreset.omegaTilde         = 2*sqrt(L/sPreset.n); % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 1;
 %% Number of eigenvectors/eigenfunctions
-sPreset.M                  = 10;
+sPreset.M                  = 20;
 sPreset.MTilde             = 30;
-sPreset.gamma1             = 0;
+sPreset.gamma1             = 0.05;
 sPreset.gamma2             = 0;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;

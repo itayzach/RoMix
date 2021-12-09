@@ -10,15 +10,15 @@ if ~exist('nTest', 'var')
 end
 %% Generate data
 if strcmp(actualDataDist, 'SineCosine')
-    assert(strcmp(interpMethod, 'AddPoints'))
-    [data, theta] = GenerateSineCosineData(dim, nTest);
-    sDataset.sData.x = data(1:nTrain,:);
-    sDataset.sData.xt = data;
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-    sDataset.sData.theta = theta;
-    omega = 0.5*sum(sqrt(std(sDataset.sData.xt)))/dim; %0.15;
-    omegaTilde = 0.5*sum(sqrt(std(sDataset.sData.xt)))/dim; %0.15;
+%     assert(strcmp(interpMethod, 'AddPoints'))
+%     [data, theta] = GenerateSineCosineData(dim, nTest);
+%     sDataset.sData.x = data(1:nTrain,:);
+%     sDataset.sData.xt = data;
+%     sDataset.sData.y = [];
+%     sDataset.sData.yt = [];
+%     sDataset.sData.theta = theta;
+%     omega = 0.5*sum(sqrt(std(sDataset.sData.xt)))/dim; %0.15;
+%     omegaTilde = 0.5*sum(sqrt(std(sDataset.sData.xt)))/dim; %0.15;
 elseif strcmp(actualDataDist, 'BrazilWeather') 
     T = readtable(fullfile('data','Brazilian_Weather_Stations-Temperature_1961-1990.xlsx'));
     
@@ -47,23 +47,17 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
     sDataset.sData.xt = dataRearranged;
     sDataset.sData.yt = T.Jul(rperm);
     sDataset.sData.y = sDataset.sData.yt(1:nTrain);
-    
-    dim = 2;
-    
-    omega = 7;
-    omegaTilde = omega;
-        
 elseif strcmp(actualDataDist, 'MnistDist')
-    assert(strcmp(interpMethod, 'AddPoints'))
-    mnist = load('data\mnist.mat');
-    dist = pdist2(mnist.testX(1:nTest,:), mnist.testX(1:nTest,:));
-    data = triu(dist,1);
-    data = data(data > 0);
-    sDataset.sData.x = data(1:nTrain,:);
-    sDataset.sData.xt = data;
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-    dim = 2;
+%     assert(strcmp(interpMethod, 'AddPoints'))
+%     mnist = load('data\mnist.mat');
+%     dist = pdist2(mnist.testX(1:nTest,:), mnist.testX(1:nTest,:));
+%     data = triu(dist,1);
+%     data = data(data > 0);
+%     sDataset.sData.x = data(1:nTrain,:);
+%     sDataset.sData.xt = data;
+%     sDataset.sData.y = [];
+%     sDataset.sData.yt = [];
+%     dim = 2;
 elseif strcmp(actualDataDist, 'MnistLatentVAE')
     assert(strcmp(interpMethod, 'AddPoints'))
     mnistLatent = load('data\mnistLatentVAE.mat');
@@ -77,85 +71,82 @@ elseif strcmp(actualDataDist, 'MnistLatentVAE')
     ind = find(ismember(y, vPossibleLabels));
     z = z(ind,:);
     y = y(ind);
-    y = y + 1;
-%     y(y == 0) = -1; % change y=0 to y=-1 for easier sepration
+    y = y + 1; % +1 since interpolating "0" is hard :)
     data = double(z(1:nTest,:));
     labels = y(1:nTest)';
     sDataset.sData.x = data(1:nTrain,:);
     sDataset.sData.xt = data;
     sDataset.sData.y = double(labels(1:nTrain)');
     sDataset.sData.yt = double(labels');
-    omega = 0.1;
-    omegaTilde = 0.1;
-    dim = size(data, 2);
+
 elseif strcmp(actualDataDist, 'CoraLatentVGAE')
-    assert(strcmp(interpMethod, 'AddPoints'))
-    coraLatent = load('data\coraLatentVGAE.mat');
-    z = double(coraLatent.z_mean);
-    data = double(z(1:nTest,:));
-    sDataset.sData.x = data(1:nTrain,:);
-    sDataset.sData.xt = data;
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-    omega = 1.5;
-    omegaTilde = 1.5;
-    dim = size(data, 2);
+%     assert(strcmp(interpMethod, 'AddPoints'))
+%     coraLatent = load('data\coraLatentVGAE.mat');
+%     z = double(coraLatent.z_mean);
+%     data = double(z(1:nTest,:));
+%     sDataset.sData.x = data(1:nTrain,:);
+%     sDataset.sData.xt = data;
+%     sDataset.sData.y = [];
+%     sDataset.sData.yt = [];
+%     omega = 1.5;
+%     omegaTilde = 1.5;
+%     dim = size(data, 2);
 elseif strcmp(actualDataDist, 'Minnesota')   
-    assert(strcmp(interpMethod, 'AddPoints'))
-    G = gsp_minnesota();
-    data = G.coords;
-    trainTestRatio = nTrain/nTest;
-    nTest = length(data);
-    nTrain = min(round(trainTestRatio*nTest),nTest);
-    
-    rperm = randperm(nTest);
-    dataRearranged = data(rperm,:);
-   
-    sDataset.sData.x = dataRearranged(1:nTrain,:);
-    sDataset.sData.xt = dataRearranged;
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-    omega = 0.5;
-    omegaTilde = 0.5;
-    dim = 2;
-    sDatasetParams = [];
-    msgBoxTitle = 'GenerateDataset warning';
-    msgBoxMsg = ['This dataset has a fixed number of points.', newline, ...
-        'updated to N = ' num2str(nTest), ', n = ', num2str(nTrain)];
-    MyMsgBox(msgBoxMsg, msgBoxTitle)
+%     assert(strcmp(interpMethod, 'AddPoints'))
+%     G = gsp_minnesota();
+%     data = G.coords;
+%     trainTestRatio = nTrain/nTest;
+%     nTest = length(data);
+%     nTrain = min(round(trainTestRatio*nTest),nTest);
+%     
+%     rperm = randperm(nTest);
+%     dataRearranged = data(rperm,:);
+%    
+%     sDataset.sData.x = dataRearranged(1:nTrain,:);
+%     sDataset.sData.xt = dataRearranged;
+%     sDataset.sData.y = [];
+%     sDataset.sData.yt = [];
+%     omega = 0.5;
+%     omegaTilde = 0.5;
+%     dim = 2;
+%     sDatasetParams = [];
+%     msgBoxTitle = 'GenerateDataset warning';
+%     msgBoxMsg = ['This dataset has a fixed number of points.', newline, ...
+%         'updated to N = ' num2str(nTest), ', n = ', num2str(nTrain)];
+%     MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'Bunny')
-    assert(strcmp(interpMethod, 'AddPoints'))
-    G = gsp_bunny();
-    data = G.coords;
-    trainTestRatio = nTrain/nTest;
-    nTest = length(data);
-    nTrain = min(round(trainTestRatio*nTest),nTest);
-    sDataset.sData.x = data(1:nTrain,:);
-    sDataset.sData.xt = data;
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-    omega = 0.15;
-    omegaTilde = 0.15;
-    dim = 3;
-    sDatasetParams = [];
-    msgBoxTitle = 'GenerateDataset warning';
-    msgBoxMsg = ['This dataset has a fixed number of points.', newline, ...
-        'updated to N = ' num2str(nTest), ', n = ', num2str(nTrain)];
-    MyMsgBox(msgBoxMsg, msgBoxTitle)
-    msgBoxTitle = 'GenerateDataset warning';
-    msgBoxMsg = 'This dataset requires omega adjustments...';
-    MyMsgBox(msgBoxMsg, msgBoxTitle)
+%     assert(strcmp(interpMethod, 'AddPoints'))
+%     G = gsp_bunny();
+%     data = G.coords;
+%     trainTestRatio = nTrain/nTest;
+%     nTest = length(data);
+%     nTrain = min(round(trainTestRatio*nTest),nTest);
+%     sDataset.sData.x = data(1:nTrain,:);
+%     sDataset.sData.xt = data;
+%     sDataset.sData.y = [];
+%     sDataset.sData.yt = [];
+%     omega = 0.15;
+%     omegaTilde = 0.15;
+%     dim = 3;
+%     sDatasetParams = [];
+%     msgBoxTitle = 'GenerateDataset warning';
+%     msgBoxMsg = ['This dataset has a fixed number of points.', newline, ...
+%         'updated to N = ' num2str(nTest), ', n = ', num2str(nTrain)];
+%     MyMsgBox(msgBoxMsg, msgBoxTitle)
+%     msgBoxTitle = 'GenerateDataset warning';
+%     msgBoxMsg = 'This dataset requires omega adjustments...';
+%     MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'Sensor')
-    assert(strcmp(interpMethod, 'AddPoints'))
-    G = gsp_sensor(nTest);
-    data = G.coords;
-    sDataset.sData.x = data(1:nTrain,:);
-    sDataset.sData.xt = data;
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-    omega = 0.15;
-    omegaTilde = 0.15;
-    dim = 2;
+%     assert(strcmp(interpMethod, 'AddPoints'))
+%     G = gsp_sensor(nTest);
+%     data = G.coords;
+%     sDataset.sData.x = data(1:nTrain,:);
+%     sDataset.sData.xt = data;
+%     sDataset.sData.y = [];
+%     sDataset.sData.yt = [];
+%     omega = 0.15;
+%     omegaTilde = 0.15;
+%     dim = 2;
 elseif strcmp(actualDataDist, 'TwoMoons')
     if ~exist('sDatasetParams', 'var') || (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams, 'b_loadTwoMoonsMatFile'))
         sDatasetParams.b_loadTwoMoonsMatFile = false;
@@ -174,9 +165,6 @@ elseif strcmp(actualDataDist, 'TwoMoons')
         sDataset.sData.y = labelsRearranged(1:nTrain,:);
         sDataset.sData.yt = labelsRearranged;
     end
-    dim = 2;
-    omega = 0.3;
-    omegaTilde = 0.3;
 elseif strcmp(actualDataDist, 'TwoSpirals')
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
@@ -186,12 +174,6 @@ elseif strcmp(actualDataDist, 'TwoSpirals')
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
     end
-    dim = 2;
-    omega = 0.2;
-    omegaTilde = 0.2;
-%     msgBoxTitle = 'GenerateDataset warning';
-%     msgBoxMsg = 'This dataset requires omega adjustments...';
-%     MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'SwissRoll')
     if strcmp(interpMethod, 'NewPoints')
         sDataset.sData.x = GenerateSwissRoll(nTrain);
@@ -203,50 +185,45 @@ elseif strcmp(actualDataDist, 'SwissRoll')
     end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
-    dim = 3;
-    omega = sqrt(5)/sqrt(2); %0.15;
-    omegaTilde = sqrt(5)/sqrt(2); %0.15;
-%     omega = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
-%     omegaTilde = 2*sqrt(sum(std(sDataset.sData.xt))/dim);
     
 elseif strcmp(actualDataDist, 'Gaussian')
-    if ~exist('sDatasetParams', 'var') || ...
-            (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'mu') && ~isfield(sDatasetParams,'sigma'))
-        sDatasetParams.mu = 0*ones(1,dim);
-        sDatasetParams.sigma = 1*eye(dim);
-    end
-    if strcmp(interpMethod, 'NewPoints')
-        sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain, sDatasetParams.mu, sDatasetParams.sigma);
-        sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
-    elseif strcmp(interpMethod, 'AddPoints')
-        data = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
-        sDataset.sData.x = data(1:nTrain,:);
-        sDataset.sData.xt = data;
-    end
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-%     warning('omega = 0.3*sigma(1,1)');
-%     omega = 0.3*sDatasetParams.sigma(1,1);
-    omega = 0.3;
-    omegaTilde = 0.3;
+%     if ~exist('sDatasetParams', 'var') || ...
+%             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'mu') && ~isfield(sDatasetParams,'sigma'))
+%         sDatasetParams.mu = 0*ones(1,dim);
+%         sDatasetParams.sigma = 1*eye(dim);
+%     end
+%     if strcmp(interpMethod, 'NewPoints')
+%         sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain, sDatasetParams.mu, sDatasetParams.sigma);
+%         sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
+%     elseif strcmp(interpMethod, 'AddPoints')
+%         data = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
+%         sDataset.sData.x = data(1:nTrain,:);
+%         sDataset.sData.xt = data;
+%     end
+%     sDataset.sData.y = [];
+%     sDataset.sData.yt = [];
+% %     warning('omega = 0.3*sigma(1,1)');
+% %     omega = 0.3*sDatasetParams.sigma(1,1);
+%     omega = 0.3;
+%     omegaTilde = 0.3;
 elseif strcmp(actualDataDist, 'Uniform')
-    if ~exist('sDatasetParams', 'var') || ...
-            (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
-        sDatasetParams.xMin = -1*ones(dim,1);
-        sDatasetParams.xMax = 1*ones(dim,1);
-    end
-    if strcmp(interpMethod, 'NewPoints')
-        sDataset.sData.x = GenerateUniformData(dim, nTrain, sDatasetParams.xMin, sDatasetParams.xMax);
-        sDataset.sData.xt = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
-    elseif strcmp(interpMethod, 'AddPoints')
-        data = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
-        sDataset.sData.x = data(1:nTrain,:);
-        sDataset.sData.xt = data;
-    end
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-    omega = 0.15;
-    omegaTilde = 0.15;
+%     if ~exist('sDatasetParams', 'var') || ...
+%             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
+%         sDatasetParams.xMin = -1*ones(dim,1);
+%         sDatasetParams.xMax = 1*ones(dim,1);
+%     end
+%     if strcmp(interpMethod, 'NewPoints')
+%         sDataset.sData.x = GenerateUniformData(dim, nTrain, sDatasetParams.xMin, sDatasetParams.xMax);
+%         sDataset.sData.xt = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
+%     elseif strcmp(interpMethod, 'AddPoints')
+%         data = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
+%         sDataset.sData.x = data(1:nTrain,:);
+%         sDataset.sData.xt = data;
+%     end
+%     sDataset.sData.y = [];
+%     sDataset.sData.yt = [];
+%     omega = 0.15;
+%     omegaTilde = 0.15;
 elseif strcmp(actualDataDist, 'Grid')
     if ~exist('sDatasetParams', 'var') || ...
             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
@@ -278,26 +255,26 @@ elseif strcmp(actualDataDist, 'Grid')
     
     
     %% option #1
-    if dim > 1
-        dist = min(pdist(sDataset.sData.x));
-        omega = 2*sqrt(dist);
-    else % dim == 1
-        L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
-        omega = 2*sqrt(L/nTrain);
-    end
-    omegaTilde = omega;
+%     if dim > 1
+%         dist = min(pdist(sDataset.sData.x));
+%         omega = 2*sqrt(dist);
+%     else % dim == 1
+%         L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
+%         omega = 2*sqrt(L/nTrain);
+%     end
+%     omegaTilde = omega;
     %% option #2
-%     omega = 0.5*std(sDataset.sData.xt)^2;
-%     omegaTilde = 0.5*std(sDataset.sData.xt)^2;
-%     omega = 0.15;
-%     omegaTilde = 0.15;
+% %     omega = 0.5*std(sDataset.sData.xt)^2;
+% %     omegaTilde = 0.5*std(sDataset.sData.xt)^2;
+% %     omega = 0.15;
+% %     omegaTilde = 0.15;
     
     %% option #3
-% %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTrain-1)^(1/dim)));
-% %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTest-1)^(1/dim)));
-%     dist = min(pdist(sDataset.sData.x));
-%     omega = sqrt(dist);
-%     omegaTilde = sqrt(dist);
+% % %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTrain-1)^(1/dim)));
+% % %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTest-1)^(1/dim)));
+% %     dist = min(pdist(sDataset.sData.x));
+% %     omega = sqrt(dist);
+% %     omegaTilde = sqrt(dist);
     %%
     if ~isempty(msgBoxMsg)
         msgBoxTitle = 'GenerateDataset warning';
@@ -308,10 +285,6 @@ else
     error('unknown pdf')
 end
 
-sDataset.recommendedOmega = omega;
-sDataset.recommendedOmegaTilde = omegaTilde;
-sDataset.xMax = max(sDataset.sData.x);
-sDataset.xMin = min(sDataset.sData.x);
 sDataset.dataDist = actualDataDist;
 sDataset.dim = dim;
 sDataset.actualNumComponents = nComponents;

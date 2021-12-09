@@ -12,6 +12,9 @@ sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Lapla
 %% DatasetParams
 sDatasetParams.vPossibleLabels = [0, 1];
 sPreset.sDatasetParams     = sDatasetParams;
+%% Gaussian kernel width
+sPreset.omega              = 0.1; % for nystrom kernel
+sPreset.omegaTilde         = 0.1; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;

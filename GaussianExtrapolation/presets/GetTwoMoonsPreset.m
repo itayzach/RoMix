@@ -11,6 +11,9 @@ sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKe
 sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sPreset.sDatasetParams     = [];
+%% Gaussian kernel width
+sPreset.omega              = 0.3; % for nystrom kernel
+sPreset.omegaTilde         = 0.3; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
@@ -18,7 +21,7 @@ sPreset.gmmNumComponents   = 8;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
 sPreset.MTilde             = 20;
-sPreset.gamma1             = 0;
+sPreset.gamma1             = 0.1;
 sPreset.gamma2             = 0.1;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;

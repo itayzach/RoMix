@@ -32,14 +32,14 @@ gamma1Rep          = sPreset.gamma1Rep;
 gmmRegVal          = sPreset.gmmRegVal;
 gmmMaxIter         = sPreset.gmmMaxIter;
 gmmNumComponents   = sPreset.gmmNumComponents;
+sDatasetParams     = sPreset.sDatasetParams;
+distType           = sPreset.distType;
 b_debugUseAnalytic = sPreset.b_debugUseAnalytic;
 b_forceCtoIdentity = sPreset.b_forceCtoIdentity;
 b_normalizePhi     = sPreset.b_normalizePhi;
 b_takeEigsFromWRef = sPreset.b_takeEigsFromWRef;
 b_flipSign         = sPreset.b_flipSign;
 b_pairwiseFlipSign = sPreset.b_pairwiseFlipSign;
-sDatasetParams     = sPreset.sDatasetParams;
-distType           = sPreset.distType;
 b_interpEigenvecs  = sPreset.b_interpEigenvecs;
 b_runGraphSignals  = sPreset.b_runGraphSignals;
 %% Verify
@@ -151,7 +151,7 @@ for r = 1:R
     vPrTilde = sDistParams.vPr;
     sKernelParams = GetKernelParams(sDistParams, omegaTilde);
     [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-        = CalcAnalyticEigenvalues(MTilde, sKernelParams, dim, gmmNumComponents);
+        = CalcAnalyticEigenvalues(MTilde, sKernelParams);
     [ PhiTilde, lambdaAnalyticTilde ] = ...
         CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, b_normalizePhi);
     invLambda = diag(1./lambdaAnalyticTilde);

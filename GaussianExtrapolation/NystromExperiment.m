@@ -46,7 +46,7 @@ for dataDim = vDataDim
             sDistParams = EstimateDistributionParameters(sDataset.sData.x, gmmNumComponents, gmmRegVal, gmmMaxIter);
             sKernelParams = GetKernelParams(sDistParams, omega);
             [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, estNumComponents);
+                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams);
             [ tPhiAnalytic(t,:,:), vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x, b_normalize);
             [ tPhiNumeric(t,:,:), vLambdaNumeric ]   = CalcNumericEigenvectors(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x);
             tPhiNumeric(t,:,:) = FlipSign(squeeze(tPhiAnalytic(t,:,:)), squeeze(tPhiNumeric(t,:,:)));

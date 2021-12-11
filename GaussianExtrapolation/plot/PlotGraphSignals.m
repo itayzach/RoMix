@@ -2,7 +2,9 @@ function localCmap = PlotGraphSignals(sSimParams, suptitle, figName, cData, cSig
 cData = reshape(cData,[],1);
 cSignals = reshape(cSignals,[],1);
 cSigStr = reshape(cSigStr,[],1);
-cNumCircles = reshape(cNumCircles,[],1);
+if exist('cNumCircles', 'var')
+    cNumCircles = reshape(cNumCircles,[],1);
+end
 dim = size(cData{1}, 2);
 nSignals = numel(cData);
 assert(dim <= 3, 'Not supported')

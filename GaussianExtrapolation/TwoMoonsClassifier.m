@@ -36,7 +36,7 @@ PlotDataset(sSimParams, sDataset.sData.x, sDataset.sData.y, pltTitle, sDistParam
 
 sKernelParams = GetKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.dim, gmmNumComponents);
+                = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams);
 %% LapRLS
 gamma_A_laprls = 0.03125;
 gamma_I_laprls = 1;

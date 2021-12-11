@@ -1,4 +1,7 @@
-function [vLambdaAnalytic, vComponentIndex, vEigIndex] = CalcAnalyticEigenvalues(nEigs, sKernelParams, dim, nComponents)
+function [vLambdaAnalytic, vComponentIndex, vEigIndex] = CalcAnalyticEigenvalues(nEigs, sKernelParams)
+
+nComponents = sKernelParams.sDistParams.estNumComponents;
+dim = sKernelParams.sDistParams.dim;
 
 mLambdaBeforeSort = zeros(nComponents, nEigs);
 for c = 1:nComponents

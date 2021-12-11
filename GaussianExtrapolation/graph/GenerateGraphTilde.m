@@ -8,7 +8,7 @@ gmmMaxIter = 1000;
 sDistParamsTilde = EstimateDistributionParameters(sDatasetTilde.sData.x, nTildeComponents, GMMRegVal, gmmMaxIter);
 sKernelParamsTilde = GetKernelParams(sDistParamsTilde, omega);
 [sKernelParamsTilde.vLambdaAnalytic, sKernelParamsTilde.vComponentIndex, sKernelParamsTilde.vEigIndex] ...
-    = CalcAnalyticEigenvalues(nEigs, sKernelParamsTilde, sDatasetTilde.dim, nTildeComponents);
+    = CalcAnalyticEigenvalues(nEigs, sKernelParamsTilde);
 % Adjacency (gaussian kernel)
 [W_tilde, dist_tilde] = CalcAdjacency(sKernelParamsTilde, v_tilde);
 W_tilde = sparse(W_tilde);

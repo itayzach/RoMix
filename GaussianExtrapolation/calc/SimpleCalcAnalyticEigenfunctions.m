@@ -20,7 +20,7 @@ sKernelParams.sDistParams = sDistParams;
 
 %% Calculate eigenvalues (and matching indices)
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-    = CalcAnalyticEigenvalues(nEigs, sKernelParams, dim, nComponents);
+    = CalcAnalyticEigenvalues(nEigs, sKernelParams);
 %% Calculate eigenfunctions
 [Phi, lambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, X, true);
 end

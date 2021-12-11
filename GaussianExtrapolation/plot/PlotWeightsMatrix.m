@@ -16,8 +16,13 @@ colorbar();
 title('Weight matrix', 'FontSize', 14, 'interpreter', 'latex')
 set(gca,'FontSize', 14);
 
+if size(D,1) == size(D,2)
+    d = diag(D); % D is a matrix
+else
+    d = D; % D is a vector
+end
 figure('Name', 'Node degrees');
-plot(diag(D), '.', 'MarkerSize', 10);
+plot(d, '.', 'MarkerSize', 10);
 title('Node degrees', 'FontSize', 14, 'interpreter', 'latex')
 set(gca,'FontSize', 14);
 
@@ -38,7 +43,12 @@ if dim <= 3
     end
 
     figName = 'W';
-    PlotEigenfuncvecScatter(sPlotParams, sPlotParams.sDataset.actualDataDist, xTrain, [], 0, 3, W(:,1:4), [], [], [], ...
+    if isempty(sPlotParams)
+        actualDataDist = [];
+    else
+        actualDataDist = sPlotParams.sDataset.actualDataDist;
+    end
+    PlotEigenfuncvecScatter(sPlotParams, actualDataDist, xTrain, [], 0, 3, W(:,1:4), [], [], [], ...
         figTitle, figName, 'w');
 end
 end

@@ -1,4 +1,4 @@
-function [mPhi2Flipped, vMinInd] = FlipSign(mPhi1, mPhi2, b_pairwiseFlip)
+function [mPhi2Flipped, vMinInd] = FlipSign(mPhi1Base, mPhi2Candidate, b_pairwiseFlip)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % b_pairwiseFlipSign = true  --> Navie pairwise flip:
 %   For each pair m:
@@ -15,25 +15,25 @@ function [mPhi2Flipped, vMinInd] = FlipSign(mPhi1, mPhi2, b_pairwiseFlip)
 if ~exist('b_pairwiseFlip', 'var')
     b_pairwiseFlip = true;
 end
-[N1, M1] = size(mPhi1);
-[N2, M2] = size(mPhi2);
+[N1, M1] = size(mPhi1Base);
+[N2, M2] = size(mPhi2Candidate);
 M = min(M1,M2);
 assert(N1 == N2, 'lengths must be the same');
 vMinInd = zeros(M,1);
-mPhi2Flipped = zeros(size(mPhi2));
+mPhi2Flipped = zeros(size(mPhi2Candidate));
 
 if b_pairwiseFlip
     b_vFlippedIndicator = zeros(M,1);
     for m = 1:M
-        [mPhi2Flipped(:,m), b_vFlippedIndicator(m)] = FlipTwoByNormDiff(mPhi1(:,m), mPhi2(:,m));
+        [mPhi2Flipped(:,m), b_vFlippedIndicator(m)] = FlipTwoByNormDiff(mPhi1Base(:,m), mPhi2Candidate(:,m));
     end   
 else
     for m = 1:M
-        phi1_m = mPhi1(:,m);
-        mPhi2AlignedToPhi1 = nan(size(mPhi2));
+        phi1_m = mPhi1Base(:,m);
+        mPhi2AlignedToPhi1 = nan(size(mPhi2Candidate));
         b_vFlippedIndicator = zeros(M,1);
         for k=1:M
-            [mPhi2AlignedToPhi1(:,k), b_vFlippedIndicator(k)] = FlipTwoByNormDiff(phi1_m, mPhi2(:,k));
+            [mPhi2AlignedToPhi1(:,k), b_vFlippedIndicator(k)] = FlipTwoByNormDiff(phi1_m, mPhi2Candidate(:,k));
         end
         vNorms = zeros(M,1);
         for k=1:M

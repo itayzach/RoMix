@@ -1,14 +1,14 @@
 function [] = PlotRMSE(sPlotParams, mRmse, cDispName)
+windowStyle = get(0,'DefaultFigureWindowStyle');
+set(0,'DefaultFigureWindowStyle','normal')
 
 [M, nMethods] = size(mRmse);
-
+cLineStyle = {'-', '--', '-.'};
 fig = figure('Name', 'RMSE');
 for methodId = 1:nMethods
     vRmse = mRmse(:,methodId);
-plot((0:M-1)', vRmse, '-o', 'LineWidth', 2, 'DisplayName', cDispName{methodId});
-hold on;
-% plot((0:M-1)', vRmseNys.', '-x', 'LineWidth', 2, 'DisplayName', ...
-%     )
+    plot((0:M-1)', vRmse, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
+    hold on;
 end
 rmseylim = max(mRmse(:));
 ylim([0 rmseylim]);
@@ -37,5 +37,5 @@ if isfield(sPlotParams, 'outputFolder')
         num2str(M)), 'epsc');
 end
 
-
+set(0,'DefaultFigureWindowStyle',windowStyle)
 end

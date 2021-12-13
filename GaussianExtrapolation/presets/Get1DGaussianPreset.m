@@ -1,33 +1,34 @@
-function sPreset = Get1DGridPreset()
+function sPreset = Get1DGaussianPreset()
 %% Dataset parameters
 sPreset.dim                = 1;
 sPreset.n                  = 1500;
 sPreset.N                  = 3000;
 sPreset.k                  = 3;
-sPreset.nGenDataCompnts    = 0;
+sPreset.nGenDataCompnts    = 1;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
-sPreset.verticesPDF        = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
+sPreset.verticesPDF        = 'Gaussian'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sDatasetParams.xMin        = 0*ones(sPreset.dim,1);
-sDatasetParams.xMax        = 4*ones(sPreset.dim,1);
+for c = 1:sPreset.nGenDataCompnts
+    sDatasetParams.mu{c}    = 3*(c-1)*ones(1,sPreset.dim);
+    sDatasetParams.sigma{c} = 1*eye(sPreset.dim);
+end
 sPreset.sDatasetParams     = sDatasetParams;
 %% Gaussian kernel width
-L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
-sPreset.omega              = 2*sqrt(L/sPreset.n); % for nystrom kernel
-sPreset.omegaTilde         = 2*sqrt(L/sPreset.n); % for our method
+sPreset.omega              = 0.3; % for nystrom kernel
+sPreset.omegaTilde         = 0.3; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 1;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
-sPreset.MTilde             = 35;
-sPreset.gamma1             = 1e-5;
+sPreset.MTilde             = 30;
+sPreset.gamma1             = 0.001;
 sPreset.gamma2             = 0;
 %% Representer theorem
-sPreset.gamma1Rep          = 1e-5;
+sPreset.gamma1Rep          = 0.001;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;

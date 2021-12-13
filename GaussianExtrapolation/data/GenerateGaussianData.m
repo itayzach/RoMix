@@ -27,14 +27,14 @@ elseif dim == 2
         error('not supported')
     end
 elseif dim == 1
-    x = zeros(n,dim);
-    nPtsPerComp = n/nComponents;
+    x = zeros(n);
+    nPtsPerComp = round(n/nComponents);
     for c = 1:nComponents
         vPtsInd = (1:nPtsPerComp) + (c-1)*nPtsPerComp;
-        x(vPtsInd,:) = sigma{c}*randn(nPtsPerComp, 1) + mu{c};
+        x(vPtsInd) = sigma{c}*randn(nPtsPerComp, 1) + mu{c};
     end
     vRandInd = randperm(n);
-    x = x(vRandInd,:);
+    x = x(vRandInd);
 else
     error('generate random data for more than 3D')
 end

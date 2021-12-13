@@ -1,19 +1,37 @@
-function PlotCoeffsMatrix(C, Cint)
+function PlotCoeffsMatrix(C1, C1Title, C2, C2Title)
+
+if exist('C2', 'var')
+    cMin = min([C1(:); C2(:)]);
+    cMax = max([C1(:); C2(:)]);
+else
+    cMin = min(C1(:));
+    cMax = max(C1(:));
+end
+
 figure('Name', 'C');
 tiledlayout('flow')
 nexttile;
-
-imagesc(C);
+imagesc(C1);
 colormap('jet');
 colorbar();
-title('${\bf C} = \tilde{{\bf \Phi}}_n^\dagger {\bf V}$', 'interpreter', 'latex', 'FontSize', 16);
+caxis([cMin, cMax]);
+title(C1Title, 'interpreter', 'latex', 'FontSize', 16);
 set(gca,'FontSize', 14);
-if exist('Cint', 'var')
+
+if exist('C2', 'var') && ~isempty(C2)
     nexttile;
-    imagesc(Cint);
+    imagesc(C2);
     colormap('jet');
     colorbar();
-    title('${\bf C^{{\bf int}}} = \tilde{{\bf \Phi}}_N^\dagger {\bf V^{{\bf int}}} $', 'interpreter', 'latex', 'FontSize', 16);
+    caxis([cMin, cMax]);
+    title(C2Title, 'interpreter', 'latex', 'FontSize', 16);
+    set(gca,'FontSize', 14);
+    
+    nexttile;
+    imagesc(abs(C1-C2));
+    colormap('jet');
+    colorbar();
+    title('$|C_1 - C_2|$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'FontSize', 14);
 end
 end

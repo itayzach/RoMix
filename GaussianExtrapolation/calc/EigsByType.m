@@ -3,6 +3,7 @@ function [V, adjLambda, matLambda] = EigsByType(W, D, M, matrixForEigs)
 if strcmp(matrixForEigs, 'Adjacency')
     [V, Lambda] = eigs(W,M);
     matLambda = diag(Lambda);
+    adjLambda = matLambda;
 elseif strcmp(matrixForEigs, 'RandomWalk')
 %     d = diag(D);
 %     S = diag(d.^-0.5)*W*diag(d.^-0.5);
@@ -27,6 +28,7 @@ elseif strcmp(matrixForEigs, 'RandomWalk')
     [Psi, Lambda] = eigs(Pa, M); 
     matLambda = diag(Lambda);
     V = Psi;
+    adjLambda = eigs(W,M);
 elseif strcmp(matrixForEigs, 'NormLap')
     d = diag(D);
     Wn = diag(d.^-0.5)*W*diag(d.^-0.5);
@@ -36,17 +38,17 @@ elseif strcmp(matrixForEigs, 'NormLap')
     V = V(:,1:M);
     matLambda = diag(Lambda);
     matLambda = matLambda(1:M);
+    adjLambda = eigs(W,M);
 elseif strcmp(matrixForEigs, 'Laplacian')
     L = D - W;
     [V, Lambda] = eig(L);
     V = V(:,1:M);
     matLambda = diag(Lambda);
     matLambda = matLambda(1:M);
+    adjLambda = eigs(W,M);
 else
     error('invalid matrixType = %s', matrixForEigs);
 end
-
-adjLambda = eigs(W,M);
 
 assert(~any(isnan(adjLambda)), 'You have at least one NaN');
 

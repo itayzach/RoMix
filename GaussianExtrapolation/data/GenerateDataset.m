@@ -187,25 +187,23 @@ elseif strcmp(actualDataDist, 'SwissRoll')
     sDataset.sData.yt = [];
     
 elseif strcmp(actualDataDist, 'Gaussian')
-%     if ~exist('sDatasetParams', 'var') || ...
-%             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'mu') && ~isfield(sDatasetParams,'sigma'))
-%         sDatasetParams.mu = 0*ones(1,dim);
-%         sDatasetParams.sigma = 1*eye(dim);
-%     end
-%     if strcmp(interpMethod, 'NewPoints')
-%         sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain, sDatasetParams.mu, sDatasetParams.sigma);
-%         sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
-%     elseif strcmp(interpMethod, 'AddPoints')
-%         data = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
-%         sDataset.sData.x = data(1:nTrain,:);
-%         sDataset.sData.xt = data;
-%     end
-%     sDataset.sData.y = [];
-%     sDataset.sData.yt = [];
-% %     warning('omega = 0.3*sigma(1,1)');
-% %     omega = 0.3*sDatasetParams.sigma(1,1);
-%     omega = 0.3;
-%     omegaTilde = 0.3;
+    if ~exist('sDatasetParams', 'var') || ...
+            (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'mu') && ~isfield(sDatasetParams,'sigma'))
+        warning('mu sigma were not specified, setting defaults');
+        sDatasetParams.mu = 0*ones(1,dim);
+        sDatasetParams.sigma = 1*eye(dim);
+    end
+    if strcmp(interpMethod, 'NewPoints')
+        sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain, sDatasetParams.mu, sDatasetParams.sigma);
+        sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
+    elseif strcmp(interpMethod, 'AddPoints')
+        data = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
+        sDataset.sData.x = data(1:nTrain,:);
+        sDataset.sData.xt = data;
+    end
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    
 elseif strcmp(actualDataDist, 'Uniform')
 %     if ~exist('sDatasetParams', 'var') || ...
 %             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
@@ -227,6 +225,7 @@ elseif strcmp(actualDataDist, 'Uniform')
 elseif strcmp(actualDataDist, 'Grid')
     if ~exist('sDatasetParams', 'var') || ...
             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
+        warning('xMin xMax were not specified, setting defaults.')
         sDatasetParams.xMin = -1*ones(dim,1);
         sDatasetParams.xMax = 1*ones(dim,1);
     end

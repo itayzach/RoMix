@@ -34,6 +34,7 @@ gmmMaxIter         = sPreset.gmmMaxIter;
 gmmNumComponents   = sPreset.gmmNumComponents;
 sDatasetParams     = sPreset.sDatasetParams;
 distType           = sPreset.distType;
+R                  = sPreset.R;
 b_debugUseAnalytic = sPreset.b_debugUseAnalytic;
 b_forceCtoIdentity = sPreset.b_forceCtoIdentity;
 b_normalizePhi     = sPreset.b_normalizePhi;
@@ -70,7 +71,6 @@ else
     plotInd = [0,min(8,M-1)];
 end
 %% Run
-R = 1;
 mVIntToCompare = zeros(R, N, M);
 mVNysToCompare = zeros(R, N, M);
 mVRepToCompare = zeros(R, N, M);

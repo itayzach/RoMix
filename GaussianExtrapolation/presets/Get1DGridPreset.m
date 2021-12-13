@@ -24,10 +24,13 @@ sPreset.gmmNumComponents   = 1;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
 sPreset.MTilde             = 35;
+%% Regularizations
 sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;
 %% Representer theorem
 sPreset.gamma1Rep          = 1e-5;
+%% Number of runs (=realizations)
+sPreset.R                  = 1;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;

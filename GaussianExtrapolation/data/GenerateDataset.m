@@ -205,23 +205,22 @@ elseif strcmp(actualDataDist, 'Gaussian')
     sDataset.sData.yt = [];
     
 elseif strcmp(actualDataDist, 'Uniform')
-%     if ~exist('sDatasetParams', 'var') || ...
-%             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
-%         sDatasetParams.xMin = -1*ones(dim,1);
-%         sDatasetParams.xMax = 1*ones(dim,1);
-%     end
-%     if strcmp(interpMethod, 'NewPoints')
-%         sDataset.sData.x = GenerateUniformData(dim, nTrain, sDatasetParams.xMin, sDatasetParams.xMax);
-%         sDataset.sData.xt = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
-%     elseif strcmp(interpMethod, 'AddPoints')
-%         data = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
-%         sDataset.sData.x = data(1:nTrain,:);
-%         sDataset.sData.xt = data;
-%     end
-%     sDataset.sData.y = [];
-%     sDataset.sData.yt = [];
-%     omega = 0.15;
-%     omegaTilde = 0.15;
+    if ~exist('sDatasetParams', 'var') || ...
+            (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))
+        sDatasetParams.xMin = -1*ones(dim,1);
+        sDatasetParams.xMax = 1*ones(dim,1);
+    end
+    if strcmp(interpMethod, 'NewPoints')
+        sDataset.sData.x = GenerateUniformData(dim, nTrain, sDatasetParams.xMin, sDatasetParams.xMax);
+        sDataset.sData.xt = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
+    elseif strcmp(interpMethod, 'AddPoints')
+        data = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
+        sDataset.sData.x = data(1:nTrain,:);
+        sDataset.sData.xt = data;
+    end
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
+    
 elseif strcmp(actualDataDist, 'Grid')
     if ~exist('sDatasetParams', 'var') || ...
             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'xMin') && ~isfield(sDatasetParams,'xMax'))

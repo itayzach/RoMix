@@ -56,7 +56,8 @@ sKernelParams = GetKernelParams(sDistParams, omega);
     = CalcAnalyticEigenvalues(nEigs, sKernelParams);
 v = sDataset.sData.x;
 %% Adjacency (gaussian kernel)
-[W, dist] = CalcAdjacency(sKernelParams, v);
+dist = pdist2(v, v);
+W = exp(-dist.^2/(2*sKernelParams.omega^2));
 W = sparse(W);
 %% Graph
 G = gsp_graph(W, v);

@@ -3,8 +3,8 @@ function [mPhiNumeric, vLambdaNumeric] = CalcNumericEigenvectors(nEigs, sKernelP
 nTotal = length(mData);
 nComponents = sKernelParams.sDistParams.estNumComponents;
 %% CalcAdjacency
-A = CalcAdjacency(sKernelParams, mData);
-
+dist = pdist2(mData, mData);
+A = exp(-dist.^2/(2*sKernelParams.omega^2));
 %% EVD
 [mPhiNumeric, mLambdaNumeric] = eigs(A, nEigs);
 [vLambdaNumeric, idx] = sort(diag(mLambdaNumeric), 'descend');

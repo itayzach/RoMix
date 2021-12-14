@@ -10,7 +10,8 @@ sKernelParamsTilde = GetKernelParams(sDistParamsTilde, omega);
 [sKernelParamsTilde.vLambdaAnalytic, sKernelParamsTilde.vComponentIndex, sKernelParamsTilde.vEigIndex] ...
     = CalcAnalyticEigenvalues(nEigs, sKernelParamsTilde);
 % Adjacency (gaussian kernel)
-[W_tilde, dist_tilde] = CalcAdjacency(sKernelParamsTilde, v_tilde);
+dist_tilde = pdist2(v_tilde, v_tilde);
+W_tilde = exp(-dist_tilde.^2/(2*sKernelParamsTilde.omega^2));
 W_tilde = sparse(W_tilde);
 
 

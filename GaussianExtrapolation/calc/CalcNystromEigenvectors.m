@@ -7,8 +7,11 @@ mLeftUpperBlock = mData(1:round(nysRatio*nTotal),:);
 mRightUpperBlock = mData(round(nysRatio*nTotal)+1:end,:);
 
 %% CalcAdjacency
-A = CalcAdjacency(sKernelParams, mLeftUpperBlock);
-B = CalcAdjacency(sKernelParams, mLeftUpperBlock, mRightUpperBlock);
+distLeftUpper = pdist2(mLeftUpperBlock, mLeftUpperBlock);
+A = exp(-distLeftUpper.^2/(2*sKernelParams.omega^2));
+
+distLeftUpperRightUpper = pdist2(mLeftUpperBlock, mRightUpperBlock);
+B = exp(-distLeftUpperRightUpper.^2/(2*sKernelParams.omega^2));
 
 %% EVD with no orthogonalization and Nystrom
 [mPhi, mLambdaNys] = eigs(A, nEigs);

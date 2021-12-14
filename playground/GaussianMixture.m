@@ -53,7 +53,9 @@ for i = 1:nEigs
 end
 
 %% Numeric eigenvectors
-A = CalcAdjacency(sKernelParams, xPoints);
+dist = pdist2(xPoints, xPoints);
+A = exp(-dist.^2/(2*sKernelParams.omega^2));
+
 [mPhiNumeric, mLambdaNumeric] = eigs(A, nEigs);
 [vLambdaNumeric, idx] = sort(diag(mLambdaNumeric), 'descend');
 vLambdaNumeric = (nComponents/nPoints)*vLambdaNumeric;

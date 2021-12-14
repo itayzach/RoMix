@@ -9,7 +9,9 @@ b_normalize = false;
 %% Train
 [ mPhiAnalyticTrain, vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x, b_normalize);
 
-W = CalcAdjacency(sKernelParams, sDataset.sData.x);
+dist = pdist2(sDataset.sData.x, sDataset.sData.x);
+W = exp(-dist.^2/(2*sKernelParams.omega^2));
+    
 D = diag(sum(W,1));
 L = D - W;
 

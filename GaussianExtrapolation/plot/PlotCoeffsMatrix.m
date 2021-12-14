@@ -1,4 +1,4 @@
-function PlotCoeffsMatrix(C1, C1Title, C2, C2Title)
+function PlotCoeffsMatrix(C1, C1Title, C2, C2Title, C3, C3Title)
 
 if exist('C2', 'var')
     cMin = min([C1(:); C2(:)]);
@@ -33,5 +33,14 @@ if exist('C2', 'var') && ~isempty(C2)
     colorbar();
     title('$|C_1 - C_2|$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'FontSize', 14);
+
+    if exist('C3', 'var')
+        nexttile;
+        imagesc(C3);
+        colormap('jet');
+        colorbar();
+        title(C3Title, 'interpreter', 'latex', 'FontSize', 16);
+        set(gca,'FontSize', 14);
+    end
 end
 end

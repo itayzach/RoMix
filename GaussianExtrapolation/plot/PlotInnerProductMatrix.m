@@ -1,4 +1,4 @@
-function fig = PlotInnerProductMatrix(mPhi, vPr, sSimParams, pltTitle, figName)
+function fig = PlotInnerProductMatrix(sPlotParams, mPhi, vPr, pltTitle, figName)
 
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
@@ -24,13 +24,13 @@ set(gca,'FontSize', 14);
 set(gcf,'Position', [x0 y0 width height])
 set(0,'DefaultFigureWindowStyle',windowStyle)
 %% Save
-if isfield(sSimParams, 'outputFolder')
-    if ~exist(sSimParams.outputFolder, 'dir')
-        mkdir(sSimParams.outputFolder)
+if isfield(sPlotParams, 'outputFolder') && ~isempty(sPlotParams)
+    if ~exist(sPlotParams.outputFolder, 'dir')
+        mkdir(sPlotParams.outputFolder)
     end
-    simPrefix = strcat(sSimParams.sDataset.actualDataDist, num2str(sSimParams.sDataset.dim), ...
-        'd', '_', sSimParams.matrixForEigs);
+    simPrefix = strcat(sPlotParams.sDataset.actualDataDist, num2str(sPlotParams.sDataset.dim), ...
+        'd', '_', sPlotParams.matrixForEigs);
 
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_ip_matrix_', figName), 'epsc');
+    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_ip_matrix_', figName), 'epsc');
 end
 end

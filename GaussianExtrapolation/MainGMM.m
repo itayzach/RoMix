@@ -89,13 +89,11 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Original graph
     % ----------------------------------------------------------------------------------------------
-    [W, dist, D, DsqrtInv] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue);
-    Ln = eye(n) - DsqrtInv*W*DsqrtInv;
-    [WRef, distRef, DRef, DsqrtInvRef] = SimpleCalcAdjacency(xInt, adjacencyType, distType, omega, k, nnValue);
-    LnRef = eye(N) - DsqrtInvRef*WRef*DsqrtInvRef;
+    [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue);    
+    [WRef, distRef, DRef, LnRef] = SimpleCalcAdjacency(xInt, adjacencyType, distType, omega, k, nnValue);
 
     if r == 1 && sPlotParams.b_plotWeights
-        PlotWeightsMatrix(sPlotParams, W, dist, D, Ln, xTrain, adjacencyType, omega, k);
+        PlotWeightsMatrix([], W, dist, D, Ln, xTrain, adjacencyType, omega, k);
     end
     % ----------------------------------------------------------------------------------------------
     % Perform numeric eigs
@@ -139,8 +137,7 @@ for r = 1:R
         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
             V, matLambda, '\lambda^{v}', [], [figTitle, figTitle2, figTitle3], figName, 'v');
         figTitle = 'Numeric eigenvalues of ${\bf V}$';
-        PlotSpectrum(sPlotParams, sDataset, [], matLambda, [], [], ...
-                '\tilde{\lambda}^{v}_m', [], [], figTitle);
+        PlotSpectrum([], [], matLambda, [], [], '\tilde{\lambda}^{v}_m', [], [], figTitle);
     end
     
     % ----------------------------------------------------------------------------------------------
@@ -171,11 +168,10 @@ for r = 1:R
     if r == 1 && sPlotParams.b_plotTildeFiguresForDebug && dim <= 3
         figTitle = 'Eigenfunctions of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
         figName = 'PhiTilde';
-        PlotEigenfuncvecScatter(sPlotParams, 'Gaussian', xTildeTrain, [], 0, 4, ...
+        PlotEigenfuncvecScatter([], 'Gaussian', xTildeTrain, [], 0, 4, ...
             PhiTilde, [], [], [], figTitle, figName, '\tilde{\phi}' );
         figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-        PlotSpectrum(sPlotParams, sDataset, [], lambdaAnalyticTilde, [], [], ...
-            '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
+        PlotSpectrum([], [], lambdaAnalyticTilde, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
     end
     
     % ----------------------------------------------------------------------------------------------
@@ -220,6 +216,12 @@ for r = 1:R
         % ----------------------------------------------------------------------------------------------
         alpha = (W - gamma1Rep*eye(n)) \ V;
         alpha = alpha/sqrt(interpRatio);
+        
+        CRep = diag(lambdaAnalyticTilde)*PhiTilde.'*alpha;
+        if r == 1 && sPlotParams.b_plotC
+            PlotCoeffsMatrix(C, '${\bf C}$', CRep, ...
+                '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', alpha, '$\alpha$');
+        end
         % ----------------------------------------------------------------------------------------------
         % Interpolate with Representer theorem
         % ----------------------------------------------------------------------------------------------
@@ -251,7 +253,7 @@ for r = 1:R
 
         if r == 1 && sPlotParams.b_plotC
             Cint = EigsRLS(PhiTildeInt, gamma1, gamma2, invLambda, LnRef, VRefToCompare, b_maskDataTermCMatrix);
-            PlotCoeffsMatrix(C, Cint);
+            PlotCoeffsMatrix(C, '${\bf C}$', Cint, '${\bf C^{\bf int}}$');
         end
 
         if r == 1 && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
@@ -271,7 +273,7 @@ for r = 1:R
                     ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
                 PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, cmap, plotInd(1), plotInd(2), ...
                     VRepToCompare, [], [], [], ...
-                    ['Representer theorem (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf rep}}');
+                    ['Representer theorem (N = ', num2str(N), ')'], 'VRep', 'v^{{\bf rep}}');
                 PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, cmap, plotInd(1), plotInd(2), ...
                     VNysToCompare, [], [], [], ...
                     ['Nystrom (N = ', num2str(N), ')'], 'VNys', 'v^{{\bf nys}}');
@@ -287,19 +289,19 @@ for r = 1:R
         if r == 1 && sPlotParams.b_plotInnerProductMatrices
             pltTitle = 'VRef - ${\bf V}_{{\bf ref}}^T {\bf V}_{{\bf ref}}$';
             figName = 'VRef';
-            PlotInnerProductMatrix(VRef, [], sPlotParams, pltTitle, figName);
+            PlotInnerProductMatrix([], VRef, [], pltTitle, figName);
             pltTitle = 'VInt - ${\bf V}_{{\bf int}}^T {\bf V}_{{\bf int}}$';
             figName = 'Vint';
-            PlotInnerProductMatrix(VInt, [], sPlotParams, pltTitle, figName);
+            PlotInnerProductMatrix([], VInt, [], pltTitle, figName);
             pltTitle = 'VNys - ${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$';
             figName = 'VNys';
-            PlotInnerProductMatrix(VNys, [], sPlotParams, pltTitle, figName);
+            PlotInnerProductMatrix([], VNys, [], pltTitle, figName);
             pltTitle = 'VRep - ${\bf V}_{{\bf rep}}^T {\bf V}_{{\bf rep}}$';
             figName = 'VRep';
-            PlotInnerProductMatrix(VRep, [], sPlotParams, pltTitle, figName);
+            PlotInnerProductMatrix([], VRep, [], pltTitle, figName);
     %         pltTitle = '$\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$';
     %         figName = 'PhiTilde';
-    %         PlotInnerProductMatrix(PhiTilde, vPrTilde, sPlotParams, pltTitle, figName);
+    %         PlotInnerProductMatrix([], PhiTilde, vPrTilde, pltTitle, figName);
 
         end
     end

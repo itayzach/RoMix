@@ -13,7 +13,7 @@ end
 ylim([50 100]);
 xlim([0 M-1]);
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
-ylabel('Accuracy [%]', 'Interpreter', 'latex', 'FontSize', 14)
+ylabel('Accuracy [$\%$]', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2)
 set(gca,'FontSize', 14);
 if M < 20

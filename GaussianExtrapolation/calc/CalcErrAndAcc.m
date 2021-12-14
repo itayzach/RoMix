@@ -1,7 +1,7 @@
-function vRMSE = CalcRMSE(tPhiToCompare, tPhiNumeric, compareTo)
+function [vRMSE, vMSE, vAcc, mErrors] = CalcErrAndAcc(tPhiToCompare, tPhiNumeric, compareTo)
 
 [R, ~, nEigenFuncs] = size(tPhiToCompare);
-mSqNorm = zeros(R, nEigenFuncs);
+mErrNorms = zeros(R, nEigenFuncs);
 fprintf('*********************************************************\n');
 for r = 1:R
     fprintf([compareTo '. r = %d\n'], r);
@@ -17,10 +17,13 @@ for r = 1:R
 %         else
 %             error('unknown type')
 %         end
-        mSqNorm(r,m) = min(norm(tPhiToCompare(r,:,m) - tPhiNumeric(r,:,m)),...
-                           norm(tPhiToCompare(r,:,m) + tPhiNumeric(r,:,m)));
+        mErrNorms(r,m) = min(norm(tPhiToCompare(r,:,m) - tPhiNumeric(r,:,m)),...
+                           norm(tPhiToCompare(r,:,m) + tPhiNumeric(r,:,m)))/norm(tPhiToCompare(r,:,m));
     end
     fprintf('\n');
 end
 fprintf('*********************************************************\n');
-vRMSE = sqrt(sum(mSqNorm,1)/R).';
+vRMSE = sqrt(sum(mErrNorms.^2,1)/R).';
+vMSE = (sum(mErrNorms.^2,1)/R).';
+vAcc = (100*sum((1-mErrNorms),1)/R).';
+mErrors = mErrNorms;

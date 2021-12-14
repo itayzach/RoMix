@@ -1,20 +1,19 @@
-function [] = PlotRMSE(sPlotParams, mRmse, cDispName)
+function [] = PlotAccuracy(sPlotParams, mAcc, cDispName)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
-[M, nMethods] = size(mRmse);
+[M, nMethods] = size(mAcc);
 cLineStyle = {'-', '--', '-.'};
-fig = figure('Name', 'RMSE');
+fig = figure('Name', 'Accuracy');
 for methodId = 1:nMethods
-    vRmse = mRmse(:,methodId);
-    plot((0:M-1)', vRmse, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
+    vAcc = mAcc(:,methodId);
+    plot((0:M-1)', vAcc, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
     hold on;
 end
-rmseylim = max(mRmse(:));
-ylim([0 rmseylim]);
+ylim([50 100]);
 xlim([0 M-1]);
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
-ylabel('RMSE', 'Interpreter', 'latex', 'FontSize', 14)
+ylabel('Accuracy [%]', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2)
 set(gca,'FontSize', 14);
 if M < 20
@@ -33,7 +32,7 @@ if isfield(sPlotParams, 'outputFolder')
     simPrefix = strcat(sPlotParams.sDataset.actualDataDist, num2str(sPlotParams.sDataset.dim), ...
         'd', '_', sPlotParams.matrixForEigs);
 
-    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_RMSE_eigs_0_to_', ...
+    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_Acc_eigs_0_to_', ...
         num2str(M-1)), 'epsc');
 end
 

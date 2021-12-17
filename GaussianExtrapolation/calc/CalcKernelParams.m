@@ -1,4 +1,4 @@
-function sKernelParams = GetKernelParams(sDistParams, omega)
+function sKernelParams = CalcKernelParams(sDistParams, omega)
 dim = sDistParams.dim;
 %% kernel and eigenfunctions constants type
 if strcmp(sDistParams.estDataDist, 'Gaussian')

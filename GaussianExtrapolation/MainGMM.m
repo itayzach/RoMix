@@ -148,7 +148,7 @@ for r = 1:R
     xTildeTrain = xTrain;
     sDistParams = EstimateDistributionParameters(xTildeTrain, gmmNumComponents, gmmRegVal, gmmMaxIter);
     vPrTilde = sDistParams.vPr;
-    sKernelParams = GetKernelParams(sDistParams, omegaTilde);
+    sKernelParams = CalcKernelParams(sDistParams, omegaTilde);
     [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
         = CalcAnalyticEigenvalues(MTilde, sKernelParams);
     [ PhiTilde, lambdaAnalyticTilde ] = ...

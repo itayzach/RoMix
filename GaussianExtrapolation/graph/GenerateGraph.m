@@ -51,7 +51,7 @@ end
 %% Estimate distribution and get kernel parameters
 gmmMaxIter = 1000;
 sDistParams = EstimateDistributionParameters(sDataset.sData.x, nComponents, GMMRegVal, gmmMaxIter);
-sKernelParams = GetKernelParams(sDistParams, omega);
+sKernelParams = CalcKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
     = CalcAnalyticEigenvalues(nEigs, sKernelParams);
 v = sDataset.sData.x;

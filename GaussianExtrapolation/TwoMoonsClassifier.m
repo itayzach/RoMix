@@ -34,7 +34,7 @@ plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp =
 windowStyle = 'normal';
 PlotDataset(sSimParams, sDataset.sData.x, sDataset.sData.y, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
 
-sKernelParams = GetKernelParams(sDistParams, omega);
+sKernelParams = CalcKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
                 = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams);
 %% LapRLS

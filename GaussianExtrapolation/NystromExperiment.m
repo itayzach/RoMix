@@ -44,7 +44,7 @@ for dataDim = vDataDim
                 gmmRegVal = 0;
             end
             sDistParams = EstimateDistributionParameters(sDataset.sData.x, gmmNumComponents, gmmRegVal, gmmMaxIter);
-            sKernelParams = GetKernelParams(sDistParams, omega);
+            sKernelParams = CalcKernelParams(sDistParams, omega);
             [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
                 = CalcAnalyticEigenvalues(sSimParams.CalcEigenFuncsM, sKernelParams);
             [ tPhiAnalytic(t,:,:), vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x, b_normalize);

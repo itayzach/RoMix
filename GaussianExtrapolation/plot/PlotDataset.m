@@ -50,16 +50,12 @@ if dim == 1
     set(gca,'YTick',[],'FontSize', 14);
     xlim([xMin(1), xMax(1)])
 elseif dim == 2
-    if ~isempty(y)
+    if ~isempty(y) && isequal(y, floor(y))
         scatter3(x(:,1), x(:,2), y, [], y, 'filled');
-        if isequal(y, floor(y))
-            if exist('ax', 'var')
-                colormap(ax(2), jet(length(unique(y)))); 
-            else
-                colormap(jet(length(unique(y))));
-            end
+        if exist('ax', 'var')
+            colormap(ax(2), jet(length(unique(y)))); 
         else
-            colormap(jet);
+            colormap(jet(length(unique(y))));
         end
         colorbar;
     else

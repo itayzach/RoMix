@@ -9,12 +9,16 @@ if strcmp(adjacencyType, 'GaussianKernel')
     distWithoutDiag(1:n+1:end) = [];
     distWithoutDiag = reshape(distWithoutDiag,n-1,n);
     minDist = min(distWithoutDiag);
-    recEps = (1/n)*sum(minDist.^2);
-    recOmega = 2*recEps^2;
-    assert(epsilon > max(min(distWithoutDiag.^2)), ...
-        strcat('Your graph is not fully connected, your omega = %.2f is too small. ',...
-            'Consider a bigger omega, like omega > %.2f\n'), ...
+    lafonEps = (1/n)*sum(minDist.^2);
+    lafonOmega = sqrt(lafonEps/2);
+    fprintf('Lafon eps = %2.2f --> Lafon omega = 2*eps^2 = %2.2f\n', lafonEps, lafonOmega)
+    fprintf('Your  eps = %2.2f --> Your  omega = 2*eps^2 = %2.2f\n', epsilon, omega)
+    if(epsilon < max(min(distWithoutDiag.^2)))
+        warning(['Your graph is not fully connected, your omega = %.2f is too small. ',...
+         'Consider a bigger omega, like omega > %.2f\n'], ...
             omega, 2*max(min(distWithoutDiag.^2))^2)
+    end
+        
 elseif strcmp(adjacencyType, 'NearestNeighbor')
     dist = []; % irrelevant for W
     W = NearestNeighborsAdjacency(xTrain, k, nnValue);
@@ -22,6 +26,5 @@ end
 
 d = sum(W,2);
 D = diag(d);
-DsqrtInv = diag(1./sqrt(d));
-Ln = eye(n) - DsqrtInv*W*DsqrtInv;
+Ln = eye(n) - diag(d.^-0.5)*W*diag(d.^-0.5);
 end

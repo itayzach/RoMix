@@ -1,4 +1,4 @@
-function [] = PlotRMSE(sPlotParams, mRmse, cDispName)
+function [] = PlotRMSE(sPlotParams, mRmse, cDispName, pltTitle)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
@@ -17,6 +17,9 @@ xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('RMSE', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2)
 set(gca,'FontSize', 14);
+if exist('pltTitle', 'var')
+    title(pltTitle, 'Interpreter', 'latex', 'FontSize', 14)
+end
 if M < 20
     set(gca, 'XTick', 0:M-1);
 end

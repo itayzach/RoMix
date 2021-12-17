@@ -23,7 +23,7 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
     T = readtable(fullfile('data','Brazilian_Weather_Stations-Temperature_1961-1990.xlsx'));
     
     % Remove entries with NaN
-    T(isnan(T.Annual),:) = [];
+    T(isnan(T.Ann),:) = [];
     
     nPoints = height(T);
     latStr = cell2mat(T.Latitude);
@@ -45,8 +45,15 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
     
     sDataset.sData.x = dataRearranged(1:nTrain,:);
     sDataset.sData.xt = dataRearranged;
-    sDataset.sData.yt = T.(sDatasetParams.monthName)(rperm);
-    sDataset.sData.y = sDataset.sData.yt(1:nTrain);
+    
+    nMonths = numel(sDatasetParams.monthNames);
+    mSignals = zeros(nTest, nMonths);
+    for monthId = 1:nMonths
+        currMonth = sDatasetParams.monthNames{monthId};
+        mSignals(:,monthId) = T.(currMonth)(rperm);
+    end
+    sDataset.sData.yt = mSignals;
+    sDataset.sData.y = mSignals(1:nTrain,:);
 elseif strcmp(actualDataDist, 'MnistDist')
 %     assert(strcmp(interpMethod, 'AddPoints'))
 %     mnist = load('data\mnist.mat');
@@ -250,29 +257,7 @@ elseif strcmp(actualDataDist, 'Grid')
     end
     sDataset.sData.y = [];
     sDataset.sData.yt = [];
-    
-    
-    %% option #1
-%     if dim > 1
-%         dist = min(pdist(sDataset.sData.x));
-%         omega = 2*sqrt(dist);
-%     else % dim == 1
-%         L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
-%         omega = 2*sqrt(L/nTrain);
-%     end
-%     omegaTilde = omega;
-    %% option #2
-% %     omega = 0.5*std(sDataset.sData.xt)^2;
-% %     omegaTilde = 0.5*std(sDataset.sData.xt)^2;
-% %     omega = 0.15;
-% %     omegaTilde = 0.15;
-    
-    %% option #3
-% % %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTrain-1)^(1/dim)));
-% % %     dist = norm((sDatasetParams.xMax(1:dim)-sDatasetParams.xMin(1:dim))/((nTest-1)^(1/dim)));
-% %     dist = min(pdist(sDataset.sData.x));
-% %     omega = sqrt(dist);
-% %     omegaTilde = sqrt(dist);
+
     %%
     if ~isempty(msgBoxMsg)
         msgBoxTitle = 'GenerateDataset warning';

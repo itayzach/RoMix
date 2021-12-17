@@ -1,4 +1,4 @@
-function [] = PlotAccuracy(sPlotParams, mAcc, cDispName)
+function [] = PlotAccuracy(sPlotParams, mAcc, cDispName, figName, minAcc, xTickNames, pltTitle)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
@@ -10,11 +10,23 @@ for methodId = 1:nMethods
     plot((0:M-1)', vAcc, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
     hold on;
 end
-ylim([50 100]);
+
+if ~exist('minAcc', 'var')
+    minAcc = min(mAcc(:))-10;
+end
+ylim([minAcc, 100]);
 xlim([0 M-1]);
-xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 ylabel('Accuracy [$\%$]', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2)
+if exist('pltTitle', 'var')
+    title(pltTitle, 'Interpreter', 'latex', 'FontSize', 14)
+end
+if exist('xTickNames', 'var')
+    set(gca,'xtick',(0:M-1)','xticklabel',xTickNames)
+    xtickangle(45)
+else
+    xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
+end
 set(gca,'FontSize', 14);
 if M < 20
     set(gca, 'XTick', 0:M-1);
@@ -32,8 +44,7 @@ if isfield(sPlotParams, 'outputFolder')
     simPrefix = strcat(sPlotParams.sDataset.actualDataDist, num2str(sPlotParams.sDataset.dim), ...
         'd', '_', sPlotParams.matrixForEigs);
 
-    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_Acc_eigs_0_to_', ...
-        num2str(M-1)), 'epsc');
+    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_', figName), 'epsc');
 end
 
 set(0,'DefaultFigureWindowStyle',windowStyle)

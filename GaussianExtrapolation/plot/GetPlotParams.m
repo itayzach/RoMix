@@ -12,4 +12,5 @@ sPlotParams.b_plotDataVsGmm            = true;
 sPlotParams.b_plotInnerProductMatrices = true;
 sPlotParams.b_plotHistogram            = false;
 sPlotParams.b_plotC                    = true;
+sPlotParams.b_plotGmmSignal            = false;
 end

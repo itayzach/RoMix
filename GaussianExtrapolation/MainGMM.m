@@ -354,12 +354,6 @@ for r = 1:R
         % Just for reference
         mSigRefHatPhi = EigsRLS(PhiTildeInt, gamma1, gamma2, invLambda, LnRef, mSigRef, sPreset.b_maskDataFitTerm);
         
-        % GMM
-        nGmmPoints = 1000;
-        [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
-        [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
-        mSigGmm = PhiTildeGmm*mSigHatPhi;
-        
         % ------------------------------------------------------------------------------------------
         % Plots
         % ------------------------------------------------------------------------------------------
@@ -369,7 +363,6 @@ for r = 1:R
         vSigHatPhi    = mSigHatPhi(:,sigIndToPlot);
         vAlpha        = mAlpha(:,sigIndToPlot);
         
-        
         vSig       = mSig(:,sigIndToPlot);
         vSigRef    = mSigRef(:,sigIndToPlot);
         vSigRecV   = mSigRecV(:,sigIndToPlot);
@@ -378,7 +371,6 @@ for r = 1:R
         vSigInt    = mSigInt(:,sigIndToPlot);
         vSigNys    = mSigNys(:,sigIndToPlot);
         vSigRep    = mSigRep(:,sigIndToPlot);
-        vSigGmm    = mSigGmm(:,sigIndToPlot);
         
 %         PlotGraphSignalAnalysis(vSig, vSigRecPhi, vSigRecV, vSigRef, vSigInt, vSigNys, ...
 %             vSigHatPhi, vSigHatV, vSigRefHatPhi);
@@ -408,6 +400,13 @@ for r = 1:R
             {'$s^{{\bf ref}}$', '$s^{{\bf int}}$', '$s^{{\bf nys}}$', '$s^{{\bf rep}}$'}, ...
             {n, n, n, n});
         
+        if sPlotParams.b_plotGmmSignal
+            % GMM
+            nGmmPoints = 1000;
+            [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
+            [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
+            mSigGmm = PhiTildeGmm*mSigHatPhi;
+            vSigGmm = mSigGmm(:,sigIndToPlot);
         if dim == 2
             xylim(1) = min(xTrain(:,1));
             xylim(2) = max(xTrain(:,1));
@@ -418,6 +417,7 @@ for r = 1:R
         end
         PlotGraphSignals(sPlotParams, 'GMM Graph signal', 'GMM', {xGmm}, {vSigGmm}, ...
             {'$s^{{\bf gmm}}$'}, {nGmmPoints}, xylim, cmap);
+        end
         
         % ------------------------------------------------------------------------------------------
         % Accuracy

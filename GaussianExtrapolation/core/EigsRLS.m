@@ -4,14 +4,16 @@ lastwarn(''); % clear last warning
 if b_maskDataFitTerm
     assert(size(f,2) == 1, 'The following term would not work for f as a matrix, only as a vector')
     J = diag(sign(abs(f)));
-    Phi = J*Phi;
+    JPhi = J*Phi;
+else
+    JPhi = Phi;
 end
 if gamma2 == 0 || isempty(L)
-    matToInv = Phi.'*Phi + gamma1*invLambda;
+    matToInv = JPhi.'*JPhi + gamma1*invLambda;
 else
-    matToInv = Phi.'*Phi + gamma1*invLambda + gamma2*Phi.'*L*Phi;
+    matToInv = JPhi.'*JPhi + gamma1*invLambda + gamma2*Phi.'*L*Phi;
 end
-C = matToInv \ (Phi.'*f);
+C = matToInv \ (JPhi.'*f);
 
 warnMsg = lastwarn();
 if ~isempty(warnMsg) % catch warning

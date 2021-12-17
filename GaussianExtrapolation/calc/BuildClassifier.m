@@ -11,13 +11,14 @@ b_normalize = false;
 
 dist = pdist2(sDataset.sData.x, sDataset.sData.x);
 W = exp(-dist.^2/(2*sKernelParams.omega^2));
-    
-D = diag(sum(W,1));
-L = D - W;
+
+d = sum(W,1);
+I = eye(length(sDataset.sData.x));
+Ln = I - diag(d.^(-0.5))*W*diag(d.^(-0.5));
 
 PlotWeightsMatrix(sSimParams, W, [], D, sDataset.sData.x, 'GaussianKernel', sKernelParams.omega);
 
-c = eigrls(sDataset.sData.y, mPhiAnalyticTrain, diag(vLambdaAnalytic), gamma_A, gamma_I, L);
+c = eigrls(sDataset.sData.y, mPhiAnalyticTrain, diag(vLambdaAnalytic), gamma_A, gamma_I, Ln);
 sClassifier.c = c;
 sClassifier.vPhi_xTrain_c = mPhiAnalyticTrain*c;
 

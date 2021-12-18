@@ -1,7 +1,7 @@
 function sPreset = GetBrazilWeatherPreset()
 %% Dataset parameters
 sPreset.dim                = 2;
-sPreset.n                  = 246;
+sPreset.n                  = 196; % 148 / 196
 sPreset.N                  = 296;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
@@ -10,10 +10,10 @@ sPreset.verticesPDF        = 'BrazilWeather'; % 'Gaussian' / 'Uniform' / 'Grid' 
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sDatasetParams.monthName   = 'Jul';
+sDatasetParams.monthNames  = {'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Ann'};
 sPreset.sDatasetParams     = sDatasetParams;
 %% Gaussian kernel width
-sPreset.omega              = 7; % for nystrom kernel
+sPreset.omega              = 1000; % for nystrom kernel
 sPreset.omegaTilde         = 7; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
@@ -26,7 +26,7 @@ sPreset.MTilde             = 25*sPreset.gmmNumComponents;
 sPreset.gamma1             = 0.1;
 sPreset.gamma2             = 0;
 %% Representer theorem
-sPreset.gamma1Rep          = 0.001;
+sPreset.gamma1Rep          = 1e-3;
 %% Number of runs (=realizations)
 sPreset.R                  = 1;
 %% Method parameters

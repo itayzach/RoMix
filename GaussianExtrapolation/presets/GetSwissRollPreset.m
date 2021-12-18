@@ -12,21 +12,27 @@ sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Lapla
 %% DatasetParams
 sPreset.sDatasetParams     = [];
 %% Gaussian kernel width
-sPreset.omega              = sqrt(5)/sqrt(2); % for nystrom kernel
-sPreset.omegaTilde         = sqrt(5)/sqrt(2); % for our method
+% eps value was taken from:
+% "Parsimonious representation of nonlinear dynamical systems through manifold learning: 
+% A chemotaxis case study"
+% where K(x_i,x_j) = exp(||x_i-x_j||^2/eps^2)
+eps                        = sqrt(5);
+sPreset.omega              = eps/sqrt(2); % for nystrom kernel
+sPreset.omegaTilde         = eps/sqrt(2); % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 20;
 %% Number of eigenvectors/eigenfunctions
-sPreset.M                  = 9;
+sPreset.M                  = 10;
 sPreset.MTilde             = 25*sPreset.gmmNumComponents;
-sPreset.gamma1             = 0; %5;
+%% Regularizations
+sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;
 %% Representer theorem
-sPreset.gamma1Rep          = 0;
+sPreset.gamma1Rep          = 1e-5;
 %% Number of runs (=realizations)
-sPreset.R                  = 1;
+sPreset.R                  = 10;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;

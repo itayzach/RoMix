@@ -1,8 +1,8 @@
 function sPreset = Get1DGridPreset()
 %% Dataset parameters
 sPreset.dim                = 1;
-sPreset.n                  = 1500;
-sPreset.N                  = 3000;
+sPreset.n                  = 1000;
+sPreset.N                  = 5000;
 sPreset.k                  = 3;
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
@@ -11,12 +11,15 @@ sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKe
 sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sDatasetParams.xMin        = 0*ones(sPreset.dim,1);
-sDatasetParams.xMax        = 4*ones(sPreset.dim,1);
+sDatasetParams.xMax        = 1*ones(sPreset.dim,1);
 sPreset.sDatasetParams     = sDatasetParams;
 %% Gaussian kernel width
 L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
 sPreset.omega              = 2*sqrt(L/sPreset.n); % for nystrom kernel
 sPreset.omegaTilde         = 2*sqrt(L/sPreset.n); % for our method
+%%
+% sPreset.fs = sPreset.n/L;
+% sPreset.nyquistMaxM = 4*sPreset.fs;
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;

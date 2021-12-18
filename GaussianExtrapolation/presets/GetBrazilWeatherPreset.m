@@ -41,6 +41,6 @@ sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
 %% 
 sPreset.dataGenTechnique = 'AddPoints';
-sPreset.distType = 'Haversine'; % 'Euclidean' / 'Haversine'
-
+sPreset.sDistanceParams.distType = 'Haversine'; % 'Euclidean' / 'Haversine'
+sPreset.sDistanceParams.earthRadius = 6371; % km (approximation)
 end

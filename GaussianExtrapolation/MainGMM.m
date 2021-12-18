@@ -35,7 +35,7 @@ gmmRegVal          = sPreset.gmmRegVal;
 gmmMaxIter         = sPreset.gmmMaxIter;
 gmmNumComponents   = sPreset.gmmNumComponents;
 sDatasetParams     = sPreset.sDatasetParams;
-distType           = sPreset.distType;
+sDistanceParams    = sPreset.sDistanceParams;
 R                  = sPreset.R;
 b_debugUseAnalytic = sPreset.b_debugUseAnalytic;
 b_forceCtoIdentity = sPreset.b_forceCtoIdentity;
@@ -91,8 +91,8 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Original graph
     % ----------------------------------------------------------------------------------------------
-    [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue);    
-    [WRef, distRef, DRef, LnRef] = SimpleCalcAdjacency(xInt, adjacencyType, distType, omega, k, nnValue);
+    [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, sDistanceParams.distType, omega, k, nnValue);    
+    [WRef, distRef, DRef, LnRef] = SimpleCalcAdjacency(xInt, adjacencyType, sDistanceParams.distType, omega, k, nnValue);
 
     if r == 1 && sPlotParams.b_plotWeights
         PlotWeightsMatrix([], W, dist, D, Ln, xTrain, adjacencyType, omega, k);
@@ -185,7 +185,7 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Interpolate with Nystrom
     % ----------------------------------------------------------------------------------------------
-    distLUBlockRUBlock = CalcDistance(xTrain, xInt, distType);
+    distLUBlockRUBlock = CalcDistance(xTrain, xInt, sDistanceParams);
     WTrainInt = exp(-distLUBlockRUBlock.^2/(2*omegaNys^2));
     lambdaNys = adjLambda*sqrt(interpRatio);
     VNys = WTrainInt.'*V*diag(1./lambdaNys);
@@ -389,12 +389,12 @@ for r = 1:R
 %             {'|s^{{\bf ref}}-s^{{\bf int}}|', '|s^{{\bf ref}}-s^{{\bf nys}}|', '|s^{{\bf ref}}-s^{{\bf rep}}|'},  ...
 %             'Total error ($N$ nodes)')
         
-        PlotGraphSignals(sPlotParams, 'Graph signals on given $n$ nodes (Train set)', 'TrainSet', ...
+        PlotGraphSignals(sPlotParams, ['Graph signals on given $n=' num2str(n) '$ nodes (Train set)'], 'TrainSet', ...
             {xTrain, xTrain, xTrain, xTrain}, ...
             {vSig, vSigRecPhi, vSigRecV, vSigRecRep}, ...
             {'$s$', '$s_{\Phi}^{{\bf rec}}$', '$s_{V}^{{\bf rec}}$', '$s_{K}^{{\bf rec}}$'}, ...
             {n, n, n, n});
-        cmap = PlotGraphSignals(sPlotParams, 'Graph signals on all $N$ nodes (Train \& Test sets)', 'TrainAndTestSet', ...
+        cmap = PlotGraphSignals(sPlotParams, ['Graph signals on all $N=' num2str(N) '$ nodes (Train \& Test sets)'], 'TrainAndTestSet', ...
             {xInt, xInt, xInt, xInt}, ...
             {vSigRef, vSigInt, vSigNys, vSigRep}, ...
             {'$s^{{\bf ref}}$', '$s^{{\bf int}}$', '$s^{{\bf nys}}$', '$s^{{\bf rep}}$'}, ...
@@ -486,7 +486,7 @@ for r = 1:R
 %             PlotRMSE(sPlotParams, [vRmseRecPhi, vRmseRecV, vRmseRecRep], ...
 %                 {'RMSE$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'RMSE$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...
 %                 'RMSE$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'Train RMSE');
-            minAcc = 65;
+            minAcc = 0;
             PlotAccuracy(sPlotParams, [vAccRecPhi, vAccRecV, vAccRecRep], ...
                 {'Acc$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'Acc$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...
                 'Acc$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'TrainAcc', minAcc, sDatasetParams.monthNames, 'Train accuracy');

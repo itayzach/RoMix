@@ -1,7 +1,7 @@
-function [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, distType, omega, k, nnValue)
+function [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, sDistanceParams, omega, k, nnValue)
 if strcmp(adjacencyType, 'GaussianKernel')
     n = length(xTrain);
-    dist = CalcDistance(xTrain, xTrain, distType);
+    dist = CalcDistance(xTrain, xTrain, sDistanceParams);
     W = exp(-dist.^2/(2*omega^2));
     epsilon = 2*omega^2;
     

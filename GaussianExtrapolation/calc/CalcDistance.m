@@ -1,9 +1,8 @@
-function dist = CalcDistance(x1, x2, distType)
-if strcmp(distType, 'Euclidean')
+function dist = CalcDistance(x1, x2, sDistanceParams)
+if strcmp(sDistanceParams.distType, 'Euclidean')
     dist = pdist2(x1, x2);
-elseif strcmp(distType, 'Haversine')
-    earthRadius = 100; % km (approximation)
-    
+elseif strcmp(sDistanceParams.distType, 'Haversine')
+    earthRadius = sDistanceParams.earthRadius;
     lat1 = deg2rad(x1(:,1));
     lon1 = deg2rad(x1(:,2));
     lat2 = deg2rad(x2(:,1));

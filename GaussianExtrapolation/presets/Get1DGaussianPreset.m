@@ -44,5 +44,5 @@ sPreset.b_runGraphSignals  = false;
 sPreset.b_maskDataFitTerm  = false;
 %% 
 sPreset.dataGenTechnique = 'AddPoints';
-sPreset.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
+sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 end

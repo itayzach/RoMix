@@ -91,8 +91,8 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Original graph
     % ----------------------------------------------------------------------------------------------
-    [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, sDistanceParams.distType, omega, k, nnValue);    
-    [WRef, distRef, DRef, LnRef] = SimpleCalcAdjacency(xInt, adjacencyType, sDistanceParams.distType, omega, k, nnValue);
+    [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, sDistanceParams, omega, k, nnValue);    
+    [WRef, distRef, DRef, LnRef] = SimpleCalcAdjacency(xInt, adjacencyType, sDistanceParams, omega, k, nnValue);
 
     if r == 1 && sPlotParams.b_plotWeights
         PlotWeightsMatrix([], W, dist, D, Ln, xTrain, adjacencyType, omega, k);

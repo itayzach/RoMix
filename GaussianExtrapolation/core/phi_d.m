@@ -20,7 +20,9 @@ if strcmp(sKernelParams.kernelType, 'gaussian')
         % note that for high m it might be numerically unstable
         vHm = hermite(m, (1/4 + beta/2)^(1/4)*(x-mu)/sigma);
      else
-%         warning('m > 170, using hermiteH instead of factorial hermite')
+        if m == 50
+            warning('m >= 50. using MATLAB''s hermiteH instead of factorial hermite. calculation will take time...')
+        end
         vHm = hermiteH(m, (1/4 + beta/2)^(1/4)*(x-mu)/sigma);
     end
     vPhi_m = normFactor * exp( -((x-mu).^2/(2*sigma^2)) * ((sqrt(1+2*beta)-1)/2) ) .* vHm;

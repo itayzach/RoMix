@@ -27,7 +27,7 @@ elseif dim == 2
         error('not supported')
     end
 elseif dim == 1
-    x = zeros(n);
+    x = zeros(n,1);
     nPtsPerComp = round(n/nComponents);
     for c = 1:nComponents
         vPtsInd = (1:nPtsPerComp) + (c-1)*nPtsPerComp;

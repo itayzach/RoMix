@@ -35,3 +35,13 @@ if isfield(sSimParams, 'outputFolder')
     saveas(fig,[sSimParams.outputFolder filesep 'fig_eigrls_M_' num2str(sClassifier.MTilde)], 'epsc');
 end
 end
+
+function plot2D(X,Y,markersize, marker)
+pos=find(Y==1);
+neg=find(Y==-1);
+unlab=find(Y==0);
+
+plot(X(unlab,1),X(unlab,2),marker); hold on;     
+plot(X(pos,1),X(pos,2),'rd','MarkerSize',markersize,'MarkerFaceColor','r','MarkerEdgeColor','k'); hold on;
+plot(X(neg,1),X(neg,2),'bo' ,'MarkerSize',markersize,'MarkerFaceColor','b','MarkerEdgeColor','k'); hold on;
+end

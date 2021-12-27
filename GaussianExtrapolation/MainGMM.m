@@ -2,6 +2,8 @@
 clc; clear; rng('default');
 close all; 
 set(0,'DefaultFigureWindowStyle','normal')
+%% Illustrate the first eigenfunctions of the 1-D Guassian kernel
+PlotGaussianKernelEigenfunsExample();
 %% Load preset
 % sPreset = Get1DGridPreset();
 % sPreset = Get1DUniformPreset();

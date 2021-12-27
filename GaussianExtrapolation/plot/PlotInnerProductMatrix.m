@@ -28,7 +28,7 @@ if isfield(sPlotParams, 'outputFolder') && ~isempty(sPlotParams)
     if ~exist(sPlotParams.outputFolder, 'dir')
         mkdir(sPlotParams.outputFolder)
     end
-    simPrefix = strcat(sPlotParams.sDataset.actualDataDist, num2str(sPlotParams.sDataset.dim), ...
+    simPrefix = strcat(sPlotParams.actualDataDist, num2str(sPlotParams.dim), ...
         'd', '_', sPlotParams.matrixForEigs);
 
     saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_ip_matrix_', figName), 'epsc');

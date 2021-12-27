@@ -4,10 +4,12 @@ sDistParams.estDataDist = 'Gaussian';
 dim = size(x,2);
 sDistParams.dim = dim;
 
+fprintf('Running fitgmdist... ')
 options = statset('MaxIter',gmmMaxIter);
 GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
 assert(GMModel.Converged, 'GMM couldn''t converge...')
 sDistParams.GMModel = GMModel;
+fprintf('Done.\n')
 
 sDistParams.estNumComponents = gmmNumComponents;
 sDistParams.componentProportion = GMModel.ComponentProportion;

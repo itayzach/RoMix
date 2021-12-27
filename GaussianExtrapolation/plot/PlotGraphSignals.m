@@ -1,4 +1,4 @@
-function localCmap = PlotGraphSignals(sSimParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, xylim, cmap)
+function localCmap = PlotGraphSignals(sPlotParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, xylim, cmap)
 cData = reshape(cData,[],1);
 cSignals = reshape(cSignals,[],1);
 cSigStr = reshape(cSigStr,[],1);
@@ -69,7 +69,7 @@ elseif dim == 2 || dim == 3
             nCircles = cNumCircles{m};
         end
         ax(m) = nexttile;
-        if ~isempty(sSimParams) && isfield(sSimParams, 'b_GSPBoxPlots') && sSimParams.b_GSPBoxPlots
+        if ~isempty(sPlotParams) && isfield(sPlotParams, 'b_GSPBoxPlots') && sPlotParams.b_GSPBoxPlots
             param.show_edges = false;
             gsp_plot_signal(G,vSignal,param);
         else
@@ -120,12 +120,12 @@ elseif dim == 2 || dim == 3
 end
 
 %% Save
-if ~isempty(sSimParams) && isfield(sSimParams, 'outputFolder')
-    if ~exist(sSimParams.outputFolder, 'dir')
-        mkdir(sSimParams.outputFolder)
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    if ~exist(sPlotParams.outputFolder, 'dir')
+        mkdir(sPlotParams.outputFolder)
     end
-    simPrefix = strcat(sSimParams.sDataset.actualDataDist, num2str(dim), 'd');
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_', figName, '_signals'), 'epsc');
+    simPrefix = strcat(sPlotParams.actualDataDist, num2str(dim), 'd');
+    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_', figName, '_signals'), 'epsc');
 end
 set(0,'DefaultFigureWindowStyle',windowStyle)
 

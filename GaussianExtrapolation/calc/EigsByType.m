@@ -1,5 +1,6 @@
 function [V, adjLambda, matLambda] = EigsByType(W, D, M, matrixForEigs)
 
+fprintf('Performing eigs(%s) for %d points, M = %d... ', matrixForEigs, size(W,1), M)
 if strcmp(matrixForEigs, 'Adjacency')
     [V, Lambda] = eigs(W,M);
     matLambda = diag(Lambda);
@@ -58,6 +59,6 @@ else
 end
 
 assert(~any(isnan(adjLambda)), 'You have at least one NaN');
-
+fprintf('Done.\n')
 end
 

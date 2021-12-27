@@ -7,7 +7,7 @@ for i = 1:nEigs
     j = sKernelParams.vEigIndex(i);
     m = OneDim2MultiDimIndex(j-1,dim);
     mPhiAnalytic(:,i) = phi(sKernelParams, c, m, mData);
-    assert(~any(isnan(mPhiAnalytic(:,i))), 'Phi %d contains NaN', m);
+    assert(~any(isnan(mPhiAnalytic(:,i))), 'Phi %d contains NaN', i);
 end
 
 

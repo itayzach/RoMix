@@ -8,6 +8,7 @@ end
 if ~exist('nTest', 'var')
     nTest = 1000;
 end
+fprintf('Generating n = %d, N = %d points of %d-d %s... ', nTrain, nTest, dim, actualDataDist)
 %% Generate data
 if strcmp(actualDataDist, 'SineCosine')
 %     assert(strcmp(interpMethod, 'AddPoints'))
@@ -274,4 +275,5 @@ sDataset.actualNumComponents = nComponents;
 sDataset.actualDataDist = actualDataDist;
 sDataset.estDataDist = 'Gaussian';
 sDataset.sDatasetParams = sDatasetParams;
+fprintf('Done.\n')
 end

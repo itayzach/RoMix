@@ -46,7 +46,7 @@ if dim <= 3
     if isempty(sPlotParams)
         actualDataDist = [];
     else
-        actualDataDist = sPlotParams.sDataset.actualDataDist;
+        actualDataDist = sPlotParams.actualDataDist;
     end
     PlotEigenfuncvecScatter(sPlotParams, actualDataDist, xTrain, [], 0, 3, W(:,1:4), [], [], [], ...
         figTitle, figName, 'w');

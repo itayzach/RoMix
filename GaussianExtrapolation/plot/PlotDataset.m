@@ -25,6 +25,9 @@ if exist('GMModel', 'var')
         xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
         ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
         view(2);
+%         hold on
+%         gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(GMModel,[x0 y0]),x,y);
+%         fcontour(gmPDF,[xMin(1), xMax(1), xMin(2), xMax(2)],'LevelList',[1e-5:1e-4:1e-2],'LineColor','black');
         set(gca,'FontSize', 14);
         xlim([xMin(1), xMax(1)])
         ylim([xMin(2), xMax(2)])

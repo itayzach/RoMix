@@ -1,4 +1,5 @@
 function [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, sDistanceParams, omega, k, nnValue)
+fprintf('Calculating adjacency matrix for %d points... ',length(xTrain))
 if strcmp(adjacencyType, 'GaussianKernel')
     n = length(xTrain);
     dist = CalcDistance(xTrain, xTrain, sDistanceParams);
@@ -11,8 +12,8 @@ if strcmp(adjacencyType, 'GaussianKernel')
     minDist = min(distWithoutDiag);
     lafonEps = (1/n)*sum(minDist.^2);
     lafonOmega = sqrt(lafonEps/2);
-    fprintf('Lafon eps = %2.2f --> Lafon omega = 2*eps^2 = %2.2f\n', lafonEps, lafonOmega)
-    fprintf('Your  eps = %2.2f --> Your  omega = 2*eps^2 = %2.2f\n', epsilon, omega)
+%     fprintf('Lafon eps = %2.2f --> Lafon omega = 2*eps^2 = %2.2f\n', lafonEps, lafonOmega)
+%     fprintf('Your  eps = %2.2f --> Your  omega = 2*eps^2 = %2.2f\n', epsilon, omega)
     if(epsilon < max(min(distWithoutDiag.^2)))
         warning(['Your graph is not fully connected, your omega = %.2f is too small. ',...
          'Consider a bigger omega, like omega > %.2f\n'], ...
@@ -27,4 +28,5 @@ end
 d = sum(W,2);
 D = diag(d);
 Ln = eye(n) - diag(d.^-0.5)*W*diag(d.^-0.5);
+fprintf('Done.\n')
 end

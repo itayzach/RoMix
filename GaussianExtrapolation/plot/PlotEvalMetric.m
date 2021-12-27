@@ -1,22 +1,24 @@
-function [] = PlotAccuracy(sPlotParams, mAcc, cDispName, figName, minAcc, xTickNames, pltTitle)
+function [] = PlotEvalMetric(sPlotParams, mMetrics, cDispName, figName, minMaxMetric, xTickNames, pltTitle)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
-[M, nMethods] = size(mAcc);
+[M, nMethods] = size(mMetrics);
 cLineStyle = {'-', '--', '-.'};
-fig = figure('Name', 'Accuracy');
+fig = figure('Name', 'EvalMetric');
 for methodId = 1:nMethods
-    vAcc = mAcc(:,methodId);
-    plot((0:M-1)', vAcc, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
+    vCoh = mMetrics(:,methodId);
+    plot((0:M-1)', vCoh, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
     hold on;
 end
 
-if ~exist('minAcc', 'var') || isempty(minAcc)
-    minAcc = min(mAcc(:))-10;
+if ~exist('minMaxMetric', 'var') || isempty(minMaxMetric)
+    minMaxMetric(1) = min(mMetrics(:));
+    minMaxMetric(2) = max(mMetrics(:));
+    
 end
-ylim([minAcc, 100]);
+ylim(minMaxMetric);
 xlim([0 M-1]);
-ylabel('Accuracy [$\%$]', 'Interpreter', 'latex', 'FontSize', 14)
+% ylabel('Coherence', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2)
 if exist('pltTitle', 'var')
     title(pltTitle, 'Interpreter', 'latex', 'FontSize', 14)

@@ -5,16 +5,15 @@ y0     = 250;
 width  = 600;
 height = 400;
 
-cSquared = c.^2;
-
 fig = figure;
 tiledlayout('flow');
 nexttile;
-plot(cSquared, 'LineWidth', 2, 'DisplayName', '$c_m^2$');
+plot(abs(c), 'LineWidth', 2, 'DisplayName', '$|c_m|$');
+plot(c.^2, 'LineWidth', 2, 'DisplayName', '$c_m^2$');
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14);
 hold on;
 plot(vLambda, 'LineWidth', 2, 'DisplayName', '$\lambda_m$');
-plot(cSquared.^2 ./ vLambda, 'LineWidth', 2, 'DisplayName', '$c_m^2/\lambda_m$');
+% plot(c.^2 ./ vLambda, 'LineWidth', 2, 'DisplayName', '$c_m^2/\lambda_m$');
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'SouthOutside', 'NumColumns', 3)
 % small_c_idx = find(abs(c_sq) < 1e-5);
 % scatter(small_c_idx, c_sq(small_c_idx), 'filled');

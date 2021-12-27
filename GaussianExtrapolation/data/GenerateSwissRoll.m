@@ -27,6 +27,11 @@ function x = GenerateSwissRoll(N)
 
 
 %% Method #3
+% According to:
+% Parsimonious representation of nonlinear dynamical systems
+% through manifold learning: A chemotaxis case study
+% Carmeline J. Dsilva, 2015
+% https://ronentalmon.com/wp-content/uploads/2019/03/ACHA_Dsilva_Jul_2015.pdf
 % construct archemedian spiral
 % ============================
 a = 1;

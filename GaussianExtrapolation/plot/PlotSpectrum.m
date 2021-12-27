@@ -1,4 +1,4 @@
-function fig = PlotSpectrum(sSimParams, vNysRatio, vLambda1, vLambda2, mLambda3, lambda1Str, lambda2Str, lambda3Str, figTitle)
+function fig = PlotSpectrum(sPlotParams, vNysRatio, vLambda1, vLambda2, mLambda3, lambda1Str, lambda2Str, lambda3Str, figTitle)
 % windowStyle = get(0,'DefaultFigureWindowStyle');
 % set(0,'DefaultFigureWindowStyle','normal')
 
@@ -49,13 +49,13 @@ set(gca,'FontSize', 14);
 % set(gcf,'Position',[100 100 600 500])
 % set(0,'DefaultFigureWindowStyle',windowStyle)
 %% Save
-if isfield(sSimParams, 'outputFolder') && ~isempty(sSimParams)
-    if ~exist(sSimParams.outputFolder, 'dir')
-        mkdir(sSimParams.outputFolder)
+if isfield(sPlotParams, 'outputFolder') && ~isempty(sPlotParams)
+    if ~exist(sPlotParams.outputFolder, 'dir')
+        mkdir(sPlotParams.outputFolder)
     end
 
-    simPrefix = strcat(sSimParams.sDataset.actualDataDist, num2str(sSimParams.sDataset.dim), ...
-        'd', '_', sSimParams.matrixForEigs);
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, '_spectrum'), 'epsc');
+    simPrefix = strcat(sPlotParams.actualDataDist, num2str(sPlotParams.dim), ...
+        'd', '_', sPlotParams.matrixForEigs);
+    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_spectrum'), 'epsc');
 end
 end

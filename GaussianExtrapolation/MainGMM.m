@@ -14,6 +14,7 @@ set(0,'DefaultFigureWindowStyle','normal')
 sPreset = GetTwoSpiralsPreset();
 % sPreset = GetMnistLatentVAEPreset();
 %% Parse sPreset
+clusterMethod = 'SC'; % 'GMM' / 'SC'
 dim                = sPreset.dim;
 n                  = sPreset.n;
 N                  = sPreset.N;
@@ -142,11 +143,32 @@ for r = 1:R
     end
     
     % ----------------------------------------------------------------------------------------------
-    % Calculate lambdaAnalyticTilde and PhiTilde(xTildeTrain)
+    % Estimate distribution parameters
     % ----------------------------------------------------------------------------------------------
     xTildeTrain = xTrain;
+    if strcmp(clusterMethod, 'GMM')
     sDistParams = EstimateDistributionParameters(xTildeTrain, gmmNumComponents, gmmRegVal, gmmMaxIter);
-    vPrTilde = sDistParams.vPr;
+    elseif strcmp(clusterMethod, 'SC')
+        sDistParams = EstDistParamsSpectClust(xTildeTrain, W, gmmNumComponents);
+    end
+    % ----------------------------------------------------------------------------------------------
+    % Plot distribution estimation
+    % ----------------------------------------------------------------------------------------------
+    if r == 1 && sPlotParams.b_plotDataVsGmm && dim <= 3
+        nGmmPoints = n;
+        pltTitle = ['Dataset with n = ', num2str(n), ' points'];
+        if strcmp(clusterMethod, 'GMM')
+            plt2Title = ['Generated ' num2str(nGmmPoints), ' points from ' clusterMethod ' with nEstComp = ' num2str(gmmNumComponents)];
+        elseif strcmp(clusterMethod, 'SC')
+            plt2Title = ['Painted ' num2str(n), ' according to ' clusterMethod ' with nEstComp = ' num2str(gmmNumComponents)];
+        end
+        windowStyle = 'normal';
+        PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
+
+    end
+    % ----------------------------------------------------------------------------------------------
+    % Calculate lambdaAnalyticTilde and PhiTilde(xTildeTrain)
+    % ----------------------------------------------------------------------------------------------
     sKernelParams = CalcKernelParams(sDistParams, omegaTilde);
     [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
         = CalcAnalyticEigenvalues(MTilde, sKernelParams);
@@ -155,22 +177,18 @@ for r = 1:R
     invLambda = diag(1./lambdaAnalyticTilde);
 
     % ----------------------------------------------------------------------------------------------
-    % Plot GMM estimation and PhiTilde
+    % Plot PhiTilde
     % ----------------------------------------------------------------------------------------------
-    if r == 1 && sPlotParams.b_plotDataVsGmm && dim <= 3
-        nGmmPoints = n;
-        pltTitle = ['Dataset with n = ', num2str(n), ' points'];
-        plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
-
-        windowStyle = 'normal';
-        PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
-
-    end
     if r == 1 && sPlotParams.b_plotTildeFiguresForDebug && dim <= 3
-        figTitle = 'Eigenfunctions of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+        if strcmp(verticesPDF, 'Gaussian')
+            sPlotParamsGaussian = sPlotParams;
+        else
+            sPlotParamsGaussian = [];
+        end
+        figTitle = 'Eigenfunctions of the Gaussian kernel (on $n$ nodes)';
         figName = 'PhiTilde';
-        PlotEigenfuncvecScatter([], 'Gaussian', xTildeTrain, [], 0, 4, ...
-            PhiTilde, [], [], [], figTitle, figName, '\tilde{\phi}' );
+        PlotEigenfuncvecScatter(sPlotParamsGaussian, 'Gaussian', xTildeTrain, [], 0, 4, ...
+            PhiTilde, [], [], [], figTitle, figName, '\phi' );
         figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
         PlotSpectrum([], [], lambdaAnalyticTilde, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
     end
@@ -302,6 +320,7 @@ for r = 1:R
             PlotInnerProductMatrix([], VRep, [], pltTitle, figName);
     %         pltTitle = '$\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$';
     %         figName = 'PhiTilde';
+    %         vPrTilde = sDistParams.vPr;
     %         PlotInnerProductMatrix([], PhiTilde, vPrTilde, pltTitle, figName);
 
         end

@@ -1,4 +1,4 @@
-function fig = PlotDataset(sSimParams, x, y, pltTitle, GMModel, nGmmPoints, plt2Title, windowStyle)
+function fig = PlotDataset(sPlotParams, x, y, pltTitle, GMModel, nGmmPoints, plt2Title, windowStyle)
 prevWindowStyle = get(0,'DefaultFigureWindowStyle');
 if ~exist('windowStyle', 'var')
     windowStyle = prevWindowStyle;
@@ -6,11 +6,21 @@ end
 set(0,'DefaultFigureWindowStyle',windowStyle)
 
 [n, dim] = size(x);
-fig = figure('Name', sprintf('%d-D %s', dim, sSimParams.sDataset.actualDataDist));
+if exist('sPlotParams', 'var') && ~isempty(sPlotParams)
+    actualDataDist = sPlotParams.actualDataDist;
+else
+    actualDataDist = '';
+end
+fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
 %% GMM
 if exist('GMModel', 'var')
     ax(1) = subplot(1,2,2);
-    [xGmm,compIdx] = random(GMModel, nGmmPoints);
+    if isa(GMModel,"gmdistribution")
+        [xGmm,compIdx] = random(GMModel, nGmmPoints);
+    else
+        xGmm = x;
+        compIdx = GMModel.SCcompIdx;
+    end
     xMax = max([max(xGmm); max(x)]);
     xMin = min([min(xGmm); min(x)]);
     if dim == 1
@@ -86,7 +96,7 @@ elseif dim == 3
         zlim([xMin(3), xMax(3)])
     end
 end
-title(strcat(pltTitle, " (", sSimParams.sDataset.actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
+title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 
 %% Size
 if strcmp(windowStyle, 'normal')
@@ -98,11 +108,11 @@ if strcmp(windowStyle, 'normal')
 end
 set(0,'DefaultFigureWindowStyle',prevWindowStyle)
 %% Save
-if isfield(sSimParams, 'outputFolder')
-    if ~exist(sSimParams.outputFolder, 'dir')
-        mkdir(sSimParams.outputFolder)
+if exist('sPlotParams', 'var') &&  ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    if ~exist(sPlotParams.outputFolder, 'dir')
+        mkdir(sPlotParams.outputFolder)
     end
     
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, sSimParams.sDataset.actualDataDist, num2str(dim), 'd', '_dataset'), 'epsc');
+    saveas(fig,strcat(sPlotParams.outputFolder, filesep, actualDataDist, num2str(dim), 'd', '_dataset'), 'epsc');
 end
 end

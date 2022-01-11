@@ -1,6 +1,7 @@
 function [mPhiAnalytic, vLambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, mData, b_normalize)
 
 [nTotal, dim] = size(mData);
+fprintf('Calculating %d eigenfunctions (b_normalize = %d) d = %d, n = %d... ',nEigs,b_normalize, dim,nTotal)
 mPhiAnalytic = zeros(length(mData), nEigs);
 for i = 1:nEigs
     c = sKernelParams.vComponentIndex(i);
@@ -17,4 +18,5 @@ if b_normalize
 end
 
 vLambdaAnalytic = sKernelParams.vLambdaAnalytic(1:nEigs);
+fprintf('Done.\n')
 end

@@ -4,15 +4,9 @@ if ~isvector(x)
 end
 
 if strcmp(sKernelParams.kernelType, 'gaussian')
-    if exist('d', 'var')
-        mu = sKernelParams.sDistParams.mu_1D{c}(d);
-        sigma = sKernelParams.sDistParams.sigma{c}(d);
-        beta = sKernelParams.beta{c}(d);
-    else
-        mu = sKernelParams.sDistParams.mu_1D{c};
-        sigma = sKernelParams.sDistParams.sigma{c};
-        beta = sKernelParams.beta{c};
-    end
+    mu = sKernelParams.sDistParams.mu_1D{c}(d);
+    sigma = sKernelParams.sDistParams.sigma{c}(d);
+    beta = sKernelParams.beta{c}(d);
 
     normFactor = (1+2*beta)^(1/8)/sqrt(2^m*factorial(m));
     if m <= 50

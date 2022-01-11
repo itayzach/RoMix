@@ -4,7 +4,7 @@ n_fact = factorial(n);
 m = 0:floor(n/2);
 h(2*m+1) = n_fact .* (-1).^m ./ (factorial(m) .* factorial(n-2.*m)) .* 2.^(n-2.*m);
 
-if exist('x','var')
+% if exist('x','var')
     h = polyval(h, x);
-end
+% end
 end

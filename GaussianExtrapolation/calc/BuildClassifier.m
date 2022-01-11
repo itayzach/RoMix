@@ -16,7 +16,7 @@ d = sum(W,1);
 I = eye(length(sDataset.sData.x));
 Ln = I - diag(d.^(-0.5))*W*diag(d.^(-0.5));
 
-PlotWeightsMatrix(sSimParams, W, [], D, sDataset.sData.x, 'GaussianKernel', sKernelParams.omega);
+PlotWeightsMatrix(sSimParams, W, [], diag(d), sDataset.sData.x, 'GaussianKernel', sKernelParams.omega);
 
 c = eigrls(sDataset.sData.y, mPhiAnalyticTrain, diag(vLambdaAnalytic), gamma_A, gamma_I, Ln);
 sClassifier.c = c;

@@ -4,13 +4,14 @@ sDistParams.estDataDist = 'Gaussian';
 dim = size(x,2);
 sDistParams.dim = dim;
 
-fprintf('Running fitgmdist... ')
+fprintf('Running fitgmdist with %d components... ', gmmNumComponents)
 options = statset('MaxIter',gmmMaxIter);
 GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
 assert(GMModel.Converged, 'GMM couldn''t converge...')
 sDistParams.GMModel = GMModel;
 fprintf('Done.\n')
 
+fprintf('Filling sDistParams... ')
 sDistParams.estNumComponents = gmmNumComponents;
 sDistParams.componentProportion = GMModel.ComponentProportion;
 for c = 1:gmmNumComponents
@@ -29,20 +30,21 @@ for c = 1:gmmNumComponents
     sDistParams.mu_1D{c} = sDistParams.mu{c}*sDistParams.u{c};
     isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-10)
 end
+fprintf('Done.\n')
 
 % Caluclate the probability for each data point x
-sDistParams.vPr = zeros(length(x),1);
-for c = 1:gmmNumComponents
-    prop = sDistParams.componentProportion(c);
-    vDensity = prop*p(sDistParams, c, x);
-    vDiffs = ones(length(x),1);
-    for d = 1:sDistParams.dim
-        [ xTotalSorted, vSortedIdx ] = sort(x(:,d));
-        [~, vInvSortIdx] = sort(vSortedIdx);
-        vDiffsSorted = [0; diff(xTotalSorted)];
-        vDiffs = vDiffs .* vDiffsSorted(vInvSortIdx);
-    end
-    sDistParams.vPr = sDistParams.vPr + (vDensity .* vDiffs);
-end
+% sDistParams.vPr = zeros(length(x),1);
+% for c = 1:gmmNumComponents
+%     prop = sDistParams.componentProportion(c);
+%     vDensity = prop*p(sDistParams, c, x);
+%     vDiffs = ones(length(x),1);
+%     for d = 1:sDistParams.dim
+%         [ xTotalSorted, vSortedIdx ] = sort(x(:,d));
+%         [~, vInvSortIdx] = sort(vSortedIdx);
+%         vDiffsSorted = [0; diff(xTotalSorted)];
+%         vDiffs = vDiffs .* vDiffsSorted(vInvSortIdx);
+%     end
+%     sDistParams.vPr = sDistParams.vPr + (vDensity .* vDiffs);
+% end
 
 end

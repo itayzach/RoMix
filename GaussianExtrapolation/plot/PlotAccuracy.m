@@ -21,7 +21,7 @@ legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'Num
 if exist('pltTitle', 'var')
     title(pltTitle, 'Interpreter', 'latex', 'FontSize', 14)
 end
-if exist('xTickNames', 'var')
+if exist('xTickNames', 'var') && ~isempty(xTickNames)
     set(gca,'xtick',(0:M-1)','xticklabel',xTickNames)
     xtickangle(45)
 else

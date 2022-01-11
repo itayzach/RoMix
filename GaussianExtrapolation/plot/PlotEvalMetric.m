@@ -6,8 +6,8 @@ set(0,'DefaultFigureWindowStyle','normal')
 cLineStyle = {'-', '--', '-.'};
 fig = figure('Name', 'EvalMetric');
 for methodId = 1:nMethods
-    vCoh = mMetrics(:,methodId);
-    plot((0:M-1)', vCoh, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
+    vMetric = mMetrics(:,methodId);
+    plot((0:M-1)', vMetric, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
     hold on;
 end
 

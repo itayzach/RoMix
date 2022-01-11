@@ -1,35 +1,14 @@
 function sKernelParams = CalcKernelParams(sDistParams, omega)
-dim = sDistParams.dim;
 %% kernel and eigenfunctions constants type
 if strcmp(sDistParams.estDataDist, 'Gaussian')
     sKernelParams.kernelType = 'gaussian';
     %% second type consts
-    fprintf('*********************************************************\n');
-    fprintf('*                 CalcKernelParams                      *\n');
-    fprintf('*********************************************************\n');
     sKernelParams.omega = omega;
     sKernelParams.t = 0.5*sKernelParams.omega^2;
-    fprintf('omega    (kernel width)            = %8.3f\n', sKernelParams.omega);
-    fprintf('---------------------------------------------------------\n');
     for c = 1:sDistParams.estNumComponents
         sKernelParams.beta{c} = 2*sDistParams.sigma{c}.^2/sKernelParams.omega^2;
-        fprintf('mu(%2d)    (pdf mean)                 = [',c);
-        for d = 1:dim
-            fprintf('%8.3f, ', sDistParams.mu{c}(d)); 
-        end
-        fprintf(']\n');
-        fprintf('sigma(%2d) (pdf width)                = [',c);
-        for d = 1:dim
-            fprintf('%8.3f, ', sDistParams.sigma{c}(d)); 
-        end
-        fprintf(']\n');
-        fprintf('--> beta(%2d) = 2*sigma(%2d)^2/omega^2 = [', c, c);
-        for d = 1:dim
-            fprintf('%8.3f, ', sKernelParams.beta{c}(d));
-        end
-        fprintf(']\n');
-        fprintf('---------------------------------------------------------\n');
     end
+    PrintKernelParams(sDistParams,sKernelParams);
 elseif strcmp(sDistParams.estDataDist, 'uniform')
     sKernelParams.kernelType = 'sinc';
 else

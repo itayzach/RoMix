@@ -2,8 +2,15 @@ function C = EigsRLS(Phi, gamma1, gamma2, invLambda, L, f, b_maskDataFitTerm)
 
 lastwarn(''); % clear last warning
 if b_maskDataFitTerm
-    assert(size(f,2) == 1, 'The following term would not work for f as a matrix, only as a vector')
-    J = diag(sign(abs(f)));
+    if(size(f,2) == 10)
+        assert(islogical(f), 'If you got here, your f must be one hot encodeing classes matrix')
+        f_sum = sum(f,2);
+        J = diag(f_sum);
+    elseif(size(f,2) == 1)
+        J = diag(abs(f));
+    else
+        error('Semi-Supervised Learning masking is avaliable only for USPS and TwoMoons')
+    end
     JPhi = J*Phi;
 else
     JPhi = Phi;

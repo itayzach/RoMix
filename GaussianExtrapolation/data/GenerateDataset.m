@@ -55,6 +55,89 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
     end
     sDataset.sData.yt = mSignals;
     sDataset.sData.y = mSignals(1:nTrain,:);
+elseif ismember(actualDataDist, {'USPS', 'MNIST'})
+    assert(strcmp(interpMethod, 'AddPoints'))
+    nSets = ceil(nTest/1000);
+
+    datasetInd = randi(10,nSets,1);
+    fprintf('Loading %s set %d... ',actualDataDist, datasetInd(1))
+    digitsDataset = load(['data', filesep, lower(actualDataDist), filesep, lower(actualDataDist), '_set', num2str(datasetInd(1)), '.mat']);
+
+    for setInd = 2:nSets
+        fprintf('Loading %s set %d... ',actualDataDist, datasetInd(setInd))
+        digitsDataset2 = load(['data', filesep, lower(actualDataDist), filesep, lower(actualDataDist), '_set', num2str(datasetInd(setInd)), '.mat']);
+        digitsDataset.X = [digitsDataset.X; digitsDataset2.X];
+        digitsDataset.mem_fn = [digitsDataset.mem_fn; digitsDataset2.mem_fn];
+    end
+
+    Xdiv255 = digitsDataset.X/255;
+    if 0
+        k = 8;
+        sPreset = GetUspsPreset();
+        [~, ~, ~, Ln] = SimpleCalcAdjacency(Xdiv255,'GaussianKernel',sPreset.sDistanceParams, sPreset.omega);
+        Ln_k = Ln;
+        for classInd = 1:(k-1)
+            Ln_k = Ln_k*Ln;
+        end
+        S_opt_prev = false(nTest,1);
+        num_queries_to_add = sDatasetParams.nLabeled;
+    
+        Ln_k = 0.5*(Ln_k+Ln_k.');
+        [S_opt, cutoff] = compute_opt_set_inc(Ln_k, k, num_queries_to_add, S_opt_prev);
+        S_compl = setdiff((1:nTest)', S_opt);
+        
+        rperm = [S_opt.'; S_compl];
+    else
+        rperm = randperm(nTest);
+    end
+    Xdiv255perm = Xdiv255(rperm,:);
+    mSignalsPerm = digitsDataset.mem_fn(rperm,:);
+    [~, vLabels] = max(mSignalsPerm,[],2);
+    
+    % Take even number of samples from each class for training
+    vTrainInd = zeros(nTrain,1);
+    for classInd = 1:10
+        vTrainInd(nTrain/10*(classInd-1) + (1:nTrain/10)) = find(vLabels == classInd,nTrain/10);
+    end
+    
+    % Sort data as [train; test]
+    vNonTrainInd = setdiff(1:nTest,vTrainInd);
+    vLabelsOrdered(1:nTrain,:) = vLabels(vTrainInd);
+    vLabelsOrdered(nTrain+1:nTest) = vLabels(vNonTrainInd);
+    Xdiv255ordered(1:nTrain,:) = Xdiv255perm(vTrainInd,:);
+    Xdiv255ordered(nTrain+1:nTest,:) = Xdiv255perm(vNonTrainInd,:);
+    mSignalsPermOrdered(1:nTrain,:) = mSignalsPerm(vTrainInd,:);
+    mSignalsPermOrdered(nTrain+1:nTest,:) = mSignalsPerm(vNonTrainInd,:);
+    
+    % Zero out labeled signals for ssl
+    nLabeled = sDatasetParams.nLabeled;
+    mSignalsPermOrderedMasked = mSignalsPermOrdered(1:nTrain,:);
+    for classInd = 1:10
+        vNonLabledInd = nTrain/10*(classInd-1) + (nLabeled/10+1:nTrain/10);
+        mSignalsPermOrderedMasked(vNonLabledInd,:) = 0;
+    end
+
+%     Xdiv255_tsne = tsne(Xdiv255,'Algorithm','barneshut','NumPCAComponents',50,'NumDimensions',3);
+%     [~, labels] = max(usps.mem_fn,[],2);
+%     figure
+%     scatter3(Xdiv255_tsne(:,1),Xdiv255_tsne(:,2),Xdiv255_tsne(:,3),15,labels,'filled')
+%     figure; 
+%     tiledlayout('flow')
+%     imsize = sqrt(size(Xdiv255ordered,2));
+%     for i = (1:30)+30*2
+%         nexttile;
+%         imagesc(reshape(Xdiv255ordered(i,:),imsize,imsize))
+%         title(vLabelsOrdered(i))
+%     end
+%     sgtitle('random samples')   
+
+
+    sDataset.sData.x = Xdiv255ordered(1:nTrain,:);
+    sDataset.sData.xt = Xdiv255ordered;
+    sDataset.sData.y = mSignalsPermOrdered(1:nTrain,:);
+    sDataset.sData.ymasked = mSignalsPermOrderedMasked;
+    sDataset.sData.yt = mSignalsPermOrdered;
+
 elseif strcmp(actualDataDist, 'MnistDist')
 %     assert(strcmp(interpMethod, 'AddPoints'))
 %     mnist = load('data\mnist.mat');
@@ -68,7 +151,8 @@ elseif strcmp(actualDataDist, 'MnistDist')
 %     dim = 2;
 elseif strcmp(actualDataDist, 'MnistLatentVAE')
     assert(strcmp(interpMethod, 'AddPoints'))
-    mnistLatent = load('data\mnistLatentVAE.mat');
+    error('change to one-hot encoding and then take argmax, like usps')
+    mnistLatent = load(['data', filesep, 'mnist', filesep, 'mnistLatentVAE.mat']);
     z = double(mnistLatent.z);
     y = double(mnistLatent.labels');
     if ~isfield(sDatasetParams, 'vPossibleLabels')
@@ -160,9 +244,9 @@ elseif strcmp(actualDataDist, 'TwoMoons')
         sDatasetParams.b_loadTwoMoonsMatFile = false;
     end
     if strcmp(interpMethod, 'NewPoints')
-        sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, sDatasetParams.b_loadTwoMoonsMatFile);
+        sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, sDatasetParams.nLabeled, sDatasetParams.b_loadTwoMoonsMatFile);
     elseif strcmp(interpMethod, 'AddPoints')
-        sData = GenerateTwoMoonsDataset(nTest, 0, sDatasetParams.b_loadTwoMoonsMatFile);
+        sData = GenerateTwoMoonsDataset(nTest, 0, sDatasetParams.nLabeled, sDatasetParams.b_loadTwoMoonsMatFile);
         data = sData.x;
         rperm = randperm(nTest);
         dataRearranged = data(rperm,:);

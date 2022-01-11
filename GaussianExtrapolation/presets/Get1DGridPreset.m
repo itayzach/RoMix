@@ -32,6 +32,7 @@ sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;
 %% Representer theorem
 sPreset.gamma1Rep          = 1e-5;
+sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
 sPreset.R                  = 1;
 %% Method parameters

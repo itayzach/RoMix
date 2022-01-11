@@ -10,7 +10,8 @@ sPreset.verticesPDF        = 'TwoMoons'; % 'Gaussian' / 'Uniform' / 'Grid' / 'Tw
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sPreset.sDatasetParams     = [];
+sDatasetParams.nLabeled    = 2;
+sPreset.sDatasetParams     = sDatasetParams;
 %% Gaussian kernel width
 sPreset.omega              = 0.3; % for nystrom kernel
 sPreset.omegaTilde         = 0.3; % for our method
@@ -25,7 +26,8 @@ sPreset.MTilde             = 20;
 sPreset.gamma1             = 0.1;
 sPreset.gamma2             = 0.1;
 %% Representer theorem
-sPreset.gamma1Rep          = 0.1;
+sPreset.gamma1Rep          = 0.1;0.03125;
+sPreset.gamma2Rep          = 1;0;
 %% Number of runs (=realizations)
 sPreset.R                  = 1;
 %% Method parameters

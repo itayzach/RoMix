@@ -1,4 +1,4 @@
-function sTwoMoons = GenerateTwoMoonsDataset(nTrain, nTest, b_loadTwoMoonsMatFile, noiseSigma)
+function sTwoMoons = GenerateTwoMoonsDataset(nTrain, nTest, nLabeled, b_loadTwoMoonsMatFile, noiseSigma)
 
 if ~exist('noiseSigma', 'var')
     noiseSigma = 0.1;
@@ -11,7 +11,7 @@ else
     [sTwoMoons.xt, sTwoMoons.yt] = GenerateTwoMoons(nTest, noiseSigma);
 end
 
-ell = 1;
+ell = nLabeled/2;
 posTrainInd = find(sTwoMoons.y==1);
 negTrainInd = find(sTwoMoons.y==-1);
 ipos = randperm(length(posTrainInd));

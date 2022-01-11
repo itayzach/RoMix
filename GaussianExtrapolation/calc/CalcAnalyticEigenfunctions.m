@@ -2,7 +2,7 @@ function [mPhiAnalytic, vLambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKe
 
 [nTotal, dim] = size(mData);
 fprintf('Calculating %d eigenfunctions (b_normalize = %d) d = %d, n = %d... ',nEigs,b_normalize, dim,nTotal)
-mPhiAnalytic = zeros(length(mData), nEigs);
+mPhiAnalytic = zeros(nTotal, nEigs);
 for i = 1:nEigs
     c = sKernelParams.vComponentIndex(i);
     j = sKernelParams.vEigIndex(i);

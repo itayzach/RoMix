@@ -1,31 +1,31 @@
-function sPreset = GetTwoSpiralsPreset()
+function sPreset = GetMnistPreset()
 %% Dataset parameters
-sPreset.dim                = 2;
-sPreset.n                  = 1000;
-sPreset.N                  = 1000;
+sPreset.dim                = 28*28;
+sPreset.n                  = 800; % cannot be less than 28*28 due to GMM
+sPreset.N                  = 3000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
-sPreset.verticesPDF        = 'TwoSpirals'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
+sPreset.verticesPDF        = 'MNIST'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-% sDatasetParams.b_loadTwoMoonsMatFile = true;
-sDatasetParams             = [];
+sDatasetParams.nLabeled = round(sPreset.n);
+assert(sDatasetParams.nLabeled <= sPreset.n)
 sPreset.sDatasetParams     = sDatasetParams;
 %% Gaussian kernel width
-sPreset.omega              = 0.2; % for nystrom kernel
-sPreset.omegaTilde         = 0.2; % for our method
+sPreset.omega              = 1.73; % for nystrom kernel
+sPreset.omegaTilde         = 3;1.73; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
-sPreset.gmmNumComponents   = 25;
+sPreset.gmmNumComponents   = 10;
 %% Number of eigenvectors/eigenfunctions
-sPreset.M                  = 50;
-sPreset.MTilde             = 80;
+sPreset.M                  = 20;
+sPreset.MTilde             = 20*sPreset.gmmNumComponents;
 %% Regularizations
-sPreset.gamma1             = 0;
-sPreset.gamma2             = 0.1;
+sPreset.gamma1             = 0.1;
+sPreset.gamma2             = 0;0.1;
 %% Representer theorem
 sPreset.gamma1Rep          = 0.1;
 sPreset.gamma2Rep          = 0;
@@ -42,6 +42,6 @@ sPreset.b_interpEigenvecs  = false;
 sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = true;
 %% 
-sPreset.dataGenTechnique = 'NewPoints';
+sPreset.dataGenTechnique = 'AddPoints';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 end

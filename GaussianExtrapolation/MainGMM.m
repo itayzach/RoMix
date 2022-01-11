@@ -34,6 +34,7 @@ omegaTilde         = sPreset.omegaTilde; % for our method
 gamma1             = sPreset.gamma1;
 gamma2             = sPreset.gamma2;
 gamma1Rep          = sPreset.gamma1Rep;
+gamma2Rep          = sPreset.gamma2Rep;
 gmmRegVal          = sPreset.gmmRegVal;
 gmmMaxIter         = sPreset.gmmMaxIter;
 gmmNumComponents   = sPreset.gmmNumComponents;
@@ -53,6 +54,7 @@ interpRatio        = N/n;
 assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
 assert(~strcmp(adjacencyType,'NearestNeighbor') || ...
     strcmp(adjacencyType,'NearestNeighbor') && strcmp(verticesPDF,'Grid'))
+assert((strcmp(clusterMethod, 'GMM') && n >= dim) || (strcmp(clusterMethod, 'SC'))) 
 %% Plot params
 sPlotParams = GetPlotParams();
 sPlotParams.actualDataDist = verticesPDF;
@@ -72,19 +74,20 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Generate dataset
     % ----------------------------------------------------------------------------------------------
-    fprintf('Iteration r = %d\n',r)
+    fprintf('Iteration r = %d of R = %d\n',r,R)
     sDataset = GenerateDataset(verticesPDF, dim, nGenDataCompnts, n, N, dataGenTechnique, sDatasetParams);
-    assert(n == length(sDataset.sData.x));
-    assert(N == length(sDataset.sData.xt));
+    xTrain   = sDataset.sData.x;
+    yTrain   = sDataset.sData.y;
+    xInt     = sDataset.sData.xt;
+    assert(n == size(xTrain,1));
+    assert(N == size(xInt,1));
     if strcmp(sPreset.dataGenTechnique, 'NewPoints')
         warning('sPreset.dataGenTechnique is NewPoints, should make sure its okay...')
         pause(0.5)
     else
-        assert(isequal(sDataset.sData.x, sDataset.sData.xt(1:n,:)));
+        assert(isequal(xTrain, xInt(1:n,:)));
     end
-    xTrain   = sDataset.sData.x;
-    yTrain   = sDataset.sData.y;
-    xInt     = sDataset.sData.xt;
+
     if r == 1 && sPlotParams.b_plotData && dim <= 3
         PlotDataset(sPlotParams, xTrain, yTrain, 'Training set');
     end
@@ -147,7 +150,7 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     xTildeTrain = xTrain;
     if strcmp(clusterMethod, 'GMM')
-    sDistParams = EstimateDistributionParameters(xTildeTrain, gmmNumComponents, gmmRegVal, gmmMaxIter);
+        sDistParams = EstimateDistributionParameters(xTildeTrain, gmmNumComponents, gmmRegVal, gmmMaxIter);
     elseif strcmp(clusterMethod, 'SC')
         sDistParams = EstDistParamsSpectClust(xTildeTrain, W, gmmNumComponents);
     end
@@ -171,7 +174,7 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     sKernelParams = CalcKernelParams(sDistParams, omegaTilde);
     [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
-        = CalcAnalyticEigenvalues(MTilde, sKernelParams);
+         = CalcAnalyticEigenvalues(MTilde, sKernelParams);
     [ PhiTilde, lambdaAnalyticTilde ] = ...
         CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, b_normalizePhi);
     invLambda = diag(1./lambdaAnalyticTilde);
@@ -180,14 +183,9 @@ for r = 1:R
     % Plot PhiTilde
     % ----------------------------------------------------------------------------------------------
     if r == 1 && sPlotParams.b_plotTildeFiguresForDebug && dim <= 3
-        if strcmp(verticesPDF, 'Gaussian')
-            sPlotParamsGaussian = sPlotParams;
-        else
-            sPlotParamsGaussian = [];
-        end
         figTitle = 'Eigenfunctions of the Gaussian kernel (on $n$ nodes)';
         figName = 'PhiTilde';
-        PlotEigenfuncvecScatter(sPlotParamsGaussian, 'Gaussian', xTildeTrain, [], 0, 4, ...
+        PlotEigenfuncvecScatter([], 'Gaussian', xTildeTrain, [], 0, 4, ...
             PhiTilde, [], [], [], figTitle, figName, '\phi' );
         figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
         PlotSpectrum([], [], lambdaAnalyticTilde, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
@@ -196,8 +194,7 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Calculate eigenfunctions values at xInt
     % ----------------------------------------------------------------------------------------------
-    xTildeInt = xInt;
-    [PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeInt, b_normalizePhi);
+    [PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xInt, b_normalizePhi);
 
     % ----------------------------------------------------------------------------------------------
     % Interpolate with Nystrom
@@ -233,13 +230,14 @@ for r = 1:R
         % ----------------------------------------------------------------------------------------------
         % Learn alpha using the Representer theorem
         % ----------------------------------------------------------------------------------------------
-        mAlpha = (W - gamma1Rep*eye(n)) \ V;
-        mAlpha = mAlpha/sqrt(interpRatio);
+        b_normalizeAlpha = true;
+        mAlpha = LapRLS(W, V, Ln, gamma1Rep, gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
         
-        CRep = diag(lambdaAnalyticTilde)*PhiTilde.'*mAlpha;
         if r == 1 && sPlotParams.b_plotC
+            CRep = diag(lambdaAnalyticTilde)*PhiTilde.'*mAlpha;
             PlotCoeffsMatrix(C, '${\bf C}$', CRep, ...
                 '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', mAlpha, '$\alpha$');
+            %             PlotCoefficients(sPlotParams, C(:,1:5), lambdaAnalyticTilde)
         end
         % ----------------------------------------------------------------------------------------------
         % Interpolate with Representer theorem
@@ -328,7 +326,7 @@ for r = 1:R
     % ----------------------------------------------------------------------------------------------
     % Graph signal
     % ----------------------------------------------------------------------------------------------
-    if r == 1 && b_runGraphSignals
+    if b_runGraphSignals
         if isfield(sDataset.sData, 'y') && ~isempty(sDataset.sData.y)
             assert(~isempty(sDataset.sData.yt));
             mSig = sDataset.sData.y;
@@ -340,10 +338,17 @@ for r = 1:R
         % Coeffs
         % ------------------------------------------------------------------------------------------
         mSigHatV = V'*mSig; % same as pinv(V)*sig...
-        mSigHatPhi = EigsRLS(PhiTilde, gamma1, gamma2, invLambda, Ln, mSig, sPreset.b_maskDataFitTerm);
-        mAlpha = (W - gamma1Rep*eye(n)) \ mSig;
-        mAlpha = mAlpha/sqrt(interpRatio);
-
+        if ismember(sPreset.verticesPDF, {'USPS'})  
+            mSigMasked = sDataset.sData.ymasked;
+            mSigHatPhi = EigsRLS(PhiTilde, gamma1, gamma2, invLambda, Ln, mSigMasked, sPreset.b_maskDataFitTerm);
+        else
+            mSigHatPhi = EigsRLS(PhiTilde, gamma1, gamma2, invLambda, Ln, mSig, sPreset.b_maskDataFitTerm);
+        end
+        b_normalizeAlpha = true;
+        mAlpha = LapRLS(W, mSig, Ln, gamma1Rep, gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
+        
+        % Just for reference
+        mSigRefHatPhi = EigsRLS(PhiTildeInt, gamma1, gamma2, invLambda, LnRef, mSigRef, sPreset.b_maskDataFitTerm);
         % ------------------------------------------------------------------------------------------
         % Signals
         % ------------------------------------------------------------------------------------------
@@ -353,6 +358,8 @@ for r = 1:R
         mSigInt = PhiTildeInt*mSigHatPhi;
         mSigNys = VNys*mSigHatV;
         mSigRep = WTrainInt.'*mAlpha;
+
+        mSigIntRef = PhiTildeInt*mSigRefHatPhi;
         if (ismember(sPreset.verticesPDF, {'TwoMoons', 'TwoSpirals'})) || ...
                 (ismember(sPreset.verticesPDF, {'MnistLatentVAE'}) && isequal(sDatasetParams.vPossibleLabels, [0, 1]))
             mSigRecV = sign(mSigRecV);
@@ -361,16 +368,32 @@ for r = 1:R
             mSigInt = sign(mSigInt);
             mSigNys = sign(mSigNys);
             mSigRep = sign(mSigRep);
+
+            mSigIntRef = sign(mSigIntRef);
         elseif ismember(sPreset.verticesPDF, {'MnistLatentVAE'})    
+            error('I dont think round is the way to go here...')
             mSigRecV = round(mSigRecV);
             mSigRecPhi = round(mSigRecPhi);
             mSigRecRep = round(mSigRecRep);
             mSigInt = round(mSigInt);
             mSigNys = round(mSigNys);
             mSigRep = round(mSigRep);
+
+            mSigIntRef = round(mSigIntRef);
+        elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})  
+            [~, mSig] = max(mSig,[],2);
+            [~, mSigRef] = max(mSigRef,[],2);
+
+            [~, mSigRecV] = max(mSigRecV,[],2);
+            [~, mSigRecPhi] = max(mSigRecPhi,[],2);
+            [~, mSigRecRep] = max(mSigRecRep,[],2);
+            [~, mSigInt] = max(mSigInt,[],2);
+            [~, mSigNys] = max(mSigNys,[],2);
+            [~, mSigRep] = max(mSigRep,[],2);
+
+            [~, mSigIntRef] = max(mSigIntRef,[],2);
         end
-        % Just for reference
-        mSigRefHatPhi = EigsRLS(PhiTildeInt, gamma1, gamma2, invLambda, LnRef, mSigRef, sPreset.b_maskDataFitTerm);
+        
                
         % ------------------------------------------------------------------------------------------
         % Plots
@@ -387,8 +410,17 @@ for r = 1:R
         vSigRecPhi = mSigRecPhi(:,sigIndToPlot);
         vSigRecRep = mSigRecRep(:,sigIndToPlot);
         vSigInt    = mSigInt(:,sigIndToPlot);
+        vSigIntRef = mSigIntRef(:,sigIndToPlot);
         vSigNys    = mSigNys(:,sigIndToPlot);
         vSigRep    = mSigRep(:,sigIndToPlot);
+
+        if r == 1 && sPlotParams.b_plotC
+            CRep = diag(lambdaAnalyticTilde)*PhiTilde.'*mAlpha;
+            PlotCoeffsMatrix(mSigHatPhi, '${\bf C}$', CRep, ...
+                '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', mAlpha, '$\alpha$');
+            PlotCoefficients([], mSigHatPhi(:,sigIndToPlot), lambdaAnalyticTilde)
+        end
+
         
 %         PlotGraphSignalAnalysis(vSig, vSigRecPhi, vSigRecV, vSigRef, vSigInt, vSigNys, ...
 %             vSigHatPhi, vSigHatV, vSigRefHatPhi);
@@ -407,34 +439,41 @@ for r = 1:R
 %             {'|s^{{\bf ref}}-s^{{\bf int}}|', '|s^{{\bf ref}}-s^{{\bf nys}}|', '|s^{{\bf ref}}-s^{{\bf rep}}|'},  ...
 %             'Total error ($N$ nodes)')
         
-        PlotGraphSignals(sPlotParams, ['Graph signals on given $n=' num2str(n) '$ nodes (Train set)'], 'TrainSet', ...
-            {xTrain, xTrain, xTrain, xTrain}, ...
-            {vSig, vSigRecPhi, vSigRecV, vSigRecRep}, ...
-            {'$s$', '$s_{\Phi}^{{\bf rec}}$', '$s_{V}^{{\bf rec}}$', '$s_{K}^{{\bf rec}}$'}, ...
-            {n, n, n, n});
-        cmap = PlotGraphSignals(sPlotParams, ['Graph signals on all $N=' num2str(N) '$ nodes (Train \& Test sets)'], 'TrainAndTestSet', ...
-            {xInt, xInt, xInt, xInt}, ...
-            {vSigRef, vSigInt, vSigNys, vSigRep}, ...
-            {'$s^{{\bf ref}}$', '$s^{{\bf int}}$', '$s^{{\bf nys}}$', '$s^{{\bf rep}}$'}, ...
-            {n, n, n, n});
+        if r == 1 && sPlotParams.b_plotC
+            PlotCoefficients(sPlotParams, vSigHatPhi, lambdaAnalyticTilde)        
+            PlotCoefficients(sPlotParams, vSigRefHatPhi, lambdaAnalyticTilde)        
+        end
         
-        if sPlotParams.b_plotGmmSignal
-            % GMM
-            nGmmPoints = 1000;
-            [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
-            [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
-            mSigGmm = PhiTildeGmm*mSigHatPhi;
-            vSigGmm = mSigGmm(:,sigIndToPlot);
-            if dim == 2
-                xylim(1) = min(xTrain(:,1));
-                xylim(2) = max(xTrain(:,1));
-                xylim(3) = min(xTrain(:,2));
-                xylim(4) = max(xTrain(:,2));
-            else
-                xylim = [];
+        if r == 1 && dim <=3 &&  ~(ismember(sPreset.verticesPDF, {'TwoMoons'}))
+            PlotGraphSignals(sPlotParams, ['Graph signals on given $n=' num2str(n) '$ nodes (Train set)'], 'TrainSet', ...
+                {xTrain, xTrain, xTrain, xTrain}, ...
+                {vSig, vSigRecPhi, vSigRecV, vSigRecRep}, ...
+                {'$s$', '$s_{\Phi}^{{\bf rec}}$', '$s_{V}^{{\bf rec}}$', '$s_{K}^{{\bf rec}}$'}, ...
+                {n, n, n, n});
+            cmap = PlotGraphSignals(sPlotParams, ['Graph signals on all $N=' num2str(N) '$ nodes (Train \& Test sets)'], 'TrainAndTestSet', ...
+                {xInt, xInt, xInt, xInt}, ...
+                {vSigRef, vSigInt, vSigNys, vSigRep}, ...
+                {'$s^{{\bf ref}}$', '$s^{{\bf int}}$', '$s^{{\bf nys}}$', '$s^{{\bf rep}}$'}, ...
+                {n, n, n, n});
+            
+            if sPlotParams.b_plotGmmSignal
+                % GMM
+                nGmmPoints = 1000;
+                [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
+                [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
+                mSigGmm = PhiTildeGmm*mSigHatPhi;
+                vSigGmm = mSigGmm(:,sigIndToPlot);
+                if dim == 2
+                    xylim(1) = min(xTrain(:,1));
+                    xylim(2) = max(xTrain(:,1));
+                    xylim(3) = min(xTrain(:,2));
+                    xylim(4) = max(xTrain(:,2));
+                else
+                    xylim = [];
+                end
+                PlotGraphSignals(sPlotParams, 'GMM Graph signal', 'GMM', {xGmm}, {vSigGmm}, ...
+                    {'$s^{{\bf gmm}}$'}, {nGmmPoints}, xylim, cmap);
             end
-            PlotGraphSignals(sPlotParams, 'GMM Graph signal', 'GMM', {xGmm}, {vSigGmm}, ...
-                {'$s^{{\bf gmm}}$'}, {nGmmPoints}, xylim, cmap);
         end
         
         % ------------------------------------------------------------------------------------------
@@ -443,9 +482,9 @@ for r = 1:R
         if (ismember(sPreset.verticesPDF, {'TwoMoons', 'TwoSpirals'})) || ...
                 (ismember(sPreset.verticesPDF, {'MnistLatentVAE'}) && isequal(sDatasetParams.vPossibleLabels, [0, 1]))
             vPredictionsInt = mSigInt;
-            vTestIdx = find(sDataset.sData.yt ~= 0);
-            testAccInt = 100*sum(vPredictionsInt(vTestIdx) == sDataset.sData.yt(vTestIdx)) / length(vTestIdx);
-            fprintf('Test accuracy = %.2f%%\n', testAccInt);
+            vTestIdx = find(mSigRef ~= 0);
+            testAccInt = 100*sum(vPredictionsInt(vTestIdx) == mSigRef(vTestIdx)) / length(vTestIdx);
+            fprintf('Ours Test accuracy = %.2f%%\n', testAccInt);
             
             sClassifier.MTilde = MTilde;
             sClassifier.omega = omegaTilde;
@@ -453,8 +492,8 @@ for r = 1:R
             sClassifier.gamma_I = gamma2;
             sClassifier.error = 100 - testAccInt;
             sClassifier.vPhi_xTrain_c = mSigRecPhi;
-            xMax = max([sDataset.sData.x(:); sDataset.sData.xt(:)]);
-            xMin = min([sDataset.sData.x(:); sDataset.sData.xt(:)]);
+            xMax = max([xTrain(:); xInt(:)]);
+            xMin = min([xTrain(:); xInt(:)]);
             step = (xMax - xMin)/100;
             x1 = xMin:step:xMax;
             x2 = x1;
@@ -465,41 +504,56 @@ for r = 1:R
             PlotGraphSignalAnalysis(mSig, mSigRecPhi, mSigRecV, mSigRef, mSigInt, mSigNys, ...
                 mSigHatPhi, mSigHatV, mSigRefHatPhi);
         
-            PlotClassifier(sPlotParams, sDataset, sClassifier)
-        elseif ismember(sPreset.verticesPDF, {'MnistLatentVAE'})
+            PlotClassifier(sPlotParams, sDataset, sClassifier);
+
+
+            vPredictionsRep = mSigRep;
+            testAccRepThm = 100*sum(vPredictionsRep(vTestIdx) == mSigRef(vTestIdx)) / length(vTestIdx);
+            fprintf('Rep. Thm Test accuracy = %.2f%%\n', testAccRepThm);
+
+            sLapRLSClassifier.alpha = mAlpha;
+            sLapRLSClassifier.gammas = [gamma1Rep, gamma2Rep];
+            sLapRLSClassifier.test_error = 100 - testAccRepThm;
+            PlotLapRLS(sPlotParams, sDataset, sDistanceParams, omega, sLapRLSClassifier);
+
+        elseif ismember(sPreset.verticesPDF, {'MnistLatentVAE', 'USPS', 'MNIST'})
             vPredictionsRecRep = mSigRecRep;
-            testAccRecRep = 100*sum(vPredictionsRecRep == sDataset.sData.y) / n;
+            testAccRecRep = 100*sum(vPredictionsRecRep == mSig) / n;
             fprintf('\nRep Thm train accuracy = %.2f%%\n', testAccRecRep);
             vPredictionsRep = mSigRep;
-            testAccRep = 100*sum(vPredictionsRep == sDataset.sData.yt) / N;
+            testAccRep = 100*sum(vPredictionsRep == mSigRef) / N;
             fprintf('Rep Thm test accuracy  = %.2f%%\n', testAccRep);
             
             vPredictionsRecV = mSigRecV;
-            testAccRecV = 100*sum(vPredictionsRecV == sDataset.sData.y) / n;
+            testAccRecV = 100*sum(vPredictionsRecV == mSig) / n;
             fprintf('\nNystrom train accuracy = %.2f%%\n', testAccRecV);
             vPredictionsNys = mSigNys;
-            testAccNys = 100*sum(vPredictionsNys == sDataset.sData.yt) / N;
+            testAccNys = 100*sum(vPredictionsNys == mSigRef) / N;
             fprintf('Nystrom test accuracy  = %.2f%%\n', testAccNys);
             
             vPredictionsRecPhi = mSigRecPhi;
-            testAccRecPhi = 100*sum(vPredictionsRecPhi == sDataset.sData.y) / n;
+            testAccRecPhi = 100*sum(vPredictionsRecPhi == mSig) / n;
             fprintf('\nOurs train accuracy    = %.2f%%\n', testAccRecPhi);
             vPredictionsInt = mSigInt;
-            testAccInt = 100*sum(vPredictionsInt == sDataset.sData.yt) / N;
+            testAccInt = 100*sum(vPredictionsInt == mSigRef) / N;
             fprintf('Ours test accuracy     = %.2f%%\n', testAccInt);
+            
+            vPredictionsIntRef = mSigIntRef;
+            testAccIntRef = 100*sum(vPredictionsIntRef == mSigRef) / N;
+            fprintf('Ours test accuracy     = %.2f%%\n', testAccIntRef);
         else
             [vRmseRecRep, vMseRecRep, vAccRecRep, mErrRecRep, vCohRecRep] = ...
-                CalcErrAndAcc(mSigRecRep, sDataset.sData.y, 'Representer (train)');
+                CalcErrAndAcc(mSigRecRep, mSig, 'Representer (train)');
             [vRmseRep, vMseRep, vAccRep, mErrRep, vCohRep] = ...
-                CalcErrAndAcc(mSigRep, sDataset.sData.yt, 'Representer (test)');
+                CalcErrAndAcc(mSigRep, mSigRef, 'Representer (test)');
             [vRmseRecV, vMseRecV, vAccRecV, mErrRecV, vCohRecV] = ...
-                CalcErrAndAcc(mSigRecV, sDataset.sData.y, 'Nystrom (train)');
+                CalcErrAndAcc(mSigRecV, mSig, 'Nystrom (train)');
             [vRmseNys, vMseNys, vAccNys, mErrNys, vCohNys] = ...
-                CalcErrAndAcc(mSigNys, sDataset.sData.yt, 'Nystrom (test)');
+                CalcErrAndAcc(mSigNys, mSigRef, 'Nystrom (test)');
             [vRmseRecPhi, vMseRecPhi, vAccRecPhi, mErrRecPhi, vCohRecPhi] = ...
-                CalcErrAndAcc(mSigRecPhi, sDataset.sData.y, 'EigsRLS (train)');
+                CalcErrAndAcc(mSigRecPhi, mSig, 'EigsRLS (train)');
             [vRmseInt, vMseInt, vAccInt, mErrInt, vCohInt] = ...
-                CalcErrAndAcc(mSigInt, sDataset.sData.yt, 'EigsRLS (test)');
+                CalcErrAndAcc(mSigInt, mSigRef, 'EigsRLS (test)');
             
 %             PlotRMSE(sPlotParams, [vRmseRecPhi, vRmseRecV, vRmseRecRep], ...
 %                 {'RMSE$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'RMSE$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...

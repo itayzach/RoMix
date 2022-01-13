@@ -6,7 +6,7 @@ I=eye(n);
 lastwarn(''); % clear last warning
 if b_maskDataFitTerm
     if(size(f,2) == 10)
-        assert(islogical(f), 'If you got here, your f must be one hot encodeing classes matrix')
+        assert(isequal(f,sign(f)), 'If you got here, your f must be one hot encodeing classes matrix')
         f_sum = sum(f,2);
         J = diag(f_sum);
     elseif(size(f,2) == 1)

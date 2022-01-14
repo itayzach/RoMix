@@ -21,6 +21,7 @@ if strcmp(sKernelParams.kernelType, 'gaussian')
     end
     vPhi_m = normFactor * exp( -((x-mu).^2/(2*sigma^2)) * ((sqrt(1+2*beta)-1)/2) ) .* vHm;
     assert(~any(isnan(vPhi_m)), 'Phi %d contains NaN', m);
+    assert(isreal(vPhi_m), 'Phi %d is complex', m);
 
 elseif strcmp(sKernelParams.kernelType, 'sinc')
 %     vPhi_m = real(sqrt(pi./(2*sParams.a*x)) .* besselj(m+0.5, sParams.a*x));

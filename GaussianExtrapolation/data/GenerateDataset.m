@@ -58,7 +58,6 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
 elseif ismember(actualDataDist, {'USPS', 'MNIST'})
     assert(strcmp(interpMethod, 'AddPoints'))
     nSets = ceil(nTest/1000);
-
     datasetInd = randi(10,nSets,1);
     fprintf('Loading %s set %d... ',actualDataDist, datasetInd(1))
     digitsDataset = load(['data', filesep, lower(actualDataDist), filesep, lower(actualDataDist), '_set', num2str(datasetInd(1)), '.mat']);
@@ -69,9 +68,10 @@ elseif ismember(actualDataDist, {'USPS', 'MNIST'})
         digitsDataset.X = [digitsDataset.X; digitsDataset2.X];
         digitsDataset.mem_fn = [digitsDataset.mem_fn; digitsDataset2.mem_fn];
     end
-
+    
     Xdiv255 = digitsDataset.X/255;
     if 0
+        % Set selection from "Active semisupervised learning"
         k = 8;
         sPreset = GetUspsPreset();
         [~, ~, ~, Ln] = SimpleCalcAdjacency(Xdiv255,'GaussianKernel',sPreset.sDistanceParams, sPreset.omega);
@@ -88,27 +88,32 @@ elseif ismember(actualDataDist, {'USPS', 'MNIST'})
         
         rperm = [S_opt.'; S_compl];
     else
-        rperm = randperm(nTest);
+%         rperm = 1:nTest;
+        rperm = randperm(nTest);    
     end
+    
+    % By this point, X is ordered. We take a random permutation to randomize the data order
     Xdiv255perm = Xdiv255(rperm,:);
     mSignalsPerm = digitsDataset.mem_fn(rperm,:);
     [~, vLabels] = max(mSignalsPerm,[],2);
     
-    % Take even number of samples from each class for training
+    % Take even number of samples from each class for training.
+    % (There are 10 classes)
     vTrainInd = zeros(nTrain,1);
     for classInd = 1:10
-        vTrainInd(nTrain/10*(classInd-1) + (1:nTrain/10)) = find(vLabels == classInd,nTrain/10);
+        currClassOffset = nTrain/10*(classInd-1);
+        vIndOfCurrClass = find(vLabels == classInd,nTrain/10);
+        vTrainInd(currClassOffset + (1:nTrain/10)) = vIndOfCurrClass;
     end
-    
+    % None training indices are the complement of vTrainInt
+    vNonTrainInd = setdiff((1:nTest)',vTrainInd);
+
     % Sort data as [train; test]
-    vNonTrainInd = setdiff(1:nTest,vTrainInd);
-    vLabelsOrdered(1:nTrain,:) = vLabels(vTrainInd);
-    vLabelsOrdered(nTrain+1:nTest) = vLabels(vNonTrainInd);
     Xdiv255ordered(1:nTrain,:) = Xdiv255perm(vTrainInd,:);
     Xdiv255ordered(nTrain+1:nTest,:) = Xdiv255perm(vNonTrainInd,:);
     mSignalsPermOrdered(1:nTrain,:) = mSignalsPerm(vTrainInd,:);
     mSignalsPermOrdered(nTrain+1:nTest,:) = mSignalsPerm(vNonTrainInd,:);
-    
+
     % Zero out labeled signals for ssl
     nLabeled = sDatasetParams.nLabeled;
     mSignalsPermOrderedMasked = mSignalsPermOrdered(1:nTrain,:);
@@ -116,6 +121,7 @@ elseif ismember(actualDataDist, {'USPS', 'MNIST'})
         vNonLabledInd = nTrain/10*(classInd-1) + (nLabeled/10+1:nTrain/10);
         mSignalsPermOrderedMasked(vNonLabledInd,:) = 0;
     end
+
 
 %     Xdiv255_tsne = tsne(Xdiv255,'Algorithm','barneshut','NumPCAComponents',50,'NumDimensions',3);
 %     [~, labels] = max(usps.mem_fn,[],2);

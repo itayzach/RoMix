@@ -7,4 +7,5 @@ function [vPhi_m] = phi(sKernelParams, c, m, x)
         end
         vPhi_m = vPhi_m .* phi_d(sKernelParams, c, m(d), x*sKernelParams.sDistParams.u{c}(:,d), d);
     end
+    assert(~isequal(vPhi_m,ones(size(x,1),1)), 'vPhi_m remained all ones')
 end

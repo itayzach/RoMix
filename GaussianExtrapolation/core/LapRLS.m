@@ -27,4 +27,7 @@ if b_renormalize
     alpha = alpha/sqrt(interpRatio);
 end
 
+fRec = W*alpha;
+fprintf('LapRLS : first fRec^T*L*fRec = %.4f\n',fRec(:,1).'*L*fRec(:,1))
+
 end

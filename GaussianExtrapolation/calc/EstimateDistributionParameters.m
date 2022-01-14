@@ -11,7 +11,8 @@ assert(GMModel.Converged, 'GMM couldn''t converge...')
 sDistParams.GMModel = GMModel;
 fprintf('Done.\n')
 
-fprintf('Filling sDistParams... ')
+
+fprintf('Calculating [fliplr(u), fliplr(sigma^2)] = eig(cov) for all %d components... ',gmmNumComponents)
 sDistParams.estNumComponents = gmmNumComponents;
 sDistParams.componentProportion = GMModel.ComponentProportion;
 for c = 1:gmmNumComponents
@@ -19,18 +20,21 @@ for c = 1:gmmNumComponents
     sDistParams.mu{c} = GMModel.mu(c,:);
     [sDistParams.u{c}, sDistParams.sigma_eigv{c}] = eig(sDistParams.cov{c});
     sDistParams.sigma{c} = diag(sqrt(sDistParams.sigma_eigv{c})).';
-    if dim == 2
-        if sDistParams.cov{c}(1,1) > sDistParams.cov{c}(2,2)
-            warning('The variance in the first axis is greater than the variance in the second, but eig returns the eigenvalues in increasing order. So we fliplr')
-            sDistParams.u{c} = fliplr(sDistParams.u{c});    
-            sDistParams.sigma{c} = fliplr(sDistParams.sigma{c});
-        end   
-        sDistParams.u{c} = [-sDistParams.u{c}(:,1) -sDistParams.u{c}(:,2)];    
-    end
+    assert(isreal(sDistParams.sigma{c}) && all(sDistParams.sigma{c} > eps))
+% 1:
+%     sDistParams.u{c} = fliplr(sDistParams.u{c});
+%     sDistParams.sigma{c} = fliplr(sDistParams.sigma{c});
+% 2:
+    [~, uIndByCov] = sort(sDistParams.sigma{c},'descend');
+    sDistParams.u{c} = sDistParams.u{c}(:,uIndByCov);
+    sDistParams.sigma{c} = sDistParams.sigma{c}(uIndByCov);
+
     sDistParams.mu_1D{c} = sDistParams.mu{c}*sDistParams.u{c};
     isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-10)
+%     assert(isequal(sort(sDistParams.sigma{c}),sDistParams.sigma{c}))
 end
-fprintf('Done.\n')
+[minSigma, minSigmaInd] = min(sDistParams.sigma{c});
+fprintf('Done. min(sigma{1:%d}) = %.4f (ind = %d)\n', gmmNumComponents, minSigma, minSigmaInd)
 
 % Caluclate the probability for each data point x
 % sDistParams.vPr = zeros(length(x),1);

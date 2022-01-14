@@ -26,6 +26,10 @@ warnMsg = lastwarn();
 if ~isempty(warnMsg) % catch warning
     error('\n returned warning: %s\n', warnMsg);
 end
+
+fRec = Phi*C;
+fprintf('EigsRLS: first fRec^T*L*fRec = %.4f\n',fRec(:,1).'*L*fRec(:,1))
+
 fprintf('*********************************************************\n');
 fprintf('cond(matToInv) = %.2f\n', cond(matToInv));
 fprintf('*********************************************************\n');

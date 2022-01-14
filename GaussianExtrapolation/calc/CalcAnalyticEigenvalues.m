@@ -1,13 +1,15 @@
 function [vLambdaAnalytic, vComponentIndex, vEigIndex] = CalcAnalyticEigenvalues(nEigs, sKernelParams)
 
 fprintf('Calculating %d eigenvalues... ', nEigs)
+t = tic;
 nComponents = sKernelParams.sDistParams.estNumComponents;
 dim = sKernelParams.sDistParams.dim;
 
+OneDim2MultiDimIndexMatrix = LoadOneDim2MultiDimIndexMatrix(nEigs,dim);
 mLambdaBeforeSort = zeros(nComponents, nEigs);
 for c = 1:nComponents
     for i = 0:nEigs-1
-        m = OneDim2MultiDimIndex(i,dim);
+        m = OneDim2MultiDimIndexMatrix(i+1,:);
         mLambdaBeforeSort(c,i+1) = lambda(sKernelParams, c, m);
     end
 end
@@ -24,5 +26,5 @@ vLambdaBeforeSort = mLambdaBeforeSort(:);
 % end
 
 [vComponentIndex, vEigIndex] = ind2sub([nComponents nEigs], vMultindexToSingleIndexMap);
-fprintf('Done.\n')
+fprintf('Done (took %.2f sec).\n', toc(t))
 end

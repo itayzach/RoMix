@@ -42,7 +42,7 @@ if n < 4000
     if nGraphComponents > 1
         distWithoutDiagSorted = sort(distWithoutDiag);
         ssl_heuristic_omega = (1/3)*mean(distWithoutDiagSorted(10,:));
-        error(['Your graph has %d connected components! Your omega = %.2f is too small. ', ...
+        warning(['Your graph has %d connected components! Your omega = %.2f is too small. ', ...
             'Consider a bigger omega, like omega = %.2f\n'], nGraphComponents, omega ,ssl_heuristic_omega)
     end 
 else

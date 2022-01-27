@@ -4,14 +4,27 @@ sDistParams.estDataDist = 'Gaussian';
 dim = size(x,2);
 sDistParams.dim = dim;
 
-fprintf('Running fitgmdist with %d components... ', gmmNumComponents)
-options = statset('MaxIter',gmmMaxIter);
-GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
-assert(GMModel.Converged, 'GMM couldn''t converge...')
+vGMModels = cell(size(gmmNumComponents(:),1),1);
+vAIC = zeros(size(gmmNumComponents(:),1),1);
+i = 1;
+for nComp = gmmNumComponents
+    fprintf('Running fitgmdist with %d components... ', nComp)
+    options = statset('MaxIter',gmmMaxIter);
+    vGMModels{i} = fitgmdist(x, nComp, 'RegularizationValue', gmmRegVal, 'Options', options);
+    assert(vGMModels{i}.Converged, 'GMM couldn''t converge...')
+    fprintf('Done after %d iterations with AIC = %.2f\n', vGMModels{i}.NumIterations, vGMModels{i}.AIC)
+    vAIC(i) = vGMModels{i}.AIC;
+    i = i + 1;
+end
+
+if numel(gmmNumComponents) > 1
+    figure; plot(gmmNumComponents, vAIC, 'DisplayName', 'AIC'); 
+    legend()
+end
+[~, argminAIC] = min(vAIC);
+GMModel = vGMModels{argminAIC};
+gmmNumComponents = GMModel.NumComponents;
 sDistParams.GMModel = GMModel;
-fprintf('Done.\n')
-
-
 fprintf('Calculating [fliplr(u), fliplr(sigma^2)] = eig(cov) for all %d components... ',gmmNumComponents)
 sDistParams.estNumComponents = gmmNumComponents;
 sDistParams.componentProportion = GMModel.ComponentProportion;

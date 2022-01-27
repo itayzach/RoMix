@@ -1,4 +1,4 @@
-function fig = PlotDataset(sPlotParams, x, y, pltTitle, GMModel, nGmmPoints, plt2Title, windowStyle)
+function fig = PlotDataset(sPlotParams, x, y, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle)
 prevWindowStyle = get(0,'DefaultFigureWindowStyle');
 if ~exist('windowStyle', 'var')
     windowStyle = prevWindowStyle;
@@ -13,13 +13,13 @@ else
 end
 fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
 %% GMM
-if exist('GMModel', 'var')
+if exist('sDistParams', 'var')
     ax(1) = subplot(1,2,2);
-    if isa(GMModel,"gmdistribution")
-        [xGmm,compIdx] = random(GMModel, nGmmPoints);
+    if isa(sDistParams.GMModel,"gmdistribution")
+        [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
     else
         xGmm = x;
-        compIdx = GMModel.SCcompIdx;
+        compIdx = sDistParams.GMModel.SCcompIdx;
     end
     xMax = max([max(xGmm); max(x)]);
     xMin = min([min(xGmm); min(x)]);
@@ -30,13 +30,13 @@ if exist('GMModel', 'var')
         xlim([xMin(1), xMax(1)])
     elseif dim == 2
         scatter3(xGmm(:,1),xGmm(:,2),compIdx,[],compIdx,'filled');
-        colormap(ax(1), jet(GMModel.NumComponents));
+        colormap(ax(1), jet(sDistParams.GMModel.NumComponents));
         colorbar();
         xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
         ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
         view(2);
 %         hold on
-%         gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(GMModel,[x0 y0]),x,y);
+%         gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(sDistParams.GMModel,[x0 y0]),x,y);
 %         fcontour(gmPDF,[xMin(1), xMax(1), xMin(2), xMax(2)],'LevelList',[1e-5:1e-4:1e-2],'LineColor','black');
         set(gca,'FontSize', 14);
         xlim([xMin(1), xMax(1)])
@@ -95,6 +95,12 @@ elseif dim == 3
         ylim([xMin(2), xMax(2)])
         zlim([xMin(3), xMax(3)])
     end
+    hold on;
+    scatter3(sDistParams.GMModel.mu(:,1), sDistParams.GMModel.mu(:,2), sDistParams.GMModel.mu(:,3), 100, 'r', 'filled');
+%     for c = 1:sDistParams.GMModel.NumComponents 
+%         quiver3(sDistParams.u{c}(:,1), sDistParams.u{c}(:,2), sDistParams.u{c}(:,3),zeros(3,1),zeros(3,1),zeros(3,1));
+%         hold on;
+%     end
 end
 title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 

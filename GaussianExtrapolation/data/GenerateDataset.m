@@ -53,8 +53,16 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
         currMonth = sDatasetParams.monthNames{monthId};
         mSignals(:,monthId) = T.(currMonth)(rperm);
     end
-    sDataset.sData.yt = mSignals;
+    
+    rpermUnlabeled = randperm(nTrain);
+    rpermUnlabeled = rpermUnlabeled(1:nTrain-sDatasetParams.nLabeled);
+    mSignalsMasked = mSignals(1:nTrain,:);
+    mSignalsMasked(rpermUnlabeled,:) = 0;
+
     sDataset.sData.y = mSignals(1:nTrain,:);
+    sDataset.sData.ymasked = mSignalsMasked;
+    sDataset.sData.yt = mSignals;
+
 elseif ismember(actualDataDist, {'USPS', 'MNIST'})
     assert(strcmp(interpMethod, 'AddPoints'))
     nSets = ceil(nTest/1000);
@@ -299,8 +307,9 @@ elseif strcmp(actualDataDist, 'Gaussian')
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
     end
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
+
+    sDataset.sData.y = GenerateSyntheticGraphSignal(sDataset.sData.x);
+    sDataset.sData.yt = GenerateSyntheticGraphSignal(sDataset.sData.xt);
     
 elseif strcmp(actualDataDist, 'Uniform')
     if ~exist('sDatasetParams', 'var') || ...
@@ -346,8 +355,9 @@ elseif strcmp(actualDataDist, 'Grid')
         sDataset.sData.x = data(xTrainInd,:);
         sDataset.sData.xt = [data(xTrainInd,:); data(setdiff(1:end,xTrainInd),:)];
     end
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
+    sDataset.sData.y = GenerateSyntheticGraphSignal(sDataset.sData.x);
+    sDataset.sData.yt = GenerateSyntheticGraphSignal(sDataset.sData.xt);
+    figure; plot(sDataset.sData.x,sDataset.sData.y,'.');
 
     %%
     if ~isempty(msgBoxMsg)

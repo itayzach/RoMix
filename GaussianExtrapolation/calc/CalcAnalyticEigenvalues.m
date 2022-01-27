@@ -8,9 +8,10 @@ dim = sKernelParams.sDistParams.dim;
 OneDim2MultiDimIndexMatrix = LoadOneDim2MultiDimIndexMatrix(nEigs,dim);
 mLambdaBeforeSort = zeros(nComponents, nEigs);
 for c = 1:nComponents
-    for i = 0:nEigs-1
-        m = OneDim2MultiDimIndexMatrix(i+1,:);
-        mLambdaBeforeSort(c,i+1) = lambda(sKernelParams, c, m);
+    for i = 1:nEigs
+        m = OneDim2MultiDimIndexMatrix(i,:);
+        mLambdaBeforeSort(c,i) = lambdaD(sKernelParams, c, m);
+%         isalmostequal(mLambdaBeforeSort(c,i),lambda(sKernelParams, c, m))
     end
 end
 vLambdaBeforeSort = mLambdaBeforeSort(:);

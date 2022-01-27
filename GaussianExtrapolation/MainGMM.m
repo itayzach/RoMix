@@ -166,35 +166,35 @@ for r = 1:R
             plt2Title = ['Painted ' num2str(n), ' according to ' clusterMethod ' with nEstComp = ' num2str(gmmNumComponents)];
         end
         windowStyle = 'normal';
-        PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams.GMModel, nGmmPoints, plt2Title, windowStyle);
+        PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle);
 
     end
     % ----------------------------------------------------------------------------------------------
-    % Calculate lambdaAnalyticTilde and PhiTilde(xTildeTrain)
+    % Calculate lambdaPhi and Phi(xTildeTrain)
     % ----------------------------------------------------------------------------------------------
     sKernelParams = CalcKernelParams(sDistParams, omegaTilde);
     [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
          = CalcAnalyticEigenvalues(MTilde, sKernelParams);
-    [ PhiTilde, lambdaAnalyticTilde ] = ...
+    [ Phi, lambdaPhi ] = ...
         CalcAnalyticEigenfunctions(MTilde, sKernelParams, xTildeTrain, b_normalizePhi);
-    invLambda = diag(1./lambdaAnalyticTilde);
+    invLambda = diag(1./lambdaPhi);
 
     % ----------------------------------------------------------------------------------------------
-    % Plot PhiTilde
+    % Plot Phi
     % ----------------------------------------------------------------------------------------------
     if r == 1 && sPlotParams.b_plotTildeFiguresForDebug && dim <= 3
         figTitle = 'Eigenfunctions of the Gaussian kernel (on $n$ nodes)';
-        figName = 'PhiTilde';
+        figName = 'Phi';
         PlotEigenfuncvecScatter([], 'Gaussian', xTildeTrain, [], 0, 4, ...
-            PhiTilde, [], [], [], figTitle, figName, '\phi' );
-        figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-        PlotSpectrum([], [], lambdaAnalyticTilde, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
+            Phi, [], [], [], figTitle, figName, '\phi' );
+%         figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+%         PlotSpectrum([], [], lambdaPhi, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
     end
     
     % ----------------------------------------------------------------------------------------------
     % Calculate eigenfunctions values at xInt
     % ----------------------------------------------------------------------------------------------
-    [PhiTildeInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xInt, b_normalizePhi);
+    [PhiInt, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xInt, b_normalizePhi);
 
     % ----------------------------------------------------------------------------------------------
     % Interpolate with Nystrom
@@ -213,12 +213,12 @@ for r = 1:R
             C(1:M,1:M) = eye(M);
         else
             b_maskDataTermCMatrix = false;
-            C = EigsRLS(PhiTilde, gamma1, gamma2, invLambda, Ln, V, b_maskDataTermCMatrix);
+            C = EigsRLS(Phi, gamma1, gamma2, invLambda, Ln, V, b_maskDataTermCMatrix);
         end
         % ----------------------------------------------------------------------------------------------
         % Interpolate with our method
         % ----------------------------------------------------------------------------------------------
-        VInt = (1/sqrt(interpRatio))*PhiTildeInt*C;
+        VInt = (1/sqrt(interpRatio))*PhiInt*C;
         VIntToCompare = VInt;
         % ----------------------------------------------------------------------------------------------
         % Interpolate with Nystrom
@@ -234,10 +234,10 @@ for r = 1:R
         mAlpha = LapRLS(W, V, Ln, gamma1Rep, gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
         
         if r == 1 && sPlotParams.b_plotC
-            CRep = diag(lambdaAnalyticTilde)*PhiTilde.'*mAlpha;
+            CRep = diag(lambdaPhi)*Phi.'*mAlpha;
             PlotCoeffsMatrix(C, '${\bf C}$', CRep, ...
                 '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', mAlpha, '$\alpha$');
-            %             PlotCoefficients(sPlotParams, C(:,1:5), lambdaAnalyticTilde)
+            %             PlotCoefficients(sPlotParams, C(:,1:5), lambdaPhi)
         end
         % ----------------------------------------------------------------------------------------------
         % Interpolate with Representer theorem
@@ -269,7 +269,7 @@ for r = 1:R
         end
 
         if r == 1 && sPlotParams.b_plotC
-            Cint = EigsRLS(PhiTildeInt, gamma1, gamma2, invLambda, LnRef, VRefToCompare, b_maskDataTermCMatrix);
+            Cint = EigsRLS(PhiInt, gamma1, gamma2, invLambda, LnRef, VRefToCompare, b_maskDataTermCMatrix);
             PlotCoeffsMatrix(C, '${\bf C}$', Cint, '${\bf C^{\bf int}}$');
         end
 
@@ -317,9 +317,9 @@ for r = 1:R
             figName = 'VRep';
             PlotInnerProductMatrix([], VRep, [], pltTitle, figName);
 %             pltTitle = '$\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$';
-%             figName = 'PhiTilde';
+%             figName = 'Phi';
 %             vPrTilde = sDistParams.vPr;
-%             PlotInnerProductMatrix([], PhiTilde, vPrTilde, pltTitle, figName);
+%             PlotInnerProductMatrix([], Phi, vPrTilde, pltTitle, figName);
         
         end
     end
@@ -332,35 +332,36 @@ for r = 1:R
             mSig = sDataset.sData.y;
             mSigRef = sDataset.sData.yt;
         else
-            [mSig, mSigRef] = GenerateSyntheticGraphSignal(V, VRef);
+            [mSig, mSigRef] = GenerateSyntheticGraphSignal(xTrain, xInt, V, VRef);
         end
         % ------------------------------------------------------------------------------------------
         % Coeffs
         % ------------------------------------------------------------------------------------------
         mSigHatV = V'*mSig; % same as pinv(V)*sig...
-        if ismember(sPreset.verticesPDF, {'USPS'})  
+%         if ismember(sPreset.verticesPDF, {'USPS'})  
+        if isfield(sDataset.sData, 'ymasked')  
             mSigMasked = sDataset.sData.ymasked;
-            mSigHatPhi = EigsRLS(PhiTilde, gamma1, gamma2, invLambda, Ln, mSigMasked, sPreset.b_maskDataFitTerm);
+            mSigHatPhi = EigsRLS(Phi, gamma1, gamma2, invLambda, Ln, mSigMasked, sPreset.b_maskDataFitTerm);
             b_normalizeAlpha = false;
             mAlpha = LapRLS(W, mSigMasked, Ln, gamma1Rep, gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
         else
-            mSigHatPhi = EigsRLS(PhiTilde, gamma1, gamma2, invLambda, Ln, mSig, sPreset.b_maskDataFitTerm);
+            mSigHatPhi = EigsRLS(Phi, gamma1, gamma2, invLambda, Ln, mSig, sPreset.b_maskDataFitTerm);
             b_normalizeAlpha = false;
             mAlpha = LapRLS(W, mSig, Ln, gamma1Rep, gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
         end
         
         % Just for reference
-        mSigRefHatPhi = EigsRLS(PhiTildeInt, gamma1, gamma2, invLambda, LnRef, mSigRef, sPreset.b_maskDataFitTerm);
+        mSigRefHatPhi = EigsRLS(PhiInt, gamma1, gamma2, invLambda, LnRef, mSigRef, sPreset.b_maskDataFitTerm);
         % ------------------------------------------------------------------------------------------
         % Signals
         % ------------------------------------------------------------------------------------------
         mSigRecV   = V*mSigHatV;
-        mSigRecPhi = PhiTilde*mSigHatPhi;
+        mSigRecPhi = Phi*mSigHatPhi;
         mSigRecRep = W.'*mAlpha;
-        mSigInt    = PhiTildeInt*mSigHatPhi;
+        mSigInt    = PhiInt*mSigHatPhi;
         mSigNys    = VNys*mSigHatV;
         mSigRep    = WTrainInt.'*mAlpha;
-        mSigIntRef = PhiTildeInt*mSigRefHatPhi;
+        mSigIntRef = PhiInt*mSigRefHatPhi;
 
         mSigCnvrt       = ConvertSignalByDataset(sPreset.verticesPDF, mSig);
         mSigCnvrtRef    = ConvertSignalByDataset(sPreset.verticesPDF, mSigRef);
@@ -438,8 +439,8 @@ for r = 1:R
                 % GMM
                 nGmmPoints = 1000;
                 [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
-                [PhiTildeGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
-                mSigGmm = PhiTildeGmm*mSigHatPhi;
+                [PhiGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
+                mSigGmm = PhiGmm*mSigHatPhi;
                 vSigGmm = mSigGmm(:,sigIndToPlot);
                 if dim == 2
                     xylim(1) = min(xTrain(:,1));
@@ -477,10 +478,10 @@ for r = 1:R
             x2 = x1;
             [sClassifier.XX1,sClassifier.XX2] = meshgrid(x1,x2);
             xMeshGrid = [sClassifier.XX1(:) sClassifier.XX2(:)];   
-            PhiTildeMeshgrid = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xMeshGrid, b_normalizePhi);
-            sClassifier.mPhi_X_c = reshape(PhiTildeMeshgrid*mSigHatPhi, length(x1), length(x2));
-            PlotGraphSignalAnalysis(mSig, mSigRecPhi, mSigRecV, mSigRef, mSigInt, mSigNys, ...
-                mSigHatPhi, mSigHatV, mSigRefHatPhi);
+            PhiMeshgrid = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xMeshGrid, b_normalizePhi);
+            sClassifier.mPhi_X_c = reshape(PhiMeshgrid*mSigHatPhi, length(x1), length(x2));
+%             PlotGraphSignalAnalysis(mSig, mSigRecPhi, mSigRecV, mSigRef, mSigInt, mSigNys, ...
+%                 mSigHatPhi, mSigHatV, mSigRefHatPhi);
         
             PlotClassifier(sPlotParams, sDataset, sClassifier);
 
@@ -540,9 +541,9 @@ for r = 1:R
                 PlotAccuracy(sPlotParams, [vAccRecPhi, vAccRecV, vAccRecRep], ...
                     {'Acc$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'Acc$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...
                     'Acc$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'TrainAcc', [], sDatasetParams.monthNames, 'Train accuracy');
-                PlotEvalMetric(sPlotParams, [vCohRecPhi, vCohRecV, vCohRecRep], ...
-                    {'Coh$(s_{\Phi}^{{\bf rec}}, s)$', 'Coh$(s_{V}^{{\bf rec}}, s)$', ...
-                    'Coh$(s_{K}^{{\bf rec}}, s)$'}, 'Coh_graph_signals_', [], sDatasetParams.monthNames, 'Train coherence');
+%                 PlotEvalMetric(sPlotParams, [vCohRecPhi, vCohRecV, vCohRecRep], ...
+%                     {'Coh$(s_{\Phi}^{{\bf rec}}, s)$', 'Coh$(s_{V}^{{\bf rec}}, s)$', ...
+%                     'Coh$(s_{K}^{{\bf rec}}, s)$'}, 'Coh_graph_signals_', [], sDatasetParams.monthNames, 'Train coherence');
     %             PlotEvalMetric(sPlotParams, [vMseRecPhi, vMseRecV, vMseRecRep], ...
     %                 {'MSE$(s_{\Phi}^{{\bf rec}}, s)$', 'MSE$(s_{V}^{{\bf rec}}, s)$', ...
     %                 'MSE$(s_{K}^{{\bf rec}}, s)$'}, 'Mse_graph_signals_', [], sDatasetParams.monthNames, 'Train MSE');
@@ -553,9 +554,9 @@ for r = 1:R
                 PlotAccuracy(sPlotParams, [vAccInt, vAccNys, vAccRep], ...
                     {'Acc$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'Acc$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...
                     'Acc$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'TestAcc', [], sDatasetParams.monthNames, 'Train \& Test accuracy');
-                PlotEvalMetric(sPlotParams, [vCohInt, vCohNys, vCohRep], ...
-                    {'Coh$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'Coh$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...
-                    'Coh$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'Coh_graph_signals_', [], sDatasetParams.monthNames, 'Train \& Test coherence');
+%                 PlotEvalMetric(sPlotParams, [vCohInt, vCohNys, vCohRep], ...
+%                     {'Coh$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'Coh$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...
+%                     'Coh$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'Coh_graph_signals_', [], sDatasetParams.monthNames, 'Train \& Test coherence');
     %             PlotEvalMetric(sPlotParams, [vMseInt, vMseNys, vMseRep], ...
     %                 {'MSE$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'MSE$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...
     %                 'MSE$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'Mse_graph_signals_', [], sDatasetParams.monthNames, 'Train \& Test  MSE');

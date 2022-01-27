@@ -1,5 +1,8 @@
-function [] = PlotLapRLS(sSimParams, sDataset, sDistanceParams, omega, classifier)
+function [] = PlotTwoMoonsLapRLS(sSimParams, sDataset, sDistanceParams, omega, mAlpha,gamma1Rep, gamma2Rep,test_error)
 
+classifier.alpha = mAlpha;
+classifier.gammas = [gamma1Rep, gamma2Rep];
+classifier.test_error = 100 - test_error;
 
 x0     = 10;
 y0     = 250;

@@ -30,8 +30,8 @@ if exist('sDistParams', 'var')
         xlim([xMin(1), xMax(1)])
     elseif dim == 2
         scatter3(xGmm(:,1),xGmm(:,2),compIdx,[],compIdx,'filled');
-        colormap(ax(1), jet(sDistParams.GMModel.NumComponents));
-        colorbar();
+%         colormap(ax(1), jet(sDistParams.GMModel.NumComponents));
+%         colorbar();
         xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
         ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
         view(2);
@@ -63,7 +63,7 @@ if dim == 1
     set(gca,'YTick',[],'FontSize', 14);
     xlim([xMin(1), xMax(1)])
 elseif dim == 2
-    if ~isempty(y) && isequal(y, floor(y))
+    if ~isempty(y) && isequal(y, floor(y)) && sum(y(:) > 0)
         scatter3(x(:,1), x(:,2), y, [], y, 'filled');
         if exist('ax', 'var')
             colormap(ax(2), jet(length(unique(y)))); 

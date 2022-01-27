@@ -13,10 +13,10 @@ sData.timestamp = fileCells{4};
 
 
 % sData = tdfread(fullfile('sData', 'ml-100k', 'ua.base'));
-nUsers = max(sData.userId);
+nUsers = double(max(sData.userId));
 nMovies = max(sData.movieId);
 
-R = NaN(nMovies,nUsers);
+R = zeros(nMovies,nUsers);
 for row = 1:length(sData.userId)
     R(sData.movieId(row), sData.userId(row)) = sData.rating(row);
 end
@@ -32,6 +32,7 @@ S = R*R.';
 figure; imagesc(S); colorbar;
 Q = diag(1./vecnorm(R,2,2));
 W = Q*S*Q;
+W = (W + W')/2; % force symmetric W
 
 % exp
 % pdistR = pdist(R);
@@ -42,6 +43,13 @@ W = Q*S*Q;
 % Y = tsne(R,'Algorithm','exact','Distance','cosine');
 % figure; gscatter(Y(:,1),Y(:,2))
 
+SumRating = sum(R,2);
+nUsersThatRated = sum(R>0,2);
+nClusters = 5;
+[clusterInd,V_SC,D_SC] = spectralcluster(W,nClusters,"Distance","precomputed");
+% figure; scatter3(V_SC(:,2), V_SC(:,3), V_SC(:,4),[],clusterInd, 'filled'); colormap(jet(nClusters)); colorbar;
+figure; scatter3(V_SC(:,2), V_SC(:,3), V_SC(:,4),[],clusterInd, 'filled'); colormap(jet(nClusters)); colorbar;
+figure; scatter3(V_SC(:,2), V_SC(:,3), V_SC(:,4),[],round(SumRating./nUsersThatRated), 'filled'); colormap(jet(nClusters)); colorbar;
 
 % laplacian
 d = sum(W,2);

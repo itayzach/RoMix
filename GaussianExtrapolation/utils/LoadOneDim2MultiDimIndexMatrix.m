@@ -3,7 +3,7 @@ if ~exist('b_forceLoadFromFile','var')
     b_forceLoadFromFile = false;
 end
 fname = ['OneDim2MultiDimIndexMatrix_',num2str(dim),'d.mat'];
-fpath = fullfile('GaussianExtrapolation','indmat');
+fpath = fullfile(fileparts(mfilename('fullpath')), '..','indmat');
 if ~isfolder(fpath)
     fprintf('Creating %s... ',fpath)
     mkdir(fpath)

@@ -15,6 +15,8 @@ sPreset.sDatasetParams     = sDatasetParams;
 %% Gaussian kernel width
 sPreset.omega              = 0.1; % for nystrom kernel
 sPreset.omegaTilde         = 0.1; % for our method
+%% Number of signals
+sPreset.nSignals           = 1;
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;

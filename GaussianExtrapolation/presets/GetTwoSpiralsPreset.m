@@ -13,6 +13,8 @@ sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Lapla
 % sDatasetParams.b_loadTwoMoonsMatFile = true;
 sDatasetParams             = [];
 sPreset.sDatasetParams     = sDatasetParams;
+%% Number of signals
+sPreset.nSignals           = 1;
 %% Gaussian kernel width
 sPreset.omega              = 0.2; % for nystrom kernel
 sPreset.omegaTilde         = 0.2; % for our method

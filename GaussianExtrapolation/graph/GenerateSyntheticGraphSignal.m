@@ -1,4 +1,4 @@
-function sig = GenerateSyntheticGraphSignal(x)
+function [sig, sigRef] = GenerateSyntheticGraphSignal(x, xInt)
 
 % [n, M] = size(V);
 % N = length(VRef);
@@ -15,10 +15,18 @@ function sig = GenerateSyntheticGraphSignal(x)
 % sigRef = VRef*sigHat;
 % sigRefNoisy = sigRef + noise;
 
-L = max(x) - min(x);
-f = 5/(L);
-
-sig = sin(2*pi*f*x).*exp(-5*L*abs(x-0.5*L));
+[n,d] = size(xInt);
+if d == 1
+    L = max(xInt) - min(xInt);
+    f = 5/(L);
+    sig = sin(2*pi*f.*x).*exp(-5*L.*abs(x-0.5*L));
+    sigRef = sin(2*pi*f.*xInt).*exp(-5*L.*abs(xInt-0.5*L));
+elseif d == 3
+    Lx = max(xInt(:, [1 3])) - min(xInt(:, [1 3]));
+    fx = 2./(Lx);
+    sig = prod(sin(2*pi*fx.*x(:, [1 3])),2);
+    sigRef = prod(sin(2*pi*fx.*xInt(:, [1 3])),2);
+end
 % sigRef = sin(3*xInt).*exp(-0.5*abs(xInt));
 
 end

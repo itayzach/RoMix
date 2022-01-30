@@ -15,13 +15,15 @@ for c = 1:sPreset.nGenDataCompnts
     sDatasetParams.sigma{c} = 1*eye(sPreset.dim);
 end
 sPreset.sDatasetParams     = sDatasetParams;
+%% Number of signals
+sPreset.nSignals           = 1;
 %% Gaussian kernel width
 sPreset.omega              = 0.3; % for nystrom kernel
 sPreset.omegaTilde         = 0.3; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
-sPreset.gmmNumComponents   = 1;
+sPreset.gmmNumComponents   = sPreset.nGenDataCompnts;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
 sPreset.MTilde             = 30;

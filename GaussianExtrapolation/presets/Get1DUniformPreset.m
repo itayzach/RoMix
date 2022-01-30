@@ -13,6 +13,8 @@ sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Lapla
 sDatasetParams.xMin        = 0*ones(sPreset.dim,1);
 sDatasetParams.xMax        = 1*ones(sPreset.dim,1);
 sPreset.sDatasetParams     = sDatasetParams;
+%% Number of signals
+sPreset.nSignals           = 1;
 %% Gaussian kernel width
 L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
 sPreset.omega              = 2*sqrt(L/sPreset.n); % for nystrom kernel

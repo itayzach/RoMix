@@ -13,6 +13,8 @@ sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplac
 sDatasetParams.nLabeled = sPreset.n; %round(0.1*sPreset.n);
 assert(sDatasetParams.nLabeled <= sPreset.n)
 sPreset.sDatasetParams     = sDatasetParams;
+%% Number of signals
+sPreset.nSignals           = 1; % After conversion from number of classes
 %% Gaussian kernel width
 sPreset.omega              = 1.73;%9.4338; % for nystrom kernel
 sPreset.omegaTilde         = 3;1.73;%9.4338; % for our method

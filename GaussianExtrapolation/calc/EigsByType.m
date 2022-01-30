@@ -1,4 +1,4 @@
-function [V, adjLambda, matLambda] = EigsByType(W, D, M, matrixForEigs)
+function [V, adjLambda, matLambda] = EigsByType(W, D, Ln, M, matrixForEigs)
 
 fprintf('Performing eigs(%s) for %d points, M = %d... ', matrixForEigs, size(W,1), M)
 if strcmp(matrixForEigs, 'Adjacency')
@@ -38,10 +38,6 @@ elseif strcmp(matrixForEigs, 'RandomWalk')
     V = Psi;
     adjLambda = eigs(W,M);
 elseif strcmp(matrixForEigs, 'NormLap')
-    d = diag(D);
-    Wn = diag(d.^-0.5)*W*diag(d.^-0.5);
-    I = eye(length(W));
-    Ln = I - Wn;
     [V, Lambda] = eig(Ln);
     V = V(:,1:M);
     matLambda = diag(Lambda);

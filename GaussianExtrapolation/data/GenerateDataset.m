@@ -1,6 +1,6 @@
-function sDataset = GenerateDataset(actualDataDist, dim, nComponents, nTrain, nTest, interpMethod, sDatasetParams)
-assert( (strcmp(interpMethod, 'AddPoints') && nTrain <= nTest) || ...
-       ~(strcmp(interpMethod, 'AddPoints')))
+function sDataset = GenerateDataset(actualDataDist, dim, nComponents, nTrain, nTest, dataGenTechnique, sDatasetParams)
+assert( (strcmp(dataGenTechnique, 'AddPoints') && nTrain <= nTest) || ...
+       ~(strcmp(dataGenTechnique, 'AddPoints')))
 %% Set defaults
 if ~exist('nTrain', 'var')
     nTrain = 4000;
@@ -11,7 +11,7 @@ end
 fprintf('Generating n = %d, N = %d points of %d-d %s... ', nTrain, nTest, dim, actualDataDist)
 %% Generate data
 if strcmp(actualDataDist, 'SineCosine')
-%     assert(strcmp(interpMethod, 'AddPoints'))
+%     assert(strcmp(dataGenTechnique, 'AddPoints'))
 %     [data, theta] = GenerateSineCosineData(dim, nTest);
 %     sDataset.sData.x = data(1:nTrain,:);
 %     sDataset.sData.xt = data;
@@ -64,7 +64,7 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
     sDataset.sData.yt = mSignals;
 
 elseif ismember(actualDataDist, {'USPS', 'MNIST'})
-    assert(strcmp(interpMethod, 'AddPoints'))
+    assert(strcmp(dataGenTechnique, 'AddPoints'))
     nSets = ceil(nTest/1000);
     datasetInd = randi(10,nSets,1);
     fprintf('Loading %s set %d... ',actualDataDist, datasetInd(1))
@@ -153,7 +153,7 @@ elseif ismember(actualDataDist, {'USPS', 'MNIST'})
     sDataset.sData.yt = mSignalsPermOrdered;
 
 elseif strcmp(actualDataDist, 'MnistDist')
-%     assert(strcmp(interpMethod, 'AddPoints'))
+%     assert(strcmp(dataGenTechnique, 'AddPoints'))
 %     mnist = load('data\mnist.mat');
 %     dist = pdist2(mnist.testX(1:nTest,:), mnist.testX(1:nTest,:));
 %     data = triu(dist,1);
@@ -164,7 +164,7 @@ elseif strcmp(actualDataDist, 'MnistDist')
 %     sDataset.sData.yt = [];
 %     dim = 2;
 elseif strcmp(actualDataDist, 'MnistLatentVAE')
-    assert(strcmp(interpMethod, 'AddPoints'))
+    assert(strcmp(dataGenTechnique, 'AddPoints'))
     error('change to one-hot encoding and then take argmax, like usps')
     mnistLatent = load(['data', filesep, 'mnist', filesep, 'mnistLatentVAE.mat']);
     z = double(mnistLatent.z);
@@ -186,7 +186,7 @@ elseif strcmp(actualDataDist, 'MnistLatentVAE')
     sDataset.sData.yt = double(labels');
 
 elseif strcmp(actualDataDist, 'CoraLatentVGAE')
-%     assert(strcmp(interpMethod, 'AddPoints'))
+%     assert(strcmp(dataGenTechnique, 'AddPoints'))
 %     coraLatent = load('data\coraLatentVGAE.mat');
 %     z = double(coraLatent.z_mean);
 %     data = double(z(1:nTest,:));
@@ -198,7 +198,7 @@ elseif strcmp(actualDataDist, 'CoraLatentVGAE')
 %     omegaTilde = 1.5;
 %     dim = size(data, 2);
 elseif strcmp(actualDataDist, 'Minnesota')   
-%     assert(strcmp(interpMethod, 'AddPoints'))
+%     assert(strcmp(dataGenTechnique, 'AddPoints'))
 %     G = gsp_minnesota();
 %     data = G.coords;
 %     trainTestRatio = nTrain/nTest;
@@ -221,7 +221,7 @@ elseif strcmp(actualDataDist, 'Minnesota')
 %         'updated to N = ' num2str(nTest), ', n = ', num2str(nTrain)];
 %     MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'Bunny')
-%     assert(strcmp(interpMethod, 'AddPoints'))
+%     assert(strcmp(dataGenTechnique, 'AddPoints'))
 %     G = gsp_bunny();
 %     data = G.coords;
 %     trainTestRatio = nTrain/nTest;
@@ -243,7 +243,7 @@ elseif strcmp(actualDataDist, 'Bunny')
 %     msgBoxMsg = 'This dataset requires omega adjustments...';
 %     MyMsgBox(msgBoxMsg, msgBoxTitle)
 elseif strcmp(actualDataDist, 'Sensor')
-%     assert(strcmp(interpMethod, 'AddPoints'))
+%     assert(strcmp(dataGenTechnique, 'AddPoints'))
 %     G = gsp_sensor(nTest);
 %     data = G.coords;
 %     sDataset.sData.x = data(1:nTrain,:);
@@ -257,9 +257,9 @@ elseif strcmp(actualDataDist, 'TwoMoons')
     if ~exist('sDatasetParams', 'var') || (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams, 'b_loadTwoMoonsMatFile'))
         sDatasetParams.b_loadTwoMoonsMatFile = false;
     end
-    if strcmp(interpMethod, 'NewPoints')
+    if strcmp(dataGenTechnique, 'NewPoints')
         sDataset.sData = GenerateTwoMoonsDataset(nTrain, nTest, sDatasetParams.nLabeled, sDatasetParams.b_loadTwoMoonsMatFile);
-    elseif strcmp(interpMethod, 'AddPoints')
+    elseif strcmp(dataGenTechnique, 'AddPoints')
         sData = GenerateTwoMoonsDataset(nTest, 0, sDatasetParams.nLabeled, sDatasetParams.b_loadTwoMoonsMatFile);
         data = sData.x;
         rperm = randperm(nTest);
@@ -272,26 +272,25 @@ elseif strcmp(actualDataDist, 'TwoMoons')
         sDataset.sData.yt = labelsRearranged;
     end
 elseif strcmp(actualDataDist, 'TwoSpirals')
-    if strcmp(interpMethod, 'NewPoints')
+    if strcmp(dataGenTechnique, 'NewPoints')
         sDataset.sData = GenerateTwoSpiralsDataset(nTrain, nTest);
-    elseif strcmp(interpMethod, 'AddPoints')
+    elseif strcmp(dataGenTechnique, 'AddPoints')
         sData = GenerateTwoSpiralsDataset(nTest, 0);
         data = sData.x;
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
     end
 elseif strcmp(actualDataDist, 'SwissRoll')
-    if strcmp(interpMethod, 'NewPoints')
+    if strcmp(dataGenTechnique, 'NewPoints')
         sDataset.sData.x = GenerateSwissRoll(nTrain);
         sDataset.sData.xt = GenerateSwissRoll(nTest);
-    elseif strcmp(interpMethod, 'AddPoints')
+    elseif strcmp(dataGenTechnique, 'AddPoints')
         data = GenerateSwissRoll(nTest);
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
     end
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
-    
+    [sDataset.sData.y, sDataset.sData.yt] = GenerateSyntheticGraphSignal(sDataset.sData.x, sDataset.sData.xt);
+    figure; scatter3(sDataset.sData.x(:,1),sDataset.sData.x(:,2),sDataset.sData.x(:,3),[],sDataset.sData.y,'filled');
 elseif strcmp(actualDataDist, 'Gaussian')
     if ~exist('sDatasetParams', 'var') || ...
             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'mu') && ~isfield(sDatasetParams,'sigma'))
@@ -299,10 +298,10 @@ elseif strcmp(actualDataDist, 'Gaussian')
         sDatasetParams.mu = 0*ones(1,dim);
         sDatasetParams.sigma = 1*eye(dim);
     end
-    if strcmp(interpMethod, 'NewPoints')
+    if strcmp(dataGenTechnique, 'NewPoints')
         sDataset.sData.x = GenerateGaussianData(dim, nComponents, nTrain, sDatasetParams.mu, sDatasetParams.sigma);
         sDataset.sData.xt = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
-    elseif strcmp(interpMethod, 'AddPoints')
+    elseif strcmp(dataGenTechnique, 'AddPoints')
         data = GenerateGaussianData(dim, nComponents, nTest, sDatasetParams.mu, sDatasetParams.sigma);
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
@@ -317,10 +316,10 @@ elseif strcmp(actualDataDist, 'Uniform')
         sDatasetParams.xMin = -1*ones(dim,1);
         sDatasetParams.xMax = 1*ones(dim,1);
     end
-    if strcmp(interpMethod, 'NewPoints')
+    if strcmp(dataGenTechnique, 'NewPoints')
         sDataset.sData.x = GenerateUniformData(dim, nTrain, sDatasetParams.xMin, sDatasetParams.xMax);
         sDataset.sData.xt = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
-    elseif strcmp(interpMethod, 'AddPoints')
+    elseif strcmp(dataGenTechnique, 'AddPoints')
         data = GenerateUniformData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
@@ -335,10 +334,10 @@ elseif strcmp(actualDataDist, 'Grid')
         sDatasetParams.xMin = -1*ones(dim,1);
         sDatasetParams.xMax = 1*ones(dim,1);
     end
-    if strcmp(interpMethod, 'NewPoints')
+    if strcmp(dataGenTechnique, 'NewPoints')
         sDataset.sData.x = GenerateGridData(dim, nTrain, sDatasetParams.xMin, sDatasetParams.xMax);
         sDataset.sData.xt = GenerateGridData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
-    elseif strcmp(interpMethod, 'AddPoints')
+    elseif strcmp(dataGenTechnique, 'AddPoints')
         data = GenerateGridData(dim, nTest, sDatasetParams.xMin, sDatasetParams.xMax);
         msgBoxMsg = [];
         if nTest ~= length(data)
@@ -355,8 +354,7 @@ elseif strcmp(actualDataDist, 'Grid')
         sDataset.sData.x = data(xTrainInd,:);
         sDataset.sData.xt = [data(xTrainInd,:); data(setdiff(1:end,xTrainInd),:)];
     end
-    sDataset.sData.y = GenerateSyntheticGraphSignal(sDataset.sData.x);
-    sDataset.sData.yt = GenerateSyntheticGraphSignal(sDataset.sData.xt);
+    [sDataset.sData.y, sDataset.sData.yt] = GenerateSyntheticGraphSignal(sDataset.sData.x, sDataset.sData.xt);
     figure; plot(sDataset.sData.x,sDataset.sData.y,'.');
 
     %%
@@ -375,5 +373,15 @@ sDataset.actualNumComponents = nComponents;
 sDataset.actualDataDist = actualDataDist;
 sDataset.estDataDist = 'Gaussian';
 sDataset.sDatasetParams = sDatasetParams;
+
+% sanity checks
+assert(nTrain == size(sDataset.sData.x,1) && nTest == size(sDataset.sData.xt,1));
+if strcmp(dataGenTechnique, 'NewPoints')
+    warning('sPreset.dataGenTechnique is NewPoints, should make sure its okay...')
+    pause(0.5)
+else
+    assert(isequal(sDataset.sData.x, sDataset.sData.xt(1:nTrain,:)));
+end
+
 fprintf('Done.\n')
 end

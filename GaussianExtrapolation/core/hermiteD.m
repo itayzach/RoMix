@@ -35,20 +35,9 @@ end
 end
 
 function h = LoadHermiteCoeffs(n)
-
-% Should generate all possibilities for all n,
-% and then load from file the coeffs according to n(1,...,d)
 % h should be PxD
 P = max(n)+1;
 D = size(n,2);
-% fname = 'HermiteCoeffs.mat';
-% fpath = fullfile('GaussianExtrapolation');
-% if isfile(fullfile(fpath,fname))
-%     fprintf('Loading %s...', fname)
-%     load(fullfile(fpath,fname), 'h')
-% else
-%     fprintf('\n')
-%     warning('Generating %s (this might take some time)... ', fname)
 n_fact = factorial(n);
 h = zeros(P,D);
 for d=1:D
@@ -69,7 +58,4 @@ for d=1:D
     h(2*m+1+rem,d) = fliplr(coeffs);
 end
 h = flipud(h);
-%     save(fullfile(fpath,fname));
-%     fprintf('\n')
-% end
 end

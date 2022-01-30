@@ -12,6 +12,8 @@ sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Lapla
 %% DatasetParams
 sDatasetParams.nLabeled    = 2;
 sPreset.sDatasetParams     = sDatasetParams;
+%% Number of signals
+sPreset.nSignals           = 1;
 %% Gaussian kernel width
 sPreset.omega              = 0.3; % for nystrom kernel
 sPreset.omegaTilde         = 0.3; % for our method

@@ -11,6 +11,8 @@ sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKe
 sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sPreset.sDatasetParams     = [];
+%% Number of signals
+sPreset.nSignals           = 1;
 %% Gaussian kernel width
 % eps value was taken from:
 % "Parsimonious representation of nonlinear dynamical systems through manifold learning: 

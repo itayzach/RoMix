@@ -11,7 +11,10 @@ sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKe
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sDatasetParams.monthNames  = {'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Ann'};
+sDatasetParams.nLabeled    = sPreset.n; %20;
 sPreset.sDatasetParams     = sDatasetParams;
+%% Number of signals
+sPreset.nSignals           = numel(sDatasetParams.monthNames);
 %% Gaussian kernel width
 sPreset.omega              = 1000; % for nystrom kernel
 sPreset.omegaTilde         = 7; % for our method
@@ -27,6 +30,7 @@ sPreset.gamma1             = 0.1;
 sPreset.gamma2             = 0;
 %% Representer theorem
 sPreset.gamma1Rep          = 1e-3;
+sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
 sPreset.R                  = 1;
 %% Method parameters

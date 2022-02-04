@@ -290,7 +290,7 @@ elseif strcmp(actualDataDist, 'SwissRoll')
         sDataset.sData.xt = data;
     end
     [sDataset.sData.y, sDataset.sData.yt] = GenerateSyntheticGraphSignal(sDataset.sData.x, sDataset.sData.xt);
-    figure; scatter3(sDataset.sData.x(:,1),sDataset.sData.x(:,2),sDataset.sData.x(:,3),[],sDataset.sData.y,'filled');
+    %figure; scatter3(sDataset.sData.x(:,1),sDataset.sData.x(:,2),sDataset.sData.x(:,3),[],sDataset.sData.y,'filled');
 elseif strcmp(actualDataDist, 'Gaussian')
     if ~exist('sDatasetParams', 'var') || ...
             (exist('sDatasetParams', 'var') && ~isfield(sDatasetParams,'mu') && ~isfield(sDatasetParams,'sigma'))
@@ -307,8 +307,7 @@ elseif strcmp(actualDataDist, 'Gaussian')
         sDataset.sData.xt = data;
     end
 
-    sDataset.sData.y = GenerateSyntheticGraphSignal(sDataset.sData.x);
-    sDataset.sData.yt = GenerateSyntheticGraphSignal(sDataset.sData.xt);
+    [sDataset.sData.y, sDataset.sData.yt] = GenerateSyntheticGraphSignal(sDataset.sData.x, sDataset.sData.xt);
     
 elseif strcmp(actualDataDist, 'Uniform')
     if ~exist('sDatasetParams', 'var') || ...
@@ -355,7 +354,7 @@ elseif strcmp(actualDataDist, 'Grid')
         sDataset.sData.xt = [data(xTrainInd,:); data(setdiff(1:end,xTrainInd),:)];
     end
     [sDataset.sData.y, sDataset.sData.yt] = GenerateSyntheticGraphSignal(sDataset.sData.x, sDataset.sData.xt);
-    figure; plot(sDataset.sData.x,sDataset.sData.y,'.');
+    %figure; plot(sDataset.sData.x,sDataset.sData.y,'.');
 
     %%
     if ~isempty(msgBoxMsg)

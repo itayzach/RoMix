@@ -1,9 +1,12 @@
-function localCmap = PlotGraphSignals(sPlotParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, xylim, cmap)
+function localCmap = PlotGraphSignals(sPlotParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, cMarkers, xylim, cmap)
 cData = reshape(cData,[],1);
 cSignals = reshape(cSignals,[],1);
 cSigStr = reshape(cSigStr,[],1);
 if exist('cNumCircles', 'var')
     cNumCircles = reshape(cNumCircles,[],1);
+end
+if exist('cNumCircles', 'var')
+    cMarkers = reshape(cMarkers,[],1);
 end
 dim = size(cData{1}, 2);
 nSignals = numel(cData);
@@ -20,7 +23,7 @@ if dim == 1
     fig = figure('Name', 'Graph signals');
     for m = 1:nSignals
         dispName = cSigStr{m};
-        plot(cData{m}, cSignals{m}, '.', 'DisplayName', dispName);
+        plot(cData{m}, cSignals{m}, cMarkers{m}, 'DisplayName', dispName);
         xlim([ min(cData{m}) max(cData{m}) ])
         hold on;
         set(gca,'FontSize', 14);
@@ -33,15 +36,20 @@ if dim == 1
         nRows = 2;
     end
     nCols = ceil(nSignals/nRows);
+    if nCols == 1
+        nCols = 2;
+    end
     legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',nCols)
     set(gcf,'Position', [x0 y0 width height])
     localCmap = [];
 elseif dim == 2 || dim == 3
     %% Plot params
-    nRows = floor(sqrt(nSignals));
-    if nRows > 4
-        nRows = 4;
-    end
+%     nRows = floor(sqrt(nSignals));
+%     if nRows > 4
+%         nRows = 4;
+%     end
+%     nCols = ceil(nSignals/nRows);
+    nRows = 2;
     nCols = ceil(nSignals/nRows);
     
     x0     = 10;
@@ -52,7 +60,7 @@ elseif dim == 2 || dim == 3
     fig = figure('Name', 'Graph signals');
     tiledlayout(nRows, nCols);
     ax = zeros(nSignals,1);
-    if exist('cmap', 'var')
+    if exist('cmap', 'var') && ~isempty(cmap)
         cMapMax = cmap(2);
         cMapMin = cmap(1);
     else
@@ -106,7 +114,7 @@ elseif dim == 2 || dim == 3
         
         title(dispName, 'Interpreter', 'latex', 'FontSize', 14)
         set(gca,'FontSize', 14);
-        if exist('xylim', 'var')
+        if exist('xylim', 'var') && ~isempty(xylim)
             xlim([xylim(1), xylim(2)]);
             ylim([xylim(3), xylim(4)]);
         end
@@ -115,6 +123,7 @@ elseif dim == 2 || dim == 3
         sgtitle(suptitle,'Interpreter', 'latex', 'FontSize', 16);
     end
 %     linkaxes(ax)
+    set(fig,'renderer','Painters')
     set(gcf,'Position', [x0 y0 width height])
     localCmap = [cMapMin; cMapMax];
 end

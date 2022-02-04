@@ -11,7 +11,7 @@ sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKe
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 for c = 1:sPreset.nGenDataCompnts
-    sDatasetParams.mu{c}    = 3*(c-1)*ones(1,sPreset.dim);
+    sDatasetParams.mu{c}    = 10*(c-1)*ones(1,sPreset.dim);
     sDatasetParams.sigma{c} = 1*eye(sPreset.dim);
 end
 sPreset.sDatasetParams     = sDatasetParams;
@@ -42,9 +42,10 @@ sPreset.b_normalizePhi     = false;
 sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;
-sPreset.b_interpEigenvecs  = true;
-sPreset.b_runGraphSignals  = false;
+sPreset.b_interpEigenvecs  = false;
+sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
+sPreset.b_compareMethods   = false;
 %% 
 sPreset.dataGenTechnique = 'AddPoints';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'

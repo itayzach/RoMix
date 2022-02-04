@@ -42,6 +42,7 @@ sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = false;
 sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = true;
+sPreset.b_compareMethods   = false;
 %% 
 sPreset.dataGenTechnique = 'AddPoints';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'

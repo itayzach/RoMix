@@ -16,23 +16,23 @@ sPreset.sDatasetParams     = sDatasetParams;
 %% Number of signals
 sPreset.nSignals           = numel(sDatasetParams.monthNames);
 %% Gaussian kernel width
-sPreset.omega              = 1000; % for nystrom kernel
+sPreset.omega              = 7; %700; % for nystrom kernel
 sPreset.omegaTilde         = 7; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 4;
 %% Number of eigenvectors/eigenfunctions
-sPreset.M                  = 25*sPreset.gmmNumComponents;
-sPreset.MTilde             = 25*sPreset.gmmNumComponents;
+sPreset.M                  = 50*sPreset.gmmNumComponents;
+sPreset.MTilde             = 50*sPreset.gmmNumComponents;
 %% Regularizations
-sPreset.gamma1             = 0.1;
+sPreset.gamma1             = 1e-3;
 sPreset.gamma2             = 0;
 %% Representer theorem
 sPreset.gamma1Rep          = 1e-3;
 sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
-sPreset.R                  = 1;
+sPreset.R                  = 10;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;
@@ -42,9 +42,10 @@ sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = false;
 sPreset.b_runGraphSignals  = true;
-sPreset.b_maskDataFitTerm  = false;
+sPreset.b_maskDataFitTerm  = true;
+sPreset.b_compareMethods   = true;
 %% 
 sPreset.dataGenTechnique = 'AddPoints';
 sPreset.sDistanceParams.distType = 'Haversine'; % 'Euclidean' / 'Haversine'
-sPreset.sDistanceParams.earthRadius = 6371; % km (approximation)
+sPreset.sDistanceParams.earthRadius = 50; %6371; % km (approximation)
 end

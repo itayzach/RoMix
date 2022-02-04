@@ -1,8 +1,8 @@
-function [] = PlotTwoMoonsLapRLS(sSimParams, sDataset, sDistanceParams, omega, mAlpha,gamma1Rep, gamma2Rep,test_error)
+function [] = PlotTwoMoonsLapRLS(sSimParams, sDataset, sDistanceParams, omega, mAlpha,gamma1Rep, gamma2Rep)
 
 classifier.alpha = mAlpha;
 classifier.gammas = [gamma1Rep, gamma2Rep];
-classifier.test_error = 100 - test_error;
+
 
 x0     = 10;
 y0     = 250;
@@ -38,8 +38,7 @@ mKa = reshape(vKa,length(x1),length(x2));
 
 fig = figure;
 sgtitle(['LapRLS with $n$ = ' num2str(length(classifier.alpha)) newline ...
-    '$\gamma_A = ' num2str(classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(classifier.gammas(2), '%.4f') '$' newline ...
-    'Test error = ' num2str(classifier.test_error, '%.1f'), '$\%$' ], ...
+    '$\gamma_A = ' num2str(classifier.gammas(1), '%.4f') '$ $\gamma_I = ' num2str(classifier.gammas(2), '%.4f') '$'], ...
     'Interpreter', 'latex', 'FontSize', 14);
 subplot(2,1,1)
 surf(XX1,XX2,mKa, 'edgecolor', 'none')

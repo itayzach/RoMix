@@ -28,7 +28,7 @@ sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 1;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
-sPreset.MTilde             = 35;
+sPreset.MTilde             = 50;
 %% Regularizations
 sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;
@@ -45,8 +45,9 @@ sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = true;
-sPreset.b_runGraphSignals  = false;
+sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
+sPreset.b_compareMethods   = false;
 %% 
 sPreset.dataGenTechnique = 'AddPoints';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'

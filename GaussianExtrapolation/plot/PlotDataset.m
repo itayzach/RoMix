@@ -14,6 +14,7 @@ end
 fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
 %% GMM
 if exist('sDistParams', 'var')
+    b_plotDistModel = true;
     ax(1) = subplot(1,2,2);
     if isa(sDistParams.GMModel,"gmdistribution")
         [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
@@ -63,17 +64,17 @@ if dim == 1
     set(gca,'YTick',[],'FontSize', 14);
     xlim([xMin(1), xMax(1)])
 elseif dim == 2
-    if ~isempty(y) && isequal(y, floor(y)) && sum(y(:) > 0)
-        scatter3(x(:,1), x(:,2), y, [], y, 'filled');
-        if exist('ax', 'var')
-            colormap(ax(2), jet(length(unique(y)))); 
-        else
-            colormap(jet(length(unique(y))));
-        end
-        colorbar;
-    else
+%     if ~isempty(y) && isequal(y, floor(y)) && sum(y(:) > 0)
+%         scatter3(x(:,1), x(:,2), y, [], y, 'filled');
+%         if exist('ax', 'var')
+%             colormap(ax(2), jet(length(unique(y)))); 
+%         else
+%             colormap(jet(length(unique(y))));
+%         end
+%         colorbar;
+%     else
         scatter(x(:,1), x(:,2), 'filled');
-    end
+%     end
     xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
     ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
     view(2);
@@ -96,7 +97,7 @@ elseif dim == 3
         zlim([xMin(3), xMax(3)])
     end
     hold on;
-    scatter3(sDistParams.GMModel.mu(:,1), sDistParams.GMModel.mu(:,2), sDistParams.GMModel.mu(:,3), 100, 'r', 'filled');
+%     scatter3(sDistParams.GMModel.mu(:,1), sDistParams.GMModel.mu(:,2), sDistParams.GMModel.mu(:,3), 100, 'r', 'filled');
 %     for c = 1:sDistParams.GMModel.NumComponents 
 %         quiver3(sDistParams.u{c}(:,1), sDistParams.u{c}(:,2), sDistParams.u{c}(:,3),zeros(3,1),zeros(3,1),zeros(3,1));
 %         hold on;
@@ -118,7 +119,12 @@ if exist('sPlotParams', 'var') &&  ~isempty(sPlotParams) && isfield(sPlotParams,
     if ~exist(sPlotParams.outputFolder, 'dir')
         mkdir(sPlotParams.outputFolder)
     end
-    
-    saveas(fig,strcat(sPlotParams.outputFolder, filesep, actualDataDist, num2str(dim), 'd', '_dataset'), 'epsc');
+    if exist('b_plotDistModel', 'var') && b_plotDistModel
+        figName = 'dataset_vs_dist';
+    else
+        figName = 'dataset';
+    end
+    set(fig,'renderer','Painters')
+    saveas(fig,strcat(sPlotParams.outputFolder, filesep, actualDataDist, num2str(dim), 'd', '_', figName), 'epsc');
 end
 end

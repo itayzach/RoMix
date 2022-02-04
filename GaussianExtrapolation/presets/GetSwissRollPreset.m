@@ -22,12 +22,12 @@ eps                        = sqrt(5);
 sPreset.omega              = eps/sqrt(2); % for nystrom kernel
 sPreset.omegaTilde         = eps/sqrt(2); % for our method
 %% GMM params
-sPreset.gmmRegVal          = 1e-3;
+sPreset.gmmRegVal          = 1e-5;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 20;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 10;
-sPreset.MTilde             = 25*sPreset.gmmNumComponents;
+sPreset.MTilde             = 50*sPreset.gmmNumComponents;
 %% Regularizations
 sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;
@@ -35,7 +35,7 @@ sPreset.gamma2             = 0;
 sPreset.gamma1Rep          = 1e-5;
 sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
-sPreset.R                  = 10;
+sPreset.R                  = 1;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;
@@ -44,8 +44,9 @@ sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = true;
-sPreset.b_runGraphSignals  = false;
+sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
+sPreset.b_compareMethods   = false;
 %% 
 sPreset.dataGenTechnique = 'AddPoints';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'

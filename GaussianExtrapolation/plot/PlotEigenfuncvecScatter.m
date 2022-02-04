@@ -127,6 +127,7 @@ elseif dim == 2 || dim == 3
             sgtitle(suptitle,'Interpreter', 'latex', 'FontSize', 16);
         end
         set(gcf,'Position', [x0 y0 width height])
+        set(fig,'renderer','Painters')
     end
 end
 

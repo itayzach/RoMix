@@ -47,7 +47,7 @@ if dim == 1
 else
     plotInd = [0,min(8,M-1)];
 end
-if sPlotParams.b_globalPlotEnable && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
+if sPlotParams.b_globalPlotEnable && (sPlotParams.b_plotOrigEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
     figTitle = ['Eigenvectors of ', matrixForEigs];
     if strcmp(adjacencyType, 'GaussianKernel')
         figTitle2 = [' (Gaussian kernel, $\omega = ', num2str(omega), '$'];

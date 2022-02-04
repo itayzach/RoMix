@@ -1,5 +1,5 @@
 function [mSigCnvrtRecPhi, mSigCnvrtRecV, mSigCnvrtRecRep, mSigCnvrt, mSigCnvrtInt, mSigCnvrtNys, mSigCnvrtRep, mSigCnvrtRef] = ...
-    InterpGraphSignal(sPlotParams, sPreset, sDataset, Phi, lambdaPhi, PhiInt, VNys, WTrainInt, V, W, WRef, D, DRef, Ln, LnRef)
+    InterpGraphSignal(sPlotParams, sPreset, sDataset, sKernelParams, Phi, lambdaPhi, PhiInt, VNys, WTrainInt, V, W, WRef, D, DRef, Ln, LnRef)
 dim                = sPreset.dim;
 n                  = sPreset.n;
 N                  = sPreset.N;
@@ -9,7 +9,6 @@ gamma1             = sPreset.gamma1;
 gamma2             = sPreset.gamma2;
 gamma1Rep          = sPreset.gamma1Rep;
 gamma2Rep          = sPreset.gamma2Rep;
-sDatasetParams     = sPreset.sDatasetParams;
 sDistanceParams    = sPreset.sDistanceParams;
 b_normalizePhi     = sPreset.b_normalizePhi;
 interpRatio        = N/n;
@@ -117,39 +116,36 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
 end
 
 
-%         PlotGraphSignalAnalysis(vSig, vSigRecPhi, vSigRecV, vSigRef, vSigInt, vSigNys, ...
-%             vSigCoeffsPhi, vSigCoeffsV, vSigRefCoeffsPhi);
+if sPlotParams.b_globalPlotEnable && dim <=3
+    if sPlotParams.b_plotExtraGraphSigAnalysis
+        PlotExtraGraphSignalAnalysis(vSig, vSigRecPhi, vSigRecV, vSigRep, vSigRef, vSigInt, vSigNys, ...
+            vSigCoeffsPhi, vSigCoeffsV, vSigRefCoeffsPhi)
+    end
 
-%         PlotGraphSignalErrors(sPlotParams, [1, n], vSig, {vSigRecPhi, vSigRecV, vSigRecRep}, ...
-%             {'|s-s_{\Phi}^{{\bf rec}}|', '|s-s_{V}^{{\bf rec}}|', '|s-s_{{\bf K}}^{{\bf rec}}|'},  ...
-%             'Projection error ($n$ given nodes)')
-%         if n+1 < N
-%             PlotGraphSignalErrors(sPlotParams, [n+1, N], vSigRef(n+1:N), ...
-%                 {vSigInt(n+1:N), vSigNys(n+1:N), vSigRep(n+1:N)}, ...
-%                 {'|s^{{\bf ref}}-s^{{\bf int}}|', '|s^{{\bf ref}}-s^{{\bf nys}}|', '|s^{{\bf ref}}-s^{{\bf rep}}|'},  ...
-%                 'Interpolation error ($N-n$ nodes)')
-%         end
-%
-%         PlotGraphSignalErrors(sPlotParams, [1, N], vSigRef, {vSigInt, vSigNys, vSigRep}, ...
-%             {'|s^{{\bf ref}}-s^{{\bf int}}|', '|s^{{\bf ref}}-s^{{\bf nys}}|', '|s^{{\bf ref}}-s^{{\bf rep}}|'},  ...
-%             'Total error ($N$ nodes)')
-
-if sPlotParams.b_globalPlotEnable && dim <=3 &&  ~(ismember(sPreset.verticesPDF, {'TwoMoons'}))
-    PlotGraphSignals(sPlotParams, ['Graph signals on given $n=' num2str(n) '$ nodes (Train set)'], 'TrainSet', ...
-        {xTrain, xTrain, xTrain, xTrain}, ...
-        {vSig, vSigRecPhi, vSigRecV, vSigRecRep}, ...
-        {'$s$', '$s_{\Phi}^{{\bf rec}}$', '$s_{V}^{{\bf rec}}$', '$s_{K}^{{\bf rec}}$'}, ...
-        {n, n, n, n});
-    cmap = PlotGraphSignals(sPlotParams, ['Graph signals on all $N=' num2str(N) '$ nodes (Train \& Test sets)'], 'TrainAndTestSet', ...
-        {xInt, xInt, xInt, xInt}, ...
-        {vSigRef, vSigInt, vSigNys, vSigRep}, ...
-        {'$s^{{\bf ref}}$', '$s^{{\bf int}}$', '$s^{{\bf nys}}$', '$s^{{\bf rep}}$'}, ...
-        {n, n, n, n});
-
+%     PlotGraphSignals(sPlotParams, ['Graph signal interpolation'], 'Interpolation', ...
+%         {xInt, xInt}, ...
+%         {vSigRef, vSigInt}, ...
+%         {'$s^{{\bf ref}}$', '$s^{{\bf int}}$'}, ...
+%         {n, n}, {'o', '.'});
+    PlotGraphSignals(sPlotParams, ['Graph signal interpolation'], 'Interpolation', ...
+        {xTrain, xTrain, xInt, xInt}, ...
+        {vSig, vSigRecPhi, vSigRef, vSigInt}, ...
+        {'$s$', '$s_{\Phi}^{{\bf rec}}$', '$s^{{\bf ref}}$', '$s^{{\bf int}}$'}, ...
+        {n, n, n, n}, {'o', 'o', '.', '.'});
+%     %     PlotGraphSignals(sPlotParams, ['Graph signals on given $n=' num2str(n) '$ nodes (Train set)'], 'TrainSet', ...
+%     %         {xTrain, xTrain, xTrain, xTrain}, ...
+%     %         {vSig, vSigRecPhi, vSigRecV, vSigRecRep}, ...
+%     %         {'$s$', '$s_{\Phi}^{{\bf rec}}$', '$s_{V}^{{\bf rec}}$', '$s_{K}^{{\bf rec}}$'}, ...
+%     %         {n, n, n, n});
+%     %     cmap = PlotGraphSignals(sPlotParams, ['Graph signals on all $N=' num2str(N) '$ nodes (Train \& Test sets)'], 'TrainAndTestSet', ...
+%     %         {xInt, xInt, xInt, xInt}, ...
+%     %         {vSigRef, vSigInt, vSigNys, vSigRep}, ...
+%     %         {'$s^{{\bf ref}}$', '$s^{{\bf int}}$', '$s^{{\bf nys}}$', '$s^{{\bf rep}}$'}, ...
+%     %         {n, n, n, n});
     if sPlotParams.b_plotGmmSignal
         % GMM
         nGmmPoints = 1000;
-        [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
+        [xGmm,compIdx] = random(sKernelParams.sDistParams.GMModel, nGmmPoints);
         [PhiGmm, ~] = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xGmm, b_normalizePhi);
         mSigGmm = PhiGmm*mSigCoeffsPhi;
         vSigGmm = mSigGmm(:,sigIndToPlot);
@@ -167,28 +163,36 @@ if sPlotParams.b_globalPlotEnable && dim <=3 &&  ~(ismember(sPreset.verticesPDF,
 end
 
 if ismember(sPreset.verticesPDF, {'TwoMoons'})
-    PlotTwoMoonsEigsRLS(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigCoeffsPhi, gamma1,gamma2, b_normalizePhi, mErrInt);
-    PlotTwoMoonsLapRLS(sPlotParams, sDataset, sDistanceParams, omega, mAlpha, gamma1Rep, gamma2Rep, mErrRep);
+    PlotTwoMoonsEigsRLS(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigCoeffsPhi, gamma1,gamma2, b_normalizePhi);
+    PlotTwoMoonsLapRLS(sPlotParams, sDataset, sDistanceParams, omega, mAlpha, gamma1Rep, gamma2Rep);
 
 elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
     b_transpose = strcmp(sPreset.verticesPDF, 'MNIST');
-    nDigitsToPlot = 50;
-    vSamples = round(linspace(1,sPreset.N,nDigitsToPlot));
-    figTitle = ['Prediction on given $n = ', num2str(length(vSamples)), '$ points'];
-    PlotDigits(sPlotParams, xInt(vSamples,:), mSigCnvrtInt(vSamples)-b_transpose, b_transpose, figTitle)
+    nDigitsToPlot = 50;    
+    if sPreset.n + nDigitsToPlot < sPreset.N
+        vSamples = round(linspace(sPreset.n+1,sPreset.N,nDigitsToPlot));
+        figTitle = ['Prediction on unseen $', num2str(length(vSamples)), '$ images'];
+        figName = [sPreset.verticesPDF '_interpolation_signals'];
+        PlotDigits(sPlotParams, xInt(vSamples,:), mSigCnvrtInt(vSamples)-b_transpose, b_transpose, figTitle, figName)
+    else
+        vSamples = round(linspace(1,sPreset.n,nDigitsToPlot));
+        figTitle = ['Prediction on seen $', num2str(length(vSamples)), '$ images'];
+        PlotDigits([], xInt(vSamples,:), mSigCnvrtInt(vSamples)-b_transpose, b_transpose, figTitle)
+    end
 
     vBadPredictInd = find(mSigCnvrtInt ~= mSigCnvrtRef);
     nBadPredict = min(50,length(vBadPredictInd));
-    figTitle = ['Wrong prediction on $n = ', num2str(nBadPredict), '$ points'];
-    PlotDigits(sPlotParams, xInt(vBadPredictInd(1:nBadPredict),:), mSigCnvrtInt(vBadPredictInd(1:nBadPredict))-b_transpose, b_transpose, figTitle)
+    figTitle = ['Wrong prediction on given+unseen $n = ', num2str(nBadPredict), '$ points'];
+    PlotDigits([], xInt(vBadPredictInd(1:nBadPredict),:), mSigCnvrtInt(vBadPredictInd(1:nBadPredict))-b_transpose, b_transpose, figTitle)
 
     nGmmPoints = 50;
-    [xGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
+    [xGmm,compIdx] = random(sKernelParams.sDistParams.GMModel, nGmmPoints);
     PhiGmm = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xGmm, b_normalizePhi);
     mSigGmm = PhiGmm*mSigCoeffsPhi;
     mSigCnvrtGmm = ConvertSignalByDataset(sPreset.verticesPDF, mSigGmm);
     figTitle = [num2str(nGmmPoints), ' generated points'];
-    PlotDigits(sPlotParams, xGmm, mSigCnvrtGmm-b_transpose, b_transpose, figTitle)
+    figName = [sPreset.verticesPDF '_generated_signals'];
+    PlotDigits(sPlotParams, xGmm, mSigCnvrtGmm-b_transpose, b_transpose, figTitle, figName)
 
 end
 end

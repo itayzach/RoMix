@@ -13,7 +13,7 @@ for i = 1:n
         imshow(image)
     end
     if exist('y','var') && ~isempty(y)
-        title(y(i))
+        title(y(i),'Interpreter','latex','FontSize',14)
     end
 end
 sgtitle(figTitle, 'interpreter', 'latex', 'fontsize', 14)

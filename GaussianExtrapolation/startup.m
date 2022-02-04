@@ -5,18 +5,17 @@ restoredefaultpath;
 %% My directories
 [filepath, scriptName, ~] = fileparts(mfilename('fullpath'));
 fprintf('[%s] Adding paths...\n', scriptName);
-addpath(genpath('GaussianExtrapolation'));
-addpath(genpath('ManifoldLearn'));
-addpath(genpath('data'));
+addpath(genpath(filepath));
 fprintf('[%s] Ready.\n', scriptName);
 clear scriptName
 
 %% Belkin's
-start_ManifoldLearn;
+% addpath(genpath(fullfile('..','ManifoldLearn')));
+% start_ManifoldLearn;
 
 %% GSPBox
-addpath('gspbox/');
-gsp_start;
+% addpath(fullfile('..','gspbox'));
+% gsp_start;
 
 %% Wrap up
 cd(filepath);

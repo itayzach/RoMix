@@ -1,10 +1,9 @@
-function PlotTwoMoonsEigsRLS(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigHatPhi, gamma1, gamma2, b_normalizePhi, testErr)
+function PlotTwoMoonsEigsRLS(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigHatPhi, gamma1, gamma2, b_normalizePhi)
 MTilde = size(mSigHatPhi,1);
 sClassifier.MTilde = MTilde;
 sClassifier.omega = sKernelParams.omega;
 sClassifier.gamma_A = gamma1;
 sClassifier.gamma_I = gamma2;
-sClassifier.error = testErr;
 sClassifier.vPhi_xTrain_c = mSigRecPhi;
 xMax = max([sDataset.sData.x(:); sDataset.sData.xt(:)]);
 xMin = min([sDataset.sData.x(:); sDataset.sData.xt(:)]);

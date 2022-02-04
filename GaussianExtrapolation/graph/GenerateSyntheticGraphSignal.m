@@ -22,10 +22,11 @@ if d == 1
     sig = sin(2*pi*f.*x).*exp(-5*L.*abs(x-0.5*L));
     sigRef = sin(2*pi*f.*xInt).*exp(-5*L.*abs(xInt-0.5*L));
 elseif d == 3
-    Lx = max(xInt(:, [1 3])) - min(xInt(:, [1 3]));
-    fx = 2./(Lx);
-    sig = prod(sin(2*pi*fx.*x(:, [1 3])),2);
-    sigRef = prod(sin(2*pi*fx.*xInt(:, [1 3])),2);
+    dims = [1, 3];
+    Lx = max(xInt(:, dims)) - min(xInt(:, dims));
+    fx = 1./(Lx);
+    sig = prod(sin(2*pi*fx.*x(:, dims)),2);
+    sigRef = prod(sin(2*pi*fx.*xInt(:, dims)),2);
 end
 % sigRef = sin(3*xInt).*exp(-0.5*abs(xInt));
 

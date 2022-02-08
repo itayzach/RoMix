@@ -1,7 +1,8 @@
+function MainGMM(presetName)
 %% Restart
-clc; clear; rng('default');
-close all; 
-set(0,'DefaultFigureWindowStyle','normal')
+% clc; clear; rng('default');
+% close all; 
+% set(0,'DefaultFigureWindowStyle','normal')
 %% Illustrate the first eigenfunctions of the 1-D Guassian kernel
 % PlotGaussianKernelEigenfunsExample();
 %% Load preset
@@ -9,12 +10,13 @@ set(0,'DefaultFigureWindowStyle','normal')
 % sPreset = Get1DUniformPreset();
 % sPreset = Get1DGaussianPreset();
 % sPreset = GetSwissRollPreset(); % For graph sig interp, run with n=1000
-sPreset = GetBrazilWeatherPreset();
+% sPreset = GetBrazilWeatherPreset();
 % sPreset = GetTwoMoonsPreset(); %Classifier is okay. Should fix order of VRef relative to V...
 % sPreset = GetTwoSpiralsPreset();
 % sPreset = GetMnistLatentVAEPreset();
 % sPreset = GetUspsPreset();
 % sPreset = GetMnistPreset();
+sPreset = eval(presetName);
 %%
 clusterMethod = 'GMM'; % 'GMM' / 'SC'
 %% Parse sPreset
@@ -221,4 +223,5 @@ if b_runGraphSignals
 %                 'MSE$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'Mse_graph_signals_', [], sDatasetParams.monthNames, 'Train \& Test  MSE');
         end 
     end
+end
 end

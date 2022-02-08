@@ -2,6 +2,8 @@
 close all; clear; clc;
 rng('default');
 set(0,'DefaultFigureWindowStyle','normal')
+addpath(genpath(fullfile('..','ManifoldLearn')));
+start_ManifoldLearn;
 
 %% Set params
 M                = 20;

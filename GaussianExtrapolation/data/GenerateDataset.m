@@ -323,8 +323,7 @@ elseif strcmp(actualDataDist, 'Uniform')
         sDataset.sData.x = data(1:nTrain,:);
         sDataset.sData.xt = data;
     end
-    sDataset.sData.y = [];
-    sDataset.sData.yt = [];
+    [sDataset.sData.y, sDataset.sData.yt] = GenerateSyntheticGraphSignal(sDataset.sData.x, sDataset.sData.xt);
     
 elseif strcmp(actualDataDist, 'Grid')
     if ~exist('sDatasetParams', 'var') || ...

@@ -1,4 +1,4 @@
-function [] = PlotAccuracy(sPlotParams, mAcc, cDispName, figName, minAcc, xTickNames, pltTitle)
+function [] = PlotAccuracy(sPlotParams, mAcc, mStd, cDispName, figName, minAcc, xTickNames, pltTitle)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
@@ -7,7 +7,8 @@ cLineStyle = {'-', '--', '-.'};
 fig = figure('Name', 'Accuracy');
 for methodId = 1:nMethods
     vAcc = mAcc(:,methodId);
-    plot((0:M-1)', vAcc, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
+    vStd = mStd(:, methodId);
+    errorbar((0:M-1)', vAcc, vStd, 'Marker', 'o', 'LineStyle', cLineStyle{methodId}, 'LineWidth', 2, 'DisplayName', cDispName{methodId});
     hold on;
 end
 

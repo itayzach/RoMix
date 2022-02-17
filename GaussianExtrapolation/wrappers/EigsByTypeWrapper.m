@@ -17,10 +17,24 @@ xTrain = sDataset.sData.x;
 xInt = sDataset.sData.xt;
 %%
 if b_debugUseAnalytic
-    warning('review the following {1}...')
-    [VRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
-    adjLambdaRef = N*adjLambdaRef;
-    matLambda = adjLambdaRef;
+    assert(strcmp(matrixForEigs, 'Adjacency') && dim == 1)
+    if strcmp(verticesPDF, 'Grid')
+        % analytic eigenfunctions from Spectral Graph Theory, Spielman
+        V = (1/sqrt(n))*cos(pi*(0:M-1).*xTrain(:,1) - pi*(0:M-1));
+        VRef = (1/sqrt(N))*cos(pi*(0:M-1).*xInt(:,1) - pi*(0:M-1));
+        adjLambda = 2*(1-cos(pi*(0:M-1)/n));
+        adjLambdaRef = 2*(1-cos(pi*(0:M-1)/N));
+        matLambda = adjLambda;
+        matLambdaRef = adjLambdaRef;
+    elseif strcmp(verticesPDF, 'Gaussian')
+        warning('review the following {1}...')
+        [V, adjLambda] = SimpleCalcAnalyticEigenfunctions(xTrain, omega, sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
+        [VRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
+        adjLambdaRef = N*adjLambdaRef;
+        matLambda = adjLambdaRef;
+    else
+        error('invalid pdf option for analytic expressions')
+    end
 else
     [VRef, adjLambdaRef, matLambdaRef] = EigsByType(WRef, DRef, LnRef, M, matrixForEigs);
     if b_takeEigsFromWRef
@@ -29,11 +43,6 @@ else
         matLambda = matLambdaRef/interpRatio;
     else
         [V, adjLambda, matLambda] = EigsByType(W, D, Ln, M, matrixForEigs);
-%         if strcmp(verticesPDF, 'Grid')
-%             % analytic eigenfunctions from Spectral Graph Theory, Spielman
-%             VAna = (1/sqrt(n))*cos(pi*(0:M-1).*xTrain(:,1) - pi*(0:M-1));
-%             interpRatio = 1;
-%         end
     end
 end
 assert(isreal(V), 'V should be real...')

@@ -1,4 +1,4 @@
-function [vRMSE, vMSE, vAcc, mErrors, vCoh] = CalcErrAndAcc(tPhiToCompare, tPhiNumeric, compareTo)
+function [vRMSE, vMSE, vAcc, mErrors, vCoh, vAccStd] = CalcErrAndAcc(tPhiToCompare, tPhiNumeric, compareTo)
 [n, nEigenFuncs, R] = size(tPhiToCompare);
 if isequal(tPhiToCompare(:,1,1),floor(tPhiToCompare(:,1,1)))
     errFunc = '0-1';
@@ -36,6 +36,7 @@ vMSE = (sum(mErrNormed.^2,1)/R).';
 vCoh = (sum(mCoherence,1)/R).';
 vAcc = (100*sum((1-mErrNormed),1)/R).';
 mErrors = mErrNormed.';
+vAccStd = 100*std(mErrNormed,[],1).';
 end
 
 

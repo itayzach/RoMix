@@ -33,7 +33,7 @@ sPreset.gamma2             = 0;
 sPreset.gamma1Rep          = 1e-5;
 sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
-sPreset.R                  = 1;
+sPreset.R                  = 20;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;
@@ -42,7 +42,7 @@ sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = true;
-sPreset.b_runGraphSignals  = false;
+sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
 sPreset.b_compareMethods   = false;
 %% 

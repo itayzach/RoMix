@@ -58,7 +58,7 @@ b_runGraphSignals  = sPreset.b_runGraphSignals;
 b_compareMethods   = sPreset.b_compareMethods;
 interpRatio        = N/n;
 %% Verify
-assert(~b_debugUseAnalytic || (b_debugUseAnalytic && strcmp(verticesPDF,'Gaussian')))
+assert(~b_debugUseAnalytic || (b_debugUseAnalytic && (strcmp(verticesPDF,'Gaussian') || strcmp(verticesPDF,'Grid'))))
 assert(~strcmp(adjacencyType,'NearestNeighbor') || ...
     strcmp(adjacencyType,'NearestNeighbor') && strcmp(verticesPDF,'Grid'))
 assert((strcmp(clusterMethod, 'GMM') && n >= dim) || (strcmp(clusterMethod, 'SC'))) 
@@ -166,11 +166,11 @@ end
 % Accuracy
 % ------------------------------------------------------------------------------------------
 if b_interpEigenvecs
-    [vRmseInt, vMseInt, vAccInt, mErrInt, vCohInt] = CalcErrAndAcc(tVIntToCompare, tVRefToCompare, 'Analytic');
+    [vRmseInt, vMseInt, vAccInt, mErrInt, vCohInt, vAccStdInt] = CalcErrAndAcc(tVIntToCompare, tVRefToCompare, 'Analytic');
     if b_compareMethods
-        [vRmseNys, vMseNys, vAccNys, mErrNys, vCohNys] = CalcErrAndAcc(tVNysToCompare, tVRefToCompare, 'Nystrom');
-        [vRmseRep, vMseRep, vAccRep, mErrRep, vCohRep] = CalcErrAndAcc(tVRepToCompare, tVRefToCompare, 'Representer');
-        PlotAccuracy(sPlotParams, [vAccInt, vAccNys, vAccRep], ...
+        [vRmseNys, vMseNys, vAccNys, mErrNys, vCohNys, vAccStdNys] = CalcErrAndAcc(tVNysToCompare, tVRefToCompare, 'Nystrom');
+        [vRmseRep, vMseRep, vAccRep, mErrRep, vCohRep, vAccStdRep] = CalcErrAndAcc(tVRepToCompare, tVRefToCompare, 'Representer');
+        PlotAccuracy(sPlotParams, [vAccInt, vAccNys, vAccRep], [vAccStdInt, vAccStdNys, vAccStdRep], ...
             {'Acc$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$', 'Acc$(v^{{\bf nys}}_m, v^{{\bf ref}}_m)$', ...
              'Acc$(v^{{\bf rep}}_m, v^{{\bf ref}}_m)$'}, ['Acc_eigs_0_to_' num2str(M-1)]);
 %         PlotRMSE(sPlotParams, [vRmseInt, vRmseNys, vRmseRep], ...
@@ -183,22 +183,22 @@ if b_interpEigenvecs
 %             {'MSE$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$', 'MSE$(v^{{\bf nys}}_m, v^{{\bf ref}}_m)$', ...
 %              'MSE$(v^{{\bf rep}}_m, v^{{\bf ref}}_m)$'}, ['Mse_eigs_0_to_' num2str(M-1)]);
     else
-        PlotAccuracy(sPlotParams, vAccInt, {'Acc$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$'}, ['Acc_eigs_0_to_' num2str(M-1)]);
+        PlotAccuracy(sPlotParams, vAccInt, vAccStdInt, {'Acc$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$'}, ['Acc_eigs_0_to_' num2str(M-1)]);
     end
 end
 if b_runGraphSignals
-    [vRmseRecPhi, vMseRecPhi, vAccRecPhi, mErrRecPhi, vCohRecPhi] = CalcErrAndAcc(tSigCnvrtRecPhi, tSigCnvrt, 'EigsRLS (train)');
-    [vRmseInt, vMseInt, vAccInt, mErrInt, vCohInt]                = CalcErrAndAcc(tSigCnvrtInt, tSigCnvrtRef, 'EigsRLS (test)');
+    [vRmseRecPhi, vMseRecPhi, vAccRecPhi, mErrRecPhi, vCohRecPhi, vAccStdPhi] = CalcErrAndAcc(tSigCnvrtRecPhi, tSigCnvrt, 'EigsRLS (train)');
+    [vRmseInt, vMseInt, vAccInt, mErrInt, vCohInt, vAccStdInt]                = CalcErrAndAcc(tSigCnvrtInt, tSigCnvrtRef, 'EigsRLS (test)');
     if b_compareMethods
-        [vRmseRecRep, vMseRecRep, vAccRecRep, mErrRecRep, vCohRecRep] = CalcErrAndAcc(tSigCnvrtRecRep, tSigCnvrt, 'Representer (train)');
-        [vRmseRep, vMseRep, vAccRep, mErrRep, vCohRep]                = CalcErrAndAcc(tSigCnvrtRep, tSigCnvrtRef, 'Representer (test)');
-        [vRmseRecV, vMseRecV, vAccRecV, mErrRecV, vCohRecV]           = CalcErrAndAcc(tSigCnvrtRecV, tSigCnvrt, 'Nystrom (train)');
-        [vRmseNys, vMseNys, vAccNys, mErrNys, vCohNys]                = CalcErrAndAcc(tSigCnvrtNys, tSigCnvrtRef, 'Nystrom (test)');
+        [vRmseRecRep, vMseRecRep, vAccRecRep, mErrRecRep, vCohRecRep, vAccStdRecRep] = CalcErrAndAcc(tSigCnvrtRecRep, tSigCnvrt, 'Representer (train)');
+        [vRmseRep, vMseRep, vAccRep, mErrRep, vCohRep, vAccStdRep]                   = CalcErrAndAcc(tSigCnvrtRep, tSigCnvrtRef, 'Representer (test)');
+        [vRmseRecV, vMseRecV, vAccRecV, mErrRecV, vCohRecV, vAccStdRecV]             = CalcErrAndAcc(tSigCnvrtRecV, tSigCnvrt, 'Nystrom (train)');
+        [vRmseNys, vMseNys, vAccNys, mErrNys, vCohNys, vAccStdNys]                   = CalcErrAndAcc(tSigCnvrtNys, tSigCnvrtRef, 'Nystrom (test)');
         if isfield(sDatasetParams, 'monthNames')
-            PlotAccuracy(sPlotParams, [vAccInt, vAccNys, vAccRep], ...
+            PlotAccuracy(sPlotParams, [vAccInt, vAccNys, vAccRep], [vAccStdInt, vAccStdNys, vAccStdRep], ...
                 {'Acc$(s^{{\bf int}}_m, s^{{\bf ref}}_m)$', 'Acc$(s^{{\bf nys}}_m, s^{{\bf ref}}_m)$', ...
                 'Acc$(s^{{\bf rep}}_m, s^{{\bf ref}}_m)$'}, 'InterpAcc', [], sDatasetParams.monthNames, 'Interpolation accuracy');
-            PlotAccuracy(sPlotParams, [vAccRecPhi, vAccRecV, vAccRecRep], ...
+            PlotAccuracy(sPlotParams, [vAccRecPhi, vAccRecV, vAccRecRep], [vAccStdPhi, vAccStdRecV, vAccStdRecRep], ...
                 {'Acc$(s^{{\bf int}}_m, s^{{\bf ref}}_m)$', 'Acc$(s^{{\bf nys}}_m, s^{{\bf ref}}_m)$', ...
                 'Acc$(s^{{\bf rep}}_m, s^{{\bf ref}}_m)$'}, 'ProjAcc', [], sDatasetParams.monthNames, 'Projection accuracy');
 

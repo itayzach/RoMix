@@ -29,16 +29,9 @@ height = 350;
 width  = 600;
 set(gcf,'Position', [x0 y0 width height])
 %% Save
-if isfield(sPlotParams, 'outputFolder')
-    if ~exist(sPlotParams.outputFolder, 'dir')
-        mkdir(sPlotParams.outputFolder)
-    end
-    simPrefix = strcat(sPlotParams.actualDataDist, num2str(sPlotParams.dim), ...
-        'd', '_', sPlotParams.matrixForEigs);
-
-    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_RMSE_eigs_0_to_', ...
-        num2str(M-1)), 'epsc');
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    figName = ['RMSE_eigs_0_to_', num2str(M-1)];
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
-
 set(0,'DefaultFigureWindowStyle',windowStyle)
 end

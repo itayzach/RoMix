@@ -1,10 +1,11 @@
 clc; clear; close all;
 rng('default')
-% sPreset = GetUspsPreset(); b_transpose = false;
-sPreset = GetMnistPreset(); b_transpose = true;
+% sPreset = GetUspsPreset(); b_transpose = false; sPlotParams.actualDataDist = 'USPS';
+sPreset = GetMnistPreset(); b_transpose = true; sPlotParams.actualDataDist = 'MNIST';
 sDataset = GenerateDataset(sPreset.verticesPDF, sPreset.dim, sPreset.nGenDataCompnts, sPreset.n, sPreset.N, sPreset.dataGenTechnique, sPreset.sDatasetParams);
 X = sDataset.sData.x;
 sPlotParams.outputFolder = 'figs';
+sPlotParams.dim = size(X,2);
 
 %% Plot samples
 vSamples = round(linspace(1,sPreset.n,50));

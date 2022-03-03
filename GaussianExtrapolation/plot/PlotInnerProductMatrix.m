@@ -24,13 +24,8 @@ set(gca,'FontSize', 14);
 set(gcf,'Position', [x0 y0 width height])
 set(0,'DefaultFigureWindowStyle',windowStyle)
 %% Save
-if isfield(sPlotParams, 'outputFolder') && ~isempty(sPlotParams)
-    if ~exist(sPlotParams.outputFolder, 'dir')
-        mkdir(sPlotParams.outputFolder)
-    end
-    simPrefix = strcat(sPlotParams.actualDataDist, num2str(sPlotParams.dim), ...
-        'd', '_', sPlotParams.matrixForEigs);
-
-    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_ip_matrix_', figName), 'epsc');
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    figName = [figName, '_ip_matrix'];
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
 end

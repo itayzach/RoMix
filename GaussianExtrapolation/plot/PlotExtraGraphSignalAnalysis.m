@@ -1,7 +1,7 @@
-function PlotExtraGraphSignalAnalysis(vSig, vSigRecPhi, vSigRecV, vSigRep, vSigRef, vSigInt, vSigNys, vSigCoeffsPhi, vSigCoeffsV, vSigRefCoeffsPhi)
+function PlotExtraGraphSignalAnalysis(vSig, vSigRecPhi, vSigRecV, vSigRecRep, vSigRef, vSigInt, vSigNys, vSigRep, vSigCoeffsPhi, vSigCoeffsV, vSigRefCoeffsPhi)
 
 n = size(vSig);
-N = size(nSigRef);
+N = size(vSigRef);
 
 PlotGraphSignalAnalysis(vSig, vSigRecPhi, vSigRecV, vSigRef, vSigInt, vSigNys, ...
     vSigCoeffsPhi, vSigCoeffsV, vSigRefCoeffsPhi);

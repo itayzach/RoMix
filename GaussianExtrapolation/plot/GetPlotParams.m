@@ -1,19 +1,19 @@
 function sPlotParams = GetPlotParams()
+%% Save figs
 sPlotParams.outputFolder = 'figs';
-sPlotParams.b_plotAllEvecs              = false;
-sPlotParams.b_GSPBoxPlots               = false;
-sPlotParams.b_plotWeights               = false;
-sPlotParams.b_plotVRec                  = false;
-sPlotParams.b_plotTransDemos            = false;
-sPlotParams.b_plotOrigVsInterpEvecs     = true;
+sPlotParams.b_globalPlotEnable          = true;
+%% Eigenvectors
 sPlotParams.b_plotOrigEvecs             = false;
 sPlotParams.b_plotGaussianKernelEigfunc = false;
-sPlotParams.b_plotData                  = false;
-sPlotParams.b_plotDataVsGmm             = true;
-sPlotParams.b_plotInnerProductMatrices  = false;
-sPlotParams.b_plotHistogram             = false;
+%% Debug
+sPlotParams.b_plotWeights               = false;
 sPlotParams.b_plotC                     = false;
+sPlotParams.b_plotInnerProductMatrices  = false;
+sPlotParams.b_plotMercer                = false;
+%% Data
+sPlotParams.b_plotDataVsGmm             = true;
+%% Graph signals
 sPlotParams.b_plotGmmSignal             = false;
 sPlotParams.b_plotExtraGraphSigAnalysis = false;
-sPlotParams.b_plotMercer                = false;
+
 end

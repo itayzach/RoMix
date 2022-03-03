@@ -34,10 +34,6 @@ for c = 1:gmmNumComponents
     [sDistParams.u{c}, sDistParams.sigma_eigv{c}] = eig(sDistParams.cov{c});
     sDistParams.sigma{c} = diag(sqrt(sDistParams.sigma_eigv{c})).';
     assert(isreal(sDistParams.sigma{c}) && all(sDistParams.sigma{c} > eps))
-% 1:
-%     sDistParams.u{c} = fliplr(sDistParams.u{c});
-%     sDistParams.sigma{c} = fliplr(sDistParams.sigma{c});
-% 2:
     [~, uIndByCov] = sort(sDistParams.sigma{c},'descend');
     sDistParams.u{c} = sDistParams.u{c}(:,uIndByCov);
     sDistParams.sigma{c} = sDistParams.sigma{c}(uIndByCov);
@@ -46,8 +42,9 @@ for c = 1:gmmNumComponents
     isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-10)
 %     assert(isequal(sort(sDistParams.sigma{c}),sDistParams.sigma{c}))
 end
-[minSigma, minSigmaInd] = min(sDistParams.sigma{c});
-fprintf('Done. min(sigma{1:%d}) = %.4f (ind = %d)\n', gmmNumComponents, minSigma, minSigmaInd)
+[minSigmaAllComp, minSigmaCompDim] = cellfun(@min, sDistParams.sigma);
+[minSigma, minSigmaCompInd] = min(minSigmaAllComp);
+fprintf('Done. min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', gmmNumComponents, minSigma, minSigmaCompInd, minSigmaCompDim(minSigmaCompInd))
 
 % Caluclate the probability for each data point x
 % sDistParams.vPr = zeros(length(x),1);

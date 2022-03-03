@@ -1,27 +1,31 @@
 function sDistParams = EstDistParamsSpectClust(X, W, nClusters)
 
 sDistParams.estDataDist = 'Gaussian';
-dim = size(X,2);
+[n, dim] = size(X);
 sDistParams.dim = dim;
 
 fprintf('Running spectralcluster... ')
-[clusterInd, V_SC, D_SC] = spectralcluster(W,nClusters,"Distance","precomputed");
-% [clusterInd, V_SC, D_SC] = spectralcluster(W,nClusters);
+% [clusterInd, V_SC, D_SC] = spectralcluster(W,nClusters,"Distance","precomputed");
+[clusterInd, V_SC, D_SC] = spectralcluster(X,nClusters);
 fprintf('Done.\n')
 
-sDistParams.GMModel.NumComponents = nClusters;
-sDistParams.GMModel.SCcompIdx = clusterInd;
+sDistParams.SCcompIdx = clusterInd;
 
-% figure; scatter3(X(:,1), X(:,2), X(:,3),[],clusterInd, 'filled'); colormap(jet(nClusters)); colorbar;
-% if nClusters > 1
-%     figure; 
-%     scatter3(V_SC(:,2), V_SC(:,3), clusterInd,[],clusterInd, 'filled'); 
-%     view(0,90)
-%     colormap(jet(nClusters))
-%     colorbar();
-% 
-%     figure; histogram(clusterInd)
-% end
+if dim == 3
+    fig = figure; ax = scatter3(X(:,1), X(:,2), X(:,3),[],clusterInd, 'filled'); colormap(jet(nClusters)); colorbar;
+    UpdateCursorDataTip(fig, ax, clusterInd);
+elseif dim == 2
+    figure; scatter3(X(:,1), X(:,2), clusterInd,[],clusterInd, 'filled'); colormap(jet(nClusters)); colorbar; view(2)
+end
+if nClusters > 1
+    figure; 
+    scatter3(V_SC(:,2), V_SC(:,3), clusterInd,[],clusterInd, 'filled'); 
+    view(0,90)
+    colormap(jet(nClusters))
+    colorbar();
+
+    figure; histogram(clusterInd)
+end
 % for c = 1:nClusters
 %     X_c = X(clusterInd==c,:);
 %     figure; 
@@ -39,8 +43,10 @@ fprintf('Calculating covariance, mean and [fliplr(u), fliplr(sigma^2)] = eig(cov
 sDistParams.estNumComponents = nClusters;
 for c = 1:nClusters
     X_c = X(clusterInd==c,:);
+    assert(size(X_c,1) > 1, 'cluster %d has only one point',c)
     mu_c = mean(X_c,1);
     cov_c = cov(X_c);
+    assert(det(cov_c) > 0, 'det(cov_%d) < 0?', c);
     [u_c, sigma_eigv_c] = eig(cov_c);
     assert(isreal(sigma_eigv_c), 'sigma_eigv_%d is complex?', c)
     assert(isreal(u_c), 'u_%d is complex?', c)
@@ -65,10 +71,32 @@ for c = 1:nClusters
     
     isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-10)
 end
-[minSigma, minSigmaInd] = min(sDistParams.sigma{c});
-fprintf('Done. min(sigma{1:%d}) = %.4f (ind = %d)\n', nClusters, minSigma, minSigmaInd)
+[minSigmaAllComp, minSigmaCompDim] = cellfun(@min, sDistParams.sigma);
+[minSigma, minSigmaCompInd] = min(minSigmaAllComp);
 
+mMu = cell2mat(sDistParams.mu');
+mCov = reshape(cell2mat(sDistParams.cov), dim, dim, nClusters);
+p = histcounts(clusterInd, nClusters)/n;
+sDistParams.GMModel = gmdistribution(mMu, mCov, p);
+fprintf('Done. min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', nClusters, minSigma, minSigmaCompInd, minSigmaCompDim(minSigmaCompInd))
 
-
-
+if dim == 2
+    figure;
+    gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(sDistParams.GMModel,[x0 y0]),x,y);
+    xMax = max(X);
+    xMin = min(X);
+    fcontour(gmPDF, [xMin(1), xMax(1), xMin(2), xMax(2)], 'LevelList', 1e-6:5e-2:1 );
+    
+elseif dim == 3
+    fig = figure;
+    cmap = colormap(jet(nClusters));
+    for c = 1:nClusters
+        nPoints = 20;
+        [elv,elf] = ellipsedata3(sDistParams.cov{c},sDistParams.mu{c},nPoints,1.5);
+        %scatter3(elv(:,1),elv(:,2),elv(:,3));
+        patch('Faces',elf,'Vertices',elv,'FaceColor',cmap(clusterInd(c),:),'EdgeColor',cmap(clusterInd(c),:));
+        hold on;
+    end
+    view(45,45)
+end
 end

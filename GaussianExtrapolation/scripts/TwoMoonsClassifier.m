@@ -18,7 +18,7 @@ nTrain = 200;
 nTest = 400;
 sDatasetParams.b_loadTwoMoonsMatFile = false;
 sDatasetParams.nLabeled = 2;
-interpMethod = 'NewPoints';
+interpMethod = 'TwoDraws';
 
 sDataset = GenerateDataset(actualDataDist, [], [], nTrain, nTest, interpMethod, sDatasetParams);
 sPlotParams.CalcEigenFuncsM = M;
@@ -26,6 +26,7 @@ sPlotParams.PlotEigenFuncsM = min(M,12);
 sPlotParams.PlotSpectM      = min(M,12);
 sPlotParams.b_plotEigenfunctions = true;
 sPlotParams.actualDataDist = actualDataDist;
+sPlotParams.dim = 2;
 PlotTwoMoons(sPlotParams, sDataset)
 
 %% LapRLS

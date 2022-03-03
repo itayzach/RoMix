@@ -42,11 +42,11 @@ sPreset.b_normalizePhi     = false;
 sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;
-sPreset.b_interpEigenvecs  = false;
+sPreset.b_interpEigenvecs  = true;
 sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
 sPreset.b_compareMethods   = false;
 %% 
-sPreset.dataGenTechnique = 'AddPoints';
+sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 end

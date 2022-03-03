@@ -21,10 +21,16 @@ if d == 1
     f = 5/(L);
     sig = sin(2*pi*f.*x).*exp(-5*L.*abs(x-0.5*L));
     sigRef = sin(2*pi*f.*xInt).*exp(-5*L.*abs(xInt-0.5*L));
+elseif d == 2
+    dims = [1, 2];
+    Lx = max(xInt(:, dims)) - min(xInt(:, dims));
+    fx = 2./(Lx);
+    sig = prod(sin(2*pi*fx.*x(:, dims)),2);
+    sigRef = prod(sin(2*pi*fx.*xInt(:, dims)),2);
 elseif d == 3
     dims = [1, 3];
     Lx = max(xInt(:, dims)) - min(xInt(:, dims));
-    fx = 1./(Lx);
+    fx = 2./(Lx);
     sig = prod(sin(2*pi*fx.*x(:, dims)),2);
     sigRef = prod(sin(2*pi*fx.*xInt(:, dims)),2);
 end

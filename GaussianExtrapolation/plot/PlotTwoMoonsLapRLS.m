@@ -1,4 +1,4 @@
-function [] = PlotTwoMoonsLapRLS(sSimParams, sDataset, sDistanceParams, omega, mAlpha,gamma1Rep, gamma2Rep)
+function [] = PlotTwoMoonsLapRLS(sPlotParams, sDataset, sDistanceParams, omega, mAlpha,gamma1Rep, gamma2Rep)
 
 classifier.alpha = mAlpha;
 classifier.gammas = [gamma1Rep, gamma2Rep];
@@ -63,8 +63,9 @@ plot2D(xTest,zeros(size(sDataset.sData.xt,1),1),15,'k*');
 
 set(gca,'FontSize', 14);
 set(gcf,'Position',[x0+width y0 width height])
-if isfield(sSimParams, 'output_folder') && ~isempty(sSimParams.output_folder)
-    saveas(fig,[sSimParams.output_folder filesep 'fig_' classifier.Name], 'epsc');
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    figName = 'fig_LapRLS';
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
 end
 

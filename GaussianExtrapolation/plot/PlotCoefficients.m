@@ -1,4 +1,4 @@
-function [] = PlotCoefficients(sSimParams, c, vLambda, cRep)
+function [] = PlotCoefficients(sPlotParams, c, vLambda, cRep)
 
 x0     = 10;
 y0     = 250;
@@ -38,7 +38,8 @@ if exist('cRep', 'var') && ~isempty(cRep)
 end
 
 set(gcf,'Position', [x0 y0 width height])
-if isfield(sSimParams, 'outputFolder')
-    saveas(fig,[sSimParams.outputFolder filesep 'fig_rkhs_norm_decay'], 'epsc');
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder') 
+    figName = 'fig_rkhs_norm_decay'; 
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
 end

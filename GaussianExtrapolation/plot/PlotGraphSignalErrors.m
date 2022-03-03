@@ -28,14 +28,8 @@ width  = 600;
 set(gcf,'Position', [x0 y0 width height])
 
 %% Save
-if isfield(sPlotParams, 'outputFolder')
-    if ~exist(sPlotParams.outputFolder, 'dir')
-        mkdir(sPlotParams.outputFolder)
-    end
-    simPrefix = strcat(sPlotParams.actualDataDist, num2str(sPlotParams.dim), ...
-        'd', '_', sPlotParams.matrixForEigs);
-
-    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_graphSigErr_', ...
-        num2str(xInd(1)), '_to_', num2str(xInd(2))), 'epsc');
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    figName = ['graphSigErr_', num2str(xInd(1)), '_to_', num2str(xInd(2))];
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
 end

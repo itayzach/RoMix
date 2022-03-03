@@ -1,7 +1,7 @@
 function sPreset = GetSwissRollPreset()
 %% Dataset parameters
 sPreset.dim                = 3;
-sPreset.n                  = 4000;
+sPreset.n                  = 2500;
 sPreset.N                  = 5000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
@@ -10,7 +10,10 @@ sPreset.verticesPDF        = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'T
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sPreset.sDatasetParams     = [];
+sDatasetParams.a           = 1;
+sDatasetParams.maxTheta    = 4*pi;
+sDatasetParams.height      = 20;
+sPreset.sDatasetParams     = sDatasetParams;
 %% Number of signals
 sPreset.nSignals           = 1;
 %% Gaussian kernel width
@@ -27,7 +30,7 @@ sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 20;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 10;
-sPreset.MTilde             = 50*sPreset.gmmNumComponents;
+sPreset.MTilde             = 25*sPreset.gmmNumComponents;
 %% Regularizations
 sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;
@@ -37,7 +40,7 @@ sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
 sPreset.R                  = 10;
 %% Method parameters
-sPreset.b_debugUseAnalytic = false;
+sPreset.b_debugUseAnalytic = true;
 sPreset.b_forceCtoIdentity = false;
 sPreset.b_normalizePhi     = false;
 sPreset.b_takeEigsFromWRef = false;
@@ -48,6 +51,6 @@ sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
 sPreset.b_compareMethods   = false;
 %% 
-sPreset.dataGenTechnique = 'AddPoints';
+sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 end

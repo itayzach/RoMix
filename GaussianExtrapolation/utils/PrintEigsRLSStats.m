@@ -18,6 +18,6 @@ if ~isempty(L)
 end
 
 fprintf('*********************************************************\n');
-fprintf('cond(matToInv) = %.2f\n', cond(matToInv));
+fprintf('* cond(matToInv) = %.2f\n', cond(matToInv));
 fprintf('*********************************************************\n');
 end

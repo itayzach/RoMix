@@ -45,6 +45,6 @@ sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = true;
 sPreset.b_compareMethods   = false;
 %% 
-sPreset.dataGenTechnique = 'NewPoints';
+sPreset.dataGenTechnique = 'TwoDraws';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 end

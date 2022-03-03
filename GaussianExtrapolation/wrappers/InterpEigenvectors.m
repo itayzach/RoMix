@@ -68,10 +68,9 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
     Cint = EigsRLS(PhiInt, gamma1, gamma2, invLambda, LnRef, VRefToCompare, b_maskDataTermCMatrix);
     PlotCoeffsMatrix(C, '${\bf C}$', Cint, '${\bf C^{\bf int}}$');
 end
-if sPlotParams.b_globalPlotEnable && (sPlotParams.b_plotOrigVsInterpEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
-    
-    plotInd = [0, 1, 2, 3];
+if sPlotParams.b_globalPlotEnable && dim <= 3
     if dim == 1
+        plotInd = 0:4;
 %         PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(end), ...
 %             VRefToCompare, [], [], [], ['Reference vs. Representer theorem (N = ', num2str(N), ')'], ...
 %             'VRep', 'v^{{\bf ref}}', VRepToCompare, 'v^{{\bf rep}}');
@@ -82,14 +81,15 @@ if sPlotParams.b_globalPlotEnable && (sPlotParams.b_plotOrigVsInterpEvecs || sPl
             VRefToCompare, [], [], [], ['Eigenvectors interpolation (N = ', num2str(N), ')'], ...
             'VInt', 'v^{{\bf ref}}', VIntToCompare, 'v^{{\bf int}}');
     else
-        legends = [RepLegend('v^{{\\bf ref}}', plotInd), RepLegend('v^{{\\bf int}}', plotInd)];
+        plotInd = 1:4;
+        [cData{1:numel(plotInd)*2}] = deal(xInt);
+        cSigStr = [RepLegend('v^{{\\bf ref}}', plotInd), RepLegend('v^{{\\bf int}}', plotInd)];
+        [cNumCircles{1:numel(plotInd)*2}] = deal(N);
+        [cMarkers{1:numel(plotInd)*2}] = deal('.');
         PlotGraphSignals(sPlotParams, ['Eigenvectors interpolation (N = ', num2str(N), ')'], ...
-            [sPreset.matrixForEigs, '_Eigs_',num2str(plotInd(1)), '_to_', num2str(plotInd(end)) ], ...
-            {xInt, xInt, xInt, xInt, xInt, xInt, xInt, xInt}, ...
+            [sPreset.matrixForEigs, '_Eigs_',num2str(plotInd(1)), '_to_', num2str(plotInd(end)) ], cData, ...
             [mat2cell(VRefToCompare(:,plotInd+1),N,ones(1,numel(plotInd))), mat2cell(VIntToCompare(:,plotInd+1),N,ones(1,numel(plotInd)))], ...
-            legends, ...
-            {N, N, N, N, N, N, N, N}, {'.', '.', '.', '.', '.', '.', '.', '.'}, ...
-            [], [min(min(VRefToCompare(:,plotInd+1))), max(max(VRefToCompare(:,plotInd+1)))]);
+            cSigStr, cNumCircles, cMarkers, [], [], [min(min(VRefToCompare(:,plotInd+1))), max(max(VRefToCompare(:,plotInd+1)))]);
 %         cmap = PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xInt, [], plotInd(1), plotInd(end), ...
 %             VRefToCompare, [], [], [], ...
 %             ['Reference (N = ', num2str(N), ')'], 'VRef', 'v^{{\bf ref}}');
@@ -109,6 +109,9 @@ end
 % Plot inner product of interpolated eigenvectors
 % ----------------------------------------------------------------------------------------------
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotInnerProductMatrices
+    pltTitle = 'V - ${\bf V}^T {\bf V}$';
+    figName = 'V';
+    PlotInnerProductMatrix([], V, [], pltTitle, figName);
     pltTitle = 'VRef - ${\bf V}_{{\bf ref}}^T {\bf V}_{{\bf ref}}$';
     figName = 'VRef';
     PlotInnerProductMatrix([], VRef, [], pltTitle, figName);
@@ -121,10 +124,10 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotInnerProductMatrices
     pltTitle = 'VRep - ${\bf V}_{{\bf rep}}^T {\bf V}_{{\bf rep}}$';
     figName = 'VRep';
     PlotInnerProductMatrix([], VRep, [], pltTitle, figName);
-    %             pltTitle = '$\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$';
-    %             figName = 'Phi';
-    %             vPrTilde = sDistParams.vPr;
-    %             PlotInnerProductMatrix([], Phi, vPrTilde, pltTitle, figName);
+%     pltTitle = '$\int \phi_i(x) \phi_j(x) p(x) dx = \Phi^T$diag(Pr)$\Phi$';
+%     figName = 'Phi';
+%     vPrTilde = sDistParams.vPr;
+%     PlotInnerProductMatrix([], Phi, vPrTilde, pltTitle, figName);
 
 end
 end

@@ -1,36 +1,33 @@
-function sPreset = Get1DGridPreset()
+function sPreset = Get2DGridPreset()
+%% DatasetParams
+sDatasetParams.xMin        = [0, 0];
+sDatasetParams.xMax        = [4, 1];
+sDatasetParams.nx          = [50, 25];
+sDatasetParams.Nx          = [50*2, 25*2];
+sPreset.sDatasetParams     = sDatasetParams;
 %% Dataset parameters
-sPreset.dim                = 1;
-sPreset.n                  = 1000;
-sPreset.N                  = 5000;
+sPreset.dim                = 2;
+sPreset.n                  = prod(sDatasetParams.nx);
+sPreset.N                  = prod(sDatasetParams.Nx);
 sPreset.k                  = 3;
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 sPreset.verticesPDF        = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
-%% DatasetParams
-sDatasetParams.xMin        = 0*ones(sPreset.dim,1);
-sDatasetParams.xMax        = 1*ones(sPreset.dim,1);
-sDatasetParams.nx          = sPreset.n;
-sDatasetParams.Nx          = sPreset.N;
-sPreset.sDatasetParams     = sDatasetParams;
+sPreset.matrixForEigs      = 'Laplacian'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% Number of signals
 sPreset.nSignals           = 1;
 %% Gaussian kernel width
-L = sDatasetParams.xMax(1) - sDatasetParams.xMin(1);
+L = norm(sDatasetParams.xMax - sDatasetParams.xMin);
 sPreset.omega              = 2*sqrt(L/sPreset.n); % for nystrom kernel
 sPreset.omegaTilde         = 2*sqrt(L/sPreset.n); % for our method
-%%
-% sPreset.fs = sPreset.n/L;
-% sPreset.nyquistMaxM = 4*sPreset.fs;
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
-sPreset.gmmNumComponents   = 1;
+sPreset.gmmNumComponents   = 50;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
-sPreset.MTilde             = 50;
+sPreset.MTilde             = 20*sPreset.gmmNumComponents;1000;
 %% Regularizations
 sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;

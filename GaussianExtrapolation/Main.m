@@ -1,22 +1,28 @@
-function MainGMM(presetName)
+function Main(presetName)
 %% Restart
-% clc; clear; rng('default');
+% clear;
+clc; rng('default'); 
 % close all; 
-% set(0,'DefaultFigureWindowStyle','normal')
-%% Illustrate the first eigenfunctions of the 1-D Guassian kernel
-% PlotGaussianKernelEigenfunsExample();
+set(0,'DefaultFigureWindowStyle','normal')
 %% Load preset
 % sPreset = Get1DGridPreset();
+% sPreset = Get2DGridPreset();
 % sPreset = Get1DUniformPreset();
 % sPreset = Get1DGaussianPreset();
 % sPreset = GetSwissRollPreset(); % For graph sig interp, run with n=1000
 % sPreset = GetBrazilWeatherPreset();
 % sPreset = GetTwoMoonsPreset(); %Classifier is okay. Should fix order of VRef relative to V...
-% sPreset = GetTwoSpiralsPreset();
-% sPreset = GetMnistLatentVAEPreset();
 % sPreset = GetUspsPreset();
 % sPreset = GetMnistPreset();
-sPreset = eval(presetName);
+%% Get perset from input
+if exist('presetName', 'var')
+    if isstruct(presetName)
+        sPreset = presetName;
+    elseif ischar(presetName)
+        sPreset = eval(presetName);
+    end
+end
+PrintPresetName(sPreset);
 %%
 clusterMethod = 'GMM'; % 'GMM' / 'SC'
 %% Parse sPreset
@@ -58,10 +64,11 @@ b_runGraphSignals  = sPreset.b_runGraphSignals;
 b_compareMethods   = sPreset.b_compareMethods;
 interpRatio        = N/n;
 %% Verify
-assert(~b_debugUseAnalytic || (b_debugUseAnalytic && (strcmp(verticesPDF,'Gaussian') || strcmp(verticesPDF,'Grid'))))
+assert(~b_debugUseAnalytic || ...
+    (b_debugUseAnalytic && ismember(verticesPDF, {'Gaussian', 'Grid', 'Uniform', 'SwissRoll'})))
 assert(~strcmp(adjacencyType,'NearestNeighbor') || ...
     strcmp(adjacencyType,'NearestNeighbor') && strcmp(verticesPDF,'Grid'))
-assert((strcmp(clusterMethod, 'GMM') && n >= dim) || (strcmp(clusterMethod, 'SC'))) 
+assert((strcmp(clusterMethod, 'GMM') && n >= dim) || (strcmp(clusterMethod, 'SC')))
 %% Plot params
 sPlotParams = GetPlotParams();
 sPlotParams.actualDataDist = verticesPDF;
@@ -72,16 +79,13 @@ sPlotParams.dim = dim;
 [tSigCnvrtRecPhi, tSigCnvrtRecV, tSigCnvrtRecRep, tSigCnvrt] = deal(zeros(n, nSig, R));
 [tSigCnvrtInt, tSigCnvrtNys, tSigCnvrtRep, tSigCnvrtRef] = deal(zeros(N, nSig, R));
 for r = 1:R
-    sPlotParams.b_globalPlotEnable = (r == 1);
+    sPlotParams.b_globalPlotEnable = (r == 1) && sPlotParams.b_globalPlotEnable;
     % ----------------------------------------------------------------------------------------------
     % Generate dataset
     % ----------------------------------------------------------------------------------------------
     fprintf('Iteration r = %d of R = %d\n',r,R)
     sDataset = GenerateDataset(verticesPDF, dim, nGenDataCompnts, n, N, dataGenTechnique, sDatasetParams);
     xTrain = sDataset.sData.x; yTrain = sDataset.sData.y; xInt = sDataset.sData.xt;
-    if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotData && dim <= 3
-        PlotDataset(sPlotParams, xTrain, yTrain, 'Training set');
-    end
     % ----------------------------------------------------------------------------------------------
     % Build graph (not needed for EigsRLS)
     % ----------------------------------------------------------------------------------------------
@@ -94,11 +98,6 @@ for r = 1:R
     if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights
         PlotWeightsMatrix([], W, dist, D, Ln, xTrain, adjacencyType, omega, k);
     end
-    % ----------------------------------------------------------------------------------------------
-    % Perform numeric eigs
-    % ----------------------------------------------------------------------------------------------
-    [V, adjLambda, matLambda, VRef, adjLambdaRef, matLambdaRef] = ...
-        EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef);
     % ----------------------------------------------------------------------------------------------
     % Estimate distribution parameters
     % ----------------------------------------------------------------------------------------------
@@ -118,6 +117,11 @@ for r = 1:R
         windowStyle = 'normal';
         PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle);
     end
+    % ----------------------------------------------------------------------------------------------
+    % Perform numeric eigs
+    % ----------------------------------------------------------------------------------------------
+    [V, adjLambda, matLambda, VRef, adjLambdaRef, matLambdaRef] = ...
+        EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef);
     % ----------------------------------------------------------------------------------------------
     % Calculate Phi(xTrain) and lambdaPhi
     % ----------------------------------------------------------------------------------------------
@@ -221,7 +225,9 @@ if b_runGraphSignals
 %             PlotEvalMetric(sPlotParams, [vMseInt, vMseNys, vMseRep], ...
 %                 {'MSE$(f^{{\bf int}}_m, f^{{\bf ref}}_m)$', 'MSE$(f^{{\bf nys}}_m, f^{{\bf ref}}_m)$', ...
 %                 'MSE$(f^{{\bf rep}}_m, f^{{\bf ref}}_m)$'}, 'Mse_graph_signals_', [], sDatasetParams.monthNames, 'Train \& Test  MSE');
-        end 
+        end
     end
 end
+
+save('LastMainRun.mat')
 end

@@ -10,8 +10,10 @@ M = lastEigInd+1;
 
 b_normalizePhi = false;
 x = mu + linspace(-3*sigma, 3*sigma, n).';
-sPlotParamsGaussian = GetPlotParams();
-sPlotParamsGaussian.matrixForEigs = 'Adjacency';
+sPlotParams = GetPlotParams();
+sPlotParams.matrixForEigs = 'Adjacency';
+sPlotParams.actualDataDist = 'Gaussian';
+sPlotParams.dim = 1;
 
 sDistParams.dim = 1;
 sDistParams.cov{1} = sigma;
@@ -31,7 +33,7 @@ sKernelParams = CalcKernelParams(sDistParams, omega);
 
 figTitle = 'Eigenfunctions of the Gaussian kernel on $\mathbb{R}$';
 figName = 'PhiTilde';
-PlotEigenfuncvecScatter(sPlotParamsGaussian, 'Gaussian', x, [], firsEigInd, lastEigInd, ...
+PlotEigenfuncvecScatter(sPlotParams, 'Gaussian', x, [], firsEigInd, lastEigInd, ...
     Phi, [], [], [], [], figName, '\phi' );
 % figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
 PlotSpectrum([], [], lambda, [], [], '\lambda_m', [], [], []);

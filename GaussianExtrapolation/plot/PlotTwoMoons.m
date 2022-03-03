@@ -1,4 +1,4 @@
-function [] = PlotTwoMoons(sSimParams, sDataset)
+function [] = PlotTwoMoons(sPlotParams, sDataset)
 x0     = 10;
 y0     = 250;
 width  = 600;
@@ -11,7 +11,9 @@ xlabel('$x_1$', 'Interpreter', 'latex')
 ylabel('$x_2$', 'Interpreter', 'latex')
 set(gca,'FontSize', 14);
 set(gcf,'Position',[x0 y0 width height])
-if isfield(sSimParams, 'outputFolder')
-    saveas(fig,[sSimParams.outputFolder filesep 'fig_two_moons'], 'epsc');
+
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    figName = 'fig_two_moons';
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
 end

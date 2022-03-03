@@ -1,4 +1,4 @@
-function localCmap = PlotEigenfuncvecScatter(sSimParams, actualDataDist, mData, cmap, ...
+function localCmap = PlotEigenfuncvecScatter(sPlotParams, actualDataDist, mData, cmap, ...
     firstEigenIdx, lastEigIdx, mPhi, vLambda, lambdaStr, G, suptitle, figureName, phiStr, mPhi2, phi2Str, mData2)
 dim = size(mData, 2);
 assert(dim <= 3, 'Not supported')
@@ -88,33 +88,32 @@ elseif dim == 2 || dim == 3
             phiStr = phi2Str;
         end
         fig = figure('Name', [ num2str(dim) 'D Scatter']);
+        tiledlayout(nRows, nCols)
+        vAx = zeros(nRows*nCols);
         for m = firstEigenIdx:lastEigIdx
-            subplot(nRows, nCols,m+1-firstEigenIdx);
-            if isfield(sSimParams, 'b_GSPBoxPlots') && sSimParams.b_GSPBoxPlots
-                param.show_edges = false;
-                gsp_plot_signal(G,mPhi(:,m+1),param);
-            else
-                if dim == 2
-                    scatter3(mData(:,1), mData(:,2), mPhi(:,m+1), [], mPhi(:,m+1), 'filled');
-                else % dim == 3
-                    scatter3(mData(:,1), mData(:,2), mData(:,3), [], mPhi(:,m+1), 'filled');
-                end
-                colormap(gca, 'jet')
-                colorbar()
-                if ~isempty(cmap)
-                    localCmap(1) = cmap(1);
-                    localCmap(2) = cmap(2);
-                end
-                caxis([localCmap(1) localCmap(2)])
-                xlim([ min(mData(:,1)) max(mData(:,1))])
-                ylim([ min(mData(:,2)) max(mData(:,2))])
-                if dim == 2
-                    view(2); %view(20,40);
-                else % dim == 3
-                    view(30,70);
-                    zlim([ min(mData(:,3)) max(mData(:,3))])
-                end
+            vAx(m+1-firstEigenIdx) = nexttile;
+            if dim == 2
+                scatter3(mData(:,1), mData(:,2), mPhi(:,m+1), [], mPhi(:,m+1), 'filled');
+            else % dim == 3
+                scatter3(mData(:,1), mData(:,2), mData(:,3), [], mPhi(:,m+1), 'filled');
+                UpdateCursorDataTip(fig, vAx, mPhi);
             end
+            colormap(gca, 'jet')
+            colorbar()
+            if ~isempty(cmap)
+                localCmap(1) = cmap(1);
+                localCmap(2) = cmap(2);
+            end
+            caxis([localCmap(1) localCmap(2)])
+            xlim([ min(mData(:,1)) max(mData(:,1))])
+            ylim([ min(mData(:,2)) max(mData(:,2))])
+            if dim == 2
+                view(2); %view(20,40);
+            else % dim == 3
+                view(30,70);
+                zlim([ min(mData(:,3)) max(mData(:,3))])
+            end
+            
             dispName = ['$' phiStr '_{' num2str(m) '}$'];
             if exist('vLambda', 'var') && ~isempty(vLambda)
                 lambda_m_str = ['$' lambdaStr '_{' num2str(m) '} = ' num2str(vLambda(m+1), '%.4f') '$'];
@@ -132,15 +131,11 @@ elseif dim == 2 || dim == 3
 end
 
 %% Save
-if isfield(sSimParams, 'outputFolder')
-    if ~exist(sSimParams.outputFolder, 'dir')
-        mkdir(sSimParams.outputFolder)
-    end
-    simPrefix = strcat(actualDataDist, num2str(dim), ...
-        'd', '_', sSimParams.matrixForEigs);
-    saveas(fig,strcat(sSimParams.outputFolder, filesep, simPrefix, ...
-        '_', figureName, '_eigenvectors', '_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)), 'epsc');
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    figName = [figureName, '_', sPlotParams.matrixForEigs, '_eigenvectors', '_m_', num2str(firstEigenIdx), '_to_', num2str(lastEigIdx)];
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
+
 set(0,'DefaultFigureWindowStyle',windowStyle)
 
 end

@@ -1,4 +1,4 @@
-function [] = PlotClassifier(sSimParams, sDataset, sClassifier)
+function [] = PlotClassifier(sPlotParams, sDataset, sClassifier)
 
 x0     = 10;
 y0     = 250;
@@ -30,8 +30,10 @@ plot2D(sDataset.sData.x,sDataset.sData.y,15,'ks');
 plot2D(sDataset.sData.xt,zeros(size(sDataset.sData.xt,1),1),15,'k*');
 set(gca,'FontSize', 14);
 set(gcf,'Position',[x0+width+width y0 width height])
-if isfield(sSimParams, 'outputFolder')
-    saveas(fig,[sSimParams.outputFolder filesep 'fig_eigrls_M_' num2str(sClassifier.MTilde)], 'epsc');
+
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    figName = ['fig_eigrls_M_' num2str(sClassifier.MTilde)]; 
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
 end
 

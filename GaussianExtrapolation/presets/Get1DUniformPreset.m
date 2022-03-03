@@ -1,8 +1,8 @@
 function sPreset = Get1DUniformPreset()
 %% Dataset parameters
 sPreset.dim                = 1;
-sPreset.n                  = 1500;
-sPreset.N                  = 3000;
+sPreset.n                  = 1000;
+sPreset.N                  = 5000;
 sPreset.k                  = 3;
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
@@ -25,7 +25,7 @@ sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 1;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
-sPreset.MTilde             = 35;
+sPreset.MTilde             = 50;
 %% Regularizations
 sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;
@@ -33,9 +33,9 @@ sPreset.gamma2             = 0;
 sPreset.gamma1Rep          = 1e-5;
 sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
-sPreset.R                  = 20;
+sPreset.R                  = 10;
 %% Method parameters
-sPreset.b_debugUseAnalytic = false;
+sPreset.b_debugUseAnalytic = true;
 sPreset.b_forceCtoIdentity = false;
 sPreset.b_normalizePhi     = false;
 sPreset.b_takeEigsFromWRef = false;
@@ -46,6 +46,6 @@ sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
 sPreset.b_compareMethods   = false;
 %% 
-sPreset.dataGenTechnique = 'AddPoints';
+sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 end

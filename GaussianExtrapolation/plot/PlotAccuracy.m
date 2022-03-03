@@ -13,7 +13,7 @@ for methodId = 1:nMethods
 end
 
 if ~exist('minAcc', 'var') || isempty(minAcc)
-    minAcc = min(mAcc(:))-10;
+    minAcc = min(mAcc(:))*0.99;
 end
 ylim([minAcc, 100]);
 xlim([0 M-1]);
@@ -38,15 +38,7 @@ height = 350;
 width  = 600;
 set(gcf,'Position', [x0 y0 width height])
 %% Save
-if isfield(sPlotParams, 'outputFolder')
-    if ~exist(sPlotParams.outputFolder, 'dir')
-        mkdir(sPlotParams.outputFolder)
-    end
-    simPrefix = strcat(sPlotParams.actualDataDist, num2str(sPlotParams.dim), ...
-        'd', '_', sPlotParams.matrixForEigs);
-
-    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_', figName), 'epsc');
-end
+SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 
 set(0,'DefaultFigureWindowStyle',windowStyle)
 end

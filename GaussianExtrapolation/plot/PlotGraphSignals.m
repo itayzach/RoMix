@@ -1,12 +1,15 @@
-function localCmap = PlotGraphSignals(sPlotParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, cMarkers, xylim, cmap)
+function localCmap = PlotGraphSignals(sPlotParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, cMarkers, cColors, xylim, cmap)
 cData = reshape(cData,[],1);
 cSignals = reshape(cSignals,[],1);
 cSigStr = reshape(cSigStr,[],1);
 if exist('cNumCircles', 'var')
     cNumCircles = reshape(cNumCircles,[],1);
 end
-if exist('cNumCircles', 'var')
+if exist('cMarkers', 'var')
     cMarkers = reshape(cMarkers,[],1);
+end
+if exist('cColors', 'var')
+    cColors = reshape(cColors,[],1);
 end
 dim = size(cData{1}, 2);
 nSignals = numel(cData);
@@ -23,7 +26,11 @@ if dim == 1
     fig = figure('Name', 'Graph signals');
     for m = 1:nSignals
         dispName = cSigStr{m};
-        plot(cData{m}, cSignals{m}, cMarkers{m}, 'DisplayName', dispName);
+        if exist('cColors', 'var') && ~isempty(cColors)
+            plot(cData{m}, cSignals{m}, cMarkers{m}, 'Color', cColors{m}, 'DisplayName', dispName);
+        else
+            plot(cData{m}, cSignals{m}, cMarkers{m}, 'DisplayName', dispName);
+        end
         xlim([ min(cData{m}) max(cData{m}) ])
         hold on;
         set(gca,'FontSize', 14);
@@ -77,38 +84,33 @@ elseif dim == 2 || dim == 3
             nCircles = cNumCircles{m};
         end
         ax(m) = nexttile;
-        if ~isempty(sPlotParams) && isfield(sPlotParams, 'b_GSPBoxPlots') && sPlotParams.b_GSPBoxPlots
-            param.show_edges = false;
-            gsp_plot_signal(G,vSignal,param);
-        else
-            if dim == 2
-                scatter3(mData(1:nCircles,1), mData(1:nCircles,2), vSignal(1:nCircles), [], ...
-                    vSignal(1:nCircles), 'filled');
-                if nCircles < length(mData)
-                    hold on;
-                    scatter3(mData(nCircles+1:end,1), mData(nCircles+1:end,2), vSignal(nCircles+1:end), [], ...
-                        vSignal(nCircles+1:end), 'filled', 's');
-                end
-            else % dim == 3
-                scatter3(mData(1:nCircles,1), mData(1:nCircles,2), mData(1:nCircles,3), [], ...
-                    vSignal(1:nCircles), 'filled');
-                if nCircles < length(mData)
-                    hold on;
-                    scatter3(mData(nCircles+1:end,1), mData(nCircles+1:end,2), mData(nCircles+1:end,3), [], ...
-                        vSignal(nCircles+1:end), 'filled', 's');
-                end
+        if dim == 2
+            scatter3(mData(1:nCircles,1), mData(1:nCircles,2), vSignal(1:nCircles), [], ...
+                vSignal(1:nCircles), 'filled');
+            if nCircles < length(mData)
+                hold on;
+                scatter3(mData(nCircles+1:end,1), mData(nCircles+1:end,2), vSignal(nCircles+1:end), [], ...
+                    vSignal(nCircles+1:end), 'filled', 's');
             end
-            colormap(gca, 'jet');
-            colorbar();
-            caxis([cMapMin cMapMax]);
-            xlim([ min(mData(:,1)) max(mData(:,1))])
-            ylim([ min(mData(:,2)) max(mData(:,2))])
-            if dim == 2
-                view(2); %view(20,40);
-            else % dim == 3
-                view(30,70);
-                zlim([ min(mData(:,3)) max(mData(:,3))])
+        else % dim == 3
+            scatter3(mData(1:nCircles,1), mData(1:nCircles,2), mData(1:nCircles,3), [], ...
+                vSignal(1:nCircles), 'filled');
+            if nCircles < length(mData)
+                hold on;
+                scatter3(mData(nCircles+1:end,1), mData(nCircles+1:end,2), mData(nCircles+1:end,3), [], ...
+                    vSignal(nCircles+1:end), 'filled', 's');
             end
+        end
+        colormap(gca, 'jet');
+        colorbar();
+        caxis([cMapMin cMapMax]);
+        xlim([ min(mData(:,1)) max(mData(:,1))])
+        ylim([ min(mData(:,2)) max(mData(:,2))])
+        if dim == 2
+            view(2); %view(20,40);
+        else % dim == 3
+            view(30,70);
+            zlim([ min(mData(:,3)) max(mData(:,3))])
         end
         dispName = sigStr;
         
@@ -130,11 +132,8 @@ end
 
 %% Save
 if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
-    if ~exist(sPlotParams.outputFolder, 'dir')
-        mkdir(sPlotParams.outputFolder)
-    end
-    simPrefix = strcat(sPlotParams.actualDataDist, num2str(dim), 'd');
-    saveas(fig,strcat(sPlotParams.outputFolder, filesep, simPrefix, '_', figName, '_signals'), 'epsc');
+    figName = [figName, '_signals'];
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
 set(0,'DefaultFigureWindowStyle',windowStyle)
 

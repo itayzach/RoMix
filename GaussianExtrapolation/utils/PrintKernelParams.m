@@ -1,7 +1,7 @@
 function PrintKernelParams(sDistParams,sKernelParams)
 dim = sDistParams.dim;
 fprintf('*********************************************************\n');
-fprintf('*                 CalcKernelParams                      *\n');
+fprintf('* CalcKernelParams\n');
 fprintf('*********************************************************\n');
 fprintf('omega    (kernel width)            = %8.3f\n', sKernelParams.omega);
 fprintf('---------------------------------------------------------\n');

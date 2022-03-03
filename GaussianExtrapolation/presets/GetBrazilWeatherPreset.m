@@ -45,7 +45,7 @@ sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = true;
 sPreset.b_compareMethods   = true;
 %% 
-sPreset.dataGenTechnique = 'AddPoints';
+sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Haversine'; % 'Euclidean' / 'Haversine'
 sPreset.sDistanceParams.earthRadius = 50; %6371; % km (approximation)
 end

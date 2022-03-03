@@ -16,17 +16,26 @@ interpRatio        = N/n;
 xTrain = sDataset.sData.x;
 xInt = sDataset.sData.xt;
 %%
+if isfield(sDataset.sData, 'S')
+    S = sDataset.sData.S;
+    SInt = sDataset.sData.St;
+else
+    S = sDataset.sData.x;
+    SInt = sDataset.sData.xt;
+end
 if b_debugUseAnalytic
-    assert(strcmp(matrixForEigs, 'Adjacency') && dim == 1)
-    if strcmp(verticesPDF, 'Grid')
-        % analytic eigenfunctions from Spectral Graph Theory, Spielman
-        V = (1/sqrt(n))*cos(pi*(0:M-1).*xTrain(:,1) - pi*(0:M-1));
-        VRef = (1/sqrt(N))*cos(pi*(0:M-1).*xInt(:,1) - pi*(0:M-1));
-        adjLambda = 2*(1-cos(pi*(0:M-1)/n));
-        adjLambdaRef = 2*(1-cos(pi*(0:M-1)/N));
-        matLambda = adjLambda;
-        matLambdaRef = adjLambdaRef;
+    fprintf('Generating analytic expression for %s %s\n', verticesPDF, matrixForEigs);
+    if ismember(verticesPDF, {'Grid', 'Uniform', 'SwissRoll'})
+        assert(strcmp(matrixForEigs, 'Laplacian') || strcmp(matrixForEigs, 'RandomWalk'))
+        if ismember(verticesPDF, {'Grid', 'Uniform'})
+            len = sDatasetParams.xMax - sDatasetParams.xMin;
+        else % Swiss Roll
+            len = [SwissRollArclength(sDatasetParams.maxTheta), sDatasetParams.height];
+        end
+        [V, adjLambda, matLambda] = CalcAnalyticLapEigsGrid(S, M, len);
+        [VRef, adjLambdaRef, matLambdaRef] = CalcAnalyticLapEigsGrid(SInt, M, len);
     elseif strcmp(verticesPDF, 'Gaussian')
+        assert(strcmp(matrixForEigs, 'Adjacency') && dim == 1)
         warning('review the following {1}...')
         [V, adjLambda] = SimpleCalcAnalyticEigenfunctions(xTrain, omega, sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
         [VRef, adjLambdaRef] = SimpleCalcAnalyticEigenfunctions(xInt, omega, sDatasetParams.sigma{1}, sDatasetParams.mu{1}, M);
@@ -51,12 +60,12 @@ assert(isreal(matLambda), 'matLambda should be real...')
 % ----------------------------------------------------------------------------------------------
 % Plot numeric V
 % ----------------------------------------------------------------------------------------------
-if dim == 1
-    plotInd = [0,min(4,M-1)];
-else
-    plotInd = [0,min(8,M-1)];
-end
-if sPlotParams.b_globalPlotEnable && (sPlotParams.b_plotOrigEvecs || sPlotParams.b_plotAllEvecs) && dim <= 3
+if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotOrigEvecs && dim <= 3
+    if dim == 1
+        plotInd = [0,min(4,M-1)];
+    else
+        plotInd = [0,min(8,M-1)];
+    end
     figTitle = ['Eigenvectors of ', matrixForEigs];
     if strcmp(adjacencyType, 'GaussianKernel')
         figTitle2 = [' (Gaussian kernel, $\omega = ', num2str(omega), '$'];
@@ -67,6 +76,10 @@ if sPlotParams.b_globalPlotEnable && (sPlotParams.b_plotOrigEvecs || sPlotParams
     figName = 'V';
     PlotEigenfuncvecScatter(sPlotParams, verticesPDF, xTrain, [], plotInd(1), plotInd(end), ...
         V, matLambda, '\lambda^{v}', [], [figTitle, figTitle2, figTitle3], figName, 'v');
+    if isfield(sDataset.sData, 'S')
+        PlotEigenfuncvecScatter(sPlotParams, verticesPDF, S, [], plotInd(1), plotInd(end), ...
+            V, matLambda, '\lambda^{v}', [], 'Parametrization', figName, 'v');
+    end
     figTitle = 'Numeric eigenvalues of ${\bf V}$';
     PlotSpectrum([], [], matLambda, [], [], '\tilde{\lambda}^{v}_m', [], [], figTitle);
 end

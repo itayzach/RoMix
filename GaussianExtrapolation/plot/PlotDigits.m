@@ -25,10 +25,7 @@ height = 100*nRows;
 width  = 200*nCols;
 set(gcf,'Position', [x0 y0 width height])
 
-if isfield(sPlotParams, 'outputFolder')
-    if ~exist(sPlotParams.outputFolder, 'dir')
-        mkdir(sPlotParams.outputFolder)
-    end
-    saveas(fig, strcat(sPlotParams.outputFolder, filesep, figName), 'epsc');
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 end
 end

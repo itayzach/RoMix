@@ -10,10 +10,10 @@ M = lastEigInd+1;
 
 b_normalizePhi = false;
 x = mu + linspace(-3*sigma, 3*sigma, n).';
-sPlotParams = GetPlotParams();
-sPlotParams.matrixForEigs = 'Adjacency';
-sPlotParams.actualDataDist = 'Gaussian';
-sPlotParams.dim = 1;
+sPreset.dim = 1;
+sPreset.verticesPDF = 'Gaussian';
+sPreset.matrixForEigs = 'Adjacency';
+sPlotParams = GetPlotParams(sPreset);
 
 sDistParams.dim = 1;
 sDistParams.cov{1} = sigma;

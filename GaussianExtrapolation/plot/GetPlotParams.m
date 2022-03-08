@@ -1,4 +1,4 @@
-function sPlotParams = GetPlotParams()
+function sPlotParams = GetPlotParams(sPreset)
 %% Save figs
 sPlotParams.outputFolder = 'figs';
 sPlotParams.b_globalPlotEnable          = true;
@@ -15,5 +15,8 @@ sPlotParams.b_plotDataVsGmm             = true;
 %% Graph signals
 sPlotParams.b_plotGmmSignal             = false;
 sPlotParams.b_plotExtraGraphSigAnalysis = false;
-
+%% Preset dependent
+sPlotParams.dim                         = sPreset.dim;
+sPlotParams.actualDataDist              = sPreset.verticesPDF;
+sPlotParams.matrixForEigs               = sPreset.matrixForEigs;
 end

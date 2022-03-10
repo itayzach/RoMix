@@ -24,24 +24,26 @@ end
 [~, argminAIC] = min(vAIC);
 GMModel = vGMModels{argminAIC};
 gmmNumComponents = GMModel.NumComponents;
-sDistParams.GMModel = GMModel;
-fprintf('Calculating [fliplr(u), fliplr(sigma^2)] = eig(cov) for all %d components... ',gmmNumComponents)
+sDistParams.GMModelPreOrder = GMModel;
+fprintf('Calculating [u, sigma^2] = eig(cov) for all %d components (and sorting by sigma)... ',gmmNumComponents)
 sDistParams.estNumComponents = gmmNumComponents;
-sDistParams.componentProportion = GMModel.ComponentProportion;
 for c = 1:gmmNumComponents
     sDistParams.cov{c} = GMModel.Sigma(:,:,c);
     sDistParams.mu{c} = GMModel.mu(c,:);
     [sDistParams.u{c}, sDistParams.sigma_eigv{c}] = eig(sDistParams.cov{c});
     sDistParams.sigma{c} = diag(sqrt(sDistParams.sigma_eigv{c})).';
     assert(isreal(sDistParams.sigma{c}) && all(sDistParams.sigma{c} > eps))
-    [~, uIndByCov] = sort(sDistParams.sigma{c},'descend');
-    sDistParams.u{c} = sDistParams.u{c}(:,uIndByCov);
-    sDistParams.sigma{c} = sDistParams.sigma{c}(uIndByCov);
+    [~, uIndBySigma] = sort(sDistParams.sigma{c},'descend');
+    sDistParams.u{c} = sDistParams.u{c}(:,uIndBySigma);
+    sDistParams.sigma{c} = sDistParams.sigma{c}(uIndBySigma);
 
     sDistParams.mu_1D{c} = sDistParams.mu{c}*sDistParams.u{c};
     isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-10)
 %     assert(isequal(sort(sDistParams.sigma{c}),sDistParams.sigma{c}))
 end
+
+sDistParams = SortComponentsByEigs(sDistParams, GMModel);
+
 [minSigmaAllComp, minSigmaCompDim] = cellfun(@min, sDistParams.sigma);
 [minSigma, minSigmaCompInd] = min(minSigmaAllComp);
 fprintf('Done. min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', gmmNumComponents, minSigma, minSigmaCompInd, minSigmaCompDim(minSigmaCompInd))

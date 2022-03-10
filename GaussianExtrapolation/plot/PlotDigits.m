@@ -16,7 +16,9 @@ for i = 1:n
         title(y(i),'Interpreter','latex','FontSize',14)
     end
 end
-sgtitle(figTitle, 'interpreter', 'latex', 'fontsize', 14)
+if exist('figTitle', 'var')
+    sgtitle(figTitle, 'interpreter', 'latex', 'fontsize', 14)
+end
 nRows = floor(sqrt(n));
 nCols = ceil(n/nRows);
 x0     = 10;

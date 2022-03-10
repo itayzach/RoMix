@@ -75,7 +75,7 @@ elseif ismember(actualDataDist, {'USPS', 'MNIST'})
         % Set selection from "Active semisupervised learning"
         k = 8;
         sPreset = GetUspsPreset();
-        [~, ~, ~, Ln] = SimpleCalcAdjacency(Xdiv255,'GaussianKernel',sPreset.sDistanceParams, sPreset.omega);
+        [~, ~, ~, Ln] = CalcAdjacency(Xdiv255,'GaussianKernel',sPreset.sDistanceParams, sPreset.omega);
         Ln_k = Ln;
         for classInd = 1:(k-1)
             Ln_k = Ln_k*Ln;

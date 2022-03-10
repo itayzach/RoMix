@@ -110,7 +110,7 @@ elseif dim == 2 || dim == 3
             if dim == 2
                 view(2); %view(20,40);
             else % dim == 3
-                view(30,70);
+                view(30,75);
                 zlim([ min(mData(:,3)) max(mData(:,3))])
             end
             

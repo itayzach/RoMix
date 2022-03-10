@@ -1,19 +1,9 @@
-function Main(presetName)
+function sWorkspace = Main(presetName, b_clearLastRun)
 %% Restart
-% clear;
-clc; rng('default'); 
-% close all; 
-set(0,'DefaultFigureWindowStyle','normal')
-%% Load preset
-% sPreset = Get1DGridPreset();
-% sPreset = Get2DGridPreset();
-% sPreset = Get1DUniformPreset();
-% sPreset = Get1DGaussianPreset();
-% sPreset = GetSwissRollPreset(); % For graph sig interp, run with n=1000
-% sPreset = GetBrazilWeatherPreset();
-% sPreset = GetTwoMoonsPreset(); %Classifier is okay. Should fix order of VRef relative to V...
-% sPreset = GetUspsPreset();
-% sPreset = GetMnistPreset();
+if ~exist('b_clearLastRun', 'var') || b_clearLastRun
+    clc; close all; set(0,'DefaultFigureWindowStyle','normal')
+end
+rng('default'); 
 %% Get perset from input
 if exist('presetName', 'var')
     if isstruct(presetName)
@@ -22,7 +12,7 @@ if exist('presetName', 'var')
         sPreset = eval(presetName);
     end
 end
-PrintPresetName(sPreset);
+PrintPreset(sPreset);
 %% GMM / Spectral Clustering
 clusterMethod = 'GMM'; % 'GMM' / 'SC'
 %% Verify
@@ -48,11 +38,11 @@ for r = 1:sPreset.R
     % ----------------------------------------------------------------------------------------------
     % Build graph (not needed for EigsRLS)
     % ----------------------------------------------------------------------------------------------
-    [WRef, distRef, DRef, LnRef] = SimpleCalcAdjacency(xInt, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
+    [WRef, distRef, DRef, LnRef] = CalcAdjacency(xInt, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
     if sPreset.b_takeEigsFromWRef
         W = WRef(1:sPreset.n,1:sPreset.n); dist = distRef(1:sPreset.n,1:sPreset.n); D = DRef(1:sPreset.n,1:sPreset.n); Ln = LnRef(1:sPreset.n,1:sPreset.n);
     else
-        [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
+        [W, dist, D, Ln] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
     end
     if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights
         PlotWeightsMatrix([], W, dist, D, Ln, xTrain, sPreset.adjacencyType, sPreset.omega, sPreset.k);
@@ -65,6 +55,14 @@ for r = 1:sPreset.R
     elseif strcmp(clusterMethod, 'SC')
         sDistParams = EstDistParamsSpectClust(xTrain, W, sPreset.gmmNumComponents);
     end
+    if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis
+        PlotGaussianEllipses(sPlotParams, sDistParams);
+        PlotCovEigs(sPlotParams, sDistParams);
+        PlotClustersMeans(sPreset, sDistParams);
+    end
+    % ----------------------------------------------------------------------------------------------
+    % Plot dataset
+    % ----------------------------------------------------------------------------------------------
     if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotDataVsGmm && sPreset.dim <= 3
         nGmmPoints = sPreset.n;
         pltTitle = ['Dataset with n = ', num2str(sPreset.n), ' points'];
@@ -75,8 +73,8 @@ for r = 1:sPreset.R
         end
         windowStyle = 'normal';
         PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle);
-        PlotGaussianEllipses(sDistParams);
     end
+
     % ----------------------------------------------------------------------------------------------
     % Perform numeric eigs
     % ----------------------------------------------------------------------------------------------
@@ -90,9 +88,10 @@ for r = 1:sPreset.R
          = CalcAnalyticEigenvalues(sPreset.MTilde, sKernelParams);
     [ Phi, lambdaPhi ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xTrain, sPreset.b_normalizePhi);
     if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotGaussianKernelEigfunc && sPreset.dim <= 3
+        plotInd = [0 4]*(sPreset.dim == 1) + [0 11]*(sPreset.dim > 1);
         figTitle = 'Eigenfunctions of the Gaussian kernel (on $n$ nodes)';
         figName = 'Phi';
-        PlotEigenfuncvecScatter([], 'Gaussian', xTrain, [], 0, 4, Phi, [], [], [], figTitle, figName, '\phi' );
+        PlotEigenfuncvecScatter([], 'Gaussian', xTrain, [], plotInd(1), plotInd(end), Phi, [], [], [], figTitle, figName, '\phi' );
         figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
         PlotSpectrum([], [], lambdaPhi, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
     end
@@ -160,5 +159,6 @@ if sPreset.b_runGraphSignals
         end
     end
 end
-
+sWorkspace = SaveWorkspaceToStruct();
+ReadWorkspaceStructToBase(sWorkspace);
 end

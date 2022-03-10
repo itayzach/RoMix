@@ -29,42 +29,32 @@ if exist('sDistParams', 'var')
             vAx(3) = nexttile(3);
         end
         if dim == 1
-            scatter(xGmm, zeros(1,nGmmPoints), 50, compIdx(:,i+1), 'filled')
+            %scatter(xGmm, zeros(1,nGmmPoints), 50, compIdx(:,i+1), 'filled')
+            scatter(xGmm, zeros(1,nGmmPoints), 50, 'filled')
             xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
             set(gca,'YTick',[],'FontSize', 14);
             xlim([xMin(1), xMax(1)])
         elseif dim == 2
-            scatter3(xGmm(:,1),xGmm(:,2),compIdx(:,i+1),[],compIdx(:,i+1),'filled');
-            colormap(jet(sDistParams.GMModel.NumComponents));
-            colorbar();
+            %scatter3(xGmm(:,1),xGmm(:,2),compIdx(:,i+1),[],compIdx(:,i+1),'filled');
+            scatter3(xGmm(:,1),xGmm(:,2),compIdx(:,i+1),[],'filled');
+            %colormap(jet(sDistParams.GMModel.NumComponents));
+            %colorbar();
             xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
             ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
             view(2);
-    %         hold on
-    %         gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(sDistParams.GMModel,[x0 y0]),x,y);
-    %         fcontour(gmPDF,[xMin(1), xMax(1), xMin(2), xMax(2)],'LevelList',[1e-5:1e-4:1e-2],'LineColor','black');
             set(gca,'FontSize', 14);
             xlim([xMin(1), xMax(1)])
             ylim([xMin(2), xMax(2)])
         elseif dim == 3
-            scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[],compIdx(:,i+1), 'filled');
-%             hold on;
-%             % eigenvectors of covariance matrix
-%             for c = 1:sDistParams.GMModel.NumComponents 
-%                 quiver3(sDistParams.mu{c}(1),sDistParams.mu{c}(2),sDistParams.mu{c}(3),...
-%                     sDistParams.u{c}(1,1),sDistParams.u{c}(2,1),sDistParams.u{c}(3,1),sDistParams.sigma{c}(1),'k','LineWidth',5);
-%                 quiver3(sDistParams.mu{c}(1),sDistParams.mu{c}(2),sDistParams.mu{c}(3),...
-%                     sDistParams.u{c}(1,2),sDistParams.u{c}(2,2),sDistParams.u{c}(3,2),sDistParams.sigma{c}(2),'k','LineWidth',5);
-%                 quiver3(sDistParams.mu{c}(1),sDistParams.mu{c}(2),sDistParams.mu{c}(3),...
-%                     sDistParams.u{c}(1,3),sDistParams.u{c}(2,3),sDistParams.u{c}(3,3),sDistParams.sigma{c}(3),'k','LineWidth',5);
-%             end
+            %scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[],compIdx(:,i+1), 'filled');
+            scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[], 'filled');
             xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
             ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
             zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
     %         view(10,5);
-            view(30,70);
-            colormap(jet(sDistParams.GMModel.NumComponents));
-            colorbar();
+            view(30,75);
+            %colormap(jet(sDistParams.GMModel.NumComponents));
+            %colorbar();
             set(gca,'FontSize', 14);
             xlim([xMin(1), xMax(1)])
             ylim([xMin(2), xMax(2)])
@@ -108,7 +98,7 @@ elseif dim == 3
     ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
     zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
 %     view(10,5);
-    view(30,70);
+    view(30,75);
     set(gca,'FontSize', 14);
     if exist('xMin', 'var') && exist('xMax', 'var')
         xlim([xMin(1), xMax(1)])

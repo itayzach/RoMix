@@ -3,13 +3,15 @@ clc; clear; close all;
 set(0,'DefaultFigureWindowStyle','normal')
 
 %% Run selected presets
+b_clearLastRun = false;
 selectedPresets = {'GetBrazilWeatherPreset', 'Get1DUniformPreset', 'GetSwissRollPreset', 'GetMnistPreset'};
 for presetInd = 1:numel(selectedPresets)
     funcName = selectedPresets{presetInd};
-    Main(funcName);
+    Main(funcName, b_clearLastRun);
 end
 
 %% Run all other presets
+b_clearLastRun = true;
 presetsDir = 'presets';
 sDir = dir(fullfile('presets','*.m'));
 for presetInd = 1:numel(sDir)
@@ -17,7 +19,7 @@ for presetInd = 1:numel(sDir)
     if ismember(funcName, selectedPresets)
         continue;
     end
-    Main(funcName);
+    Main(funcName, b_clearLastRun);
     %keyboard;
     %close all;
 end
@@ -27,8 +29,9 @@ TwoMoonsClassifier;
 DigitsClassifier;
 
 %% Run MNIST
+b_clearLastRun = true;
 selectedPresets = {'GetMnistPreset'};
 for presetInd = 1:numel(selectedPresets)
     funcName = selectedPresets{presetInd};
-    Main(funcName);
+    Main(funcName, b_clearLastRun);
 end

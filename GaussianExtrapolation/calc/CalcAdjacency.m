@@ -1,4 +1,4 @@
-function [W, dist, D, Ln] = SimpleCalcAdjacency(xTrain, adjacencyType, sDistanceParams, omega, k, nnValue)
+function [W, dist, D, Ln] = CalcAdjacency(xTrain, adjacencyType, sDistanceParams, omega, k, nnValue)
 fprintf('Calculating adjacency matrix for %d points... ',length(xTrain))
 if strcmp(adjacencyType, 'GaussianKernel')
     n = size(xTrain,1);

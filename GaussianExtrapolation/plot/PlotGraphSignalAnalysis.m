@@ -9,7 +9,7 @@ tiledlayout('flow')
 nexttile;
 stem(sigHatPhi, 'filled', 'DisplayName', '${{\bf \Phi}}_n^\dagger s$');
 hold on
-stem(sigRefHatPhi, 'filled', 'DisplayName', '${{\bf \Phi}}_N^\dagger s^{{\bf ref}}$');
+stem(sigRefHatPhi, 'filled', 'DisplayName', '${{\bf \Phi}}_N^\dagger s^{{\bf gt}}$');
 title('$\Phi$ coeffs', 'interpreter', 'latex', 'FontSize', 14)
 legend('interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',2)
 set(gca,'FontSize', 14);
@@ -30,17 +30,17 @@ title('graph signals on $n$ nodes', 'interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
 
 nexttile;
-plot(1:N, sigRef, 'DisplayName', '$s^{{\bf ref}}$');
+plot(1:N, sigRef, 'DisplayName', '$\tilde{s}$');
 hold on;
-plot(1:N, sigInt, 'o', 'DisplayName', '$s^{{\bf int}}$');
+plot(1:N, sigInt, 'o', 'DisplayName', '$\tilde{s}^{{\bf RoMix}}$');
 legend('interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',2)
 title('graph signals on $N$ nodes', 'interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
 
 nexttile;
-plot(1:N, sigRef, 'DisplayName', '$s^{{\bf ref}}$');
+plot(1:N, sigRef, 'DisplayName', '$\tilde{s}$');
 hold on;
-plot(1:N, sigNys, 'o', 'DisplayName', '$s^{{\bf nys}}$');
+plot(1:N, sigNys, 'o', 'DisplayName', '$\tilde{s}^{{\bf nys}}$');
 legend('interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',2)
 title('graph signals on $N$ nodes', 'interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);

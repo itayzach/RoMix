@@ -21,7 +21,7 @@ scatter3(sDataset.sData.x(neg,1),sDataset.sData.x(neg,2), sClassifier.vPhi_xTrai
 xlabel('$x_1$', 'Interpreter', 'latex')
 ylabel('$x_2$', 'Interpreter', 'latex')
 zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')
-colorbar;
+h = colorbar('TickLabelInterpreter', 'latex');
 set(gca,'FontSize', 14);
 subplot(2,1,2)
 contourf(sClassifier.XX1,sClassifier.XX2,sClassifier.mPhi_X_c,[0 0]);shading flat;

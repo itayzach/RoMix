@@ -1,4 +1,4 @@
-function PlotDigits(sPlotParams, X, y, b_transpose, figTitle, figName)
+function fig = PlotDigits(sPlotParams, X, y, b_transpose, figTitle, figName)
 fig = figure; 
 tiledlayout('flow')
 [n,d] = size(X);

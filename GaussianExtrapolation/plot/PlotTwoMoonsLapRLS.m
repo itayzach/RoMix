@@ -53,7 +53,7 @@ scatter3(xTrain(neg,1),xTrain(neg,2), vKa_train(neg),200, 'bo' ,'MarkerFaceColor
 xlabel('$x_1$', 'Interpreter', 'latex')
 ylabel('$x_2$', 'Interpreter', 'latex')
 zlabel('$f(x_1,x_2)$', 'Interpreter', 'latex')
-colorbar;
+colorbar('TickLabelInterpreter', 'latex');
 set(gca,'FontSize', 14);
 subplot(2,1,2)
 contourf(XX1,XX2,mKa,[0 0]);shading flat;

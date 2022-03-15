@@ -18,7 +18,7 @@ else
 end
 imagesc(mInnerProduct)
 % colormap(gca, 'hot')
-colorbar()
+colorbar('TickLabelInterpreter', 'latex');
 title(pltTitle, 'Interpreter', 'latex', 'FontSize', 14)
 set(gca,'FontSize', 14);
 set(gcf,'Position', [x0 y0 width height])

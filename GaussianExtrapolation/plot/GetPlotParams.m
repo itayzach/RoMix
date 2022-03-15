@@ -1,6 +1,11 @@
 function sPlotParams = GetPlotParams(sPreset)
+%% Set plot defaults
+set(0,'DefaultFigureWindowStyle','normal')
+set(0,'DefaultTextInterpreter','latex');  
+set(0,'DefaultAxesTickLabelInterpreter','latex');  
+set(0,'DefaultLegendInterpreter','latex');
 %% Save figs
-sPlotParams.outputFolder = 'figs';
+sPlotParams.outputFolder                = 'figs';
 sPlotParams.b_globalPlotEnable          = true;
 %% Eigenvectors
 sPlotParams.b_plotOrigEvecs             = false;
@@ -17,7 +22,9 @@ sPlotParams.b_plotDataVsGmm             = true;
 sPlotParams.b_plotGmmSignal             = false;
 sPlotParams.b_plotExtraGraphSigAnalysis = false;
 %% Preset dependent
-sPlotParams.dim                         = sPreset.dim;
-sPlotParams.actualDataDist              = sPreset.verticesPDF;
-sPlotParams.matrixForEigs               = sPreset.matrixForEigs;
+if exist('sPreset','var')
+    sPlotParams.dim                     = sPreset.dim;
+    sPlotParams.actualDataDist          = sPreset.verticesPDF;
+    sPlotParams.matrixForEigs           = sPreset.matrixForEigs;
+end
 end

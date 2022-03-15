@@ -43,8 +43,7 @@ end
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast');
 xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 xlim([0 M + 8])
-title([figTitle, ' (log-scale)'], ...
-    'Interpreter', 'latex', 'FontSize', 14);
+title([figTitle, ' (log-scale)'], 'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 % set(gcf,'Position',[100 100 600 500])
 % set(0,'DefaultFigureWindowStyle',windowStyle)

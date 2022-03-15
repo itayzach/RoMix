@@ -5,6 +5,7 @@
 *.obj
 *.eps
 *.png
+*.pdf
 *.mex*
 *.mat
 desktop.ini

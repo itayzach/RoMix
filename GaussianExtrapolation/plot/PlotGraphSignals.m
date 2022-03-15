@@ -102,15 +102,18 @@ elseif dim == 2 || dim == 3
             end
         end
         colormap(gca, 'jet');
-        colorbar();
+        colorbar('TickLabelInterpreter', 'latex');
         caxis([cMapMin cMapMax]);
         xlim([ min(mData(:,1)) max(mData(:,1))])
         ylim([ min(mData(:,2)) max(mData(:,2))])
+        xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 14)
+        ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 14)
         if dim == 2
             view(2); %view(20,40);
         else % dim == 3
             view(30,75);
             zlim([ min(mData(:,3)) max(mData(:,3))])
+            zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 14)
         end
         dispName = sigStr;
         

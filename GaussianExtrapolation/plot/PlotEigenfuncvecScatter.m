@@ -35,7 +35,6 @@ if dim == 1
         plot(mData(:), mPhi(:,m+1), '.', 'DisplayName', dispName);
         xlim([ min(mData) max(mData) ])
         hold on;
-        
         set(gca,'FontSize', 14);
     end
     if exist('suptitle', 'var')
@@ -99,7 +98,7 @@ elseif dim == 2 || dim == 3
                 UpdateCursorDataTip(fig, vAx, mPhi);
             end
             colormap(gca, 'jet')
-            colorbar()
+            colorbar('TickLabelInterpreter', 'latex');
             if ~isempty(cmap)
                 localCmap(1) = cmap(1);
                 localCmap(2) = cmap(2);

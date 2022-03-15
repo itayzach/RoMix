@@ -32,8 +32,10 @@ if b_debugUseAnalytic
         else % Swiss Roll
             len = [SwissRollArclength(sDatasetParams.maxTheta), sDatasetParams.height];
         end
-        [V, adjLambda, matLambda] = CalcAnalyticLapEigsGrid(S, M, len);
-        [VRef, adjLambdaRef, matLambdaRef] = CalcAnalyticLapEigsGrid(SInt, M, len);
+        [V, matLambda] = CalcAnalyticLapEigsGrid(S, M, len);
+        [VRef, matLambdaRef] = CalcAnalyticLapEigsGrid(SInt, M, len);
+        [~, adjLambda, ~] = EigsByType(W, D, Ln, M, matrixForEigs);
+        [~, adjLambdaRef, ~] = EigsByType(WRef, DRef, LnRef, M, matrixForEigs);
     elseif strcmp(verticesPDF, 'Gaussian')
         assert(strcmp(matrixForEigs, 'Adjacency') && dim == 1)
         warning('review the following {1}...')

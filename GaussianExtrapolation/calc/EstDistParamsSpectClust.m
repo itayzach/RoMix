@@ -5,8 +5,17 @@ sDistParams.estDataDist = 'Gaussian';
 sDistParams.dim = dim;
 
 fprintf('Running spectralcluster... ')
-% [clusterInd, V_SC, D_SC] = spectralcluster(W,nClusters,"Distance","precomputed");
-[clusterInd, V_SC, D_SC] = spectralcluster(X,nClusters);
+if dim > 3
+    fprintf('Performing PCA... ')
+    keyboard;
+    [coeff,score,latent,tsquared,explained,mu] = pca(X);
+    lowDim = explained > 0.05;
+    XRec = score(:,lowDim)*coeff(:,lowDim)' + mu; %repmat(mu,13,1);
+    [clusterInd, V_SC, D_SC] = spectralcluster(XRec,nClusters);
+else
+    %[clusterInd, V_SC, D_SC] = spectralcluster(W,nClusters,"Distance","precomputed");
+    [clusterInd, V_SC, D_SC] = spectralcluster(X,nClusters);
+end
 fprintf('Done.\n')
 
 sDistParams.SCcompIdx = clusterInd;
@@ -20,10 +29,11 @@ end
 if nClusters > 1
     figure; 
     scatter3(V_SC(:,2), V_SC(:,3), clusterInd,[],clusterInd, 'filled'); 
-    view(0,90)
+    %view(45,45)
     colormap(jet(nClusters))
-    colorbar();
-
+    h = colorbar('TickLabelInterpreter', 'latex');
+    h.TickLabels = [1 dim];
+    h.Ticks = (1+0.25):0.5:(clusterInd-0.25);
     figure; histogram(clusterInd)
 end
 % for c = 1:nClusters
@@ -54,7 +64,7 @@ for c = 1:nClusters
     
     sDistParams.cov{c} = cov_c;
     sDistParams.mu{c} = mu_c;
-    sDistParams.GMModel.mu(c,:) = mu_c;
+    %sDistParams.GMModel.mu(c,:) = mu_c;
     sDistParams.u{c} = u_c;
     sDistParams.sigma_eigv{c} = sigma_eigv_c;
     sDistParams.sigma{c} = diag(sqrt(abs(sigma_eigv_c))).';
@@ -66,37 +76,20 @@ for c = 1:nClusters
     [~, uIndByCov] = sort(sDistParams.sigma{c},'descend');
     sDistParams.u{c} = sDistParams.u{c}(:,uIndByCov);
     sDistParams.sigma{c} = sDistParams.sigma{c}(uIndByCov);
-
     sDistParams.mu_1D{c} = sDistParams.mu{c}*sDistParams.u{c};
     
     isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-10)
 end
-[minSigmaAllComp, minSigmaCompDim] = cellfun(@min, sDistParams.sigma);
-[minSigma, minSigmaCompInd] = min(minSigmaAllComp);
 
 mMu = cell2mat(sDistParams.mu');
 mCov = reshape(cell2mat(sDistParams.cov), dim, dim, nClusters);
 p = histcounts(clusterInd, nClusters)/n;
-sDistParams.GMModel = gmdistribution(mMu, mCov, p);
+GMModel = gmdistribution(mMu, mCov, p);
+sDistParams = SortComponentsByEigs(sDistParams, GMModel);
+
+[minSigmaAllComp, minSigmaCompDim] = cellfun(@min, sDistParams.sigma);
+[minSigma, minSigmaCompInd] = min(minSigmaAllComp);
+
 fprintf('Done. min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', nClusters, minSigma, minSigmaCompInd, minSigmaCompDim(minSigmaCompInd))
 
-if dim == 2
-    figure;
-    gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(sDistParams.GMModel,[x0 y0]),x,y);
-    xMax = max(X);
-    xMin = min(X);
-    fcontour(gmPDF, [xMin(1), xMax(1), xMin(2), xMax(2)], 'LevelList', 1e-6:5e-2:1 );
-    
-elseif dim == 3
-    fig = figure;
-    cmap = colormap(jet(nClusters));
-    for c = 1:nClusters
-        nPoints = 20;
-        [elv,elf] = ellipsedata3(sDistParams.cov{c},sDistParams.mu{c},nPoints,1.5);
-        %scatter3(elv(:,1),elv(:,2),elv(:,3));
-        patch('Faces',elf,'Vertices',elv,'FaceColor',cmap(clusterInd(c),:),'EdgeColor',cmap(clusterInd(c),:));
-        hold on;
-    end
-    view(45,45)
-end
 end

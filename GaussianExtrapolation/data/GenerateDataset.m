@@ -59,7 +59,7 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
 elseif ismember(actualDataDist, {'USPS', 'MNIST'})
     assert(strcmp(dataGenTechnique, 'OneDraw'))
     nSets = ceil(N/1000);
-    datasetInd = randi(10,nSets,1);
+    datasetInd = randperm(10, nSets);
     fprintf('Loading %s set %d... ',actualDataDist, datasetInd(1))
     digitsDataset = load(['data', filesep, lower(actualDataDist), filesep, lower(actualDataDist), '_set', num2str(datasetInd(1)), '.mat']);
 

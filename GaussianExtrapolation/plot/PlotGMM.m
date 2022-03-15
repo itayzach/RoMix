@@ -10,7 +10,7 @@ if dim == 1
 elseif dim == 2
     scatter(x(:,1),x(:,2),[],compIdx,'filled') % Scatter plot with points of size 10
     colormap(parula(GMModel.NumComponents));
-    colorbar();
+    colorbar('TickLabelInterpreter', 'latex');
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
     ylabel('$y$', 'interpreter', 'latex', 'FontSize', 16);
     set(gca,'FontSize', 14);

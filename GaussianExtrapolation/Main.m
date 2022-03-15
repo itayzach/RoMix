@@ -1,30 +1,20 @@
 function sWorkspace = Main(presetName, b_clearLastRun)
 %% Restart
 if ~exist('b_clearLastRun', 'var') || b_clearLastRun
-    clc; close all; set(0,'DefaultFigureWindowStyle','normal')
+    clc; close all; 
 end
 rng('default'); 
-%% Get perset from input
-if exist('presetName', 'var')
-    if isstruct(presetName)
-        sPreset = presetName;
-    elseif ischar(presetName)
-        sPreset = eval(presetName);
-    end
-end
-PrintPreset(sPreset);
 %% GMM / Spectral Clustering
 clusterMethod = 'GMM'; % 'GMM' / 'SC'
-%% Verify
-assert(~sPreset.b_debugUseAnalytic || ...
-    (sPreset.b_debugUseAnalytic && ismember(sPreset.verticesPDF, {'Gaussian', 'Grid', 'Uniform', 'SwissRoll'})))
-assert(~strcmp(sPreset.adjacencyType,'NearestNeighbor') || ...
-    strcmp(sPreset.adjacencyType,'NearestNeighbor') && strcmp(sPreset.verticesPDF,'Grid'))
-assert((strcmp(clusterMethod, 'GMM') && sPreset.n >= sPreset.dim) || (strcmp(clusterMethod, 'SC')))
-%% Plot params
+%% Get perset
+sPreset = GetPreset(presetName);
+%% Verify preset
+VerifyPresetParams(sPreset, clusterMethod);
+%% Get plot params
 sPlotParams = GetPlotParams(sPreset);
 %% Run
 [tVIntToCompare, tVNysToCompare, tVRepToCompare, tVRefToCompare] = deal(zeros(sPreset.N, sPreset.M, sPreset.R));
+[tVRecPhiToCompare, tVToCompare] = deal(zeros(sPreset.n, sPreset.M, sPreset.R));
 [tSigCnvrtRecPhi, tSigCnvrtRecV, tSigCnvrtRecRep, tSigCnvrt] = deal(zeros(sPreset.n, sPreset.nSignals, sPreset.R));
 [tSigCnvrtInt, tSigCnvrtNys, tSigCnvrtRep, tSigCnvrtRef] = deal(zeros(sPreset.N, sPreset.nSignals, sPreset.R));
 for r = 1:sPreset.R
@@ -55,7 +45,7 @@ for r = 1:sPreset.R
     elseif strcmp(clusterMethod, 'SC')
         sDistParams = EstDistParamsSpectClust(xTrain, W, sPreset.gmmNumComponents);
     end
-    if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis
+    if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPreset.dim > 1
         PlotGaussianEllipses(sPlotParams, sDistParams);
         PlotCovEigs(sPlotParams, sDistParams);
         PlotClustersMeans(sPreset, sDistParams);
@@ -63,8 +53,8 @@ for r = 1:sPreset.R
     % ----------------------------------------------------------------------------------------------
     % Plot dataset
     % ----------------------------------------------------------------------------------------------
-    if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotDataVsGmm && sPreset.dim <= 3
-        nGmmPoints = sPreset.n;
+    if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotDataVsGmm 
+        nGmmPoints = 50*ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) + sPreset.n*~ismember(sPreset.verticesPDF, {'USPS', 'MNIST'});
         pltTitle = ['Dataset with n = ', num2str(sPreset.n), ' points'];
         if strcmp(clusterMethod, 'GMM')
             plt2Title = ['Generated ' num2str(nGmmPoints), ' points from ' clusterMethod ' with nEstComp = ' num2str(sPreset.gmmNumComponents)];
@@ -114,7 +104,7 @@ for r = 1:sPreset.R
     % Eigenvectors interpolation
     % ----------------------------------------------------------------------------------------------
     if sPreset.b_interpEigenvecs
-        [tVIntToCompare(:,:,r), tVNysToCompare(:,:,r), tVRepToCompare(:,:,r), tVRefToCompare(:,:,r)] = ...
+        [tVIntToCompare(:,:,r), tVRecPhiToCompare(:,:,r), tVToCompare(:,:,r), tVNysToCompare(:,:,r), tVRepToCompare(:,:,r), tVRefToCompare(:,:,r)] = ...
             InterpEigenvectors(sPlotParams, sPreset, sDataset, Phi, lambdaPhi, PhiInt, VNys, WTrainInt, V, VRef, W, WRef, D, DRef, Ln, LnRef);
     end
     % ----------------------------------------------------------------------------------------------
@@ -130,35 +120,14 @@ end
 % Accuracy
 % ------------------------------------------------------------------------------------------
 if sPreset.b_interpEigenvecs
-    [vRmseInt, vMseInt, vAccInt, mErrInt, vCohInt, vAccStdInt] = CalcErrAndAcc(tVIntToCompare, tVRefToCompare, 'Analytic');
-    if sPreset.b_compareMethods
-        [vRmseNys, vMseNys, vAccNys, mErrNys, vCohNys, vAccStdNys] = CalcErrAndAcc(tVNysToCompare, tVRefToCompare, 'Nystrom');
-        [vRmseRep, vMseRep, vAccRep, mErrRep, vCohRep, vAccStdRep] = CalcErrAndAcc(tVRepToCompare, tVRefToCompare, 'Representer');
-        PlotAccuracy(sPlotParams, [vAccInt, vAccNys, vAccRep], [vAccStdInt, vAccStdNys, vAccStdRep], ...
-            {'Acc$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$', 'Acc$(v^{{\bf nys}}_m, v^{{\bf ref}}_m)$', ...
-             'Acc$(v^{{\bf rep}}_m, v^{{\bf ref}}_m)$'}, ['Acc_eigs_0_to_' num2str(sPreset.M-1)]);
-    else
-        PlotAccuracy(sPlotParams, vAccInt, vAccStdInt, {'Acc$(v^{{\bf int}}_m, v^{{\bf ref}}_m)$'}, ['Acc_eigs_0_to_' num2str(sPreset.M-1)]);
-    end
+    InterpEigenvecsMetrics(sPlotParams, sPreset, ...
+        tVIntToCompare, tVRefToCompare, tVRecPhiToCompare, tVToCompare, tVNysToCompare, tVRepToCompare);
 end
 if sPreset.b_runGraphSignals
-    [vRmseRecPhi, vMseRecPhi, vAccRecPhi, mErrRecPhi, vCohRecPhi, vAccStdPhi] = CalcErrAndAcc(tSigCnvrtRecPhi, tSigCnvrt, 'EigsRLS (train)');
-    [vRmseInt, vMseInt, vAccInt, mErrInt, vCohInt, vAccStdInt]                = CalcErrAndAcc(tSigCnvrtInt, tSigCnvrtRef, 'EigsRLS (test)');
-    if sPreset.b_compareMethods
-        [vRmseRecRep, vMseRecRep, vAccRecRep, mErrRecRep, vCohRecRep, vAccStdRecRep] = CalcErrAndAcc(tSigCnvrtRecRep, tSigCnvrt, 'Representer (train)');
-        [vRmseRep, vMseRep, vAccRep, mErrRep, vCohRep, vAccStdRep]                   = CalcErrAndAcc(tSigCnvrtRep, tSigCnvrtRef, 'Representer (test)');
-        [vRmseRecV, vMseRecV, vAccRecV, mErrRecV, vCohRecV, vAccStdRecV]             = CalcErrAndAcc(tSigCnvrtRecV, tSigCnvrt, 'Nystrom (train)');
-        [vRmseNys, vMseNys, vAccNys, mErrNys, vCohNys, vAccStdNys]                   = CalcErrAndAcc(tSigCnvrtNys, tSigCnvrtRef, 'Nystrom (test)');
-        if isfield(sPreset.sDatasetParams, 'monthNames')
-            PlotAccuracy(sPlotParams, [vAccInt, vAccNys, vAccRep], [vAccStdInt, vAccStdNys, vAccStdRep], ...
-                {'Acc$(s^{{\bf int}}_m, s^{{\bf ref}}_m)$', 'Acc$(s^{{\bf nys}}_m, s^{{\bf ref}}_m)$', ...
-                'Acc$(s^{{\bf rep}}_m, s^{{\bf ref}}_m)$'}, 'InterpAcc', [], sPreset.sDatasetParams.monthNames, 'Interpolation accuracy');
-            PlotAccuracy(sPlotParams, [vAccRecPhi, vAccRecV, vAccRecRep], [vAccStdPhi, vAccStdRecV, vAccStdRecRep], ...
-                {'Acc$(s^{{\bf int}}_m, s^{{\bf ref}}_m)$', 'Acc$(s^{{\bf nys}}_m, s^{{\bf ref}}_m)$', ...
-                'Acc$(s^{{\bf rep}}_m, s^{{\bf ref}}_m)$'}, 'ProjAcc', [], sPreset.sDatasetParams.monthNames, 'Projection accuracy');
-        end
-    end
+    InterpGraphSignalsMetrics(sPlotParams, sPreset, ...
+        tSigCnvrtRecPhi, tSigCnvrt, tSigCnvrtInt, tSigCnvrtRef, tSigCnvrtRecRep, tSigCnvrtRep, tSigCnvrtRecV, tSigCnvrtNys);
 end
+%% Save workspace
 sWorkspace = SaveWorkspaceToStruct();
 ReadWorkspaceStructToBase(sWorkspace);
 end

@@ -13,9 +13,9 @@ for methodId = 1:nMethods
 end
 
 if ~exist('minAcc', 'var') || isempty(minAcc)
-    minAcc = min(mAcc(:))*0.99;
+    minAcc = min(mAcc(:))-2;
 end
-ylim([minAcc, 100]);
+ylim([max(0,minAcc), 100]);
 xlim([0 M-1]);
 ylabel('Accuracy [$\%$]', 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2)

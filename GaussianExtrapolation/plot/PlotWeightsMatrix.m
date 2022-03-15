@@ -3,7 +3,7 @@ function PlotWeightsMatrix(sPlotParams, W, dist, D, L, xTrain, adjacencyType, om
 if ~isempty(dist)
     figure('Name', 'Distance matrix');
     imagesc(dist);
-    colorbar();
+    colorbar('TickLabelInterpreter', 'latex');
     title(['Distance matrix', newline, ...
         'omega = ', num2str(omega, '%.2f'), ', max(dist) = ', num2str(max(dist(:)), '%.2f')], ...
         'FontSize', 14, 'interpreter', 'latex')
@@ -12,7 +12,7 @@ end
 
 figure('Name', 'Weight matrix');
 imagesc(W);
-colorbar();
+colorbar('TickLabelInterpreter', 'latex');
 title('Weight matrix', 'FontSize', 14, 'interpreter', 'latex')
 set(gca,'FontSize', 14);
 
@@ -28,7 +28,7 @@ set(gca,'FontSize', 14);
 
 figure('Name', 'Laplacian matrix');
 imagesc(L);
-colorbar();
+colorbar('TickLabelInterpreter', 'latex');
 title('$L_n = I - D^{-0.5}WD^{-0.5}$', 'FontSize', 14, 'interpreter', 'latex')
 set(gca,'FontSize', 14);
 

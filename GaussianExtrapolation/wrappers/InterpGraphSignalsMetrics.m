@@ -15,5 +15,11 @@ if sPreset.b_compareMethods
             {'Acc$(s^{{\bf RoMix}}_m, s_m)$', 'Acc$(s^{{\bf nys}}_m, s_m)$', ...
             'Acc$(s^{{\bf rep}}_m, s_m)$'}, 'ProjAcc', [], sPreset.sDatasetParams.monthNames, 'Projection accuracy');
     end
+else
+    if isfield(sPreset.sDatasetParams, 'monthNames')
+        PlotAccuracy(sPlotParams, [vAccInt, vAccRecPhi], [vAccStdInt vAccStdPhi], ...
+            {'Acc$(\tilde{s}^{{\bf RoMix}}_m, \tilde{s}_m)$', 'Acc$(s^{{\bf RoMix}}_m, s_m)$'}, ...
+            'ProjInterpAcc', [], sPreset.sDatasetParams.monthNames, 'Projection \& interpolation accuracy');
+    end
 end
 end

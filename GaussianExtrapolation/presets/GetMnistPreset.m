@@ -10,14 +10,14 @@ sPreset.verticesPDF        = 'MNIST'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMo
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sDatasetParams.nLabeled    = 300;0.3*round(sPreset.n);
+sDatasetParams.nLabeled    = 0.3*round(sPreset.n);
 sPreset.sDatasetParams     = sDatasetParams;
 assert(sDatasetParams.nLabeled <= sPreset.n)
 %% Number of signals
 sPreset.nSignals           = 1; % After conversion from number of classes
 %% Gaussian kernel width
 sPreset.omega              = 2.28;1.73; % for nystrom kernel
-sPreset.omegaTilde         = 3;1.73; % for our method
+sPreset.omegaTilde         = 3; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;

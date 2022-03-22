@@ -1,7 +1,7 @@
 function sPreset = Get2DUniformPreset()
 %% Dataset parameters
 sPreset.dim                = 2;
-sPreset.n                  = 2500;
+sPreset.n                  = 1000;
 sPreset.N                  = 5000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
@@ -37,7 +37,7 @@ sPreset.gamma2             = 0;
 sPreset.gamma1Rep          = 1e-5;
 sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
-sPreset.R                  = 5;
+sPreset.R                  = 10;
 %% Method parameters
 sPreset.b_debugUseAnalytic = true;
 sPreset.b_forceCtoIdentity = false;
@@ -46,7 +46,7 @@ sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = true;
-sPreset.b_runGraphSignals  = false;
+sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = false;
 sPreset.b_compareMethods   = false;
 %% 

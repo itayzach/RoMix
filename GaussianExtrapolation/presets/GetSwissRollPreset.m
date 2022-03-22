@@ -1,7 +1,7 @@
 function sPreset = GetSwissRollPreset()
 %% Dataset parameters
 sPreset.dim                = 3;
-sPreset.n                  = 2500;
+sPreset.n                  = 1000;
 sPreset.N                  = 5000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
@@ -29,8 +29,8 @@ sPreset.gmmRegVal          = 1e-5;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 20;
 %% Number of eigenvectors/eigenfunctions
-sPreset.M                  = 10;
-sPreset.MTilde             = 25*sPreset.gmmNumComponents;
+sPreset.M                  = 20;
+sPreset.MTilde             = 50*sPreset.gmmNumComponents;
 %% Regularizations
 sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;

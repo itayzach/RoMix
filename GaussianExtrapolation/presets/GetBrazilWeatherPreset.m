@@ -21,7 +21,7 @@ sPreset.omegaTilde         = 7; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
-sPreset.gmmNumComponents   = 4;
+sPreset.gmmNumComponents   = 3;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 50*sPreset.gmmNumComponents;
 sPreset.MTilde             = 50*sPreset.gmmNumComponents;
@@ -43,7 +43,7 @@ sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = false;
 sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = true;
-sPreset.b_compareMethods   = true;
+sPreset.b_compareMethods   = false;
 %% 
 sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Haversine'; % 'Euclidean' / 'Haversine'

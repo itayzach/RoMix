@@ -10,7 +10,7 @@ sPreset.verticesPDF        = 'USPS'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoo
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sDatasetParams.nLabeled    = 0.3*sPreset.n; %round(0.1*sPreset.n);
+sDatasetParams.nLabeled    = 0.3*round(sPreset.n); %round(0.1*sPreset.n);
 sPreset.sDatasetParams     = sDatasetParams;
 assert(sDatasetParams.nLabeled <= sPreset.n)
 %% Number of signals

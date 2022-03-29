@@ -1,24 +1,27 @@
 %% Restart
 clc; clear; close all; 
 
-%% Run top examples
+%% Run toy examples
 b_clearLastRun = false;
+b_saveFigures = true;
 selectedEigsPresets = {'Get1DUniformPreset', 'Get2DUniformPreset', 'GetSwissRollPreset'};
 for presetInd = 1:numel(selectedEigsPresets)
     funcName = selectedEigsPresets{presetInd};
-    Main(funcName, b_clearLastRun);
+    Main(funcName, b_clearLastRun, b_saveFigures);
 end
 
 %% Run real world examples
 b_clearLastRun = false;
+b_saveFigures = true;
 selectedGraphSigPresets = {'GetBrazilWeatherPreset', 'GetMnistPreset'};
 for presetInd = 1:numel(selectedGraphSigPresets)
     funcName = selectedGraphSigPresets{presetInd};
-    Main(funcName, b_clearLastRun);
+    Main(funcName, b_clearLastRun, b_saveFigures);
 end
 
 %% Run all other presets
 b_clearLastRun = true;
+b_saveFigures = false;
 presetsDir = 'presets';
 sDir = dir(fullfile('presets','*.m'));
 for presetInd = 1:numel(sDir)
@@ -26,7 +29,7 @@ for presetInd = 1:numel(sDir)
     if ismember(funcName, [selectedEigsPresets, selectedGraphSigPresets])
         continue;
     end
-    Main(funcName, b_clearLastRun);
+    Main(funcName, b_clearLastRun, b_saveFigures);
 end
 %% Run additional scripts
 PlotGaussianKernelEigenfunsExample(); %Illustrate the first eigenfunctions of the 1-D Guassian kernel

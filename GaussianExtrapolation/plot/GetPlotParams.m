@@ -1,11 +1,13 @@
-function sPlotParams = GetPlotParams(sPreset)
+function sPlotParams = GetPlotParams(sPreset, b_saveFigures)
 %% Set plot defaults
 set(0,'DefaultFigureWindowStyle','normal')
 set(0,'DefaultTextInterpreter','latex');  
 set(0,'DefaultAxesTickLabelInterpreter','latex');  
 set(0,'DefaultLegendInterpreter','latex');
 %% Save figs
-sPlotParams.outputFolder                = 'figs';
+if b_saveFigures
+    sPlotParams.outputFolder            = 'figs';
+end
 sPlotParams.b_globalPlotEnable          = true;
 %% Eigenvectors
 sPlotParams.b_plotOrigEvecs             = false;

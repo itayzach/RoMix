@@ -75,7 +75,11 @@ else
         vAx(1) = nexttile(1);
         UpdateCursorDataTip(fig, vAx, compIdx);
         
+    else
+        xMax = max(x);
+        xMin = min(x);
     end
+
     %% Dataset
     if dim == 1
         scatter(x, zeros(1,n), 50, ones(1,n), 'filled')
@@ -130,7 +134,7 @@ else
         x0     = 400;
         y0     = 400;
         height = 400;
-        width  = 1200;
+        width  = 600 + 600*(exist('b_plotDistModel', 'var') && b_plotDistModel);
         set(gcf,'Position', [x0 y0 width height])
     end
     set(0,'DefaultFigureWindowStyle',prevWindowStyle)

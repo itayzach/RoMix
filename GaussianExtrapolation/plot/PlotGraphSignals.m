@@ -103,7 +103,9 @@ elseif dim == 2 || dim == 3
         end
         colormap(gca, 'jet');
         colorbar('TickLabelInterpreter', 'latex');
-        caxis([cMapMin cMapMax]);
+        if cMapMin < cMapMax
+            caxis([cMapMin cMapMax]);
+        end
         xlim([ min(mData(:,1)) max(mData(:,1))])
         ylim([ min(mData(:,2)) max(mData(:,2))])
         xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 14)

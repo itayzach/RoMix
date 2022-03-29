@@ -1,7 +1,10 @@
-function sWorkspace = Main(presetName, b_clearLastRun)
+function sWorkspace = Main(presetName, b_clearLastRun, b_saveFigures)
 %% Restart
 if ~exist('b_clearLastRun', 'var') || b_clearLastRun
     clc; close all; 
+end
+if ~exist('b_saveFigures', 'var')
+    b_saveFigures = false;
 end
 rng('default'); 
 %% GMM / Spectral Clustering
@@ -11,7 +14,7 @@ sPreset = GetPreset(presetName);
 %% Verify preset
 VerifyPresetParams(sPreset, clusterMethod);
 %% Get plot params
-sPlotParams = GetPlotParams(sPreset);
+sPlotParams = GetPlotParams(sPreset, b_saveFigures);
 %% Run
 [tVIntToCompare, tVNysToCompare, tVRepToCompare, tVRefToCompare] = deal(zeros(sPreset.N, sPreset.M, sPreset.R));
 [tVRecPhiToCompare, tVToCompare] = deal(zeros(sPreset.n, sPreset.M, sPreset.R));
@@ -48,7 +51,7 @@ for r = 1:sPreset.R
     if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPreset.dim > 1
         PlotGaussianEllipses(sPlotParams, sDistParams);
         PlotCovEigs(sPlotParams, sDistParams);
-        PlotClustersMeans(sPreset, sDistParams);
+        %PlotClustersMeans(sPreset, sDistParams);
     end
     % ----------------------------------------------------------------------------------------------
     % Plot dataset

@@ -1,6 +1,7 @@
 %% Clean up
 clear; close all; clc;
 restoredefaultpath;
+beep off;
 
 %% My directories
 [filepath, scriptName, ~] = fileparts(mfilename('fullpath'));

@@ -5,8 +5,10 @@ set(0,'DefaultFigureWindowStyle','normal')
 mCovEigs = cell2mat(sDistParams.sigma');
 [origC, origD] = size(mCovEigs);
 minEig = min(mCovEigs(:));
-lastPrincipalDims = find(mCovEigs(1,:) > 1.05*minEig,1,'last');
-lastPrincipalComp = find(mCovEigs(:,1) > 1.05*minEig,1,'last');
+%lastPrincipalDims = find(mCovEigs(1,:) > 1.05*minEig,1,'last');
+%lastPrincipalComp = find(mCovEigs(:,1) > 1.05*minEig,1,'last');
+lastPrincipalDims = origD;
+lastPrincipalComp = origC;
 
 mSigma = mCovEigs(1:lastPrincipalComp,1:lastPrincipalDims);
 [C, dim] = size(mSigma);
@@ -35,7 +37,8 @@ h.Label.Position(2) = 0;
 h.Label.Position(3) = 0;
 h.Label.FontSize = 14;
 
-title('Cov eigs $> 1.05\min(\sigma)$', 'Interpreter', 'latex', 'FontSize', 14);
+%title(['Cov eigs $> 1.05\min(\sigma), \quad \min(\sigma)= ' num2str(minEig) '$'], 'Interpreter', 'latex', 'FontSize', 14);
+title(['Cov eigs. $\min(\sigma)= ' num2str(minEig) '$'], 'Interpreter', 'latex', 'FontSize', 14);
 set(gca,'FontSize', 14);
 set(fig,'renderer','Painters')
 set(0,'DefaultFigureWindowStyle',windowStyle)

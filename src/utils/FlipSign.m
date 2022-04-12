@@ -1,4 +1,4 @@
-function [mPhi2Flipped, vMinInd] = FlipSign(mPhi1Base, mPhi2Candidate, b_pairwiseFlip)
+function [mPhi2Flipped, b_vFlippedIndicator, vMinInd] = FlipSign(mPhi1Base, mPhi2Candidate, b_pairwiseFlip)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % b_pairwiseFlipSign = true  --> Navie pairwise flip:
 %   For each pair m:

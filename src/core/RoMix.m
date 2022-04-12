@@ -1,4 +1,4 @@
-function C = EigsRLS(Phi, gamma1, gamma2, invLambda, L, f, b_maskDataFitTerm)
+function C = RoMix(Phi, gamma1, gamma2, invLambda, L, f, b_maskDataFitTerm)
 
 if b_maskDataFitTerm
     J = GetUnlabeledNodesMask(f);
@@ -20,6 +20,6 @@ if ~isempty(warnMsg) % catch warning
     error('\n returned warning: %s\n', warnMsg);
 end
 
-PrintEigsRLSStats(Phi,C,invLambda,L,matToInv)
+PrintRoMixStats(Phi,C,invLambda,L,matToInv)
 
 end

@@ -9,3 +9,5 @@
 *.mex*
 *.mat
 desktop.ini
+__pycache__
+models

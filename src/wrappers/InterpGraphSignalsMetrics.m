@@ -1,7 +1,7 @@
 function InterpGraphSignalsMetrics(sPlotParams, sPreset, ...
     tSigCnvrtRecPhi, tSigCnvrt, tSigCnvrtInt, tSigCnvrtRef, tSigCnvrtRecRep, tSigCnvrtRep, tSigCnvrtRecV, tSigCnvrtNys)
-[vAccRecPhi, vAccStdPhi] = CalcErrAndAcc(tSigCnvrtRecPhi, tSigCnvrt, 'EigsRLS (train)');
-[vAccInt, vAccStdInt]    = CalcErrAndAcc(tSigCnvrtInt, tSigCnvrtRef, 'EigsRLS (test)');
+[vAccRecPhi, vAccStdPhi] = CalcErrAndAcc(tSigCnvrtRecPhi, tSigCnvrt, 'RoMix (train)');
+[vAccInt, vAccStdInt]    = CalcErrAndAcc(tSigCnvrtInt, tSigCnvrtRef, 'RoMix (test)');
 if sPreset.b_compareMethods
     [vAccRecRep, vAccStdRecRep] = CalcErrAndAcc(tSigCnvrtRecRep, tSigCnvrt, 'Representer (train)');
     [vAccRep, vAccStdRep]       = CalcErrAndAcc(tSigCnvrtRep, tSigCnvrtRef, 'Representer (test)');

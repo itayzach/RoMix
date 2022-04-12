@@ -29,22 +29,13 @@ for r = 1:sPreset.R
     sDataset = GenerateDataset(sPreset.verticesPDF, sPreset.dim, sPreset.nGenDataCompnts, sPreset.n, sPreset.N, sPreset.dataGenTechnique, sPreset.sDatasetParams);
     xTrain = sDataset.sData.x; yTrain = sDataset.sData.y; xInt = sDataset.sData.xt;
     % ----------------------------------------------------------------------------------------------
-    % Build graph (not needed for EigsRLS)
-    % ----------------------------------------------------------------------------------------------
-    [WRef, distRef, DRef, LnRef] = CalcAdjacency(xInt, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
-    if sPreset.b_takeEigsFromWRef
-        W = WRef(1:sPreset.n,1:sPreset.n); dist = distRef(1:sPreset.n,1:sPreset.n); D = DRef(1:sPreset.n,1:sPreset.n); Ln = LnRef(1:sPreset.n,1:sPreset.n);
-    else
-        [W, dist, D, Ln] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
-    end
-    if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights
-        PlotWeightsMatrix([], W, dist, D, Ln, xTrain, sPreset.adjacencyType, sPreset.omega, sPreset.k);
-    end
-    % ----------------------------------------------------------------------------------------------
     % Estimate distribution parameters
     % ----------------------------------------------------------------------------------------------
     if strcmp(clusterMethod, 'GMM')
         sDistParams = EstimateDistributionParameters(xTrain, sPreset.gmmNumComponents, sPreset.gmmRegVal, sPreset.gmmMaxIter);
+        if isfield(sDataset, 'vae')
+            sDistParams.vae = sDataset.vae;
+        end
     elseif strcmp(clusterMethod, 'SC')
         sDistParams = EstDistParamsSpectClust(xTrain, W, sPreset.gmmNumComponents);
     end
@@ -67,12 +58,6 @@ for r = 1:sPreset.R
         windowStyle = 'normal';
         PlotDataset(sPlotParams, xTrain, yTrain, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle);
     end
-
-    % ----------------------------------------------------------------------------------------------
-    % Perform numeric eigs
-    % ----------------------------------------------------------------------------------------------
-    [V, adjLambda, matLambda, VRef, adjLambdaRef, matLambdaRef] = ...
-        EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef);
     % ----------------------------------------------------------------------------------------------
     % Calculate Phi(xTrain) and lambdaPhi
     % ----------------------------------------------------------------------------------------------
@@ -88,35 +73,71 @@ for r = 1:sPreset.R
         figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
         PlotSpectrum([], [], lambdaPhi, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
     end
-    if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotMercer
-        CheckMercerTheorem(Phi, lambdaPhi, sPreset.gmmNumComponents, W);
-    end
     % ----------------------------------------------------------------------------------------------
     % Calculate Phi(xInt)
     % ----------------------------------------------------------------------------------------------
     PhiInt = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xInt, sPreset.b_normalizePhi);
-    % ----------------------------------------------------------------------------------------------
-    % Calculate Nystrom eigenvectors
-    % ----------------------------------------------------------------------------------------------
-    distLUBlockRUBlock = CalcDistance(xTrain, xInt, sPreset.sDistanceParams);
-    WTrainInt = exp(-distLUBlockRUBlock.^2/(2*sPreset.omega^2));
-    interpRatio = sPreset.N/sPreset.n;
-    lambdaNys = adjLambda*sqrt(interpRatio);
-    VNys = WTrainInt.'*V*diag(1./lambdaNys);
+    
+    if sPreset.b_compareMethods || sPreset.b_interpEigenvecs || sPlotParams.b_plotMercer
+        % ----------------------------------------------------------------------------------------------
+        % Build graph - needed for other methods or when interpolating eigenvectors
+        % ----------------------------------------------------------------------------------------------
+        [WRef, distRef, DRef, LnRef] = CalcAdjacency(xInt, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
+        if sPreset.b_takeEigsFromWRef
+            W = WRef(1:sPreset.n,1:sPreset.n); dist = distRef(1:sPreset.n,1:sPreset.n); D = DRef(1:sPreset.n,1:sPreset.n); Ln = LnRef(1:sPreset.n,1:sPreset.n);
+        else
+            [W, dist, D, Ln] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
+        end
+        if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights
+            PlotWeightsMatrix([], W, dist, D, Ln, xTrain, sPreset.adjacencyType, sPreset.omega, sPreset.k);
+        end
+        if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotMercer
+            CheckMercerTheorem(Phi, lambdaPhi, sPreset.gmmNumComponents, W);
+        end
+        % ----------------------------------------------------------------------------------------------
+        % Perform numeric eigs - needed for other methods or when interpolating eigenvectors
+        % ----------------------------------------------------------------------------------------------
+        [V, adjLambda, matLambda, VRef, adjLambdaRef, matLambdaRef] = ...
+            EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef);
+    end
     % ----------------------------------------------------------------------------------------------
     % Eigenvectors interpolation
     % ----------------------------------------------------------------------------------------------
     if sPreset.b_interpEigenvecs
-        [tVIntToCompare(:,:,r), tVRecPhiToCompare(:,:,r), tVToCompare(:,:,r), tVNysToCompare(:,:,r), tVRepToCompare(:,:,r), tVRefToCompare(:,:,r)] = ...
-            InterpEigenvectors(sPlotParams, sPreset, sDataset, Phi, lambdaPhi, PhiInt, VNys, WTrainInt, V, VRef, W, WRef, D, DRef, Ln, LnRef);
+        [tVIntToCompare(:,:,r), tVRecPhiToCompare(:,:,r), tVToCompare(:,:,r), tVRefToCompare(:,:,r), C] = ...
+            InterpEigenvectorsRoMix(sPlotParams, sPreset, Phi, lambdaPhi, PhiInt, V, VRef, Ln);
+        
+        if sPreset.b_compareMethods
+            [tVNysToCompare(:,:,r)] = InterpEigenvectorsNystrom(sPlotParams, sPreset, sDataset, tVToCompare(:,:,r), adjLambda, tVIntToCompare(:,:,r));
+            [tVRepToCompare(:,:,r), mAlpha] = InterpEigenvectorsRepThm(sPlotParams, sPreset, sDataset, W, tVToCompare(:,:,r), tVIntToCompare(:,:,r), Ln);
+            if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
+                CRep = diag(lambdaPhi)*Phi.'*mAlpha;
+                PlotCoeffsMatrix(C, '${\bf C}$', CRep, ...
+                    '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', mAlpha, '$\alpha$');
+            end
+        end
+        
+        if sPlotParams.b_globalPlotEnable 
+            PlotEigenvectorsWrapper(sPlotParams, sPreset, sDataset, lambdaPhi, Phi, PhiInt, LnRef, tVRefToCompare(:,:,r), tVIntToCompare(:,:,r), C)
+        end
+
     end
     % ----------------------------------------------------------------------------------------------
     % Graph signals interpolation
     % ----------------------------------------------------------------------------------------------
     if sPreset.b_runGraphSignals
-        [tSigCnvrtRecPhi(:,:,r), tSigCnvrtRecV(:,:,r), tSigCnvrtRecRep(:,:,r), tSigCnvrt(:,:,r), ...
-         tSigCnvrtInt(:,:,r), tSigCnvrtNys(:,:,r), tSigCnvrtRep(:,:,r), tSigCnvrtRef(:,:,r)] = ...
-            InterpGraphSignal(sPlotParams, sPreset, sDataset, sKernelParams, Phi, lambdaPhi, PhiInt, VNys, WTrainInt, V, W, WRef, D, DRef, Ln, LnRef);
+        [tSigCnvrtRecPhi(:,:,r), tSigCnvrt(:,:,r), tSigCnvrtInt(:,:,r), tSigCnvrtRef(:,:,r), mSigCoeffsPhi] = ...
+            InterpGraphSignalRoMix(sPreset, sDataset, Phi, lambdaPhi, PhiInt);
+
+        if sPlotParams.b_globalPlotEnable 
+            PlotGraphSignalsWrapper(sPlotParams, sPreset, sKernelParams, sDataset, ...
+                tSigCnvrt(:,:,r), tSigCnvrtRef(:,:,r), tSigCnvrtRecPhi(:,:,r), tSigCnvrtInt(:,:,r), mSigCoeffsPhi)
+        end
+
+        if sPreset.b_compareMethods
+            [tSigCnvrtRecRep(:,:,r), tSigCnvrtRep(:,:,r)] = InterpGraphSignalRepThm(sPreset, sDataset, W, Ln);
+            [tSigCnvrtRecV(:,:,r), tSigCnvrtNys(:,:,r)] = InterpGraphSignalNystrom(sPreset, sDataset, V, adjLambda);
+        end
     end
 end
 % ------------------------------------------------------------------------------------------

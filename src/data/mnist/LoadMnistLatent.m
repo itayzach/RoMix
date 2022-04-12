@@ -1,0 +1,49 @@
+function [zTrain, zTest, vae] = LoadMnistLatent(sDatasetParams,xTrain,xTest,b_plotDecoded)
+
+if ~exist('b_plotDecoded', 'var')
+    b_plotDecoded = true;
+end
+
+x_train = py.numpy.array(xTrain);
+x_test = py.numpy.array(xTest);
+
+%% Train / load trained model
+modelName = ['d' num2str(sDatasetParams.latentDim), '_e', num2str(sDatasetParams.epochs), '_b', num2str(sDatasetParams.batchSize), '_n' num2str(size(xTrain,1))];
+decSaveFolder = fullfile('vae','models',modelName,'dec_trained');
+encSaveFolder = fullfile('vae','models',modelName,'enc_trained');
+if isfolder(decSaveFolder) && isfolder(encSaveFolder)
+    % Load from trained model
+    vae = pyrunfile(fullfile("vae", "vae_load.py"), "vae", enc_save_folder=encSaveFolder, dec_save_folder=decSaveFolder);
+    fprintf('Loaded VAE from files\n')
+else
+    % Train
+    tic;
+    [vae, history] = pyrunfile(fullfile("vae", "vae_train.py"), ["vae", "history"], x_train=x_train, x_test=x_test, ...
+        latent_dim=uint32(sDatasetParams.latentDim), epochs=uint32(sDatasetParams.epochs), batch_size=uint32(sDatasetParams.batchSize), ...
+        enc_save_folder=encSaveFolder, dec_save_folder=decSaveFolder);
+    histMat = struct(history.history);
+    figure; plot(cellfun(@double,cell(history.epoch)), cellfun(@double,cell(histMat.loss)));
+    t = toc;
+    fprintf('Training took %.2f minutes\n', t/60)
+end
+
+
+%% Encoder
+[~, ~, z_train] = pyrunfile(fullfile("vae", "vae_encoder.py"), ["z_mean", "z_log_var", "z"], data=x_train,vae=vae);
+[~, ~, z_test] = pyrunfile(fullfile("vae", "vae_encoder.py"), ["z_mean", "z_log_var", "z"], data=x_test,vae=vae);
+zTrain = double(z_train);
+zTest = double(z_test);
+
+%% Plot decoded
+if b_plotDecoded
+    x_train_rec = pyrunfile(fullfile("vae", "vae_decoder.py"), "x", z=zTrain,vae=vae);
+    xTrainRec = double(x_train_rec);
+    plotInd = randperm(size(xTrain,1),50);
+    xTrainRec = reshape(xTrainRec(plotInd,:,:),[],28*28);
+    xTrainPlt = reshape(xTrain(plotInd,:,:),[],28*28);
+    PlotDigits([],xTrainPlt,[],0,'Train');
+    PlotDigits([],xTrainRec,[],0,'Reconstructed');
+end
+
+fprintf('Done.\n')
+end

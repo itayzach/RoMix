@@ -1,4 +1,4 @@
-function PlotTwoMoonsEigsRLS(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigHatPhi, gamma1, gamma2, b_normalizePhi)
+function PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigHatPhi, gamma1, gamma2, b_normalizePhi)
 MTilde = size(mSigHatPhi,1);
 sClassifier.MTilde = MTilde;
 sClassifier.omega = sKernelParams.omega;

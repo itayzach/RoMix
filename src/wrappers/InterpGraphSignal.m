@@ -148,7 +148,7 @@ if ismember(sPreset.verticesPDF, {'TwoMoons'})
     PlotTwoMoonsEigsRLS(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigCoeffsPhi, sPreset.gamma1, sPreset.gamma2, sPreset.b_normalizePhi);
     PlotTwoMoonsLapRLS(sPlotParams, sDataset, sPreset.sDistanceParams, sPreset.omega, mAlpha, sPreset.gamma1Rep, sPreset.gamma2Rep);
 
-elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
+elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && sPreset.dim == 28*28
     b_transpose = strcmp(sPreset.verticesPDF, 'MNIST');
     nDigitsToPlot = 50;    
     if sPreset.n + nDigitsToPlot < sPreset.N

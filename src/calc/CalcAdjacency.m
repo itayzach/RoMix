@@ -33,7 +33,7 @@ D = diag(d);
 Ln = eye(n) - diag(d.^-0.5)*W*diag(d.^-0.5);
 Ln = 0.5*(Ln + Ln.')/2;
 fprintf('Done.\n')
-fprintf('Checking connectivity be using eig(Ln)... ')
+fprintf('Checking connectivity by using eig(Ln)... ')
 if n < 4000    
     Ln_lambda = eig(Ln);
     nGraphComponents = find(Ln_lambda > 1e-5,1) - 1;

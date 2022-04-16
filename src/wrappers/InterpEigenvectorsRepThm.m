@@ -1,4 +1,4 @@
-function [VRepToCompare] = InterpEigenvectorsRepThm(sPlotParams, sPreset, sDataset, W, V, VInt, Ln)
+function [VRepToCompare, mAlpha] = InterpEigenvectorsRepThm(sPlotParams, sPreset, sDataset, W, V, VInt, Ln)
 interpRatio = sPreset.N/sPreset.n;
 
 xTrain = sDataset.sData.x; 

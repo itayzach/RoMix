@@ -57,33 +57,42 @@ if ismember(sPreset.verticesPDF, {'TwoMoons'})
     % make sure mSigCnvrtRecPhi instead of mSigRecPhi
     PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigCnvrtRecPhi, mSigCoeffsPhi, sPreset.gamma1, sPreset.gamma2, sPreset.b_normalizePhi);
 
-elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && sPreset.dim == 28*28
-    b_transpose = strcmp(sPreset.verticesPDF, 'MNIST');
+elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
+    b_transpose = strcmp(sPreset.verticesPDF, 'MNIST') && sPreset.dim == 28*28;
+    b_minusOne = strcmp(sPreset.verticesPDF, 'MNIST');
     nDigitsToPlot = 50;    
-    if sPreset.n + nDigitsToPlot < sPreset.N
-        vSamples = round(linspace(sPreset.n+1,sPreset.N,nDigitsToPlot));
-        figTitle = ['Prediction on unseen $', num2str(length(vSamples)), '$ images'];
-        figName = 'interpolation_signals';
-        PlotDigits(sPlotParams, xInt(vSamples,:), mSigCnvrtInt(vSamples)-b_transpose, b_transpose, figTitle, figName);
+    assert(sPreset.n + nDigitsToPlot < sPreset.N)
+    vSamples = round(linspace(sPreset.n+1,sPreset.N,nDigitsToPlot));
+    if isfield(sKernelParams.sDistParams, 'vae')
+        % Transform from z to x
+        xDigits = reshape(double(pyrunfile(fullfile("vae", "vae_decoder.py"), "x", z=xInt,vae=sKernelParams.sDistParams.vae)),[],28*28);
     else
-        vSamples = round(linspace(1,sPreset.n,nDigitsToPlot));
-        figTitle = ['Prediction on seen $', num2str(length(vSamples)), '$ images'];
-        PlotDigits([], xInt(vSamples,:), mSigCnvrtInt(vSamples)-b_transpose, b_transpose, figTitle);
+        xDigits = xInt;
     end
+    
+    figTitle = ['Prediction on unseen $', num2str(length(vSamples)), '$ images'];
+    figName = 'interpolation_signals';
+    PlotDigits(sPlotParams, xDigits(vSamples,:), mSigCnvrtInt(vSamples)-b_minusOne, b_transpose, figTitle, figName);
 
     vBadPredictInd = find(mSigCnvrtInt ~= mSigCnvrtRef);
     nBadPredict = min(50,length(vBadPredictInd));
     figTitle = ['Wrong prediction on given+unseen $n = ', num2str(nBadPredict), '$ points'];
-    PlotDigits([], xInt(vBadPredictInd(1:nBadPredict),:), mSigCnvrtInt(vBadPredictInd(1:nBadPredict))-b_transpose, b_transpose, figTitle);
-
+    PlotDigits([], xDigits(vBadPredictInd(1:nBadPredict),:), mSigCnvrtInt(vBadPredictInd(1:nBadPredict))-b_minusOne, b_transpose, figTitle);
+    
     nGmmPoints = 50;
     [xGmm,compIdx] = random(sKernelParams.sDistParams.GMModel, nGmmPoints);
+    if isfield(sKernelParams.sDistParams, 'vae')
+        % Transform from z to x
+        xDigits = reshape(double(pyrunfile(fullfile("vae", "vae_decoder.py"), "x", z=xGmm,vae=sKernelParams.sDistParams.vae)),[],28*28);
+    else
+        xDigits = xGmm;
+    end
     PhiGmm = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xGmm, sPreset.b_normalizePhi);
     mSigGmm = PhiGmm*mSigCoeffsPhi;
     mSigCnvrtGmm = ConvertSignalByDataset(sPreset.verticesPDF, mSigGmm);
     figTitle = [num2str(nGmmPoints), ' generated points'];
     figName = 'generated_signals';
-    PlotDigits(sPlotParams, xGmm, mSigCnvrtGmm-b_transpose, b_transpose, figTitle, figName);
+    PlotDigits(sPlotParams, xDigits, mSigCnvrtGmm-b_minusOne, b_transpose, figTitle, figName);
 
 end
 end

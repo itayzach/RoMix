@@ -13,7 +13,8 @@ else
 end
 
 if ismember(actualDataDist, {'USPS', 'MNIST'})
-    if sDistParams.dim < 28*28 && strcmp(actualDataDist,'MNIST')
+    %if sDistParams.dim < 28*28 && strcmp(actualDataDist,'MNIST')
+    if isfield(sDistParams, 'vae')
         % Transform from z to x
         x_train_rec = pyrunfile(fullfile("vae", "vae_decoder.py"), "x", z=x,vae=sDistParams.vae);
         xTrainRec = double(x_train_rec);
@@ -33,7 +34,7 @@ if ismember(actualDataDist, {'USPS', 'MNIST'})
             xGmm = double(x_gmm);
             xGmm = reshape(xGmm,[],28*28);
         end
-        PlotDigits(sPlotParams, xGmm, [], b_transpose, plt2Title, 'gmm');
+        PlotDigits(sPlotParams, xGmm, [], b_transpose, plt2Title, ['gmm_' num2str(sDistParams.estNumComponents) 'comp']);
     end
     
 end

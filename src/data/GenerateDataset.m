@@ -18,7 +18,12 @@ elseif strcmp(actualDataDist, 'BrazilWeather')
 
 elseif ismember(actualDataDist, {'USPS', 'MNIST'})
     assert(strcmp(dataGenTechnique, 'OneDraw'))
-    sDataset = LoadDigitsDataset(actualDataDist, sDatasetParams, N, n);
+    if isfield(sDatasetParams,'b_loadKeras') && sDatasetParams.b_loadKeras
+        assert(strcmp(actualDataDist, 'MNIST'))
+        sDataset = LoadDigitsKeras(sDatasetParams, N, n);
+    else
+        sDataset = LoadDigitsDataset(actualDataDist, sDatasetParams, N, n);
+    end
     
 elseif strcmp(actualDataDist, 'MnistDist')
 %     assert(strcmp(dataGenTechnique, 'OneDraw'))

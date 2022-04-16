@@ -7,7 +7,7 @@ b_saveFigures = true;
 selectedEigsPresets = {'Get1DUniformPreset', 'Get2DUniformPreset', 'GetSwissRollPreset'};
 for presetInd = 1:numel(selectedEigsPresets)
     funcName = selectedEigsPresets{presetInd};
-    Main(funcName, b_clearLastRun, b_saveFigures);
+    Main(funcName, b_saveFigures, b_clearLastRun);
 end
 
 %% Run real world examples
@@ -16,7 +16,7 @@ b_saveFigures = true;
 selectedGraphSigPresets = {'GetBrazilWeatherPreset', 'GetMnistPreset'};
 for presetInd = 1:numel(selectedGraphSigPresets)
     funcName = selectedGraphSigPresets{presetInd};
-    Main(funcName, b_clearLastRun, b_saveFigures);
+    Main(funcName, b_saveFigures, b_clearLastRun);
 end
 
 %% Run all other presets
@@ -29,7 +29,7 @@ for presetInd = 1:numel(sDir)
     if ismember(funcName, [selectedEigsPresets, selectedGraphSigPresets])
         continue;
     end
-    Main(funcName, b_clearLastRun, b_saveFigures);
+    Main(funcName, b_saveFigures, b_clearLastRun);
 end
 %% Run additional scripts
 PlotGaussianKernelEigenfunsExample(); %Illustrate the first eigenfunctions of the 1-D Guassian kernel

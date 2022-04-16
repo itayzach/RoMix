@@ -43,7 +43,7 @@ sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = false;
 sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = true;
-sPreset.b_compareMethods   = false;
+sPreset.b_compareMethods   = true;
 %% 
 sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Haversine'; % 'Euclidean' / 'Haversine'

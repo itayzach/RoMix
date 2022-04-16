@@ -1,4 +1,4 @@
-function PrintRoMixStats(Phi,C,invLambda,L,matToInv)
+function PrintRoMixStats(Phi,C,invLambda,L,matToInv,t)
 fRec = Phi*C;
 nFuns = size(fRec,2);
 fprintf('RoMix: c^T*invLambda*c = \n\t')
@@ -18,6 +18,6 @@ if ~isempty(L)
 end
 
 fprintf('*********************************************************\n');
-fprintf('* cond(matToInv) = %.2f\n', cond(matToInv));
+fprintf('* cond(matToInv) = %.2f (took %2.f sec)\n', cond(matToInv), toc(t));
 fprintf('*********************************************************\n');
 end

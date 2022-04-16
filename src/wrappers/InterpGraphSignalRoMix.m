@@ -1,8 +1,6 @@
 function [mSigCnvrtRecPhi, mSigCnvrt, mSigCnvrtInt, mSigCnvrtRef, C] = ...
-    InterpGraphSignalRoMix(sPreset, sDataset, Phi, lambdaPhi, PhiInt)
+    InterpGraphSignalRoMix(sPreset, sDataset, Phi, lambdaPhi, PhiInt, Ln)
 assert(~isempty(sDataset.sData.yt));
-assert(sPreset.gamma2 == 0); 
-Ln = [];
 mSig = sDataset.sData.y;
 mSigRef = sDataset.sData.yt;
 % ------------------------------------------------------------------------------------------

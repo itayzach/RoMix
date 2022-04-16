@@ -13,7 +13,8 @@ x = mu + linspace(-3*sigma, 3*sigma, n).';
 sPreset.dim = 1;
 sPreset.verticesPDF = 'Gaussian';
 sPreset.matrixForEigs = 'Adjacency';
-sPlotParams = GetPlotParams(sPreset);
+b_saveFigures = true;
+sPlotParams = GetPlotParams(sPreset, b_saveFigures);
 
 sDistParams.dim = 1;
 sDistParams.cov{1} = sigma;

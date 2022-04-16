@@ -8,15 +8,26 @@ x_train = py.numpy.array(xTrain);
 x_test = py.numpy.array(xTest);
 
 %% Train / load trained model
-modelName = ['d' num2str(sDatasetParams.latentDim), '_e', num2str(sDatasetParams.epochs), '_b', num2str(sDatasetParams.batchSize), '_n' num2str(size(xTrain,1))];
-decSaveFolder = fullfile('vae','models',modelName,'dec_trained');
-encSaveFolder = fullfile('vae','models',modelName,'enc_trained');
+if sDatasetParams.b_loadKeras
+    modelName = 'keras_';
+else
+    modelName = [];
+end
+modelName = [modelName, 'd' num2str(sDatasetParams.latentDim), '_e', num2str(sDatasetParams.epochs), '_b', num2str(sDatasetParams.batchSize)];
+if sDatasetParams.b_forceLoadTrainedVAE
+    modelName = [modelName, '_n60000'];
+else
+    modelName = [modelName, '_n' num2str(size(xTrain,1))];
+end
+decSaveFolder = fullfile(pwd, 'vae','models',modelName,'dec_trained');
+encSaveFolder = fullfile(pwd, 'vae','models',modelName,'enc_trained');
 if isfolder(decSaveFolder) && isfolder(encSaveFolder)
     % Load from trained model
     vae = pyrunfile(fullfile("vae", "vae_load.py"), "vae", enc_save_folder=encSaveFolder, dec_save_folder=decSaveFolder);
     fprintf('Loaded VAE from files\n')
 else
     % Train
+    assert(~sDatasetParams.b_forceLoadTrainedVAE, 'You wanted to load, but you''re training...')
     tic;
     [vae, history] = pyrunfile(fullfile("vae", "vae_train.py"), ["vae", "history"], x_train=x_train, x_test=x_test, ...
         latent_dim=uint32(sDatasetParams.latentDim), epochs=uint32(sDatasetParams.epochs), batch_size=uint32(sDatasetParams.batchSize), ...
@@ -38,7 +49,7 @@ zTest = double(z_test);
 if b_plotDecoded
     x_train_rec = pyrunfile(fullfile("vae", "vae_decoder.py"), "x", z=zTrain,vae=vae);
     xTrainRec = double(x_train_rec);
-    plotInd = randperm(size(xTrain,1),50);
+    plotInd = 1:50; %randperm(size(xTrain,1),50);
     xTrainRec = reshape(xTrainRec(plotInd,:,:),[],28*28);
     xTrainPlt = reshape(xTrain(plotInd,:,:),[],28*28);
     PlotDigits([],xTrainPlt,[],0,'Train');

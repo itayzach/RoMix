@@ -1,4 +1,4 @@
-function sWorkspace = Main(presetName, b_clearLastRun, b_saveFigures)
+function sWorkspace = Main(presetName, b_saveFigures, b_clearLastRun)
 %% Restart
 if ~exist('b_clearLastRun', 'var') || b_clearLastRun
     clc; close all; 
@@ -16,16 +16,21 @@ VerifyPresetParams(sPreset, clusterMethod);
 %% Get plot params
 sPlotParams = GetPlotParams(sPreset, b_saveFigures);
 %% Run
-[tVIntToCompare, tVNysToCompare, tVRepToCompare, tVRefToCompare] = deal(zeros(sPreset.N, sPreset.M, sPreset.R));
-[tVRecPhiToCompare, tVToCompare] = deal(zeros(sPreset.n, sPreset.M, sPreset.R));
-[tSigCnvrtRecPhi, tSigCnvrtRecV, tSigCnvrtRecRep, tSigCnvrt] = deal(zeros(sPreset.n, sPreset.nSignals, sPreset.R));
-[tSigCnvrtInt, tSigCnvrtNys, tSigCnvrtRep, tSigCnvrtRef] = deal(zeros(sPreset.N, sPreset.nSignals, sPreset.R));
+if sPreset.b_interpEigenvecs
+    [tVIntToCompare, tVNysToCompare, tVRepToCompare, tVRefToCompare] = deal(zeros(sPreset.N, sPreset.M, sPreset.R));
+    [tVRecPhiToCompare, tVToCompare] = deal(zeros(sPreset.n, sPreset.M, sPreset.R));
+end
+if sPreset.b_runGraphSignals
+    [tSigCnvrtRecPhi, tSigCnvrtRecV, tSigCnvrtRecRep, tSigCnvrt] = deal(zeros(sPreset.n, sPreset.nSignals, sPreset.R));
+    [tSigCnvrtInt, tSigCnvrtNys, tSigCnvrtRep, tSigCnvrtRef] = deal(zeros(sPreset.N, sPreset.nSignals, sPreset.R));
+end
 for r = 1:sPreset.R
     sPlotParams.b_globalPlotEnable = (r == 1) && sPlotParams.b_globalPlotEnable;
     % ----------------------------------------------------------------------------------------------
     % Generate dataset
     % ----------------------------------------------------------------------------------------------
     fprintf('Iteration r = %d of R = %d\n',r,sPreset.R)
+    t = tic;
     sDataset = GenerateDataset(sPreset.verticesPDF, sPreset.dim, sPreset.nGenDataCompnts, sPreset.n, sPreset.N, sPreset.dataGenTechnique, sPreset.sDatasetParams);
     xTrain = sDataset.sData.x; yTrain = sDataset.sData.y; xInt = sDataset.sData.xt;
     % ----------------------------------------------------------------------------------------------
@@ -42,7 +47,9 @@ for r = 1:sPreset.R
     if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPreset.dim > 1
         PlotGaussianEllipses(sPlotParams, sDistParams);
         PlotCovEigs(sPlotParams, sDistParams);
-        %PlotClustersMeans(sPreset, sDistParams);
+        if sDistParams.GMModel.NumComponents < 100
+            PlotClustersMeans(sPreset, sDistParams);
+        end
     end
     % ----------------------------------------------------------------------------------------------
     % Plot dataset
@@ -99,6 +106,8 @@ for r = 1:sPreset.R
         % ----------------------------------------------------------------------------------------------
         [V, adjLambda, matLambda, VRef, adjLambdaRef, matLambdaRef] = ...
             EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef);
+    else
+        Ln = [];
     end
     % ----------------------------------------------------------------------------------------------
     % Eigenvectors interpolation
@@ -106,19 +115,18 @@ for r = 1:sPreset.R
     if sPreset.b_interpEigenvecs
         [tVIntToCompare(:,:,r), tVRecPhiToCompare(:,:,r), tVToCompare(:,:,r), tVRefToCompare(:,:,r), C] = ...
             InterpEigenvectorsRoMix(sPlotParams, sPreset, Phi, lambdaPhi, PhiInt, V, VRef, Ln);
+
+        if sPlotParams.b_globalPlotEnable 
+            PlotEigenvectorsWrapper(sPlotParams, sPreset, sDataset, lambdaPhi, Phi, PhiInt, LnRef, tVRefToCompare(:,:,r), tVIntToCompare(:,:,r), C)
+        end
         
         if sPreset.b_compareMethods
             [tVNysToCompare(:,:,r)] = InterpEigenvectorsNystrom(sPlotParams, sPreset, sDataset, tVToCompare(:,:,r), adjLambda, tVIntToCompare(:,:,r));
             [tVRepToCompare(:,:,r), mAlpha] = InterpEigenvectorsRepThm(sPlotParams, sPreset, sDataset, W, tVToCompare(:,:,r), tVIntToCompare(:,:,r), Ln);
             if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
                 CRep = diag(lambdaPhi)*Phi.'*mAlpha;
-                PlotCoeffsMatrix(C, '${\bf C}$', CRep, ...
-                    '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', mAlpha, '$\alpha$');
+                PlotCoeffsMatrix(C, '${\bf C}$', CRep, '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', mAlpha, '$\alpha$');
             end
-        end
-        
-        if sPlotParams.b_globalPlotEnable 
-            PlotEigenvectorsWrapper(sPlotParams, sPreset, sDataset, lambdaPhi, Phi, PhiInt, LnRef, tVRefToCompare(:,:,r), tVIntToCompare(:,:,r), C)
         end
 
     end
@@ -127,9 +135,9 @@ for r = 1:sPreset.R
     % ----------------------------------------------------------------------------------------------
     if sPreset.b_runGraphSignals
         [tSigCnvrtRecPhi(:,:,r), tSigCnvrt(:,:,r), tSigCnvrtInt(:,:,r), tSigCnvrtRef(:,:,r), mSigCoeffsPhi] = ...
-            InterpGraphSignalRoMix(sPreset, sDataset, Phi, lambdaPhi, PhiInt);
+            InterpGraphSignalRoMix(sPreset, sDataset, Phi, lambdaPhi, PhiInt, Ln);
 
-        if sPlotParams.b_globalPlotEnable 
+        if sPlotParams.b_globalPlotEnable
             PlotGraphSignalsWrapper(sPlotParams, sPreset, sKernelParams, sDataset, ...
                 tSigCnvrt(:,:,r), tSigCnvrtRef(:,:,r), tSigCnvrtRecPhi(:,:,r), tSigCnvrtInt(:,:,r), mSigCoeffsPhi)
         end
@@ -139,17 +147,16 @@ for r = 1:sPreset.R
             [tSigCnvrtRecV(:,:,r), tSigCnvrtNys(:,:,r)] = InterpGraphSignalNystrom(sPreset, sDataset, V, adjLambda);
         end
     end
+    fprintf('Iteration r = %d of R = %d finished (took %.2f sec)\n',r,sPreset.R,toc(t))
 end
 % ------------------------------------------------------------------------------------------
 % Accuracy
 % ------------------------------------------------------------------------------------------
 if sPreset.b_interpEigenvecs
-    InterpEigenvecsMetrics(sPlotParams, sPreset, ...
-        tVIntToCompare, tVRefToCompare, tVRecPhiToCompare, tVToCompare, tVNysToCompare, tVRepToCompare);
+    InterpEigenvecsMetrics(sPlotParams, sPreset, tVIntToCompare, tVRefToCompare, tVRecPhiToCompare, tVToCompare, tVNysToCompare, tVRepToCompare);
 end
 if sPreset.b_runGraphSignals
-    InterpGraphSignalsMetrics(sPlotParams, sPreset, ...
-        tSigCnvrtRecPhi, tSigCnvrt, tSigCnvrtInt, tSigCnvrtRef, tSigCnvrtRecRep, tSigCnvrtRep, tSigCnvrtRecV, tSigCnvrtNys);
+    InterpGraphSignalsMetrics(sPlotParams, sPreset, tSigCnvrtRecPhi, tSigCnvrt, tSigCnvrtInt, tSigCnvrtRef, tSigCnvrtRecRep, tSigCnvrtRep, tSigCnvrtRecV, tSigCnvrtNys);
 end
 %% Save workspace
 sWorkspace = SaveWorkspaceToStruct();

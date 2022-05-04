@@ -3,7 +3,7 @@ windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
 [M, nMethods] = size(mAcc);
-cLineStyle = {'-', '--', '-.'};
+cLineStyle = {'-', '-', '-', '-', '-'};
 fig = figure('Name', 'Accuracy');
 for methodId = 1:nMethods
     vAcc = mAcc(:,methodId);

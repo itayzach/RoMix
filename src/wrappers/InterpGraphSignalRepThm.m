@@ -1,32 +1,43 @@
-function [mSigCnvrtRecRep, mSigCnvrtRep] = InterpGraphSignalRepThm(sPreset, sDataset, W, Ln)
+function [mSigCnvrtRecRep, mSigCnvrtRep, tTrain, tInt, mAlpha] = InterpGraphSignalRepThm(sPlotParams, sPreset, sDataset)
 
 interpRatio = sPreset.N/sPreset.n;
-assert(~isempty(sDataset.sData.yt));
 b_normalizeAlpha = false;
 
-xTrain = sDataset.sData.x; 
+xTrain = sDataset.sData.x;
 xInt = sDataset.sData.xt;
-
-% ------------------------------------------------------------------------------------------
-% Coeffs
-% ------------------------------------------------------------------------------------------
 if isfield(sDataset.sData, 'ymasked')
-    mSigMasked = sDataset.sData.ymasked;
-    mAlpha = LapRLS(W, mSigMasked, Ln, sPreset.gamma1Rep, sPreset.gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
+    mSig = sDataset.sData.ymasked;
 else
     mSig = sDataset.sData.y;
-    mAlpha = LapRLS(W, mSig, Ln, sPreset.gamma1Rep, sPreset.gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
 end
-
+% ------------------------------------------------------------------------------------------
+% Build adjacency and find alpha
+% ------------------------------------------------------------------------------------------
+[W, tTrainVec(1), ~, ~, Ln, tTrainVec(2)] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
+[mAlpha, tTrainVec(3)] = LapRLS(W, mSig, Ln, sPreset.gamma1Rep, sPreset.gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
+% ------------------------------------------------------------------------------------------
+% Reconstruction
+% ------------------------------------------------------------------------------------------
+ts = tic;
+mSigRecRep = W.'*mAlpha;
+mSigCnvrtRecRep = ConvertSignalByDataset(sPreset.verticesPDF, mSigRecRep);
+tTrainVec(3) = toc(ts);
+tTrain = sum(tTrainVec);
 % ------------------------------------------------------------------------------------------
 % Interpolation
 % ------------------------------------------------------------------------------------------
-distLUBlockRUBlock = CalcDistance(xTrain, xInt, sPreset.sDistanceParams);
-WTrainInt = exp(-distLUBlockRUBlock.^2/(2*sPreset.omega^2));
-mSigRecRep = W.'*mAlpha;
-mSigRep    = WTrainInt.'*mAlpha;
+ts = tic;
+distTrainInt = CalcDistance(xTrain, xInt, sPreset.sDistanceParams);
+WTrainInt = exp(-distTrainInt.^2/(2*sPreset.omega^2));
+mSigRep = WTrainInt.'*mAlpha;
+mSigCnvrtRep = ConvertSignalByDataset(sPreset.verticesPDF, mSigRep);
+tInt = toc(ts);
 
-mSigCnvrtRecRep = ConvertSignalByDataset(sPreset.verticesPDF, mSigRecRep);
-mSigCnvrtRep    = ConvertSignalByDataset(sPreset.verticesPDF, mSigRep);
+fprintf('Rep. Thm.: train took %.2f sec, interp took %.2f sec\n', tTrain, tInt);
 
+if sPlotParams.b_globalPlotEnable && sPreset.b_runGraphSignals
+    mSigRef    = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);
+    mSigRefInt = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.yt);
+    PlotGraphSignalsWrapper([], sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtRecRep, mSigCnvrtRep, [], 'Rep. Thm.')
+end
 end

@@ -5,9 +5,8 @@ xInt = sDataset.sData.xt;
 % ----------------------------------------------------------------------------------------------
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
     b_maskDataTermCMatrix = false;
-    invLambda = diag(1./lambdaPhi);
-    Cint = RoMix(PhiInt, sPreset.gamma1, sPreset.gamma2, invLambda, LnRef, VRefToCompare, b_maskDataTermCMatrix);
-    PlotCoeffsMatrix(C, '${\bf C}$', Cint, '${\bf C^{\bf RoMix}}$');
+    Cint = RoMix(PhiInt, sPreset.gamma1, sPreset.gamma2, lambdaPhi, LnRef, VRefToCompare, b_maskDataTermCMatrix);
+    PlotCoeffsMatrix(C, '${\bf C}$', Cint, '${\bf C^{\bf int}}$');
 end
 if sPlotParams.b_globalPlotEnable && sPreset.dim <= 3
     if sPreset.dim == 1

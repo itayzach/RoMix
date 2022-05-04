@@ -20,5 +20,4 @@ for i = 1:M
 end
 [matLambda, vMultindexToSingleIndexMap] = sort(matLambda);
 V = V(:,vMultindexToSingleIndexMap);
-adjLambda = [];
 end

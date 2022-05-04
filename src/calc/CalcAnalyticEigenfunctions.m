@@ -1,9 +1,9 @@
-function [mPhiAnalytic, vLambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, mData, b_normalize)
+function [mPhiAnalytic, vLambdaAnalytic, t] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, mData, b_normalize)
 
 [nTotal, dim] = size(mData);
 OneDim2MultiDimIndexMatrix = LoadOneDim2MultiDimIndexMatrix(nEigs,dim);
 fprintf('Calculating %d eigenfunctions (max m = %d) (b_normalize = %d) d = %d, n = %d... ',nEigs, max(OneDim2MultiDimIndexMatrix(:)), b_normalize, dim,nTotal)
-t = tic;
+ts = tic;
 mPhiAnalytic = zeros(nTotal, nEigs);
 for i = 1:nEigs
     c = sKernelParams.vComponentIndex(i);
@@ -21,5 +21,6 @@ if b_normalize
 end
 
 vLambdaAnalytic = sKernelParams.vLambdaAnalytic(1:nEigs);
-fprintf('Done (took %.2f sec).\n', toc(t))
+t = toc(ts);
+fprintf('Done (took %.2f sec).\n', t)
 end

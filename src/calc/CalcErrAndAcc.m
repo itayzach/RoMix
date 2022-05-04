@@ -8,9 +8,9 @@ end
 
 mErrNormed = zeros(R, nEigenFuncs);
 mCoherence = zeros(R, nEigenFuncs);
-fprintf('*********************************************************\n');
+%fprintf('*********************************************************\n');
 for r = 1:R
-    fprintf(['Accuracy of ', compareTo '. r = %d\n'], r);
+    %fprintf(['Accuracy of ', compareTo '. r = %d\n'], r);
     mPhiToCompare = squeeze(tPhiToCompare(:,:,r));
     mPhiNumeric = squeeze(tPhiNumeric(:,:,r));
     if strcmp(errFunc, 'norm')
@@ -21,12 +21,12 @@ for r = 1:R
         mCoherence(r,:) = sum(mPhiToCompare ~= mPhiNumeric) / n;
     end
     for m = 1:nEigenFuncs
-        fprintf('\t(m=%2d) %6.4f%%\t', m-1, 100*(1-mErrNormed(r,m)))
+        %fprintf('\t(m=%2d) %6.4f%%\t', m-1, 100*(1-mErrNormed(r,m)))
         if (mod(m,8) == 0) && m < nEigenFuncs
-            fprintf('\n');
+            %fprintf('\n');
         end
     end
-    fprintf('\n');
+    %fprintf('\n');
 end
 % fprintf('*********************************************************\n');
 

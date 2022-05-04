@@ -27,7 +27,7 @@ if isfolder(decSaveFolder) && isfolder(encSaveFolder)
     fprintf('Loaded VAE from files\n')
 else
     % Train
-    assert(~sDatasetParams.b_forceLoadTrainedVAE, 'You wanted to load, but you''re training...')
+    assert(~sDatasetParams.b_forceLoadTrainedVAE, 'You wanted to load %s, but you''re training...', modelName)
     tic;
     [vae, history] = pyrunfile(fullfile("vae", "vae_train.py"), ["vae", "history"], x_train=x_train, x_test=x_test, ...
         latent_dim=uint32(sDatasetParams.latentDim), epochs=uint32(sDatasetParams.epochs), batch_size=uint32(sDatasetParams.batchSize), ...

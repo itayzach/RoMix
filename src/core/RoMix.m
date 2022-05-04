@@ -1,6 +1,8 @@
-function C = RoMix(Phi, gamma1, gamma2, invLambda, L, f, b_maskDataFitTerm)
+function [C, t] = RoMix(Phi, gamma1, gamma2, lambdaPhi, L, f, b_maskDataFitTerm)
 
-t = tic;
+ts = tic;
+invLambda = diag(1./lambdaPhi);
+
 if b_maskDataFitTerm
     J = GetUnlabeledNodesMask(f);
 else
@@ -21,7 +23,7 @@ warnMsg = lastwarn();
 if ~isempty(warnMsg) % catch warning
     error('\n returned warning: %s\n', warnMsg);
 end
-
-PrintRoMixStats(Phi,C,invLambda,L,matToInv,t)
+t = toc(ts);
+PrintRoMixStats(Phi,C,invLambda,L,matToInv)
 
 end

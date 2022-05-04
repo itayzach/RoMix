@@ -15,8 +15,8 @@ clear scriptName
 % start_ManifoldLearn;
 
 %% GSPBox
-% addpath(fullfile('..','gspbox'));
-% gsp_start;
+addpath(fullfile('..','gspbox'));
+gsp_start;
 
 %% Wrap up
 cd(filepath);

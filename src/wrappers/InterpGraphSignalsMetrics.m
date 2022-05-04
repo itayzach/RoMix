@@ -1,30 +1,42 @@
-function InterpGraphSignalsMetrics(sPlotParams, sPreset, ...
-    tSigCnvrtRecPhi, tSigCnvrt, tSigCnvrtInt, tSigCnvrtRef, tSigCnvrtRecRep, tSigCnvrtRep, tSigCnvrtRecV, tSigCnvrtNys)
-[vAccRecPhi, vAccStdPhi] = CalcErrAndAcc(tSigCnvrtRecPhi, tSigCnvrt, 'RoMix (train)');
-[vAccInt, vAccStdInt]    = CalcErrAndAcc(tSigCnvrtInt, tSigCnvrtRef, 'RoMix (test)');
+function [mAccRec, mAccInt, vTrainTime, vIntTime] = ...
+    InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tTrainTime, tIntTime)
+[mAccRec(:,1), mAccStdRec(:,1)] = CalcErrAndAcc(squeeze(tSigCnvrtRec(:,:,:,1)), tSigCnvrtRecRef);
+[mAccInt(:,1), mAccStdInt(:,1)] = CalcErrAndAcc(squeeze(tSigCnvrtInt(:,:,:,1)), tSigCnvrtIntRef);
+vTrainTime = mean(tTrainTime,1);
+vIntTime = mean(tIntTime,1);
 if sPreset.b_compareMethods
-    [vAccRecRep, vAccStdRecRep] = CalcErrAndAcc(tSigCnvrtRecRep, tSigCnvrt, 'Representer (train)');
-    [vAccRep, vAccStdRep]       = CalcErrAndAcc(tSigCnvrtRep, tSigCnvrtRef, 'Representer (test)');
-    [vAccRecV, vAccStdRecV]     = CalcErrAndAcc(tSigCnvrtRecV, tSigCnvrt, 'Nystrom (train)');
-    [vAccNys, vAccStdNys]       = CalcErrAndAcc(tSigCnvrtNys, tSigCnvrtRef, 'Nystrom (test)');
-    if isscalar(vAccRecPhi)
-        PrintAccuracyLatex(sPreset, [vAccRecPhi, vAccRecRep, vAccRecV], [vAccStdPhi, vAccStdRecRep, vAccStdRecV], ...
-            [vAccInt, vAccRep, vAccNys], [vAccStdInt, vAccStdRep, vAccStdNys], {'RoMix', 'Rep. Thm', 'Nystrom'});
+    for methodInd = 2:size(tSigCnvrtRec,4)
+        [mAccRec(:,methodInd), mAccStdRec(:,methodInd)] = CalcErrAndAcc(tSigCnvrtRec(:,:,:,methodInd), tSigCnvrtRecRef);
+    end
+    for methodInd = 2:size(tSigCnvrtInt,4)
+        [mAccInt(:,methodInd), mAccStdInt(:,methodInd)] = CalcErrAndAcc(tSigCnvrtInt(:,:,:,methodInd), tSigCnvrtIntRef);
+    end
+    if sPreset.nSignals == 1
+        PrintAccuracyLatex(sPreset, mAccRec, mAccStdRec, mAccInt, mAccStdInt, sPreset.cMethods);
+        PrintAccuracy(sPreset, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vIntTime, sPreset.cMethods);
+    elseif b_interpEigenvecs
+        PlotAccuracy(sPlotParams, mAccInt, mAccStdInt, ...
+            sPreset.cMethods, [ sPreset.matrixForEigs '_Acc_eigs_0_to_' num2str(sPreset.M-1)]);
     end
     if isfield(sPreset.sDatasetParams, 'monthNames')
-        PlotAccuracy(sPlotParams, [vAccInt, vAccNys, vAccRep], [vAccStdInt, vAccStdNys, vAccStdRep], ...
-            {'Acc$(\tilde{s}^{{\bf RoMix}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf nys}}_m, \tilde{s}_m)$', ...
-            'Acc$(\tilde{s}^{{\bf rep}}_m, \tilde{s}_m)$'}, 'InterpAcc', [], sPreset.sDatasetParams.monthNames, 'Interpolation accuracy');
-        PlotAccuracy(sPlotParams, [vAccRecPhi, vAccRecV, vAccRecRep], [vAccStdPhi, vAccStdRecV, vAccStdRecRep], ...
-            {'Acc$(s^{{\bf RoMix}}_m, s_m)$', 'Acc$(s^{{\bf nys}}_m, s_m)$', ...
-            'Acc$(s^{{\bf rep}}_m, s_m)$'}, 'ProjAcc', [], sPreset.sDatasetParams.monthNames, 'Projection accuracy');
+        PlotAccuracy(sPlotParams, mAccInt, mAccStdInt, sPreset.cMethods, ...
+            'InterpAcc', [], sPreset.sDatasetParams.monthNames, 'Interpolation accuracy');
+        %{'Acc$(\tilde{s}^{{\bf RoMix}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf nys}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf rep}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf PW}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf kNN}}_m, \tilde{s}_m)$'}
+        PlotAccuracy(sPlotParams, mAccRec, mAccStdRec, sPreset.cMethods, ... 
+            'ProjAcc', [], sPreset.sDatasetParams.monthNames, 'Projection accuracy');
+            %{'Acc$(s^{{\bf RoMix}}_m, s_m)$', 'Acc$(s^{{\bf nys}}_m, s_m)$', 'Acc$(s^{{\bf rep}}_m, s_m)$', 'Acc$(s^{{\bf PW}}_m, s_m)$', 'Acc$(s^{{\bf kNN}}_m, s_m)$'}, ...
     end
 else
-    if isscalar(vAccRecPhi)
-        PrintAccuracyLatex(sPreset, vAccRecPhi, vAccStdPhi, vAccInt, vAccStdInt, {'RoMix'});
+    if sPreset.nSignals == 1
+        PrintAccuracyLatex(sPreset, mAccRec(:,1), mAccStdRec(:,1), mAccInt(:,1), mAccStdInt(:,1), {'RoMix'});
+        PrintAccuracy(sPreset, mAccRec(:,1), mAccStdRec(:,1), mAccInt(:,1), mAccStdInt(:,1), vTrainTime, vIntTime, {'RoMix'});
+    elseif b_interpEigenvecs
+        PlotAccuracy(sPlotParams, [mAccInt(:,1), mAccRec(:,1)], [mAccStdInt(:,1), mAccStdRec(:,1)], ...
+            {'Acc$(\tilde{\psi}^{{\bf RoMix}}_m, \tilde{\psi}_m)$', 'Acc$(\psi^{{\bf RoMix}}_m, \psi_m)$'}, ...
+            [sPreset.matrixForEigs '_Acc_eigs_0_to_' num2str(sPreset.M-1)]);
     end
     if isfield(sPreset.sDatasetParams, 'monthNames')
-        PlotAccuracy(sPlotParams, [vAccInt, vAccRecPhi], [vAccStdInt vAccStdPhi], ...
+        PlotAccuracy(sPlotParams, [mAccInt(:,1), mAccRec(:,1)], [mAccStdInt(:,1) mAccStdRec(:,1)], ...
             {'Acc$(\tilde{s}^{{\bf RoMix}}_m, \tilde{s}_m)$', 'Acc$(s^{{\bf RoMix}}_m, s_m)$'}, ...
             'ProjInterpAcc', [], sPreset.sDatasetParams.monthNames, 'Projection \& interpolation accuracy');
     end

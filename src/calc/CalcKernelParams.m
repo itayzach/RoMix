@@ -1,4 +1,5 @@
-function sKernelParams = CalcKernelParams(sDistParams, omega)
+function [sKernelParams, t] = CalcKernelParams(sDistParams, omega)
+ts = tic;
 %% kernel and eigenfunctions constants type
 if strcmp(sDistParams.estDataDist, 'Gaussian')
     sKernelParams.kernelType = 'gaussian';
@@ -17,6 +18,6 @@ end
 
 %% Save distParams
 sKernelParams.sDistParams = sDistParams;
-
+t = toc(ts);
 
 end

@@ -9,8 +9,7 @@ if sPreset.b_forceCtoIdentity
     C(1:sPreset.M,1:sPreset.M) = eye(sPreset.M)/sqrt(sPreset.n);
 else
     b_maskDataTermCMatrix = false;
-    invLambda = diag(1./lambdaPhi);
-    C = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, invLambda, Ln, V, b_maskDataTermCMatrix);
+    C = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, Ln, V, b_maskDataTermCMatrix);
 end
 VInt = (1/sqrt(interpRatio))*PhiInt*C;
 VIntToCompare = VInt;

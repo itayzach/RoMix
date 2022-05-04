@@ -1,32 +1,42 @@
-function sDistParams = EstimateDistributionParameters(x, gmmNumComponents, gmmRegVal, gmmMaxIter)
+function [sDistParams, t] = EstimateDistributionParameters(x, gmmNumComponents, gmmRegVal, gmmMaxIter)
 
 sDistParams.estDataDist = 'Gaussian';
 dim = size(x,2);
 sDistParams.dim = dim;
 
-vGMModels = cell(size(gmmNumComponents(:),1),1);
-vAIC = zeros(size(gmmNumComponents(:),1),1);
-i = 1;
-for nComp = gmmNumComponents
-    fprintf('Running fitgmdist with %d components... ', nComp)
-    options = statset('MaxIter',gmmMaxIter);
-    vGMModels{i} = fitgmdist(x, nComp, 'RegularizationValue', gmmRegVal, 'Options', options);
-    assert(vGMModels{i}.Converged, 'GMM couldn''t converge...')
-    fprintf('Done after %d iterations with AIC = %.2f\n', vGMModels{i}.NumIterations, vGMModels{i}.AIC)
-    vAIC(i) = vGMModels{i}.AIC;
-    i = i + 1;
-end
-
 if numel(gmmNumComponents) > 1
+    vGMModels = cell(size(gmmNumComponents(:),1),1);
+    vAIC = zeros(size(gmmNumComponents(:),1),1);
+    i = 1;
+    for nComp = gmmNumComponents
+        fprintf('Running fitgmdist with %d components... ', nComp)
+        options = statset('MaxIter',gmmMaxIter);
+        vGMModels{i} = fitgmdist(x, nComp, 'RegularizationValue', gmmRegVal, 'Options', options);
+        assert(vGMModels{i}.Converged, 'GMM couldn''t converge...')
+        fprintf('Done after %d iterations with AIC = %.2f\n', vGMModels{i}.NumIterations, vGMModels{i}.AIC)
+        vAIC(i) = vGMModels{i}.AIC;
+        i = i + 1;
+    end
+    [~, argminAIC] = min(vAIC);
+    GMModel = vGMModels{argminAIC};
+    
     figure; plot(gmmNumComponents, vAIC, 'DisplayName', 'AIC'); 
     legend()
+else
+    fprintf('Running fitgmdist with %d components... ', gmmNumComponents)
+    ts = tic;
+    options = statset('MaxIter',gmmMaxIter);
+    GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
+    t(1) = toc(ts);
+    assert(GMModel.Converged, 'GMM couldn''t converge...')
+    fprintf('Done after %d iterations with AIC = %.2f\n', GMModel.NumIterations, GMModel.AIC)
 end
-[~, argminAIC] = min(vAIC);
-GMModel = vGMModels{argminAIC};
+
 gmmNumComponents = GMModel.NumComponents;
 sDistParams.GMModelPreOrder = GMModel;
 fprintf('Calculating [u, sigma^2] = eig(cov) for all %d components (and sorting by sigma)... ',gmmNumComponents)
 sDistParams.estNumComponents = gmmNumComponents;
+ts = tic;
 for c = 1:gmmNumComponents
     sDistParams.cov{c} = GMModel.Sigma(:,:,c);
     sDistParams.mu{c} = GMModel.mu(c,:);
@@ -41,12 +51,14 @@ for c = 1:gmmNumComponents
     isalmostequal(sDistParams.u{c}*diag(sDistParams.sigma{c}.^2)*sDistParams.u{c}.', sDistParams.cov{c}, 1e-10)
 %     assert(isequal(sort(sDistParams.sigma{c}),sDistParams.sigma{c}))
 end
+t(2) = toc(ts);
 
-sDistParams = SortComponentsByEigs(sDistParams, GMModel);
+%sDistParams = SortComponentsByEigs(sDistParams, GMModel);
+sDistParams.GMModel = GMModel;
 
 [minSigmaAllComp, minSigmaCompDim] = cellfun(@min, sDistParams.sigma);
 [minSigma, minSigmaCompInd] = min(minSigmaAllComp);
-fprintf('Done. min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', gmmNumComponents, minSigma, minSigmaCompInd, minSigmaCompDim(minSigmaCompInd))
+fprintf('Done (took %2.f). min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', sum(t), gmmNumComponents, minSigma, minSigmaCompInd, minSigmaCompDim(minSigmaCompInd))
 
 % Caluclate the probability for each data point x
 % sDistParams.vPr = zeros(length(x),1);

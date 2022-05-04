@@ -25,7 +25,6 @@ sDistParams.mu{1} = mu;
 sDistParams.mu_1D{1} = sDistParams.mu{1}*sDistParams.u{1};
 sDistParams.estNumComponents = 1;
 sDistParams.componentProportion = 1;
-sDistParams.estDataDist = 'Gaussian';
 
 sKernelParams = CalcKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...

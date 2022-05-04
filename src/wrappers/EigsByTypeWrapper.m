@@ -1,4 +1,4 @@
-function [V, adjLambda, matLambda, VRef, adjLambdaRef, matLambdaRef] = EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef)
+function [V, VRef, adjLambda, matLambda, adjLambdaRef, matLambdaRef] = EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef)
 dim                = sPreset.dim;
 n                  = sPreset.n;
 N                  = sPreset.N;

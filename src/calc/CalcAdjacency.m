@@ -1,5 +1,6 @@
-function [W, dist, D, Ln] = CalcAdjacency(xTrain, adjacencyType, sDistanceParams, omega, k, nnValue)
+function [W, tW, dist, D, Ln, tLn] = CalcAdjacency(xTrain, adjacencyType, sDistanceParams, omega, k, nnValue)
 fprintf('Calculating adjacency matrix for %d points... ',length(xTrain))
+t = tic;
 if strcmp(adjacencyType, 'GaussianKernel')
     n = size(xTrain,1);
     dist = CalcDistance(xTrain, xTrain, sDistanceParams);
@@ -25,29 +26,34 @@ elseif strcmp(adjacencyType, 'NearestNeighbor')
     dist = []; % irrelevant for W
     W = NearestNeighborsAdjacency(xTrain, k, nnValue);
 end
-fprintf('Done.\n')
+tW = toc(t);
+fprintf('Done (took %.2f sec).\n', tW)
 
-fprintf('Calculating normalized Laplacian for %d points... ',length(xTrain))
-d = sum(W,2);
-D = diag(d);
-Ln = eye(n) - diag(d.^-0.5)*W*diag(d.^-0.5);
-Ln = 0.5*(Ln + Ln.')/2;
-fprintf('Done.\n')
-fprintf('Checking connectivity by using eig(Ln)... ')
-if n < 4000    
-    Ln_lambda = eig(Ln);
-    nGraphComponents = find(Ln_lambda > 1e-5,1) - 1;
-    assert(~isempty(nGraphComponents))
-    fprintf('G has %d connected components (Ln_lambda(%d) = %.3f)... ', nGraphComponents, nGraphComponents+1, Ln_lambda(nGraphComponents+1))
-    if nGraphComponents > 1
-        distWithoutDiagSorted = sort(distWithoutDiag);
-        ssl_heuristic_omega = (1/3)*mean(distWithoutDiagSorted(10,:));
-        fprintf('\n')
-        warning(['Your graph has %d connected components! Your omega = %.2f is too small. ', ...
-            'Consider a bigger omega, like omega = %.2f\n'], nGraphComponents, omega ,ssl_heuristic_omega)
-    end 
-else
-    warning('n > 4000, eig will take time. skipping... ')
+if nargout >= 4 
+    fprintf('Calculating normalized Laplacian for %d points... ',length(xTrain))
+    t = tic;
+    d = sum(W,2);
+    D = diag(d);
+    Ln = eye(n) - diag(d.^-0.5)*W*diag(d.^-0.5);
+    Ln = (Ln + Ln.')/2;
+    tLn = toc(t);
+    fprintf('Done (took %.2f sec).\n', tLn)
+    fprintf('Checking connectivity by using eig(Ln)... ')
+    if n < 4000
+        t = tic;
+        Ln_lambda = eig(Ln);
+        nGraphComponents = find(Ln_lambda > 1e-5,1) - 1;
+        assert(~isempty(nGraphComponents))
+        fprintf('Done (took %.2f sec). G has %d connected components (Ln_lambda(%d) = %.3f)... ', toc(t), nGraphComponents, nGraphComponents+1, Ln_lambda(nGraphComponents+1))
+        if nGraphComponents > 1
+            distWithoutDiagSorted = sort(distWithoutDiag);
+            ssl_heuristic_omega = (1/3)*mean(distWithoutDiagSorted(10,:));
+            fprintf('\n')
+            warning(['Your graph has %d connected components! Your omega = %.2f is too small. ', ...
+                'Consider a bigger omega, like omega = %.2f\n'], nGraphComponents, omega ,ssl_heuristic_omega)
+        end 
+    else
+        warning('n > 4000, eig will take time. skipping... ')
+    end
 end
-fprintf('Done.\n')   
 end

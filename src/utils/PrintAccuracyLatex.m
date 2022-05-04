@@ -1,4 +1,5 @@
 function PrintAccuracyLatex(sPreset, vAccRec, vAccRecStd, vAccInt, vAccIntStd, cMethods)
+assert(sPreset.nSignals == 1)
 nMethods = numel(cMethods);
 methods = [];
 accRec = [];

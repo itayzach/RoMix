@@ -10,8 +10,7 @@ if sPreset.b_forceCtoIdentity
     C(1:sPreset.M,1:sPreset.M) = eye(sPreset.M)/sqrt(sPreset.n);
 else
     b_maskDataTermCMatrix = false;
-    invLambda = diag(1./lambdaPhi);
-    C = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, invLambda, Ln, V, b_maskDataTermCMatrix);
+    C = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, Ln, V, b_maskDataTermCMatrix);
 end
 VInt = (1/sqrt(interpRatio))*PhiInt*C;
 VIntToCompare = VInt;
@@ -52,7 +51,7 @@ VToCompare = V;
 % Plots
 % ----------------------------------------------------------------------------------------------
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
-    Cint = RoMix(PhiInt, sPreset.gamma1, sPreset.gamma2, invLambda, LnRef, VRefToCompare, b_maskDataTermCMatrix);
+    Cint = RoMix(PhiInt, sPreset.gamma1, sPreset.gamma2, lambdaPhi, LnRef, VRefToCompare, b_maskDataTermCMatrix);
     PlotCoeffsMatrix(C, '${\bf C}$', Cint, '${\bf C^{\bf RoMix}}$');
 end
 if sPlotParams.b_globalPlotEnable && sPreset.dim <= 3

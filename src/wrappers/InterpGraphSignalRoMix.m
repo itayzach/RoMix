@@ -14,7 +14,7 @@ if isfield(sDataset, 'vae'), sDistParams.vae = sDataset.vae; end
 % 2. Calculate Phi(xTrain) and lambdaPhi
 [sKernelParams, tTrainVec(3)] = CalcKernelParams(sDistParams, sPreset.omegaTilde);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex, tTrainVec(4)] = CalcAnalyticEigenvalues(sPreset.MTilde, sKernelParams);
-[ Phi, lambdaPhi ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xTrain, sPreset.b_normalizePhi);
+[ Phi, lambdaPhi ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xTrain);
 
 % 3. Find C
 Ln = [];
@@ -25,7 +25,7 @@ mSigRecPhi = Phi*C;
 mSigCnvrtRec = ConvertSignalByDataset(sPreset.verticesPDF, mSigRecPhi);
 
 % 5. Calculate Phi(xInt) and interpolate
-[PhiInt, ~, tIntVec(1)] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xInt, sPreset.b_normalizePhi);
+[PhiInt, ~, tIntVec(1)] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xInt);
 ts = tic;
 mSigInt = PhiInt*C;
 mSigCnvrtInt = ConvertSignalByDataset(sPreset.verticesPDF, mSigInt);
@@ -78,15 +78,15 @@ if sPlotParams.b_globalPlotEnable
     end
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotMercer
-    W = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
-    CheckMercerTheorem(Phi, lambdaPhi, sPreset.gmmNumComponents, W);
+    [W, tW, dist, D, Ln, tLn] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
+    CheckMercerTheorem(sDistParams, Phi, lambdaPhi, W, xTrain);
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotInnerProductMatrices
-    PlotInnerProductMatrix([], PhiInt, [], '${\bf \Phi}^T {\bf \Phi}$', 'PhiInt');
+    PlotInnerProductMatrix([], Phi/sqrt(sPreset.n), [], '$\frac{1}{\sqrt{n}}{\bf \Phi}^T \frac{1}{\sqrt{n}} {\bf \Phi}$', 'Phi');
+    PlotInnerProductMatrix([], PhiInt/sqrt(sPreset.N), [], '$\frac{1}{\sqrt{N}}{\bf \Phi}^T \frac{1}{\sqrt{N}} {\bf \Phi}$', 'PhiInt');
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
     [~, ~, ~, ~, mAlpha] = InterpGraphSignalRepThm(sPlotParams, sPreset, sDataset);
-    %figure; subplot(121); plot(C); subplot(122); plot(mAlpha)
     CRep = diag(lambdaPhi)*Phi.'*mAlpha;
     PlotCoeffsMatrix(C, '${\bf C}$', CRep, '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', mAlpha, '$\alpha$');
 end

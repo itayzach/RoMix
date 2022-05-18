@@ -22,5 +22,5 @@ sKernelParams.sDistParams = sDistParams;
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
     = CalcAnalyticEigenvalues(nEigs, sKernelParams);
 %% Calculate eigenfunctions
-[Phi, lambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, X, true);
+[Phi, lambdaAnalytic] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, X);
 end

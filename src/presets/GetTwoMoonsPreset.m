@@ -35,7 +35,6 @@ sPreset.R                  = 1;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;
-sPreset.b_normalizePhi     = false;
 sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;

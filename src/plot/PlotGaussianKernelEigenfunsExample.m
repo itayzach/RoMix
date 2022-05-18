@@ -8,7 +8,6 @@ firsEigInd = 0;
 lastEigInd = 5;
 M = lastEigInd+1;
 
-b_normalizePhi = false;
 x = mu + linspace(-3*sigma, 3*sigma, n).';
 sPreset.dim = 1;
 sPreset.verticesPDF = 'Gaussian';
@@ -29,7 +28,7 @@ sDistParams.componentProportion = 1;
 sKernelParams = CalcKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
     = CalcAnalyticEigenvalues(M, sKernelParams);
-[ Phi, lambda ] = CalcAnalyticEigenfunctions(M, sKernelParams, x, b_normalizePhi);
+[ Phi, lambda ] = CalcAnalyticEigenfunctions(M, sKernelParams, x);
 
 figTitle = 'Eigenfunctions of the Gaussian kernel on $\mathbb{R}$';
 figName = 'PhiTilde';

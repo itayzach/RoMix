@@ -11,7 +11,7 @@ sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKe
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sDatasetParams.monthNames  = {'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Ann'};
-sDatasetParams.nLabeled    = sPreset.n; %20;
+sDatasetParams.nLabeled    = round(0.8*sPreset.n); %20;
 sPreset.sDatasetParams     = sDatasetParams;
 %% Number of signals
 sPreset.nSignals           = numel(sDatasetParams.monthNames);
@@ -23,20 +23,19 @@ sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = 3;
 %% Number of eigenvectors/eigenfunctions
-sPreset.M                  = 50*sPreset.gmmNumComponents;
-sPreset.MTilde             = 50*sPreset.gmmNumComponents;
+sPreset.M                  = 50; % If M is too big eigs(W,M) is not stable numerically
+sPreset.MTilde             = 500;
 %% Regularizations
-sPreset.gamma1             = 1e-3;
+sPreset.gamma1             = 0.1;
 sPreset.gamma2             = 0;
 %% Representer theorem
-sPreset.gamma1Rep          = 1e-3;
+sPreset.gamma1Rep          = 0.1;
 sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
 sPreset.R                  = 10;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;
-sPreset.b_normalizePhi     = false;
 sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;
@@ -46,6 +45,6 @@ sPreset.b_maskDataFitTerm  = true;
 sPreset.b_compareMethods   = true;
 %% 
 sPreset.dataGenTechnique = 'OneDraw';
-sPreset.sDistanceParams.distType = 'Haversine'; % 'Euclidean' / 'Haversine'
+sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 sPreset.sDistanceParams.earthRadius = 50; %6371; % km (approximation)
 end

@@ -1,13 +1,15 @@
-function sResults = RunWrapper(sPreset, sPlotParams, b_interpEigenvecs)
+function sResults = RunGraphSignalInterp(sPreset, sPlotParams, b_interpEigenvecs)
 
 sPreset = UpdatePreset(sPreset, b_interpEigenvecs);
+nMethods = numel(sPreset.cMethods);
 
-tSigCnvrtRec    = zeros(sPreset.n, sPreset.nSignals, sPreset.R, 5);
-tSigCnvrtInt    = zeros(sPreset.N, sPreset.nSignals, sPreset.R, 5);
+tSigCnvrtRec    = zeros(sPreset.n, sPreset.nSignals, sPreset.R, nMethods);
+tSigCnvrtInt    = zeros(sPreset.N, sPreset.nSignals, sPreset.R, nMethods);
 tSigCnvrtRecRef = zeros(sPreset.n, sPreset.nSignals, sPreset.R);
 tSigCnvrtIntRef = zeros(sPreset.N, sPreset.nSignals, sPreset.R);
-[tTrainTime, tIntTime] = deal(zeros(sPreset.R, 5));
+[tTrainTime, tIntTime] = deal(zeros(sPreset.R, nMethods));
 for r = 1:sPreset.R
+    % Plot only on first iteration
     sPlotParams.b_globalPlotEnable = (r == 1) && sPlotParams.b_globalPlotEnable;
     
     % Generate dataset

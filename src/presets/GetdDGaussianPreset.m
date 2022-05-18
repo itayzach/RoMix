@@ -1,10 +1,10 @@
-function sPreset = Get1DGaussianPreset()
+function sPreset = GetdDGaussianPreset()
 %% Dataset parameters
-sPreset.dim                = 1;
-sPreset.n                  = 4000;
-sPreset.N                  = 4000;
+sPreset.dim                = 20;
+sPreset.n                  = 6000;
+sPreset.N                  = 6000;
 sPreset.k                  = 3;
-sPreset.nGenDataCompnts    = 4;
+sPreset.nGenDataCompnts    = 25;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 sPreset.verticesPDF        = 'Gaussian'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
@@ -26,8 +26,8 @@ sPreset.gmmRegVal          = 1e-3;
 sPreset.gmmMaxIter         = 2000;
 sPreset.gmmNumComponents   = sPreset.nGenDataCompnts;
 %% Number of eigenvectors/eigenfunctions
-sPreset.M                  = 50;
-sPreset.MTilde             = 50;
+sPreset.M                  = 20*sPreset.gmmNumComponents;
+sPreset.MTilde             = 20*sPreset.gmmNumComponents;
 %% Regularizations
 sPreset.gamma1             = 0.001;
 sPreset.gamma2             = 0;

@@ -37,7 +37,7 @@ if sPreset.dim <=3
         % GMM
         nGmmPoints = 1000;
         [xGmm,compIdx] = random(sKernelParams.sDistParams.GMModel, nGmmPoints);
-        [PhiGmm, ~] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xGmm, sPreset.b_normalizePhi);
+        [PhiGmm, ~] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xGmm);
         mSigGmm = PhiGmm*mSigCoeffsPhi;
         vSigGmm = mSigGmm(:,sigIndToPlot);
         if sPreset.dim == 2
@@ -56,7 +56,7 @@ end
 if ismember(sPreset.verticesPDF, {'TwoMoons'})
     % make sure mSigCnvrtRecPhi instead of mSigRecPhi
     assert(strcmp(methodName,'RoMix'))
-    PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigCnvrtRecPhi, mSigCoeffsPhi, sPreset.gamma1, sPreset.gamma2, sPreset.b_normalizePhi);
+    PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigCnvrtRecPhi, mSigCoeffsPhi, sPreset.gamma1, sPreset.gamma2);
 
 elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && ~isempty(sKernelParams)
     b_transpose = strcmp(sPreset.verticesPDF, 'MNIST') && sPreset.dim == 28*28;
@@ -75,10 +75,11 @@ elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && ~isempty(sKernelParam
     figName = 'interpolation_signals';
     PlotDigits(sPlotParams, xDigits(vSamples,:), mSigCnvrtInt(vSamples)-b_minusOne, b_transpose, figTitle, figName);
 
-    vBadPredictInd = find(mSigCnvrtInt ~= mSigCnvrtRef);
-    nBadPredict = min(50,length(vBadPredictInd));
+    nBadPredict = 50;
+    vBadPredictInd = find(mSigCnvrtInt ~= mSigCnvrtRef, nBadPredict);
+    nBadPredict = min(length(vBadPredictInd));
     figTitle = ['Wrong prediction on given+unseen $n = ', num2str(nBadPredict), '$ points'];
-    PlotDigits([], xDigits(vBadPredictInd(1:nBadPredict),:), mSigCnvrtInt(vBadPredictInd(1:nBadPredict))-b_minusOne, b_transpose, figTitle);
+    PlotDigits([], xDigits(vBadPredictInd,:), mSigCnvrtInt(vBadPredictInd)-b_minusOne, b_transpose, figTitle);
     
     nGmmPoints = 50;
     [xGmm,compIdx] = random(sKernelParams.sDistParams.GMModel, nGmmPoints);
@@ -88,7 +89,7 @@ elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && ~isempty(sKernelParam
     else
         xDigits = xGmm;
     end
-    PhiGmm = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xGmm, sPreset.b_normalizePhi);
+    PhiGmm = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xGmm);
     mSigGmm = PhiGmm*mSigCoeffsPhi;
     mSigCnvrtGmm = ConvertSignalByDataset(sPreset.verticesPDF, mSigGmm);
     figTitle = [num2str(nGmmPoints), ' generated points'];

@@ -1,8 +1,8 @@
-function [mPhiAnalytic, vLambdaAnalytic, t] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, mData, b_normalize)
+function [mPhiAnalytic, vLambdaAnalytic, t] = CalcAnalyticEigenfunctions(nEigs, sKernelParams, mData)
 
 [nTotal, dim] = size(mData);
 OneDim2MultiDimIndexMatrix = LoadOneDim2MultiDimIndexMatrix(nEigs,dim);
-fprintf('Calculating %d eigenfunctions (max m = %d) (b_normalize = %d) d = %d, n = %d... ',nEigs, max(OneDim2MultiDimIndexMatrix(:)), b_normalize, dim,nTotal)
+fprintf('Calculating %d eigenfunctions (max m = %d) d = %d, n = %d... ',nEigs, max(OneDim2MultiDimIndexMatrix(:)), dim, nTotal)
 ts = tic;
 mPhiAnalytic = zeros(nTotal, nEigs);
 for i = 1:nEigs
@@ -15,10 +15,8 @@ for i = 1:nEigs
     assert(isreal(mPhiAnalytic(:,i)), 'Phi %d is complex', i);
 end
 
-if b_normalize
-    nComponents = sKernelParams.sDistParams.estNumComponents;
-    mPhiAnalytic = sqrt(nComponents/nTotal)*mPhiAnalytic;
-end
+nComponents = sKernelParams.sDistParams.estNumComponents;
+mPhiAnalytic = sqrt(nComponents)*mPhiAnalytic;
 
 vLambdaAnalytic = sKernelParams.vLambdaAnalytic(1:nEigs);
 t = toc(ts);

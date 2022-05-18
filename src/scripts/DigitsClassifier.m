@@ -28,11 +28,10 @@ PlotDigits(sPlotParams, xRand, [], b_transpose, figTitle, figName)
 
 
 %% Our method
-b_normalize = false;
 sKernelParams = CalcKernelParams(sDistParams, sPreset.omegaTilde);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
      = CalcAnalyticEigenvalues(sPreset.MTilde, sKernelParams);
-[ Phi, lambdaPhi ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, X, b_normalize);
+[ Phi, lambdaPhi ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, X);
 mSigHatPhi = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, [], sDataset.sData.ymasked, sPreset.b_maskDataFitTerm);
 mSigRecPhi = Phi*mSigHatPhi;
 vSigCnvrtRecPhi = ConvertSignalByDataset(sPreset.verticesPDF, mSigRecPhi);
@@ -45,7 +44,7 @@ PlotDigits([], X(1:201:sPreset.n,:), vSigCnvrtRecPhi(1:201:sPreset.n)-b_transpos
 %% Generate new examples from GMM and predict digit
 nNew = 100;
 xRand = sDistParams.GMModel.random(nNew);
-PhiNew = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xRand, b_normalize);
+PhiNew = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xRand);
 mSigNew = PhiNew*mSigHatPhi;
 mSigCnvrtNew = ConvertSignalByDataset(sPreset.verticesPDF, mSigNew);
 figTitle = [num2str(nGmmPoints), ' generated points'];

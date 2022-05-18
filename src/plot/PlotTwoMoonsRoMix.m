@@ -1,4 +1,4 @@
-function PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigHatPhi, gamma1, gamma2, b_normalizePhi)
+function PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigHatPhi, gamma1, gamma2)
 MTilde = size(mSigHatPhi,1);
 sClassifier.MTilde = MTilde;
 sClassifier.omega = sKernelParams.omega;
@@ -12,7 +12,7 @@ x1 = xMin:step:xMax;
 x2 = x1;
 [sClassifier.XX1,sClassifier.XX2] = meshgrid(x1,x2);
 xMeshGrid = [sClassifier.XX1(:) sClassifier.XX2(:)];
-PhiMeshgrid = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xMeshGrid, b_normalizePhi);
+PhiMeshgrid = CalcAnalyticEigenfunctions(MTilde, sKernelParams, xMeshGrid);
 sClassifier.mPhi_X_c = reshape(PhiMeshgrid*mSigHatPhi, length(x1), length(x2));
 PlotClassifier(sPlotParams, sDataset, sClassifier);
 end

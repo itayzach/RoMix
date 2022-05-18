@@ -22,11 +22,11 @@ sPlotParams = GetPlotParams(sPreset, b_saveFigures);
 %% Run loop
 if sPreset.b_interpEigenvecs
     b_interpEigenvecs = true;
-    sEigResults = RunWrapper(sPreset, sPlotParams, b_interpEigenvecs);
+    sEigResults = RunGraphSignalInterp(sPreset, sPlotParams, b_interpEigenvecs);
 end
 if sPreset.b_runGraphSignals
     b_interpEigenvecs = false;
-    sSigResults = RunWrapper(sPreset, sPlotParams, b_interpEigenvecs);
+    sSigResults = RunGraphSignalInterp(sPreset, sPlotParams, b_interpEigenvecs);
 end
 %% Save workspace
 sWorkspace = SaveWorkspaceToStruct();

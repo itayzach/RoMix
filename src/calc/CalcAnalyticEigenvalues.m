@@ -17,6 +17,8 @@ end
 vLambdaBeforeSort = mLambdaBeforeSort(:);
 [vLambdaAnalytic, vMultindexToSingleIndexMap] = sort(vLambdaBeforeSort, 'descend');
 
+vLambdaAnalytic = (1/nComponents)*vLambdaAnalytic;
+
 % fprintf('\n')
 % fprintf(' Before  |  After   |   Multi   | Eigenvalue  | Eigenvalue  \n');
 % fprintf('  sort   |  sort    |   index   | before sort | after sort  \n');

@@ -28,6 +28,7 @@ if isfolder(decSaveFolder) && isfolder(encSaveFolder)
 else
     % Train
     assert(~sDatasetParams.b_forceLoadTrainedVAE, 'You wanted to load %s, but you''re training...', modelName)
+    MyMsgBox('Train VAE?', 'Train VAE', true);
     tic;
     [vae, history] = pyrunfile(fullfile("vae", "vae_train.py"), ["vae", "history"], x_train=x_train, x_test=x_test, ...
         latent_dim=uint32(sDatasetParams.latentDim), epochs=uint32(sDatasetParams.epochs), batch_size=uint32(sDatasetParams.batchSize), ...

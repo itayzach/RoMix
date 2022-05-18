@@ -1,11 +1,11 @@
 function PlotGaussianEllipses(sPlotParams, sDistParams)
 dim = numel(sDistParams.mu{1});
 if dim == 2
-    fig = figure;
-    gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(sDistParams.GMModel,[x0 y0]),x,y);
-    xMax = 1.5*max(cell2mat(sDistParams.sigma')) + max(cell2mat(sDistParams.mu'));
-    xMin = 1.5*min(cell2mat(sDistParams.sigma')) + min(cell2mat(sDistParams.mu'));
-    fcontour(gmPDF, [xMin(1), xMax(1), xMin(2), xMax(2)]);
+    %fig = figure;
+    %gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(sDistParams.GMModel,[x0 y0]),x,y);
+    %xMax = 1.5*max(cell2mat(sDistParams.sigma')) + max(cell2mat(sDistParams.mu'));
+    %xMin = 1.5*min(cell2mat(sDistParams.sigma')) + min(cell2mat(sDistParams.mu'));
+    %fcontour(gmPDF, [xMin(1), xMax(1), xMin(2), xMax(2)]);
 elseif dim == 3
     fig = figure;
     cmap = colormap(jet(sDistParams.GMModel.NumComponents));

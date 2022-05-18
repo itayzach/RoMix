@@ -6,6 +6,4 @@ assert(~strcmp(sPreset.adjacencyType,'NearestNeighbor') || ...
 %assert((strcmp(clusterMethod, 'GMM') && sPreset.n >= sPreset.dim) || (strcmp(clusterMethod, 'SC')))
 assert(strcmp(clusterMethod, 'GMM'))
 
-if isfield(sPreset.sDatasetParams, 'nLabeled')
-    assert(sPreset.sDatasetParams.nLabeled == sPreset.n);
 end

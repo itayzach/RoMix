@@ -10,7 +10,7 @@ sPreset.verticesPDF        = 'Uniform'; % 'Gaussian' / 'Uniform' / 'Grid' / 'Two
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sDatasetParams.xMin        = [0 0];
+sDatasetParams.xMin        = [0, 0];
 sDatasetParams.xMax        = [SwissRollArclength(4*pi), 20];
 sPreset.sDatasetParams     = sDatasetParams;
 %% Number of signals
@@ -41,7 +41,6 @@ sPreset.R                  = 10;
 %% Method parameters
 sPreset.b_debugUseAnalytic = true;
 sPreset.b_forceCtoIdentity = false;
-sPreset.b_normalizePhi     = false;
 sPreset.b_takeEigsFromWRef = false;
 sPreset.b_flipSign         = true;
 sPreset.b_pairwiseFlipSign = true;

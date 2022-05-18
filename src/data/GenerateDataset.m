@@ -172,15 +172,16 @@ elseif strcmp(sPreset.verticesPDF, 'SwissRoll')
     %figure; scatter3(sDataset.sData.x(:,1),sDataset.sData.x(:,2),sDataset.sData.x(:,3),[],sDataset.sData.y,'filled');
 elseif strcmp(sPreset.verticesPDF, 'Gaussian')
     if strcmp(sPreset.dataGenTechnique, 'TwoDraws')
-        sDataset.sData.x = GenerateGaussianData(sPreset.dim, sPreset.nGenDataCompnts, sPreset.n, sPreset.sDatasetParams.mu, sPreset.sDatasetParams.sigma);
-        sDataset.sData.xt = GenerateGaussianData(sPreset.dim, sPreset.nGenDataCompnts, sPreset.N, sPreset.sDatasetParams.mu, sPreset.sDatasetParams.sigma);
+        sDataset.sData.x = GenerateGaussianData(sPreset.dim, sPreset.nGenDataCompnts, sPreset.n, sPreset.sDatasetParams.mu, sPreset.sDatasetParams.sigma, sPreset.sDatasetParams.p);
+        sDataset.sData.xt = GenerateGaussianData(sPreset.dim, sPreset.nGenDataCompnts, sPreset.N, sPreset.sDatasetParams.mu, sPreset.sDatasetParams.sigma, sPreset.sDatasetParams.p);
     elseif strcmp(sPreset.dataGenTechnique, 'OneDraw')
-        data = GenerateGaussianData(sPreset.dim, sPreset.nGenDataCompnts, sPreset.N, sPreset.sDatasetParams.mu, sPreset.sDatasetParams.sigma);
+        data = GenerateGaussianData(sPreset.dim, sPreset.nGenDataCompnts, sPreset.N, sPreset.sDatasetParams.mu, sPreset.sDatasetParams.sigma, sPreset.sDatasetParams.p);
         sDataset.sData.x = data(1:sPreset.n,:);
         sDataset.sData.xt = data;
     end
-
-    [sDataset.sData.y, sDataset.sData.yt] = GenerateSyntheticGraphSignal(sDataset.sData.x, sDataset.sData.xt);
+    if sPreset.dim <= 3
+        [sDataset.sData.y, sDataset.sData.yt] = GenerateSyntheticGraphSignal(sDataset.sData.x, sDataset.sData.xt);
+    end
     %figure; plot(sDataset.sData.x,sDataset.sData.y,'o',sDataset.sData.xt,sDataset.sData.yt,'.');
 elseif strcmp(sPreset.verticesPDF, 'Uniform')
     if strcmp(sPreset.dataGenTechnique, 'TwoDraws')
@@ -237,12 +238,14 @@ else
 end
 
 % Override y and yt with eigenvectors
-if b_interpEigenvecs
+if b_interpEigenvecs || (sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights)
     [W, ~, dist, D, Ln, ~] = CalcAdjacency(sDataset.sData.x, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
-    [WRef, ~, distRef, DRef, LnRef] = CalcAdjacency(sDataset.sData.xt, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
     if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights
         PlotWeightsMatrix([], W, dist, D, Ln, sDataset.sData.x, sPreset.adjacencyType, sPreset.omega, sPreset.k);
     end
+end
+if b_interpEigenvecs
+    [WRef, ~, distRef, DRef, LnRef] = CalcAdjacency(sDataset.sData.xt, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
     [V, VRef] = EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef);
     interpRatio = sPreset.N/sPreset.n;
     if isfield(sDataset.sData, 'ymasked')

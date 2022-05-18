@@ -1,10 +1,13 @@
-function CheckMercerTheorem(Phi, lambdaPhi, gmmNumComponents, W)
+function CheckMercerTheorem(sDistParams, Phi, lambdaPhi, W, x)
 [n, MTilde] = size(Phi);
+gmmNumComponents = sDistParams.estNumComponents;
+dim = sDistParams.dim;
 %%
-WPhi = Phi*diag(lambdaPhi)*Phi.';
+LambdaPhi = diag(lambdaPhi);
+WPhi = Phi*LambdaPhi*Phi.';
 WPhiDiff = abs(W - WPhi);
 
-nMercer = 50;
+nMercer = min(250,n);
 figure('Name', 'Mercer''s Thm check'); tiledlayout('flow')
 nexttile; imagesc(W(1:nMercer,1:nMercer)); colorbar; title ('W', 'Interpreter','latex')
 nexttile; imagesc(WPhi(1:nMercer,1:nMercer)); colorbar; title('$W_\Phi = \Phi \Lambda \Phi^T$', 'Interpreter','latex')
@@ -12,17 +15,15 @@ nexttile; imagesc(WPhiDiff(1:nMercer,1:nMercer)); colorbar; title(['$|W - W_\Phi
 
 %%
 [V, lambdaV] = eigs(W,MTilde);
-lambdaV = diag(lambdaV)/(n/gmmNumComponents);
+lambdaV = diag(lambdaV)/n;
 nexttile; 
 plot(lambdaPhi,'o'); 
 hold on; 
 plot(lambdaV,'x'); 
-legend('$\lambda_\Phi$', '$\lambda_V$', 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'SouthOutside', 'NumColumns', 2)
+legend('$\lambda_\Phi$', '$\frac{1}{n}\lambda_V$', 'Interpreter', 'latex', 'FontSize', 12, 'Location', 'SouthOutside', 'NumColumns', 2)
 title('Numeric vs. analytic eigenvalues')
 sgtitle('Mercer''s Thm check (only first 50 points)')
 
-%% 
-PlotInnerProductMatrix([], V, [], '${\bf V}_{{\bf W}}^T {\bf V}_{{\bf W}}$', 'V');
 
 
 end

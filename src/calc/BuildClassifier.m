@@ -4,10 +4,9 @@ sClassifier.gamma_A = gamma_A;
 sClassifier.gamma_I = gamma_I;
 sClassifier.omega = sKernelParams.omega;
 sClassifier.MTilde = sSimParams.CalcEigenFuncsM;
-b_normalize = false;
 
 %% Train
-[ mPhiAnalyticTrain, vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x, b_normalize);
+[ mPhiAnalyticTrain, vLambdaAnalytic ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.x);
 
 dist = pdist2(sDataset.sData.x, sDataset.sData.x);
 W = exp(-dist.^2/(2*sKernelParams.omega^2));
@@ -23,7 +22,7 @@ sClassifier.c = c;
 sClassifier.vPhi_xTrain_c = mPhiAnalyticTrain*c;
 
 %% Test
-[ mPhiAnalyticTest, ~ ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.xt, b_normalize);
+[ mPhiAnalyticTest, ~ ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, sDataset.sData.xt);
 sClassifier.vPhi_xTest_c = mPhiAnalyticTest*c;
 vPredictions = sign(sClassifier.vPhi_xTest_c);
 vTestIdx = find(sDataset.sData.yt);
@@ -39,7 +38,7 @@ x2 = x1;
 X=[sClassifier.XX1(:) sClassifier.XX2(:)];    
 
 tic;
-[ mPhi_m_X, ~ ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, X, b_normalize);
+[ mPhi_m_X, ~ ] = CalcAnalyticEigenfunctions(sSimParams.CalcEigenFuncsM, sKernelParams, X);
 run_time = toc;
 fprintf('Phi time = %.2f ms\n', run_time*1e3);
 

@@ -79,7 +79,7 @@ elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && ~isempty(sKernelParam
     vBadPredictInd = find(mSigCnvrtInt ~= mSigCnvrtRef, nBadPredict);
     nBadPredict = min(length(vBadPredictInd));
     figTitle = ['Wrong prediction on given+unseen $n = ', num2str(nBadPredict), '$ points'];
-    PlotDigits([], xDigits(vBadPredictInd,:), mSigCnvrtInt(vBadPredictInd)-b_minusOne, b_transpose, figTitle);
+    PlotDigits([], xDigits(vBadPredictInd,:), mSigCnvrtInt(vBadPredictInd)-b_minusOne, b_transpose, figTitle, 'Wrong predictions');
     
     nGmmPoints = 50;
     [xGmm,compIdx] = random(sKernelParams.sDistParams.GMModel, nGmmPoints);

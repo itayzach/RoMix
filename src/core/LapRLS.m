@@ -12,16 +12,15 @@ end
 lastwarn(''); % clear last warning
 ts = tic;
 if ~isempty(L) && lambda2~=0
-    alpha = (J*W + lambda1*I + lambda2*L*W)\f;
+    matToInv = J*W + lambda1*I + lambda2*L*W;
 else
-    alpha = (J*W + lambda1*I)\f;
+    matToInv = J*W + lambda1*I;
 end
+alpha = matToInv\f;
 if b_renormalize
     alpha = alpha/sqrt(interpRatio);
 end
 t = toc(ts);
 
-fRec = W*alpha;
-fprintf('LapRLS : first fRec^T*L*fRec = %.4f\n',fRec(:,1).'*L*fRec(:,1))
-
+PrintMethodStats('LapRLS',W,alpha,[],L);
 end

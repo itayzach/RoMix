@@ -53,8 +53,8 @@ if b_plotDecoded
     plotInd = 1:50; %randperm(size(xTrain,1),50);
     xTrainRec = reshape(xTrainRec(plotInd,:,:),[],28*28);
     xTrainPlt = reshape(xTrain(plotInd,:,:),[],28*28);
-    PlotDigits([],xTrainPlt,[],0,'Train');
-    PlotDigits([],xTrainRec,[],0,'Reconstructed');
+    PlotDigits([],xTrainPlt,[],0,'Train','Train');
+    PlotDigits([],xTrainRec,[],0,'Reconstructed','Reconstructed');
 end
 
 fprintf('Done.\n')

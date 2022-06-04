@@ -24,6 +24,6 @@ if ~isempty(warnMsg) % catch warning
     error('\n returned warning: %s\n', warnMsg);
 end
 t = toc(ts);
-PrintRoMixStats(Phi,C,invLambda,L,matToInv)
+PrintMethodStats('RoMix',Phi,C,invLambda,L);
 
 end

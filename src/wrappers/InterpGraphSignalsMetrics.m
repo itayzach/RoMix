@@ -1,7 +1,7 @@
-function [mAccRec, mAccInt, vTrainTime, vIntTime] = ...
+function [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vIntTime] = ...
     InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tTrainTime, tIntTime)
-[mAccRec(:,1), mAccStdRec(:,1)] = CalcErrAndAcc(squeeze(tSigCnvrtRec(:,:,:,1)), tSigCnvrtRecRef);
-[mAccInt(:,1), mAccStdInt(:,1)] = CalcErrAndAcc(squeeze(tSigCnvrtInt(:,:,:,1)), tSigCnvrtIntRef);
+[mAccRec(:,1), mAccStdRec(:,1)] = CalcErrAndAcc(tSigCnvrtRec(:,:,:,1), tSigCnvrtRecRef);
+[mAccInt(:,1), mAccStdInt(:,1)] = CalcErrAndAcc(tSigCnvrtInt(:,:,:,1), tSigCnvrtIntRef);
 vTrainTime = mean(tTrainTime,1);
 vIntTime = mean(tIntTime,1);
 if sPreset.b_compareMethods
@@ -12,7 +12,7 @@ if sPreset.b_compareMethods
         [mAccInt(:,methodInd), mAccStdInt(:,methodInd)] = CalcErrAndAcc(tSigCnvrtInt(:,:,:,methodInd), tSigCnvrtIntRef);
     end
     if sPreset.nSignals == 1
-        PrintAccuracyLatex(sPreset, mAccRec, mAccStdRec, mAccInt, mAccStdInt, sPreset.cMethods);
+        PrintAccuracyLatex(sPreset, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, sPreset.cMethods);
         PrintAccuracy(sPreset, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vIntTime, sPreset.cMethods);
     elseif b_interpEigenvecs
         PlotAccuracy(sPlotParams, mAccInt, mAccStdInt, ...
@@ -28,8 +28,8 @@ if sPreset.b_compareMethods
     end
 else
     if sPreset.nSignals == 1
-        PrintAccuracyLatex(sPreset, mAccRec(:,1), mAccStdRec(:,1), mAccInt(:,1), mAccStdInt(:,1), {'RoMix'});
-        PrintAccuracy(sPreset, mAccRec(:,1), mAccStdRec(:,1), mAccInt(:,1), mAccStdInt(:,1), vTrainTime, vIntTime, {'RoMix'});
+        PrintAccuracyLatex(sPreset, mAccRec(:,1), mAccStdRec(:,1), mAccInt(:,1), mAccStdInt(:,1), vTrainTime(1), {'RoMix'});
+        PrintAccuracy(sPreset, mAccRec(:,1), mAccStdRec(:,1), mAccInt(:,1), mAccStdInt(:,1), vTrainTime(1), vIntTime(1), {'RoMix'});
     elseif b_interpEigenvecs
         PlotAccuracy(sPlotParams, [mAccInt(:,1), mAccRec(:,1)], [mAccStdInt(:,1), mAccStdRec(:,1)], ...
             {'Acc$(\tilde{\psi}^{{\bf RoMix}}_m, \tilde{\psi}_m)$', 'Acc$(\psi^{{\bf RoMix}}_m, \psi_m)$'}, ...

@@ -10,15 +10,14 @@ for i = 1:nEigs
     j = sKernelParams.vEigIndex(i);
     m = OneDim2MultiDimIndexMatrix(j,:);
     mPhiAnalytic(:,i) = phiD(sKernelParams, c, m, mData);
-%     isalmostequal(mPhiAnalytic(:,i),phi(sKernelParams, c, m, mData),1e-13)
-    assert(~any(isnan(mPhiAnalytic(:,i))), 'Phi %d contains NaN', i);
-    assert(isreal(mPhiAnalytic(:,i)), 'Phi %d is complex', i);
 end
 
-nComponents = sKernelParams.sDistParams.estNumComponents;
-mPhiAnalytic = sqrt(nComponents)*mPhiAnalytic;
-
-vLambdaAnalytic = sKernelParams.vLambdaAnalytic(1:nEigs);
+vNormFactor = reshape(sKernelParams.sDistParams.GMModel.ComponentProportion(sKernelParams.vComponentIndex), 1, []);
+mPhiAnalytic = 1./sqrt(vNormFactor).*mPhiAnalytic;
+vLambdaAnalytic = sKernelParams.vLambdaAnalytic;
 t = toc(ts);
+
+assert(~any(isnan(mPhiAnalytic(:))), 'Phi contains NaN');
+assert(isreal(mPhiAnalytic(:)), 'Phi is complex');
 fprintf('Done (took %.2f sec).\n', t)
 end

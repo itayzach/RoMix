@@ -1,37 +1,21 @@
-function PrintAccuracyLatex(sPreset, vAccRec, vAccRecStd, vAccInt, vAccIntStd, cMethods)
+function PrintAccuracyLatex(sPreset, vAccRec, vAccRecStd, vAccInt, vAccIntStd, vTrainTime, cMethods)
 assert(sPreset.nSignals == 1)
 nMethods = numel(cMethods);
-methods = [];
-accRec = [];
-accInt = [];
-for ii = 1:nMethods
-    methods = [methods, '& ' cMethods{ii} ' ' ];
-    if sPreset.R > 0
-        accRec = [ accRec, ' &  $' num2str(vAccRec(ii), '%.2f') ' \pm ' num2str(vAccRecStd(ii), '%.2f') '\% $'];
-    else
-        accRec = [ accRec, ' &  $' num2str(vAccRec(ii), '%.2f') '\% $'];
-    end
-    if sPreset.R > 0
-        accInt = [ accInt, ' &  $' num2str(vAccInt(ii), '%.2f') ' \pm ' num2str(vAccIntStd(ii), '%.2f') ' \%$'];
-    else
-        accInt = [ accInt, ' &  $' num2str(vAccInt(ii), '%.2f') ' \%$'];
-    end
-end
 s = [];
 %s = [s, '\begin{table}[htbp]', newline ];
 s = [s, '\begin{minipage}[c]{0.5\textwidth}', newline ];
 s = [s, '    \centering', newline ];
-s = [s, '    \begin{tabular}{ |l|l|l| }', newline ];
+s = [s, '    \begin{tabular}{ |l|l|l|l| }', newline ];
 s = [s, '    \hline', newline ];
-s = [s, '    Method & Proj. Acc. & Interp. Acc.', ' \\', newline ];
+s = [s, '    Method & Proj. Acc. & Interp. Acc. & Train Time [s] \\', newline ];
 s = [s, '    \hline\hline', newline ];
 for ii = 1:nMethods
-    if sPreset.R > 0
+    if sPreset.R > 1
         s = [s, '    ', cMethods{ii} ' &  $' num2str(vAccRec(ii), '%.2f') ' \pm ' num2str(vAccRecStd(ii), '%.2f') '\% $', ...
-            ' &  $' num2str(vAccInt(ii), '%.2f') ' \pm ' num2str(vAccIntStd(ii), '%.2f') ' \%$', ' \\', newline ];
+            ' &  $' num2str(vAccInt(ii), '%.2f') ' \pm ' num2str(vAccIntStd(ii), '%.2f') ' \%$ & $ ', num2str(vTrainTime(ii), '%.2f'), ' $ \\', newline ];
     else
-        s = [s, '    ', cMethods{ii} ' &  $' num2str(vAccRec(ii), '%.2f') '\% $', ...
-            ' &  $' num2str(vAccInt(ii), '%.2f') ' \%$' ' \\', newline];
+        s = [s, '    ', cMethods{ii} ' &  $', num2str(vAccRec(ii), '%.2f'), '\% $', ...
+            ' &  $', num2str(vAccInt(ii), '%.2f'), ' \%$ & $ ', num2str(vTrainTime(ii), '%.2f'),  ' $ \\', newline];
     end
     s = [s, '    \hline', newline ];
 end

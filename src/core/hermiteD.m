@@ -45,13 +45,15 @@ for d=1:D
     rem = mod(n(d),2);
     switch n(d)
         case 0
-            coeffs = 1; % 1*x^0
+            coeffs = 1;             % even. 1*x^0
         case 1
-            coeffs = 2; % 2*x^1
+            coeffs = 2;             % odd.  2*x^1
         case 2
-            coeffs = [4, -2]; % 4*x^2 -2*x^0
+            coeffs = [4, -2];       % even. 4*x^2 -2*x^0
         case 3
-            coeffs = [8, -12];
+            coeffs = [8, -12];      % odd.  8*x^3 -12*x^1
+        case 4
+            coeffs = [16, -48, 12]; % even. 16*x^4 - 48*x^2 + 12*x^0
         otherwise
             coeffs = n_fact(d) .* (-1).^m ./ (factorial(m) .* factorial(n(d)-2.*m)) .* 2.^(n(d)-2.*m);
     end

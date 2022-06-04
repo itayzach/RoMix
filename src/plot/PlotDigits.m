@@ -1,5 +1,5 @@
 function fig = PlotDigits(sPlotParams, X, y, b_transpose, figTitle, figName)
-fig = figure; 
+fig = figure('Name', figName); 
 tiledlayout('flow')
 [n,d] = size(X);
 imsize = sqrt(d);

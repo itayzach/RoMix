@@ -4,5 +4,6 @@ if isstruct(presetName)
 elseif ischar(presetName)
     sPreset = eval(presetName);
 end
+PrintPresetParamsLatex(sPreset);
 PrintPreset(sPreset);
 end

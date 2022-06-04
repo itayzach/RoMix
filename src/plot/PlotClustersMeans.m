@@ -1,4 +1,4 @@
-function PlotClustersMeans(sPreset, sDistParams)
+function PlotClustersMeans(sPreset, sPlotParams, sDistParams)
 if ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
     vSamples = 1:sDistParams.estNumComponents;
     if isfield(sDistParams, 'vae')
@@ -13,6 +13,6 @@ if ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
         b_transpose = strcmp(sPreset.verticesPDF, 'MNIST');
     end
     
-    PlotDigits([], xMeans(vSamples,:), vSamples, b_transpose, 'Means');
+    PlotDigits(sPlotParams, xMeans(vSamples,:), vSamples, b_transpose, 'Means', 'Means');
 end
 end

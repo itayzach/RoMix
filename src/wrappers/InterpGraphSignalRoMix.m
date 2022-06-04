@@ -14,11 +14,11 @@ if isfield(sDataset, 'vae'), sDistParams.vae = sDataset.vae; end
 % 2. Calculate Phi(xTrain) and lambdaPhi
 [sKernelParams, tTrainVec(3)] = CalcKernelParams(sDistParams, sPreset.omegaTilde);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex, tTrainVec(4)] = CalcAnalyticEigenvalues(sPreset.MTilde, sKernelParams);
-[ Phi, lambdaPhi ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xTrain);
+[ Phi, lambdaPhi, tTrainVec(4) ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xTrain);
 
 % 3. Find C
 Ln = [];
-[C, tTrainVec(4)] = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, Ln, mSig, sPreset.b_maskDataFitTerm);
+[C, tTrainVec(5)] = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, Ln, mSig, sPreset.b_maskDataFitTerm);
 
 % 4. Project (reconstruct)
 mSigRecPhi = Phi*C;
@@ -62,8 +62,11 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPres
     PlotGaussianEllipses(sPlotParams, sDistParams);
     PlotCovEigs(sPlotParams, sDistParams);
     if sDistParams.GMModel.NumComponents < 100
-        PlotClustersMeans(sPreset, sDistParams);
+        PlotClustersMeans(sPreset, sPlotParams, sDistParams);
     end
+end
+if sPlotParams.b_globalPlotEnable
+    PlotNumEigsPerComp(sKernelParams);
 end
 if sPlotParams.b_globalPlotEnable
     mSigCnvrtRecRef = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);
@@ -78,7 +81,7 @@ if sPlotParams.b_globalPlotEnable
     end
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotMercer
-    [W, tW, dist, D, Ln, tLn] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
+    W = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
     CheckMercerTheorem(sDistParams, Phi, lambdaPhi, W, xTrain);
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotInnerProductMatrices

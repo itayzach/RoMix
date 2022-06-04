@@ -12,9 +12,9 @@ s = [s, '    \hline', newline ];
 s = [s, '    \# GMM comp.    & $k = ' num2str(sPreset.gmmNumComponents) '$  \\ ', newline ];
 s = [s, '    \hline', newline ];
 if floor(sPreset.MTilde/sPreset.gmmNumComponents) == sPreset.MTilde/sPreset.gmmNumComponents
-    s = [s, '    \# eigs. per comp.  & $M = ' num2str(sPreset.MTilde/sPreset.gmmNumComponents) '\cdot k$  \\ ', newline ];
+    s = [s, '    \# eigs. & $M = ' num2str(sPreset.MTilde/sPreset.gmmNumComponents) '\cdot k$  \\ ', newline ];
 else
-    s = [s, '    \# eigs. per comp.  & $M = ' num2str(sPreset.MTilde) '$  \\ ', newline ];
+    s = [s, '    \# eigs. & $M = ' num2str(sPreset.MTilde) '$  \\ ', newline ];
 end
 s = [s, '    \hline', newline ];
 s = [s, '    $\| \cdot \|_{\H_K}$ penalty & $\gamma = ' num2str(sPreset.gamma1, '%g') '$\\', newline ];

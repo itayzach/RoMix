@@ -11,14 +11,14 @@ for ii = 1:nMethods
     else
         accRec = [ accRec, ' &  $' num2str(vAccRec(ii), '%.2f') '\% $'];
     end
-    if sPreset.R > 0
+    if sPreset.R > 1
         accInt = [ accInt, ' &  $' num2str(vAccInt(ii), '%.2f') ' \pm ' num2str(vAccIntStd(ii), '%.2f') ' \%$'];
     else
         accInt = [ accInt, ' &  $' num2str(vAccInt(ii), '%.2f') ' \%$'];
     end
 end
 fprintf('%s\n',repelem('-',15*5+7));
-fprintf('%-15s| %-16s| %-16s| %-15s| %-15s\n', 'Method','Proj. Acc.','Interp. Acc.','Train time','Interp. time');
+fprintf('%-15s| %-16s| %-16s| %-15s| %-15s\n', 'Method','Proj. Acc.','Interp. Acc.','Train time [s]','Interp. time [s]');
 fprintf('%s\n',repelem('-',15*5+7));
 for ii = 1:nMethods
     if sPreset.R > 0

@@ -1,4 +1,4 @@
-function sDataset = LoadDigitsDataset(actualDataDist, sDatasetParams, N, n)
+function sDataset = LoadDigitsDataset(sPlotParams,actualDataDist, sDatasetParams, N, n)
     nSets = ceil(N/1000);
     datasetInd = randperm(10, nSets);
     fprintf('Loading %s set %d... ',actualDataDist, datasetInd(1))
@@ -87,7 +87,7 @@ function sDataset = LoadDigitsDataset(actualDataDist, sDatasetParams, N, n)
         xTrain = permute(pagetranspose(permute(xTrainT,[2 3 1])),[3 1 2]);
         xTestT = reshape(xIntT(n+1:end,:),[],28,28);
         xTest = permute(pagetranspose(permute(xTestT,[2 3 1])),[3 1 2]);
-        [zTrain, zTest, vae] = LoadMnistLatent(sDatasetParams, xTrain, xTest);
+        [zTrain, zTest, vae] = LoadMnistLatent(sPlotParams,sDatasetParams, xTrain, xTest);
         sDataset.vae = vae;
         sDataset.sData.x = zTrain;
         sDataset.sData.xt = [zTrain; zTest];

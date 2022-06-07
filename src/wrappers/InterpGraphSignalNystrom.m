@@ -8,7 +8,8 @@ if isfield(sDataset.sData, 'ymasked')
 else
     mSig = sDataset.sData.y;
 end
-
+vLabeledFlag = diag(GetUnlabeledNodesMask(mSig));
+vLabeledInd = find(vLabeledFlag);
 % ------------------------------------------------------------------------------------------
 % Build adjacency and perform eigs
 % ------------------------------------------------------------------------------------------
@@ -21,7 +22,7 @@ tTrainVec(2) = toc(ts);
 % Reconstruction
 % ------------------------------------------------------------------------------------------
 ts = tic;
-mSigCoeffsV = V'*mSig; % same as pinv(V)*sig...
+mSigCoeffsV = pinv(V(vLabeledInd,:))*mSig(vLabeledInd,:); % same as pinv(V)*sig...
 mSigRecV = V*mSigCoeffsV;
 mSigCnvrtRecV = ConvertSignalByDataset(sPreset.verticesPDF, mSigRecV);
 tTrainVec(3) = toc(ts);

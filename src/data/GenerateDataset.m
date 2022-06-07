@@ -20,9 +20,9 @@ elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
     assert(strcmp(sPreset.dataGenTechnique, 'OneDraw'))
     if isfield(sPreset.sDatasetParams,'b_loadKeras') && sPreset.sDatasetParams.b_loadKeras
         assert(strcmp(sPreset.verticesPDF, 'MNIST'))
-        sDataset = LoadDigitsKeras(sPreset.sDatasetParams, sPreset.N, sPreset.n);
+        sDataset = LoadDigitsKeras(sPlotParams,sPreset.sDatasetParams, sPreset.N, sPreset.n);
     else
-        sDataset = LoadDigitsDataset(sPreset.verticesPDF, sPreset.sDatasetParams, sPreset.N, sPreset.n);
+        sDataset = LoadDigitsDataset(sPlotParams,sPreset.verticesPDF, sPreset.sDatasetParams, sPreset.N, sPreset.n);
     end
     
 elseif strcmp(sPreset.verticesPDF, 'MnistDist')

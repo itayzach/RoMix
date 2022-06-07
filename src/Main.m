@@ -11,10 +11,6 @@ rng('default');
 clusterMethod = 'GMM'; % 'GMM' / 'SC'
 %% Get perset
 sPreset = GetPreset(presetName);
-sPreset.cMethods = {'RoMix', 'Rep. Thm.', 'PW', 'Nystrom', 'kNN'};
-sPreset.knn = 5;
-sPreset.sPwParams.regularize_epsilon = 0.1;
-sPreset.sPwParams.order = 100;
 %% Verify preset
 VerifyPresetParams(sPreset, clusterMethod);
 %% Get plot params

@@ -1,50 +1,53 @@
-function [mSigCnvrtRecKnn, mSigCnvrtKnn, vTrainTime, vIntTime] = InterpGraphSignalKnn(sPlotParams, sPreset, sDataset)
+function [mSigCnvrtKnnRecRec, mSigCnvrtKnnInt, trainTime, intTime] = InterpGraphSignalKnn(sPlotParams, sPreset, sDataset)
 
 assert(~isempty(sDataset.sData.yt));
-xTrain = sDataset.sData.x; 
 xInt = sDataset.sData.xt;
 if isfield(sDataset.sData, 'ymasked')
     mSig = sDataset.sData.ymasked;
 else
     mSig = sDataset.sData.y;
 end
-
+vLabeledFlag = diag(GetUnlabeledNodesMask(mSig));
+vLabeledInd = find(vLabeledFlag);
+vUnlabeledInd = find(~vLabeledFlag);
+xTrainLabeled = sDataset.sData.x(vLabeledInd,:);
+xTrainUnlabeled = sDataset.sData.x(vUnlabeledInd,:);
+nUnlabeled = size(xTrainUnlabeled,1);
+nLabeled = size(xTrainLabeled,1);
+mSigLabeled = mSig(vLabeledInd,:);
 % ------------------------------------------------------------------------------------------
-% Reconstruction
+% Reconstruction (on unlabeled training nodes)
 % ------------------------------------------------------------------------------------------
-%[idx, D] = knnsearch(X1, X2, 'K', k);
-%WNN = NearestNeighborsAdjacency(xTrain, xTrain, sPreset.knn, sPreset.nnValue);
 ts = tic;
-mSigKnn = mSig;
-J = GetUnlabeledNodesMask(mSig);
-mSigCnvrtRecKnn = ConvertSignalByDataset(sPreset.verticesPDF, mSigKnn);
-vTrainTime = toc(ts);
+mSigKnnRec = mSig;
+for i = 1:nUnlabeled
+    [idx, D] = knnsearch(xTrainLabeled, xTrainUnlabeled(i,:), 'K', sPreset.knn);
+    w = D'./sum(D);
+    mSigKnnRec(vUnlabeledInd(i),:) = sum(w.*mSigLabeled(idx,:));
+end
+mSigCnvrtKnnRecRec = ConvertSignalByDataset(sPreset.verticesPDF, mSigKnnRec);
+trainTime = toc(ts);
 
 % ------------------------------------------------------------------------------------------
 % Interpolation
 % ------------------------------------------------------------------------------------------
 ts = tic;
-n = size(xTrain,1);
+n = nLabeled+nUnlabeled;
 N = size(xInt,1);
-% idx = knnsearch(xTrain, xInt(n+1:end,:), 'K', sPreset.knn);
-% mSigKnnInt(1:n,:) = mSig;
-% for i = 1:N-n
-%     mSigKnnInt(i+n,:) = (1/sPreset.knn)*sum(mSig(idx(i,:)));
-% end
-mSigKnnInt(1:n,:) = mSig;
+mSigKnnInt(1:n,:) = mSigKnnRec;
 for i = 1:N-n
-    idx = knnsearch(xTrain, xInt(i+n,:), 'K', sPreset.knn);
-    mSigKnnInt(i+n,:) = (1/sPreset.knn)*sum(mSig(idx,:));
+    idx = knnsearch(xTrainLabeled, xInt(i+n,:), 'K', sPreset.knn);
+    w = D'./sum(D);
+    mSigKnnInt(i+n,:) = sum(w.*mSigLabeled(idx,:));
 end
-
-mSigCnvrtKnn = ConvertSignalByDataset(sPreset.verticesPDF, mSigKnnInt);
-vIntTime = toc(ts);
-fprintf('KNN: train took %.2f sec, interp took %.2f sec\n', vTrainTime, vIntTime);
+mSigCnvrtKnnInt = ConvertSignalByDataset(sPreset.verticesPDF, mSigKnnInt);
+intTime = toc(ts) + trainTime;
+fprintf('KNN: train took %.2f sec, interp took %.2f sec\n', trainTime, intTime);
 
 if sPlotParams.b_globalPlotEnable && sPreset.b_runGraphSignals
     mSigRef    = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);
     mSigRefInt = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.yt);
-    PlotGraphSignalsWrapper([], sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtRecKnn, mSigCnvrtKnn, [], 'kNN')
+    PlotGraphSignalsWrapper([], sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtKnnRecRec, mSigCnvrtKnnInt, [], 'kNN')
 end
 
 end

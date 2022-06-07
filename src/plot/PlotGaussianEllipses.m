@@ -48,7 +48,7 @@ elseif dim == 3
 end
 
 %% Save
-if (dim == 2 || dim == 3) && ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+if (dim == 3) && ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
     figName = 'Ellipses';
     SaveFigure(sPlotParams, fig, figName, {'pdf', 'png'});
 end

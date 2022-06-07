@@ -8,9 +8,11 @@ if isfield(sDataset.sData, 'ymasked')
 else
     mSig = sDataset.sData.y;
 end
-vTrainInd = (1:n)';
+vLabeledFlag = diag(GetUnlabeledNodesMask(mSig));
+vLabeledInd = find(vLabeledFlag);
+mSigLabeled = mSig(vLabeledInd,:);
 % ------------------------------------------------------------------------------------------
-% Reconstruction
+% Reconstruction (on unlabeled training nodes)
 % ------------------------------------------------------------------------------------------
 [W, tTrainVec(1)] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
 
@@ -19,7 +21,7 @@ G = gsp_graph(W, xTrain);
 G.lap_type='normalized';
 G = gsp_create_laplacian(G);
 G = gsp_estimate_lmax(G);
-mSigPw = gsp_interpolate(G, mSig, vTrainInd, sPreset.sPwParams);
+mSigPw = gsp_interpolate(G, mSigLabeled, vLabeledInd, sPreset.sPwParams);
 mSigCnvrtRecPw = ConvertSignalByDataset(sPreset.verticesPDF, mSigPw);
 tTrainVec(2) = toc(ts);
 trainTime = sum(tTrainVec);
@@ -32,7 +34,7 @@ GInt = gsp_graph(WRef, xInt);
 GInt.lap_type='normalized';
 GInt = gsp_create_laplacian(GInt);
 GInt = gsp_estimate_lmax(GInt);
-mSigPwInt = gsp_interpolate(GInt, mSig, vTrainInd, sPreset.sPwParams);
+mSigPwInt = gsp_interpolate(GInt, mSigLabeled, vLabeledInd, sPreset.sPwParams);
 mSigCnvrtPw = ConvertSignalByDataset(sPreset.verticesPDF, mSigPwInt);
 tIntVec(2) = toc(ts);
 intTime = sum(tIntVec);

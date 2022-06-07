@@ -1,4 +1,4 @@
-function [zTrain, zTest, vae] = LoadMnistLatent(sDatasetParams,xTrain,xTest,b_plotDecoded)
+function [zTrain, zTest, vae] = LoadMnistLatent(sPlotParams,sDatasetParams,xTrain,xTest,b_plotDecoded)
 
 if ~exist('b_plotDecoded', 'var')
     b_plotDecoded = true;
@@ -54,7 +54,7 @@ if b_plotDecoded
     xTrainRec = reshape(xTrainRec(plotInd,:,:),[],28*28);
     xTrainPlt = reshape(xTrain(plotInd,:,:),[],28*28);
     PlotDigits([],xTrainPlt,[],0,'Train','Train');
-    PlotDigits([],xTrainRec,[],0,'Reconstructed','Reconstructed');
+    PlotDigits(sPlotParams,xTrainRec,[],0,'Reconstructed','Reconstructed');
 end
 
 fprintf('Done.\n')

@@ -1,4 +1,4 @@
-function sDataset = LoadDigitsKeras(sDatasetParams, N, n)
+function sDataset = LoadDigitsKeras(sPlotParams,sDatasetParams, N, n)
 nTrain = n;
 nTest = N - n;
 assert(nTest <= 10000, 'nTest should be less than 10000')
@@ -23,7 +23,7 @@ vNonLabeledInd = randperm(nTrain,nTrain-nLabeled);
 
 
 if isfield(sDatasetParams, 'b_runVAE') && sDatasetParams.b_runVAE
-    [zTrain, zTest, vae] = LoadMnistLatent(sDatasetParams, xTrain, xTest);
+    [zTrain, zTest, vae] = LoadMnistLatent(sPlotParams,sDatasetParams, xTrain, xTest);
     sDataset.vae = vae;
     sDataset.sData.x = zTrain;
     sDataset.sData.xt = [zTrain; zTest];

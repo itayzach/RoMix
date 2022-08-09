@@ -1,37 +1,68 @@
-function PlotGraphSignalsWrapper(sPlotParams, sPreset, sKernelParams, sDataset, mSigCnvrt, mSigCnvrtRef, mSigCnvrtRecPhi, mSigCnvrtInt, mSigCoeffsPhi, methodName)
+function PlotGraphSignalsWrapper(sPlotParams, sPreset, sKernelParams, sDataset, mSigCnvrtRecRef, mSigCnvrtIntRef, mSigCnvrtRec, mSigCnvrtInt, mSigCoeffsPhi, methodName)
 
 xTrain = sDataset.sData.x;
 xInt = sDataset.sData.xt;
+if isfield(sDataset.sData, 'ymasked')
+    mSig = sDataset.sData.ymasked;
+else
+    mSig = sDataset.sData.y;
+end
+vLabeledInd = GetUnlabeledNodesMask(mSig);
+% vUnlabeledInd = find(~vLabeledFlag);
+% xTrainLabeled = sDataset.sData.x(vLabeledInd,:);
+% xTrainUnlabeled = sDataset.sData.x(vUnlabeledInd,:);
+% nUnlabeled = size(xTrainUnlabeled,1);
+% nLabeled = size(xTrainLabeled,1);
+% mSigLabeled = mSig(vLabeledInd,:);
 
 % ------------------------------------------------------------------------------------------
 % Plots
 % ------------------------------------------------------------------------------------------
-sigIndToPlot     = min(7, size(mSigCnvrt,2));
+sigIndToPlot = min(7, size(mSigCnvrtRecRef,2));
 
-vSig       = mSigCnvrt(:,sigIndToPlot);
-vSigRef    = mSigCnvrtRef(:,sigIndToPlot);
-vSigRecPhi = mSigCnvrtRecPhi(:,sigIndToPlot);
+vSigRecRef = mSigCnvrtRecRef(:,sigIndToPlot);
+vSigIntRef = mSigCnvrtIntRef(:,sigIndToPlot);
+vSigRec    = mSigCnvrtRec(:,sigIndToPlot);
 vSigInt    = mSigCnvrtInt(:,sigIndToPlot);
+
+if ismember(sPreset.verticesPDF, {'BulgariBeacons'})
+    grid.lat = sDataset.sData.vGridLat;
+    grid.lon = sDataset.sData.vGridLon;
+    PlotGraphSignals(sPlotParams, ['Graph signal reconstruction \& interpolation'], 'Interpolation', ...
+       {sDataset.sData.mGrid, sDataset.sData.mGrid}, ...
+       {vSigRecRef, vSigRec}, ... 
+       {'$s$', ['$s^{{\bf ' methodName '}}$']}, ...
+       {1:size(xTrain,1), 1:size(xTrain,1)}, [], [], [], [], grid, sDataset.sData.tx, sDataset.sData.sense);
+
+    if size(sDataset.sData.x,2) <= 3
+        PlotGraphSignals(sPlotParams, ['Graph signal reconstruction \& interpolation'], 'Interpolation', ...
+            {sDataset.sData.x, sDataset.sData.xt, sDataset.sData.x, sDataset.sData.xt, sDataset.sData.x}, ...
+            {vSigRecRef, vSigIntRef, vSigRec, vSigInt, sDataset.sData.ymasked }, ... cellfun(@db,{vSigRecRef, vSigIntRef, vSigRec, vSigInt}, 'UniformOutput',false), ...
+            {'$s$', '$\tilde{s}$', ['$s^{{\bf ' methodName '}}$'], ['$\tilde{s}^{{\bf ' methodName '}}$'], 'ymasked'}, ...
+            {1:size(xTrain,1), 1:size(xTrain,1), 1:size(xTrain,1), 1:size(xTrain,1), 1:size(xTrain,1)});
+    end
+end
 
 if sPreset.dim <=3
     if sPreset.dim == 1
         colorOrder = get(gca, 'ColorOrder');
         PlotGraphSignals(sPlotParams, ['Graph signal reconstruction'], 'Reconstruction', ...
             {xTrain, xTrain}, ...
-            {vSig, vSigRecPhi}, ...
+            {vSigRecRef, vSigRec}, ...
             {'$s$', ['$s^{{\bf ' methodName '}}$']}, ...
-            {sPreset.n, sPreset.n}, {'o', '.'}, mat2cell(colorOrder(1:2,:),[1 1], 3));
+            {vLabeledInd, vLabeledInd}, {'o', '.'}, mat2cell(colorOrder(1:2,:),[1 1], 3));
         PlotGraphSignals(sPlotParams, ['Graph signal interpolation'], 'Interpolation', ...
             {xInt, xInt}, ...
-            {vSigRef, vSigInt}, ...
+            {vSigIntRef, vSigInt}, ...
             {'$\tilde{s}$', ['$\tilde{s}^{{\bf ' methodName '}}$']}, ...
-            {sPreset.n, sPreset.n}, {'o', '.'}, mat2cell(colorOrder(3:4,:),[1 1], 3));
+            {vLabeledInd, vLabeledInd}, {'o', '.'}, mat2cell(colorOrder(3:4,:),[1 1], 3));
     else
         PlotGraphSignals(sPlotParams, ['Graph signal reconstruction \& interpolation'], 'Interpolation', ...
             {xTrain, xInt, xTrain, xInt}, ...
-            {vSig, vSigRef, vSigRecPhi, vSigInt}, ...
+            {vSigRecRef, vSigIntRef, vSigRec, vSigInt}, ...
             {'$s$', '$\tilde{s}$', ['$s^{{\bf ' methodName '}}$'], ['$\tilde{s}^{{\bf ' methodName '}}$']}, ...
-            {sPreset.n, sPreset.n, sPreset.n, sPreset.n});
+            {vLabeledInd, vLabeledInd, vLabeledInd, vLabeledInd});
+
     end
     if ~isempty(sPlotParams) && sPlotParams.b_plotGmmSignal
         % GMM
@@ -55,8 +86,10 @@ end
 
 if ismember(sPreset.verticesPDF, {'TwoMoons'})
     % make sure mSigCnvrtRecPhi instead of mSigRecPhi
-    assert(strcmp(methodName,'RoMix'))
-    PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigCnvrtRecPhi, mSigCoeffsPhi, sPreset.gamma1, sPreset.gamma2);
+    warning('TODO: Update PlotTwoMoonsRoMix to support other methods')
+    if(strcmp(methodName,'RoMix'))
+        PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigCnvrtRec, mSigCoeffsPhi, sPreset.gamma1, sPreset.gamma2);
+    end
 
 elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && ~isempty(sKernelParams)
     b_transpose = strcmp(sPreset.verticesPDF, 'MNIST') && sPreset.dim == 28*28;
@@ -76,7 +109,7 @@ elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && ~isempty(sKernelParam
     PlotDigits(sPlotParams, xDigits(vSamples,:), mSigCnvrtInt(vSamples)-b_minusOne, b_transpose, figTitle, figName);
 
     nBadPredict = 50;
-    vBadPredictInd = find(mSigCnvrtInt ~= mSigCnvrtRef, nBadPredict);
+    vBadPredictInd = find(mSigCnvrtInt ~= mSigCnvrtIntRef, nBadPredict);
     nBadPredict = min(length(vBadPredictInd));
     figTitle = ['Wrong prediction on given+unseen $n = ', num2str(nBadPredict), '$ points'];
     PlotDigits([], xDigits(vBadPredictInd,:), mSigCnvrtInt(vBadPredictInd)-b_minusOne, b_transpose, figTitle, 'Wrong predictions');

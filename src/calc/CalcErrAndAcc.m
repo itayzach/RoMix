@@ -1,42 +1,51 @@
-function [vAcc, vAccStd, vRMSE, vMSE, vCoh, mErrors] = CalcErrAndAcc(tPhiToCompare, tPhiNumeric, compareTo)
-[n, nEigenFuncs, R] = size(tPhiToCompare);
-if isequal(tPhiToCompare(:,1,1),floor(tPhiToCompare(:,1,1)))
+function [vAcc, vAccStd, vRmse, vMse, vCoh, mErrors] = CalcErrAndAcc(tSig, tSigRef, compareTo)
+[n, nSignals, R] = size(tSig);
+if isequal(tSig(:,1,1),floor(tSig(:,1,1)))
     errFunc = '0-1';
 else
     errFunc = 'norm';
 end
 
-mErrNormed = zeros(R, nEigenFuncs);
-mCoherence = zeros(R, nEigenFuncs);
+mErr = zeros(R, nSignals);
+mErrNormed = zeros(R, nSignals);
+mCoherence = zeros(R, nSignals);
 %fprintf('*********************************************************\n');
 for r = 1:R
     %fprintf(['Accuracy of ', compareTo '. r = %d\n'], r);
-    mPhiToCompare = squeeze(tPhiToCompare(:,:,r));
-    mPhiNumeric = squeeze(tPhiNumeric(:,:,r));
+    mSig = squeeze(tSig(:,:,r));
+    mSigRef = squeeze(tSigRef(:,:,r));
     if strcmp(errFunc, 'norm')
-        mErrNormed(r,:) = vecnorm(mPhiToCompare-mPhiNumeric,2)./vecnorm(mPhiToCompare,2);
-        mCoherence(r,:) = (vecnorm(mPhiToCompare-mPhiNumeric,2).^2)./(vecnorm(mPhiToCompare,2).*vecnorm(mPhiNumeric,2));
+        mErr(r,:) = vecnorm(mSig-mSigRef,2);
+        mErrNormed(r,:) = min(vecnorm(mSig-mSigRef,2)./vecnorm(mSig,2),1);
+        mCoherence(r,:) = (vecnorm(mSig-mSigRef,2).^2)./(vecnorm(mSig,2).*vecnorm(mSigRef,2));
     elseif strcmp(errFunc, '0-1')
-        mErrNormed(r,:) = sum(mPhiToCompare ~= mPhiNumeric) / n;
-        mCoherence(r,:) = sum(mPhiToCompare ~= mPhiNumeric) / n;
+        mErr(r,:)       = sum(mSig ~= mSigRef) / n;
+        mErrNormed(r,:) = sum(mSig ~= mSigRef) / n;
+        mCoherence(r,:) = sum(mSig ~= mSigRef) / n;
     end
-    for m = 1:nEigenFuncs
+    %for m = 1:nSignals
         %fprintf('\t(m=%2d) %6.4f%%\t', m-1, 100*(1-mErrNormed(r,m)))
-        if (mod(m,8) == 0) && m < nEigenFuncs
+        %if (mod(m,8) == 0) && m < nSignals
             %fprintf('\n');
-        end
-    end
+        %end
+    %end
     %fprintf('\n');
 end
 % fprintf('*********************************************************\n');
 
+mErrors = mErrNormed.';
+
 % The sum is over the iterations, r=1:R
-vRMSE = sqrt(sum(mErrNormed.^2,1)/R).';
-vMSE = (sum(mErrNormed.^2,1)/R).';
+vRmse = sqrt(sum(mErr.^2,1)/R).';
+vRmseStd = std(mErr,[],1).';
+vMse = (sum(mErrNormed.^2,1)/R).';
 vCoh = (sum(mCoherence,1)/R).';
 vAcc = (100*sum((1-mErrNormed),1)/R).';
-mErrors = mErrNormed.';
+assert(all(vAcc >= 0));
 vAccStd = 100*std(mErrNormed,[],1).';
+
+%vAcc = vRmse;
+%vAccStd = vRmseStd;
 end
 
 

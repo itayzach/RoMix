@@ -15,4 +15,9 @@ if ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
     
     PlotDigits(sPlotParams, xMeans(vSamples,:), vSamples, b_transpose, 'Means', 'Means');
 end
+% mMu = cell2mat(sDistParams.mu');
+% mSigma = cell2mat(sDistParams.sigma');
+% nComp = sDistParams.estNumComponents;
+% dim = sDistParams.dim;
+% mU = reshape(cell2mat(sDistParams.u),dim,dim,nComp);
 end

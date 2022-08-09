@@ -1,18 +1,20 @@
-function localCmap = PlotGraphSignals(sPlotParams, suptitle, figName, cData, cSignals, cSigStr, cNumCircles, cMarkers, cColors, xylim, cmap)
+function localCmap = PlotGraphSignals(sPlotParams, suptitle, figName, cData, cSignals, cSigStr, cCirclesInd, cMarkers, cColors, xylim, cmap, grid, tx, sense)
 cData = reshape(cData,[],1);
 cSignals = reshape(cSignals,[],1);
 cSigStr = reshape(cSigStr,[],1);
+nSignals = numel(cData);
 if exist('cNumCircles', 'var')
-    cNumCircles = reshape(cNumCircles,[],1);
+    cCirclesInd = reshape(cCirclesInd,[],1);
 end
 if exist('cMarkers', 'var')
     cMarkers = reshape(cMarkers,[],1);
+else
+    cMarkers = cell(nSignals,1); cMarkers(:) = {'.'};
 end
 if exist('cColors', 'var')
     cColors = reshape(cColors,[],1);
 end
 dim = size(cData{1}, 2);
-nSignals = numel(cData);
 assert(dim <= 3, 'Not supported')
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
@@ -56,13 +58,22 @@ elseif dim == 2 || dim == 3
 %         nRows = 4;
 %     end
 %     nCols = ceil(nSignals/nRows);
-    nRows = 2;
-    nCols = ceil(nSignals/nRows);
-    
-    x0     = 10;
-    y0     = 50;
-    height = 300*nRows;
-    width  = 400*nCols;
+    if nSignals == 2
+        nRows = 1; 
+        nCols = 2;
+        x0     = 10;
+        y0     = 50;
+        height = 400;
+        width  = 500*nCols;
+    else
+        nRows = 2;
+        nCols = ceil(nSignals/nRows);
+        x0     = 10;
+        y0     = 50;
+        height = 300*nRows;
+        width  = 400*nCols;
+    end
+   
     %% Plot
     fig = figure('Name', 'Graph signals');
     tiledlayout(nRows, nCols);
@@ -78,44 +89,66 @@ elseif dim == 2 || dim == 3
         mData = cData{m};
         vSignal = cSignals{m};
         sigStr = cSigStr{m};
-        if ~exist('cNumCircles', 'var')
-            nCircles = length(vSignal);
+        if ~exist('cCirclesInd', 'var')
+            error('should be here')
+            vCirclesInd = 1:length(vSignal);
+            vRectInd = [];
         else
-            nCircles = cNumCircles{m};
+            vCirclesInd = cCirclesInd{m};
+            vRectInd = setdiff(1:length(vSignal),vCirclesInd);
         end
         ax(m) = nexttile;
-        if dim == 2
-            scatter3(mData(1:nCircles,1), mData(1:nCircles,2), vSignal(1:nCircles), [], ...
-                vSignal(1:nCircles), 'filled');
-            if nCircles < length(mData)
-                hold on;
-                scatter3(mData(nCircles+1:end,1), mData(nCircles+1:end,2), vSignal(nCircles+1:end), [], ...
-                    vSignal(nCircles+1:end), 'filled', 's');
+        if exist('tx', 'var') % Meaning: strcmp(sPlotParams.actualDataDist, 'BulgariBeacons') == 1
+            colormap(hot);
+            imagesc(grid.lon, (grid.lat), (reshape(vSignal, length(grid.lat), length(grid.lon))));
+            c=colorbar('TickLabelInterpreter', 'latex');
+            c.Label.String='dBm';
+            if cMapMin < cMapMax
+               caxis([cMapMin cMapMax]);
             end
-        else % dim == 3
-            scatter3(mData(1:nCircles,1), mData(1:nCircles,2), mData(1:nCircles,3), [], ...
-                vSignal(1:nCircles), 'filled');
-            if nCircles < length(mData)
-                hold on;
-                scatter3(mData(nCircles+1:end,1), mData(nCircles+1:end,2), mData(nCircles+1:end,3), [], ...
-                    vSignal(nCircles+1:end), 'filled', 's');
+            xlabel('Lon. [deg]'); 
+            ylabel('Lat. [deg]');
+            set(gca,'YDir','normal')
+            %set(get(gcf,'Children'),'YDir','normal');
+
+            hold on;
+            plot(tx.lon, tx.lat, 'db','MarkerFaceColor','b','MarkerSize',2.5);
+            plot(sense.lon, sense.lat, 'yo','MarkerSize',3);
+            
+        else
+            if dim == 2
+                scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), vSignal(vCirclesInd), [], ...
+                   vSignal(vCirclesInd), 'filled');
+                if vCirclesInd < length(mData)
+                    hold on;
+                    scatter3(mData(vRectInd,1), mData(vRectInd,2), vSignal(vRectInd), 50, ...
+                        vSignal(vRectInd), 'filled', 's');
+                end
+            else % dim == 3
+                scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), mData(vCirclesInd,3), [], ...
+                    vSignal(vCirclesInd), 'filled');
+                if vCirclesInd < length(mData)
+                    hold on;
+                    scatter3(mData(vRectInd,1), mData(vRectInd,2), mData(vRectInd,3), [], ...
+                        vSignal(vRectInd), 'filled', 's');
+                end
             end
-        end
-        colormap(gca, 'jet');
-        colorbar('TickLabelInterpreter', 'latex');
-        if cMapMin < cMapMax
-            caxis([cMapMin cMapMax]);
-        end
-        xlim([ min(mData(:,1)) max(mData(:,1))])
-        ylim([ min(mData(:,2)) max(mData(:,2))])
-        xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 14)
-        ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 14)
-        if dim == 2
-            view(2); %view(20,40);
-        else % dim == 3
-            view(30,75);
-            zlim([ min(mData(:,3)) max(mData(:,3))])
-            zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 14)
+            colormap(gca, 'jet'); warning('change to hot?');% colormap(gca, 'hot');
+            colorbar('TickLabelInterpreter', 'latex');
+            if cMapMin < cMapMax
+               caxis([cMapMin cMapMax]);
+            end
+            xlim([ min(mData(:,1)) max(mData(:,1))])
+            ylim([ min(mData(:,2)) max(mData(:,2))])
+            xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 14)
+            ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 14)
+            if dim == 2
+                view(2); %view(20,40);
+            else % dim == 3
+                view(30,75);
+                zlim([ min(mData(:,3)) max(mData(:,3))])
+                zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 14)
+            end
         end
         dispName = sigStr;
         

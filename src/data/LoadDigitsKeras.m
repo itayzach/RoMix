@@ -1,4 +1,4 @@
-function sDataset = LoadDigitsKeras(sPlotParams,sDatasetParams, N, n)
+function sDataset = LoadDigitsKeras(sPlotParams,sDatasetParams, N, n, nLabeled)
 nTrain = n;
 nTest = N - n;
 assert(nTest <= 10000, 'nTest should be less than 10000')
@@ -18,9 +18,7 @@ for i = 1:10
 end
 
 % Zero out labeled signals for ssl
-nLabeled = sDatasetParams.nLabeled;
 vNonLabeledInd = randperm(nTrain,nTrain-nLabeled);
-
 
 if isfield(sDatasetParams, 'b_runVAE') && sDatasetParams.b_runVAE
     [zTrain, zTest, vae] = LoadMnistLatent(sPlotParams,sDatasetParams, xTrain, xTest);

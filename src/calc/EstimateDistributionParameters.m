@@ -24,12 +24,18 @@ if numel(gmmNumComponents) > 1
     legend()
 else
     fprintf('Running fitgmdist with %d components... ', gmmNumComponents)
-    ts = tic;
-    options = statset('MaxIter',gmmMaxIter);
-    GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
-    t(1) = toc(ts);
+    converged = false;
+    numAttempts = 0;
+    while ~converged && numAttempts < 10
+        ts = tic;
+        options = statset('MaxIter',gmmMaxIter);
+        GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
+        t(1) = toc(ts);
+        converged = GMModel.Converged;
+        numAttempts = numAttempts + 1;
+    end
     assert(GMModel.Converged, 'GMM couldn''t converge...')
-    fprintf('Done after %d iterations with AIC = %.2f\n', GMModel.NumIterations, GMModel.AIC)
+    fprintf('Done after %d attemps (%d iterations with AIC = %.2f)\n', numAttempts, GMModel.NumIterations, GMModel.AIC)
 end
 
 gmmNumComponents = GMModel.NumComponents;

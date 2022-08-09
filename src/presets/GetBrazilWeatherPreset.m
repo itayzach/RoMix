@@ -3,6 +3,7 @@ function sPreset = GetBrazilWeatherPreset()
 sPreset.dim                = 2;
 sPreset.n                  = 148; % 148 / 196
 sPreset.N                  = 296;
+sPreset.nLabeled           = round(0.5*sPreset.n); %20;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
@@ -10,11 +11,10 @@ sPreset.verticesPDF        = 'BrazilWeather'; % 'Gaussian' / 'Uniform' / 'Grid' 
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sDatasetParams.monthNames  = {'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Ann'};
-sDatasetParams.nLabeled    = round(0.5*sPreset.n); %20;
+sDatasetParams.xTickNames  = {'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Ann'};
 sPreset.sDatasetParams     = sDatasetParams;
 %% Number of signals
-sPreset.nSignals           = numel(sDatasetParams.monthNames);
+sPreset.nSignals           = numel(sDatasetParams.xTickNames);
 %% Gaussian kernel width
 sPreset.omega              = 7; %700; % for nystrom kernel
 sPreset.omegaTilde         = 7; % for our method

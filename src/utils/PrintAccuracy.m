@@ -18,7 +18,7 @@ for ii = 1:nMethods
     end
 end
 fprintf('%s\n',repelem('-',15*5+7));
-fprintf('%-15s| %-16s| %-16s| %-15s| %-15s\n', 'Method','Proj. Acc.','Interp. Acc.','Train time [s]','Interp. time [s]');
+fprintf('%-15s| %-16s| %-16s| %-15s| %-15s\n', 'Method','Interp. Acc.','Extrap. Acc.','Train time [s]','Extrap. time [s]');
 fprintf('%s\n',repelem('-',15*5+7));
 for ii = 1:nMethods
     if sPreset.R > 0

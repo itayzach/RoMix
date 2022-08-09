@@ -4,11 +4,11 @@ ts = tic;
 invLambda = diag(1./lambdaPhi);
 
 if b_maskDataFitTerm
-    J = GetUnlabeledNodesMask(f);
+    vLabeledInd = GetUnlabeledNodesMask(f);
 else
-    J = eye(size(f,1));
+    vLabeledInd = (1:size(f,1))';
 end
-JPhi = J*Phi;
+JPhi = Phi(vLabeledInd,:);
 
 lastwarn(''); % clear last warning
 if gamma2 == 0 || isempty(L)
@@ -17,7 +17,7 @@ else
     assert(gamma2 > 0 && ~isempty(L))
     matToInv = JPhi.'*JPhi + gamma1*invLambda + gamma2*Phi.'*L*Phi;
 end
-C = matToInv \ (JPhi.'*f);
+C = matToInv \ (JPhi.'*f(vLabeledInd,:));
 
 warnMsg = lastwarn();
 if ~isempty(warnMsg) % catch warning

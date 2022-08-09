@@ -17,7 +17,8 @@ sPlotParams.b_plotWeights               = false;
 sPlotParams.b_plotC                     = false;
 sPlotParams.b_plotInnerProductMatrices  = false;
 sPlotParams.b_plotMercer                = false;
-sPlotParams.b_plotClustersAnalysis      = true;
+sPlotParams.b_plotClustersAnalysis      = false;
+sPlotParams.b_plotNumEigsPerComp        = false;
 %% Data
 sPlotParams.b_plotDataVsGmm             = true;
 %% Graph signals

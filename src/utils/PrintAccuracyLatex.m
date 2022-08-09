@@ -7,7 +7,7 @@ s = [s, '\begin{minipage}[c]{0.5\textwidth}', newline ];
 s = [s, '    \centering', newline ];
 s = [s, '    \begin{tabular}{ |l|l|l|l| }', newline ];
 s = [s, '    \hline', newline ];
-s = [s, '    Method & Proj. Acc. & Interp. Acc. & Train Time [s] \\', newline ];
+s = [s, '    Method & Interp. Acc. & Extrap. Acc. & Train Time [s] \\', newline ];
 s = [s, '    \hline\hline', newline ];
 for ii = 1:nMethods
     if sPreset.R > 1

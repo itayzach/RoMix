@@ -1,4 +1,4 @@
-function sDataset = LoadBrazilWeatherDataset(sDatasetParams, N, n)
+function sDataset = LoadBrazilWeatherDataset(sDatasetParams, N, n, nLabeled)
     T = readtable(fullfile('data','Brazilian_Weather_Stations-Temperature_1961-1990.xlsx'));
     
     % Remove entries with NaN
@@ -25,15 +25,15 @@ function sDataset = LoadBrazilWeatherDataset(sDatasetParams, N, n)
     sDataset.sData.x = dataRearranged(1:n,:);
     sDataset.sData.xt = dataRearranged;
     
-    nMonths = numel(sDatasetParams.monthNames);
+    nMonths = numel(sDatasetParams.xTickNames);
     mSignals = zeros(N, nMonths);
     for monthId = 1:nMonths
-        currMonth = sDatasetParams.monthNames{monthId};
+        currMonth = sDatasetParams.xTickNames{monthId};
         mSignals(:,monthId) = T.(currMonth)(rperm);
     end
     
     rpermUnlabeled = randperm(n);
-    rpermUnlabeled = rpermUnlabeled(1:n-sDatasetParams.nLabeled);
+    rpermUnlabeled = rpermUnlabeled(1:n-nLabeled);
     mSignalsMasked = mSignals(1:n,:);
     mSignalsMasked(rpermUnlabeled,:) = 0;
 

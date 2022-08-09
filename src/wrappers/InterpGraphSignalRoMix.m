@@ -14,11 +14,19 @@ if isfield(sDataset, 'vae'), sDistParams.vae = sDataset.vae; end
 % 2. Calculate Phi(xTrain) and lambdaPhi
 [sKernelParams, tTrainVec(3)] = CalcKernelParams(sDistParams, sPreset.omegaTilde);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex, tTrainVec(4)] = CalcAnalyticEigenvalues(sPreset.MTilde, sKernelParams);
-[ Phi, lambdaPhi, tTrainVec(4) ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xTrain);
+[Phi, lambdaPhi, tTrainVec(4)] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, xTrain);
 
 % 3. Find C
-Ln = [];
-[C, tTrainVec(5)] = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, Ln, mSig, sPreset.b_maskDataFitTerm);
+if sPreset.gamma2 > 0
+    [~, ~, ~, ~, Ln, tTrainVec(5)] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
+else
+    Ln = [];
+    tTrainVec(5) = 0;
+end
+if isfield(sDataset.sData, 'vLabeledInd')
+    assert(isequal(GetUnlabeledNodesMask(mSig),sort(sDataset.sData.vLabeledInd)));
+end
+[C, tTrainVec(6)] = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, Ln, mSig, sPreset.b_maskDataFitTerm);
 
 % 4. Project (reconstruct)
 mSigRecPhi = Phi*C;
@@ -33,7 +41,9 @@ tIntVec(2) = toc(ts);
 
 tTrain = sum(tTrainVec);
 tInt = sum(tIntVec);
-fprintf('RoMix: train took %.2f sec, interp took %.2f sec\n', tTrain, tInt);
+fprintf('RoMix: train took ');
+fprintf('%.2f + ', tTrainVec(1:end-1))
+fprintf('%.2f = %.2f sec, interp took %.2f sec\n', tTrainVec(end), tTrain, tInt);
 
 % ----------------------------------------------------------------------------------------------
 % Plots
@@ -54,7 +64,9 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotGaussianKernelEigfunc && 
     plotInd = [0 4]*(sPreset.dim == 1) + [0 11]*(sPreset.dim > 1);
     figTitle = 'Eigenfunctions of the Gaussian kernel (on $n$ nodes)';
     figName = 'Phi';
-    PlotEigenfuncvecScatter([], 'Gaussian', xTrain, [], plotInd(1), plotInd(end), Phi, [], [], [], figTitle, figName, '\phi' );
+    PlotEigenfuncvecScatter([], 'Gaussian', xTrain, [], plotInd(1), plotInd(end), Phi, C, 'C', [], figTitle, figName, '\phi' );
+end
+if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotGaussianKernelEigfunc
     figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
     PlotSpectrum([], [], lambdaPhi, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
 end
@@ -65,7 +77,7 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPres
         PlotClustersMeans(sPreset, sPlotParams, sDistParams);
     end
 end
-if sPlotParams.b_globalPlotEnable
+if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotNumEigsPerComp
     PlotNumEigsPerComp(sKernelParams);
 end
 if sPlotParams.b_globalPlotEnable

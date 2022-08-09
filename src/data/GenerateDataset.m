@@ -14,13 +14,13 @@ if strcmp(sPreset.verticesPDF, 'SineCosine')
 %     omega = 0.5*sum(sqrt(std(sDataset.sData.xt)))/sPreset.dim; %0.15;
 %     omegaTilde = 0.5*sum(sqrt(std(sDataset.sData.xt)))/sPreset.dim; %0.15;
 elseif strcmp(sPreset.verticesPDF, 'BrazilWeather') 
-    sDataset = LoadBrazilWeatherDataset(sPreset.sDatasetParams, sPreset.N, sPreset.n);
+    sDataset = LoadBrazilWeatherDataset(sPreset.sDatasetParams, sPreset.N, sPreset.n, sPreset.nLabeled);
 
 elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
     assert(strcmp(sPreset.dataGenTechnique, 'OneDraw'))
     if isfield(sPreset.sDatasetParams,'b_loadKeras') && sPreset.sDatasetParams.b_loadKeras
         assert(strcmp(sPreset.verticesPDF, 'MNIST'))
-        sDataset = LoadDigitsKeras(sPlotParams,sPreset.sDatasetParams, sPreset.N, sPreset.n);
+        sDataset = LoadDigitsKeras(sPlotParams, sPreset.sDatasetParams, sPreset.N, sPreset.n, sPreset.nLabeled);
     else
         sDataset = LoadDigitsDataset(sPlotParams,sPreset.verticesPDF, sPreset.sDatasetParams, sPreset.N, sPreset.n);
     end
@@ -39,9 +39,9 @@ elseif strcmp(sPreset.verticesPDF, 'MnistDist')
 elseif strcmp(sPreset.verticesPDF, 'MnistLatentVAE')
     assert(strcmp(sPreset.dataGenTechnique, 'OneDraw'))
     %error('change to one-hot encoding and then take argmax, like usps')
-    mnistLatent = load(['data', filesep, 'mnist', filesep, 'mnistLatentVAE', num2str(sPreset.dim), 'd.mat']);
-    z = double(mnistLatent.z);
-    labels = double(mnistLatent.labels');
+    sMnistLatent = load(['data', filesep, 'mnist', filesep, 'mnistLatentVAE', num2str(sPreset.dim), 'd.mat']);
+    z = double(sMnistLatent.z);
+    labels = double(sMnistLatent.labels');
     if ~isfield(sPreset.sDatasetParams, 'vPossibleLabels')
         vPossibleLabels = 0:9;
     else
@@ -63,17 +63,14 @@ elseif strcmp(sPreset.verticesPDF, 'MnistLatentVAE')
     sDataset.sData.yt = double(oneHotEnc);
 
 elseif strcmp(sPreset.verticesPDF, 'CoraLatentVGAE')
-%     assert(strcmp(sPreset.dataGenTechnique, 'OneDraw'))
-%     coraLatent = load('data\coraLatentVGAE.mat');
-%     z = double(coraLatent.z_mean);
-%     data = double(z(1:nTest,:));
-%     sDataset.sData.x = data(1:nTrain,:);
-%     sDataset.sData.xt = data;
-%     sDataset.sData.y = [];
-%     sDataset.sData.yt = [];
-%     omega = 1.5;
-%     omegaTilde = 1.5;
-%     sPreset.dim = size(data, 2);
+    assert(strcmp(sPreset.dataGenTechnique, 'OneDraw'))
+    sCoraLatent = load('data\coraLatentVGAE.mat');
+    z = double(sCoraLatent.z_mean);
+    data = double(z(1:sPreset.N,:));
+    sDataset.sData.x = data(1:sPreset.n,:);
+    sDataset.sData.xt = data;
+    sDataset.sData.y = [];
+    sDataset.sData.yt = [];
 elseif strcmp(sPreset.verticesPDF, 'Minnesota')   
 %     assert(strcmp(sPreset.dataGenTechnique, 'OneDraw'))
 %     G = gsp_minnesota();
@@ -135,9 +132,9 @@ elseif strcmp(sPreset.verticesPDF, 'TwoMoons')
         sPreset.sDatasetParams.b_loadTwoMoonsMatFile = false;
     end
     if strcmp(sPreset.dataGenTechnique, 'TwoDraws')
-        sDataset.sData = GenerateTwoMoonsDataset(sPreset.n, sPreset.N, sPreset.sDatasetParams.nLabeled, sPreset.sDatasetParams.b_loadTwoMoonsMatFile);
+        sDataset.sData = GenerateTwoMoonsDataset(sPreset.n, sPreset.N, sPreset.nLabeled, sPreset.sDatasetParams.b_loadTwoMoonsMatFile);
     elseif strcmp(sPreset.dataGenTechnique, 'OneDraw')
-        sData = GenerateTwoMoonsDataset(sPreset.N, 0, sPreset.sDatasetParams.nLabeled, sPreset.sDatasetParams.b_loadTwoMoonsMatFile);
+        sData = GenerateTwoMoonsDataset(sPreset.N, 0, sPreset.nLabeled, sPreset.sDatasetParams.b_loadTwoMoonsMatFile);
         data = sData.x;
         rperm = randperm(sPreset.N);
         dataRearranged = data(rperm,:);
@@ -232,7 +229,8 @@ elseif strcmp(sPreset.verticesPDF, 'Grid')
     %figure; plot(sDataset.sData.x(:,1),sDataset.sData.y,'.');
     %figure; scatter3(sDataset.sData.x(:,1),sDataset.sData.x(:,2),sDataset.sData.y,[],sDataset.sData.y,'filled');
     %figure; scatter(sDataset.sData.xt(:,1),sDataset.sData.xt(:,2)); hold on; scatter(sDataset.sData.x(:,1),sDataset.sData.x(:,2),'filled')
-
+elseif strcmp(sPreset.verticesPDF, 'BulgariBeacons')
+    sDataset = LoadBulgariBeacons(sPlotParams, sPreset.NLat, sPreset.NLon, sPreset.N, sPreset.n, sPreset.nLabeled);
 else
     error('unknown pdf')
 end

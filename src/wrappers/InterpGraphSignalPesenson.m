@@ -2,14 +2,12 @@ function [mSigCnvrtRecPw, mSigCnvrtPw, trainTime, intTime] = InterpGraphSignalPe
 
 xTrain = sDataset.sData.x;
 xInt = sDataset.sData.xt;
-n = size(xTrain,1);
 if isfield(sDataset.sData, 'ymasked')
     mSig = sDataset.sData.ymasked;
 else
     mSig = sDataset.sData.y;
 end
-vLabeledFlag = diag(GetUnlabeledNodesMask(mSig));
-vLabeledInd = find(vLabeledFlag);
+vLabeledInd = GetUnlabeledNodesMask(mSig);
 mSigLabeled = mSig(vLabeledInd,:);
 % ------------------------------------------------------------------------------------------
 % Reconstruction (on unlabeled training nodes)

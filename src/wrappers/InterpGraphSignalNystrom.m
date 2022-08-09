@@ -8,8 +8,7 @@ if isfield(sDataset.sData, 'ymasked')
 else
     mSig = sDataset.sData.y;
 end
-vLabeledFlag = diag(GetUnlabeledNodesMask(mSig));
-vLabeledInd = find(vLabeledFlag);
+vLabeledInd = GetUnlabeledNodesMask(mSig);
 % ------------------------------------------------------------------------------------------
 % Build adjacency and perform eigs
 % ------------------------------------------------------------------------------------------
@@ -22,7 +21,7 @@ tTrainVec(2) = toc(ts);
 % Reconstruction
 % ------------------------------------------------------------------------------------------
 ts = tic;
-mSigCoeffsV = pinv(V(vLabeledInd,:))*mSig(vLabeledInd,:); % same as pinv(V)*sig...
+mSigCoeffsV = pinv(V(vLabeledInd,:))*mSig(vLabeledInd,:);
 mSigRecV = V*mSigCoeffsV;
 mSigCnvrtRecV = ConvertSignalByDataset(sPreset.verticesPDF, mSigRecV);
 tTrainVec(3) = toc(ts);
@@ -47,12 +46,6 @@ if sPlotParams.b_globalPlotEnable && sPreset.b_runGraphSignals
     mSigRef    = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);
     mSigRefInt = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.yt);
     PlotGraphSignalsWrapper([], sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtRecV, mSigCnvrtNys, [], 'Nystrom')
-
-%     PlotGraphSignals(sPlotParams, ['debug'], 'Interpolation', ...
-%         {xTrain, xInt}, ...
-%         {V(:,end-30), VNys(:,end-30)}, ...
-%         {'$s$', '$\tilde{s}$'}, ...
-%         {sPreset.n, sPreset.n});
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotInnerProductMatrices
     PlotInnerProductMatrix([], VNys, [], '${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$', 'VNys');

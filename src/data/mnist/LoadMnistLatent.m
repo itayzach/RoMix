@@ -1,8 +1,4 @@
-function [zTrain, zTest, vae] = LoadMnistLatent(sPlotParams,sDatasetParams,xTrain,xTest,b_plotDecoded)
-
-if ~exist('b_plotDecoded', 'var')
-    b_plotDecoded = true;
-end
+function [zTrain, zTest, vae] = LoadMnistLatent(sPlotParams,sDatasetParams,xTrain,xTest)
 
 x_train = py.numpy.array(xTrain);
 x_test = py.numpy.array(xTest);
@@ -47,7 +43,7 @@ zTrain = double(z_train);
 zTest = double(z_test);
 
 %% Plot decoded
-if b_plotDecoded
+if sPlotParams.b_globalPlotEnable
     x_train_rec = pyrunfile(fullfile("vae", "vae_decoder.py"), "x", z=zTrain,vae=vae);
     xTrainRec = double(x_train_rec);
     plotInd = 1:50; %randperm(size(xTrain,1),50);

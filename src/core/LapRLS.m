@@ -4,7 +4,7 @@ n=size(W,1); % total examples
 I=eye(n);
 
 if b_maskDataFitTerm
-    J = GetUnlabeledNodesMask(f);
+    [~, J] = GetUnlabeledNodesMask(f);
 else
     J = I;
 end

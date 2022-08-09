@@ -1,9 +1,11 @@
-function [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vIntTime] = ...
+function [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd] = ...
     InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tTrainTime, tIntTime)
 [mAccRec(:,1), mAccStdRec(:,1)] = CalcErrAndAcc(tSigCnvrtRec(:,:,:,1), tSigCnvrtRecRef);
 [mAccInt(:,1), mAccStdInt(:,1)] = CalcErrAndAcc(tSigCnvrtInt(:,:,:,1), tSigCnvrtIntRef);
 vTrainTime = mean(tTrainTime,1);
 vIntTime = mean(tIntTime,1);
+vTrainTimeStd = std(tTrainTime,1);
+vIntTimeStd = std(tIntTime,1);
 if sPreset.b_compareMethods
     for methodInd = 2:size(tSigCnvrtRec,4)
         [mAccRec(:,methodInd), mAccStdRec(:,methodInd)] = CalcErrAndAcc(tSigCnvrtRec(:,:,:,methodInd), tSigCnvrtRecRef);
@@ -18,13 +20,11 @@ if sPreset.b_compareMethods
         PlotAccuracy(sPlotParams, mAccInt, mAccStdInt, ...
             sPreset.cMethods, [ sPreset.matrixForEigs '_Acc_eigs_0_to_' num2str(sPreset.M-1)]);
     end
-    if isfield(sPreset.sDatasetParams, 'monthNames')
+    if isfield(sPreset.sDatasetParams, 'xTickNames') && sPreset.nSignals > 1
         PlotAccuracy(sPlotParams, mAccInt, mAccStdInt, sPreset.cMethods, ...
-            'InterpAcc', [], sPreset.sDatasetParams.monthNames, 'Interpolation accuracy');
-        %{'Acc$(\tilde{s}^{{\bf RoMix}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf nys}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf rep}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf PW}}_m, \tilde{s}_m)$', 'Acc$(\tilde{s}^{{\bf kNN}}_m, \tilde{s}_m)$'}
+            'ExtrapAcc', [], sPreset.sDatasetParams.xTickNames, 'Extrapolation accuracy');
         PlotAccuracy(sPlotParams, mAccRec, mAccStdRec, sPreset.cMethods, ... 
-            'ProjAcc', [], sPreset.sDatasetParams.monthNames, 'Projection accuracy');
-            %{'Acc$(s^{{\bf RoMix}}_m, s_m)$', 'Acc$(s^{{\bf nys}}_m, s_m)$', 'Acc$(s^{{\bf rep}}_m, s_m)$', 'Acc$(s^{{\bf PW}}_m, s_m)$', 'Acc$(s^{{\bf kNN}}_m, s_m)$'}, ...
+            'InterpAcc', [], sPreset.sDatasetParams.xTickNames, 'Interpolation accuracy');
     end
 else
     if sPreset.nSignals == 1
@@ -35,10 +35,10 @@ else
             {'Acc$(\tilde{\psi}^{{\bf RoMix}}_m, \tilde{\psi}_m)$', 'Acc$(\psi^{{\bf RoMix}}_m, \psi_m)$'}, ...
             [sPreset.matrixForEigs '_Acc_eigs_0_to_' num2str(sPreset.M-1)]);
     end
-    if isfield(sPreset.sDatasetParams, 'monthNames')
+    if isfield(sPreset.sDatasetParams, 'xTickNames')
         PlotAccuracy(sPlotParams, [mAccInt(:,1), mAccRec(:,1)], [mAccStdInt(:,1) mAccStdRec(:,1)], ...
             {'Acc$(\tilde{s}^{{\bf RoMix}}_m, \tilde{s}_m)$', 'Acc$(s^{{\bf RoMix}}_m, s_m)$'}, ...
-            'ProjInterpAcc', [], sPreset.sDatasetParams.monthNames, 'Projection \& interpolation accuracy');
+            'InterpExtrapAcc', [], sPreset.sDatasetParams.xTickNames, 'Interpolation \& extrapolation accuracy');
     end
 end
 end

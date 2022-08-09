@@ -1,4 +1,4 @@
-function sDataset = LoadDigitsDataset(sPlotParams,actualDataDist, sDatasetParams, N, n)
+function sDataset = LoadDigitsDataset(sPlotParams,actualDataDist, sDatasetParams, N, n, nLabeled)
     nSets = ceil(N/1000);
     datasetInd = randperm(10, nSets);
     fprintf('Loading %s set %d... ',actualDataDist, datasetInd(1))
@@ -22,7 +22,7 @@ function sDataset = LoadDigitsDataset(sPlotParams,actualDataDist, sDatasetParams
             Ln_k = Ln_k*Ln;
         end
         S_opt_prev = false(N,1);
-        num_queries_to_add = sDatasetParams.nLabeled;
+        num_queries_to_add = nLabeled;
     
         Ln_k = 0.5*(Ln_k+Ln_k.');
         [S_opt, cutoff] = compute_opt_set_inc(Ln_k, k, num_queries_to_add, S_opt_prev);
@@ -57,7 +57,6 @@ function sDataset = LoadDigitsDataset(sPlotParams,actualDataDist, sDatasetParams
     mSignalsPermOrdered(n+1:N,:) = mSignalsPerm(vNonTrainInd,:);
 
     % Zero out labeled signals for ssl
-    nLabeled = sDatasetParams.nLabeled;
     mSignalsPermOrderedMasked = mSignalsPermOrdered(1:n,:);
     for classInd = 1:10
         vNonLabledInd = n/10*(classInd-1) + (nLabeled/10+1:n/10);

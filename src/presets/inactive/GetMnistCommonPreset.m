@@ -6,8 +6,10 @@ batchSize                  = 128;
 b_loadKeras                = true;
 b_forceLoadTrainedVAE      = true; % Forces load of a trained model on entire MNIST (60,000 train)
 %% Dataset parameters
+vPer                       = [0.01 0.05 (0.1:0.2:0.7)];
 sPreset.dim                = b_runVAE*latentDim + (1-b_runVAE)*28*28;
 sPreset.n                  = 15000; % cannot be less than 28*28 due to GMM
+sPreset.nLabeled           = round(vPer*sPreset.n);
 sPreset.N                  = 16000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
@@ -16,15 +18,16 @@ sPreset.verticesPDF        = 'MNIST'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMo
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
 sPreset.matrixForEigs      = 'Adjacency'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
-sDatasetParams.nLabeled    = round(0.8*sPreset.n);
 sDatasetParams.b_runVAE    = b_runVAE;
 sDatasetParams.latentDim   = latentDim;
 sDatasetParams.epochs      = epochs;
 sDatasetParams.batchSize   = batchSize;
 sDatasetParams.b_loadKeras = b_loadKeras;
 sDatasetParams.b_forceLoadTrainedVAE = b_forceLoadTrainedVAE;
+sDatasetParams.xTickNames  = strcat(cellfun(@num2str,(num2cell(100*vPer,numel(sPreset.nLabeled))), 'UniformOutput', false),'%');
+sDatasetParams.b_zoomInAcc = false;
 sPreset.sDatasetParams     = sDatasetParams;
-assert(sDatasetParams.nLabeled <= sPreset.n)
+assert(all(sPreset.nLabeled <= sPreset.n))
 %% Number of signals
 sPreset.nSignals           = 1; % After conversion from number of classes
 %% Gaussian kernel width
@@ -32,7 +35,7 @@ sPreset.omega              = 0.114*sPreset.dim; % for nystrom kernel
 sPreset.omegaTilde         = 0.114*sPreset.dim; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 0.1;
-sPreset.gmmMaxIter         = 2000;
+sPreset.gmmMaxIter         = 100;
 sPreset.gmmNumComponents   = b_runVAE*10 + (1-b_runVAE)*300;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;

@@ -236,7 +236,7 @@ else
 end
 
 % Override y and yt with eigenvectors
-if b_interpEigenvecs || (sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights)
+if b_interpEigenvecs || (~isempty(sPlotParams) && sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights)
     [W, ~, dist, D, Ln, ~] = CalcAdjacency(sDataset.sData.x, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
     if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotWeights
         PlotWeightsMatrix([], W, dist, D, Ln, sDataset.sData.x, sPreset.adjacencyType, sPreset.omega, sPreset.k);

@@ -13,19 +13,23 @@ gmmRegVal        = 1e-3;
 gmmMaxIter       = 2000;
 
 %% Load dataset
-actualDataDist = 'TwoMoons';
-nTrain = 200;
-nTest = 400;
-sDatasetParams.b_loadTwoMoonsMatFile = false;
-sDatasetParams.nLabeled = 2;
-interpMethod = 'TwoDraws';
+sPreset.n = 200;
+sPreset.N = 400;
+sPreset.nLabeled = 2;
+sPreset.verticesPDF = 'TwoMoons';
+sPreset.dataGenTechnique = 'TwoDraws';
+sPreset.sDatasetParams.b_loadTwoMoonsMatFile = false;
+sPreset.dim = 2;
 
-sDataset = GenerateDataset(actualDataDist, [], [], nTrain, nTest, interpMethod, sDatasetParams);
+b_interpEigenvecs = false;
+sPlotParams = [];
+
+sDataset = GenerateDataset(sPlotParams, sPreset, b_interpEigenvecs);
 sPlotParams.CalcEigenFuncsM = M;
 sPlotParams.PlotEigenFuncsM = min(M,12);
 sPlotParams.PlotSpectM      = min(M,12);
 sPlotParams.b_plotEigenfunctions = true;
-sPlotParams.actualDataDist = actualDataDist;
+sPlotParams.actualDataDist = sPreset.verticesPDF;
 sPlotParams.dim = 2;
 PlotTwoMoons(sPlotParams, sDataset)
 
@@ -55,8 +59,8 @@ gamma_I_eigrls = 0.1;
 sDistParams = EstimateDistributionParameters(sDataset.sData.x, gmmNumComponents, gmmRegVal, gmmMaxIter);
 nGmmPoints = 1000;
 PlotGMM('GMM', sDistParams.GMModel, nGmmPoints);
-nGmmPoints = nTrain;
-pltTitle = ['Dataset with n = ', num2str(nTrain), ' points'];
+nGmmPoints = sPreset.n;
+pltTitle = ['Dataset with n = ', num2str(sPreset.n), ' points'];
 plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
 windowStyle = 'normal';
 PlotDataset(sPlotParams, sDataset.sData.x, sDataset.sData.y, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle);

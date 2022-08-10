@@ -18,7 +18,7 @@ if sPreset.b_compareMethods
         PrintAccuracy(sPreset, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vIntTime, sPreset.cMethods);
     elseif b_interpEigenvecs
         PlotAccuracy(sPlotParams, mAccInt, mAccStdInt, ...
-            sPreset.cMethods, [ sPreset.matrixForEigs '_Acc_eigs_0_to_' num2str(sPreset.M-1)]);
+            sPreset.cMethods, [ sPreset.matrixForEigs '_Acc_eigs_0_to_' num2str(sPreset.M-1)], [95 100]);
     end
     if isfield(sPreset.sDatasetParams, 'xTickNames') && sPreset.nSignals > 1
         PlotAccuracy(sPlotParams, mAccInt, mAccStdInt, sPreset.cMethods, ...
@@ -33,7 +33,7 @@ else
     elseif b_interpEigenvecs
         PlotAccuracy(sPlotParams, [mAccInt(:,1), mAccRec(:,1)], [mAccStdInt(:,1), mAccStdRec(:,1)], ...
             {'Acc$(\tilde{\psi}^{{\bf RoMix}}_m, \tilde{\psi}_m)$', 'Acc$(\psi^{{\bf RoMix}}_m, \psi_m)$'}, ...
-            [sPreset.matrixForEigs '_Acc_eigs_0_to_' num2str(sPreset.M-1)]);
+            [sPreset.matrixForEigs '_Acc_eigs_0_to_' num2str(sPreset.M-1)], [95 100]);
     end
     if isfield(sPreset.sDatasetParams, 'xTickNames')
         PlotAccuracy(sPlotParams, [mAccInt(:,1), mAccRec(:,1)], [mAccStdInt(:,1) mAccStdRec(:,1)], ...

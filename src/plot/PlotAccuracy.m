@@ -1,4 +1,4 @@
-function [] = PlotAccuracy(sPlotParams, mAcc, mStd, cDispName, figName, minAcc, xTickNames, pltTitle, ylab, xlab, b_zoomIn)
+function [] = PlotAccuracy(sPlotParams, mAcc, mStd, cDispName, figName, vylim, xTickNames, pltTitle, ylab, xlab, b_zoomIn)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
@@ -19,13 +19,13 @@ for methodId = 1:nMethods
     hold on;
 end
 
-if ~exist('minAcc', 'var') || isempty(minAcc)
-    minAcc = min(mAcc(:))-2;
+if ~exist('vylim', 'var') || isempty(vylim)
+    vylim = [min(mAcc(:)), max(mAcc(:))];
 end
 if ~exist('ylab', 'var')
     ylab = 'Accuracy [$\%$]';
 end
-%ylim([max(0,minAcc), 100]);
+ylim(vylim);
 %xlim([0 M-1]);
 xlim([min(xVals), max(xVals)]);
 ylabel(ylab, 'Interpreter', 'latex', 'FontSize', 14)
@@ -43,14 +43,15 @@ else
     xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 end
 set(gca,'FontSize', 14);
-%if M < 20
-%    set(gca, 'XTick', 0:M-1);
-%end
+
+%% Size
 x0     = 10;
 y0     = 50;
 height = 350;
 width  = 600;
 set(gcf,'Position', [x0 y0 width height])
+
+%% Zoom in
 if exist('b_zoomIn', 'var') && ~isempty(b_zoomIn) && b_zoomIn
     p_ax=gca;
     srcPos =[45 92 150 93.5];

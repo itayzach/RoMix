@@ -70,7 +70,14 @@ elseif dim == 2 || dim == 3
         nCols = ceil(nSignals/nRows);
         x0     = 10;
         y0     = 50;
-        height = 300*nRows;
+        if dim == 2
+            xMax = max(cell2mat(cellfun(@max, cData, 'UniformOutput', false)));
+            xMin = max(cell2mat(cellfun(@min, cData, 'UniformOutput', false)));
+            hRatio = 2.5*(xMax(2) - xMin(2))/(xMax(1) - xMin(2));
+        else
+            hRatio = 1;
+        end
+        height = 300*hRatio*nRows;
         width  = 400*nCols;
     end
    
@@ -133,7 +140,7 @@ elseif dim == 2 || dim == 3
                         vSignal(vRectInd), 'filled', 's');
                 end
             end
-            colormap(gca, 'jet'); warning('change to hot?');% colormap(gca, 'hot');
+            colormap(gca, 'jet');
             colorbar('TickLabelInterpreter', 'latex');
             if cMapMin < cMapMax
                caxis([cMapMin cMapMax]);

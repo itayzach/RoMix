@@ -57,8 +57,8 @@ if exist('sDistParams', 'var')
         [~,z] = pca(x);
         x = z(:,1:pcaDim);
     end
-    xMax = max([max(xGmm); max(x)]);
-    xMin = min([min(xGmm); min(x)]);
+    xMax = max(x);
+    xMin = min(x);
     for i=1:1+b_spectclust
         if i == 2
             xGmm = x;
@@ -108,6 +108,11 @@ else
 end
 
 %% Dataset
+if ismember(actualDataDist, {'Uniform'}) && dim == 2
+    hRatio = 2*(xMax(2)-xMin(2))/(xMax(1)-xMin(1));
+else
+    hRatio = 1;
+end
 if dim == 1
     scatter(x, zeros(1,n), 50, ones(1,n), 'filled')
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
@@ -161,8 +166,8 @@ title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'Font
 if strcmp(windowStyle, 'normal')
     x0     = 400;
     y0     = 400;
-    height = 400;
-    width  = 600 + 600*(exist('b_plotDistModel', 'var') && b_plotDistModel);
+    height = hRatio*400;
+    width  = 600*(1 + (exist('b_plotDistModel', 'var') && b_plotDistModel));
     set(gcf,'Position', [x0 y0 width height])
 end
 set(0,'DefaultFigureWindowStyle',prevWindowStyle)

@@ -17,14 +17,16 @@ else
 end
 decSaveFolder = fullfile(pwd, 'vae','models',modelName,'dec_trained');
 encSaveFolder = fullfile(pwd, 'vae','models',modelName,'enc_trained');
-if isfolder(decSaveFolder) && isfolder(encSaveFolder)
+if isfolder(decSaveFolder) && isfolder(encSaveFolder) && sDatasetParams.b_forceLoadTrainedVAE
     % Load from trained model
     vae = pyrunfile(fullfile("vae", "vae_load.py"), "vae", enc_save_folder=encSaveFolder, dec_save_folder=decSaveFolder);
     fprintf('Loaded VAE from files\n')
 else
     % Train
-    assert(~sDatasetParams.b_forceLoadTrainedVAE, 'You wanted to load %s, but you''re training...', modelName)
-    MyMsgBox('Train VAE?', 'Train VAE', true);
+    MyMsgBox('Train VAE? This will take time...', 'Train VAE', true);
+    if isfolder(decSaveFolder) && isfolder(encSaveFolder)
+        MyMsgBox('Are you sure? trained model already exists (note that b_forceLoadTrainedVAE = false)', 'Train VAE', true)
+    end
     tic;
     [vae, history] = pyrunfile(fullfile("vae", "vae_train.py"), ["vae", "history"], x_train=x_train, x_test=x_test, ...
         latent_dim=uint32(sDatasetParams.latentDim), epochs=uint32(sDatasetParams.epochs), batch_size=uint32(sDatasetParams.batchSize), ...

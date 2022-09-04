@@ -1,13 +1,9 @@
-function [alpha, t] = LapRLS(W,f,L,lambda1,lambda2,interpRatio,b_renormalize, b_maskDataFitTerm)
+function [alpha, t] = LapRLS(W,f,L,lambda1,lambda2,interpRatio,b_renormalize)
 
 n=size(W,1); % total examples
 I=eye(n);
 
-if b_maskDataFitTerm
-    [~, J] = GetUnlabeledNodesMask(f);
-else
-    J = I;
-end
+[~, J] = GetUnlabeledNodesMask(f);
 
 lastwarn(''); % clear last warning
 ts = tic;

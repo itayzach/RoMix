@@ -51,7 +51,8 @@ if nargout >= 4
             fprintf('\n')
             warning(['Your graph has %d connected components! Your omega = %.2f is too small. ', ...
                 'Consider a bigger omega, like omega = %.2f\n'], nGraphComponents, omega ,ssl_heuristic_omega)
-        end 
+        end
+        fprintf('\n')
     else
         warning('n > 4000, eig will take time. skipping... ')
     end

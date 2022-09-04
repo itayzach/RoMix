@@ -14,7 +14,7 @@ end
 % Build adjacency and find alpha
 % ------------------------------------------------------------------------------------------
 [W, tTrainVec(1), ~, ~, Ln, tTrainVec(2)] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
-[mAlpha, tTrainVec(3)] = LapRLS(W, mSig, Ln, sPreset.gamma1Rep, sPreset.gamma2Rep, interpRatio, b_normalizeAlpha, sPreset.b_maskDataFitTerm);
+[mAlpha, tTrainVec(3)] = LapRLS(W, mSig, Ln, sPreset.gamma1Rep, sPreset.gamma2Rep, interpRatio, b_normalizeAlpha);
 % ------------------------------------------------------------------------------------------
 % Reconstruction
 % ------------------------------------------------------------------------------------------

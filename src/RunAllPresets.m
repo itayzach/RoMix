@@ -1,22 +1,26 @@
 %% Restart
 clc; clear; close all; 
 
+%% Run illustrative examples
+PlotGaussianKernelEigenfunsExample(); %Illustrate the first eigenfunctions of the 1-D Guassian kernel
+PlotGmmSwissRollExample();
+
 %% Run toy examples
 b_clearLastRun = false;
 b_saveFigures = true;
 selectedEigsPresets = {'Get1DUniformPreset', 'Get2DUniformPreset', 'GetSwissRollPreset'};
 for presetInd = 1:numel(selectedEigsPresets)
-    funcName = selectedEigsPresets{presetInd};
-    Main(funcName, b_saveFigures, b_clearLastRun);
+   funcName = selectedEigsPresets{presetInd};
+   Main(funcName, b_saveFigures, b_clearLastRun);
 end
 
 %% Run real world examples
 b_clearLastRun = false;
 b_saveFigures = true;
-selectedGraphSigPresets = {'GetBulgariBeaconsPreset', 'GetMnistPreset'};
+selectedGraphSigPresets = {'GetBulgariBeaconsPreset', 'GetMnistVaePreset'};
 for presetInd = 1:numel(selectedGraphSigPresets)
-    funcName = selectedGraphSigPresets{presetInd};
-    Main(funcName, b_saveFigures, b_clearLastRun);
+   funcName = selectedGraphSigPresets{presetInd};
+   Main(funcName, b_saveFigures, b_clearLastRun);
 end
 
 %% Run all other presets
@@ -31,6 +35,5 @@ for presetInd = 1:numel(sDir)
     end
 end
 %% Run additional scripts
-PlotGaussianKernelEigenfunsExample(); %Illustrate the first eigenfunctions of the 1-D Guassian kernel
 TwoMoonsClassifier;
 DigitsClassifier;

@@ -156,10 +156,13 @@ elseif strcmp(sPreset.verticesPDF, 'TwoSpirals')
     end
 elseif strcmp(sPreset.verticesPDF, 'SwissRoll')
     if strcmp(sPreset.dataGenTechnique, 'TwoDraws')
-        [sDataset.sData.x, sDataset.sData.S] = GenerateSwissRoll(sPreset.n, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, sPreset.sDatasetParams.height);
-        [sDataset.sData.xt, sDataset.sData.St] = GenerateSwissRoll(sPreset.N, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, sPreset.sDatasetParams.height);
+        [sDataset.sData.x, sDataset.sData.S] = GenerateSwissRoll(sPreset.n, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, ...
+            sPreset.sDatasetParams.height, sPreset.gmmNumComponents);
+        [sDataset.sData.xt, sDataset.sData.St] = GenerateSwissRoll(sPreset.N, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, ...
+            sPreset.sDatasetParams.height, sPreset.gmmNumComponents*sPreset.sDatasetParams.b_randn);
     elseif strcmp(sPreset.dataGenTechnique, 'OneDraw')
-        [data, S] = GenerateSwissRoll(sPreset.N, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, sPreset.sDatasetParams.height);
+        [data, S] = GenerateSwissRoll(sPreset.N, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, ...
+            sPreset.sDatasetParams.height, sPreset.gmmNumComponents*sPreset.sDatasetParams.b_randn);
         sDataset.sData.x = data(1:sPreset.n,:);
         sDataset.sData.xt = data;
         sDataset.sData.S = S(1:sPreset.n,:);
@@ -246,9 +249,8 @@ if b_interpEigenvecs
     [WRef, ~, distRef, DRef, LnRef] = CalcAdjacency(sDataset.sData.xt, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
     [V, VRef] = EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef);
     interpRatio = sPreset.N/sPreset.n;
-    if isfield(sDataset.sData, 'ymasked')
-        sDataset.sData = rmfield(sDataset.sData, 'ymasked');
-    end
+    sDataset.sData.ymasked = zeros(sPreset.n, sPreset.M);
+    sDataset.sData.ymasked(1:sPreset.nLabeled, :) = (1/sqrt(interpRatio))*V(1:sPreset.nLabeled, :);
     sDataset.sData.y = (1/sqrt(interpRatio))*V;
     sDataset.sData.yt = VRef;
 end

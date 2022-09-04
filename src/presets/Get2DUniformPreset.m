@@ -1,14 +1,15 @@
 function sPreset = Get2DUniformPreset()
 %% Dataset parameters
 sPreset.dim                = 2;
-sPreset.n                  = 1000;
-sPreset.N                  = 5000;
+sPreset.n                  = 2000;
+sPreset.nLabeled           = 1000;
+sPreset.N                  = 3000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 sPreset.verticesPDF        = 'Uniform'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+sPreset.matrixForEigs      = 'NormLap'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sDatasetParams.xMin        = [0, 0];
 sDatasetParams.xMax        = [SwissRollArclength(4*pi), 20];

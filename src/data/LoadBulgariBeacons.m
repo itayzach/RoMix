@@ -151,8 +151,8 @@ grid.Nlon = numel(vGridLon);
 
 %Load Edi's simulation vectors:
 fprintf(1,'Reading Signal-Pro results... ');
-[sensors_lat, sensors_lon, sensors_alt]= MyGetEdisSensorPos();
-simul_path=fullfile('data', 'bulgari', 'EdisSimulation');
+[sensors_lat, sensors_lon, sensors_alt]= GetSensorsPos();
+simul_path=fullfile('data', 'bulgari', 'SensorsSimulation');
 for siteInd=1:5
     load(fullfile(simul_path,sprintf('site%d.mat',siteInd)));
     Site(siteInd).lat=site.lat;
@@ -370,7 +370,7 @@ LoS(LoS<mean(p))=0;
 [~,tx_grid_lon_ind]=min(abs(grid.lon-site.tx_lon));
 end
 
-function [sensors_lat, sensors_lon, sensors_alt]= MyGetEdisSensorPos()
+function [sensors_lat, sensors_lon, sensors_alt]= GetSensorsPos()
 
 data= [...
 42	46	29.33	24	10	14.17	1533.549072

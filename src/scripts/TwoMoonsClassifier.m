@@ -63,7 +63,7 @@ nGmmPoints = sPreset.n;
 pltTitle = ['Dataset with n = ', num2str(sPreset.n), ' points'];
 plt2Title = ['Generated ' num2str(nGmmPoints), ' points from GMM with nEstComp = ' num2str(gmmNumComponents)];
 windowStyle = 'normal';
-PlotDataset(sPlotParams, sDataset.sData.x, sDataset.sData.y, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle);
+PlotDataset(sPlotParams, sPreset, sDataset.sData.x, sDataset.sData.y, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle);
 
 % Calculate eigenfunctions
 sKernelParams = CalcKernelParams(sDistParams, omega);

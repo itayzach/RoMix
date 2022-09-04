@@ -4,7 +4,7 @@ omega = sqrt(sigma/10); 0.3;
 mu = 5;
 
 n = 2000;
-firsEigInd = 0;
+firstEigInd = 0;
 lastEigInd = 5;
 M = lastEigInd+1;
 
@@ -33,9 +33,16 @@ sKernelParams = CalcKernelParams(sDistParams, omega);
 [ Phi, lambda ] = CalcAnalyticEigenfunctions(M, sKernelParams, x);
 
 figTitle = 'Eigenfunctions of the Gaussian kernel on $\mathbb{R}$';
-figName = 'PhiTilde';
-PlotEigenfuncvecScatter(sPlotParams, 'Gaussian', x, [], firsEigInd, lastEigInd, ...
-    Phi, [], [], [], [], figName, '\phi' );
+plotInd = firstEigInd:lastEigInd;
+[cData{1:numel(plotInd)}] = deal(x);
+cSigStr = RepLegend('\\phi', plotInd);
+[cNumCircles{1:numel(plotInd)}] = deal((1:n).');
+[cMarkers{1:numel(plotInd)}] = deal('.');
+PlotGraphSignals(sPlotParams, [], ...
+    ['PhiTilde_' ,num2str(plotInd(1)), '_to_', num2str(plotInd(end)) ], cData, ...
+    [mat2cell(Phi(:,plotInd+1),n,ones(1,numel(plotInd))), mat2cell(Phi(:,plotInd+1),n,ones(1,numel(plotInd)))], ...
+    cSigStr, cNumCircles, cMarkers, [], [], [min(min(Phi(:,plotInd+1))), max(max(Phi(:,plotInd+1)))]);
+
 % figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
 PlotSpectrum([], [], lambda, [], [], '\lambda_m', [], [], []);
 end

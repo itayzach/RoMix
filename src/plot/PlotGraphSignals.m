@@ -73,7 +73,10 @@ elseif dim == 2 || dim == 3
         if dim == 2
             xMax = max(cell2mat(cellfun(@max, cData, 'UniformOutput', false)));
             xMin = max(cell2mat(cellfun(@min, cData, 'UniformOutput', false)));
-            hRatio = 2.5*(xMax(2) - xMin(2))/(xMax(1) - xMin(2));
+            hRatio = (xMax(2) - xMin(2))/(xMax(1) - xMin(1));
+            hRatio = 2.5*hRatio;
+            %hRatio = 1.5*hRatio;
+            assert(hRatio > 0)
         else
             hRatio = 1;
         end

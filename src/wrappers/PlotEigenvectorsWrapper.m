@@ -1,29 +1,35 @@
-function PlotEigenvectorsWrapper(sPlotParams, sPreset, sDataset, lambdaPhi, Phi, PhiInt, LnRef, VRefToCompare, VIntToCompare, C)
+function PlotEigenvectorsWrapper(sPlotParams, sPreset, sDataset, mSigCnvrtRecRef, mSigCnvrtIntRef, mSigCnvrtRec, mSigCnvrtInt)
+xTrain = sDataset.sData.x;
 xInt = sDataset.sData.xt;
 % ----------------------------------------------------------------------------------------------
 % Plots
 % ----------------------------------------------------------------------------------------------
-if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
-    b_maskDataTermCMatrix = false;
-    Cint = RoMix(PhiInt, sPreset.gamma1, sPreset.gamma2, lambdaPhi, LnRef, VRefToCompare, b_maskDataTermCMatrix);
-    PlotCoeffsMatrix(C, '${\bf C}$', Cint, '${\bf C^{\bf int}}$');
-end
 if sPlotParams.b_globalPlotEnable && sPreset.dim <= 3
     if sPreset.dim == 1
         plotInd = 0:4;
-        PlotEigenfuncvecScatter(sPlotParams, sPreset.verticesPDF, xInt, [], plotInd(1), plotInd(end), ...
-            VRefToCompare, [], [], [], ['Eigenvectors extrapolation (N = ', num2str(sPreset.N), ')'], ...
-            'VInt', '\tilde{\psi}', VIntToCompare, '\tilde{\psi}^{{\bf RoMix}}');
+        [cMarkers{1:numel(plotInd)}] = deal('o');
+        [cMarkers{numel(plotInd)+1:numel(plotInd)*2}] = deal('.');
     else
         plotInd = 1:4;
-        [cData{1:numel(plotInd)*2}] = deal(xInt);
-        cSigStr = [RepLegend('\\tilde{\\psi}', plotInd), RepLegend('\\tilde{\\psi}^{{\\bf RoMix}}', plotInd)];
-        [cNumCircles{1:numel(plotInd)*2}] = deal((1:sPreset.N).');
         [cMarkers{1:numel(plotInd)*2}] = deal('.');
-        PlotGraphSignals(sPlotParams, ['Eigenvectors extrapolation (N = ', num2str(sPreset.N), ')'], ...
-            [sPreset.matrixForEigs, '_Eigs_',num2str(plotInd(1)), '_to_', num2str(plotInd(end)) ], cData, ...
-            [mat2cell(VRefToCompare(:,plotInd+1),sPreset.N,ones(1,numel(plotInd))), mat2cell(VIntToCompare(:,plotInd+1),sPreset.N,ones(1,numel(plotInd)))], ...
-            cSigStr, cNumCircles, cMarkers, [], [], [min(min(VRefToCompare(:,plotInd+1))), max(max(VRefToCompare(:,plotInd+1)))]);
     end
+
+    % Interpolation
+    [cData{1:numel(plotInd)*2}] = deal(xTrain);
+    cSigStr = [RepLegend('\\psi', plotInd), RepLegend('\\psi^{{\\bf RoMix}}', plotInd)];
+    [cNumCircles{1:numel(plotInd)*2}] = deal((1:sPreset.nLabeled).');
+    PlotGraphSignals(sPlotParams, ['Eigenvectors interpolation ($\ell = ', num2str(sPreset.nLabeled), '$, $n = ', num2str(sPreset.n), '$)'], ...
+        [sPreset.matrixForEigs, '_InterpEigs_',num2str(plotInd(1)), '_to_', num2str(plotInd(end)) ], cData, ...
+        [mat2cell(mSigCnvrtRecRef(:,plotInd+1),sPreset.n,ones(1,numel(plotInd))), mat2cell(mSigCnvrtRec(:,plotInd+1),sPreset.n,ones(1,numel(plotInd)))], ...
+        cSigStr, cNumCircles, cMarkers, [], [], [min(min(mSigCnvrtRecRef(:,plotInd+1))), max(max(mSigCnvrtRecRef(:,plotInd+1)))]);
+
+    % Extrapolation
+    [cData{1:numel(plotInd)*2}] = deal(xInt);
+    cSigStr = [RepLegend('\\tilde{\\psi}', plotInd), RepLegend('\\tilde{\\psi}^{{\\bf RoMix}}', plotInd)];
+    [cNumCircles{1:numel(plotInd)*2}] = deal((1:sPreset.N).');
+    PlotGraphSignals(sPlotParams, ['Eigenvectors extrapolation ($N = ', num2str(sPreset.N), '$)'], ...
+        [sPreset.matrixForEigs, '_ExtrapEigs_',num2str(plotInd(1)), '_to_', num2str(plotInd(end)) ], cData, ...
+        [mat2cell(mSigCnvrtIntRef(:,plotInd+1),sPreset.N,ones(1,numel(plotInd))), mat2cell(mSigCnvrtInt(:,plotInd+1),sPreset.N,ones(1,numel(plotInd)))], ...
+        cSigStr, cNumCircles, cMarkers, [], [], [min(min(mSigCnvrtIntRef(:,plotInd+1))), max(max(mSigCnvrtIntRef(:,plotInd+1)))]);
 end
 end

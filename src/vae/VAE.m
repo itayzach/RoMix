@@ -38,7 +38,7 @@ d_x_train = double(x_train);
 %% enc
 [z_mean, z_log_var, z_train] = pyrunfile("vae_encoder.py", ["z_mean", "z_log_var", "z"], data=x_train,vae=vae);
 zTrain = double(z_train);
-PlotDataset([], zTrain, yTrain, 'plot');
+PlotDataset([], [], zTrain, yTrain, 'plot');
 x_train_rec = pyrunfile("vae_decoder.py", "x", z=zTrain,vae=vae);
 xTrainRec = double(x_train_rec);
 plotInd = randperm(nTrain,50);
@@ -57,7 +57,7 @@ sDistParams = EstimateDistributionParameters(zTrain, gmmNumComponents, gmmRegVal
 PlotCovEigs([], sDistParams);
 nGmmPoints = nTrain;
 [zGmm,compIdx] = random(sDistParams.GMModel, nGmmPoints);
-PlotDataset([], zGmm, [], 'gmm');
+PlotDataset([], [], zGmm, [], 'gmm');
 zGmm = py.numpy.array(zGmm);
 x = pyrunfile("vae_decoder.py", "x", z=zGmm,vae=vae);
 d_x = double(x); 

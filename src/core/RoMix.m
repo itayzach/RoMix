@@ -1,13 +1,9 @@
-function [C, t] = RoMix(Phi, gamma1, gamma2, lambdaPhi, L, f, b_maskDataFitTerm)
+function [C, t] = RoMix(Phi, gamma1, gamma2, lambdaPhi, L, f)
 
 ts = tic;
 invLambda = diag(1./lambdaPhi);
 
-if b_maskDataFitTerm
-    vLabeledInd = GetUnlabeledNodesMask(f);
-else
-    vLabeledInd = (1:size(f,1))';
-end
+vLabeledInd = GetUnlabeledNodesMask(f);
 JPhi = Phi(vLabeledInd,:);
 
 lastwarn(''); % clear last warning

@@ -2,13 +2,14 @@ function sPreset = Get1DUniformPreset()
 %% Dataset parameters
 sPreset.dim                = 1;
 sPreset.n                  = 1000;
-sPreset.N                  = 5000;
+sPreset.nLabeled           = 500;
+sPreset.N                  = 3000;
 sPreset.k                  = 3;
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 sPreset.verticesPDF        = 'Uniform'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+sPreset.matrixForEigs      = 'NormLap'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sDatasetParams.xMin        = 0*ones(sPreset.dim,1);
 sDatasetParams.xMax        = 1*ones(sPreset.dim,1);

@@ -1,18 +1,32 @@
-function sPreset = GetSwissRollPreset()
+function sPreset = GetSwissRollPreset(b_randn)
+if ~exist('b_randn', 'var')
+    b_randn = false;
+end
 %% Dataset parameters
-sPreset.dim                = 3;
-sPreset.n                  = 1000;
-sPreset.N                  = 5000;
+sPreset.dim                = 3*(~b_randn) + 2*b_randn;
+sPreset.n                  = 2000;
+sPreset.nLabeled           = 1000;
+sPreset.N                  = 3000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 sPreset.verticesPDF        = 'SwissRoll'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-sPreset.matrixForEigs      = 'RandomWalk'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+sPreset.matrixForEigs      = 'NormLap'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% DatasetParams
 sDatasetParams.a           = 1;
 sDatasetParams.maxTheta    = 4*pi;
 sDatasetParams.height      = 20;
+sDatasetParams.b_randn     = b_randn;
+if b_randn
+    gmmNumComponents       = 5;
+    maxS = SwissRollArclength(sDatasetParams.maxTheta);
+    for c = 1:gmmNumComponents
+        sDatasetParams.sigma{c}    = [maxS/(5*gmmNumComponents), sDatasetParams.height/5];
+        sDatasetParams.mu{c}       = [(c/(gmmNumComponents+1))*maxS, sDatasetParams.height/2];
+        sDatasetParams.compProp{c} = 1/gmmNumComponents;
+    end
+end
 sPreset.sDatasetParams     = sDatasetParams;
 %% Number of signals
 sPreset.nSignals           = 1;
@@ -27,10 +41,14 @@ sPreset.omegaTilde         = eps/sqrt(2); % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-5;
 sPreset.gmmMaxIter         = 2000;
-sPreset.gmmNumComponents   = 20;
+if ~b_randn
+    sPreset.gmmNumComponents = 20;
+else
+    sPreset.gmmNumComponents = gmmNumComponents;
+end
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
-sPreset.MTilde             = 50*sPreset.gmmNumComponents;
+sPreset.MTilde             = 50*sPreset.gmmNumComponents*(~b_randn) + sPreset.M*b_randn;
 %% Regularizations
 sPreset.gamma1             = 1e-5;
 sPreset.gamma2             = 0;

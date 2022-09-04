@@ -36,7 +36,7 @@ assert(n == sPreset.n);
 N = size(xInt,1);
 mSigKnnInt(1:n,:) = mSigKnnRec;
 for i = 1:N-n
-    idx = knnsearch(xTrainLabeled, xInt(i+n,:), 'K', sPreset.knn);
+    [idx, D] = knnsearch(xTrainLabeled, xInt(i+n,:), 'K', sPreset.knn);
     w = D'./sum(D);
     mSigKnnInt(i+n,:) = sum(w.*mSigLabeled(idx,:));
 end

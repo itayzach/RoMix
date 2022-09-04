@@ -41,8 +41,8 @@ vRmseStd = std(mErr,[],1).';
 vMse = (sum(mErrNormed.^2,1)/R).';
 vCoh = (sum(mCoherence,1)/R).';
 vAcc = (100*sum((1-mErrNormed),1)/R).';
-assert(all(vAcc >= 0));
 vAccStd = 100*std(mErrNormed,[],1).';
+assert(all(vAcc >= 0) && all(vAccStd >= 0));
 
 %vAcc = vRmse;
 %vAccStd = vRmseStd;

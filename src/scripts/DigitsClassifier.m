@@ -32,7 +32,7 @@ sKernelParams = CalcKernelParams(sDistParams, sPreset.omegaTilde);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
      = CalcAnalyticEigenvalues(sPreset.MTilde, sKernelParams);
 [ Phi, lambdaPhi ] = CalcAnalyticEigenfunctions(sPreset.MTilde, sKernelParams, X);
-mSigHatPhi = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, [], sDataset.sData.ymasked, sPreset.b_maskDataFitTerm);
+mSigHatPhi = RoMix(Phi, sPreset.gamma1, sPreset.gamma2, lambdaPhi, [], sDataset.sData.ymasked);
 mSigRecPhi = Phi*mSigHatPhi;
 vSigCnvrtRecPhi = ConvertSignalByDataset(sPreset.verticesPDF, mSigRecPhi);
 vSigCnvrt       = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);

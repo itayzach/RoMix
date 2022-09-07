@@ -28,7 +28,8 @@ else
         MyMsgBox('Are you sure? trained model already exists (note that b_forceLoadTrainedVAE = false)', 'Train VAE', true)
     end
     tic;
-    [vae, history] = pyrunfile(fullfile("vae", "vae_train.py"), ["vae", "history"], x_train=x_train, x_test=x_test, ...
+    [x_train_vae, x_test_vae] = pyrunfile(fullfile("vae", "load_mnist_keras.py"), ["x_train", "x_test", "y_train", "y_test"], num_train=uint32(sDatasetParams.nTrainVAE),num_test=uint32(sDatasetParams.nTestVAE));
+    [vae, history] = pyrunfile(fullfile("vae", "vae_train.py"), ["vae", "history"], x_train=x_train_vae, x_test=x_test_vae, ...
         latent_dim=uint32(sDatasetParams.latentDim), epochs=uint32(sDatasetParams.epochs), batch_size=uint32(sDatasetParams.batchSize), ...
         enc_save_folder=encSaveFolder, dec_save_folder=decSaveFolder);
     histMat = struct(history.history);

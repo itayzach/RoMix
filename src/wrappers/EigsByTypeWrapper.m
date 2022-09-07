@@ -11,7 +11,7 @@ omega              = sPreset.omega; % for W
 sDatasetParams     = sPreset.sDatasetParams;
 b_debugUseAnalytic = sPreset.b_debugUseAnalytic;
 b_takeEigsFromWRef = sPreset.b_takeEigsFromWRef;
-interpRatio        = N/n;
+interpRatio        = sPreset.interpRatio;
 
 xTrain = sDataset.sData.x;
 xInt = sDataset.sData.xt;

@@ -1,4 +1,4 @@
-function fig = PlotDataset(sPlotParams, sPreset, x, y, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle, b_transform)
+function fig = PlotDataset(sPlotParams, sPreset, x, y, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle, b_transform, cXAxisLabels)
 prevWindowStyle = get(0,'DefaultFigureWindowStyle');
 if ~exist('windowStyle', 'var')
     windowStyle = prevWindowStyle;
@@ -14,6 +14,11 @@ if exist('sPlotParams', 'var') && ~isempty(sPlotParams)
     actualDataDist = sPlotParams.actualDataDist;
 else
     actualDataDist = '';
+end
+
+if ~exist('cXAxisLabels', 'var') || ~isempty(cXAxisLabels)
+    cXAxisLabels{1} = '$z_1$';
+    cXAxisLabels{2} = '$z_2$';
 end
 
 if ismember(actualDataDist, {'USPS', 'MNIST'})
@@ -104,8 +109,8 @@ if exist('sDistParams', 'var')
             end
             grid on;
             if ismember(actualDataDist, {'SwissRoll'})
-                xlabel('$z_1$', 'interpreter', 'latex', 'FontSize', 16);
-                ylabel('$z_2$', 'interpreter', 'latex', 'FontSize', 16);
+                xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
+                ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
             else
                 xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
                 ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
@@ -171,8 +176,8 @@ elseif dim == 2
         grid on;
     end
     if ismember(actualDataDist, {'SwissRoll'})
-        xlabel('$z_1$', 'interpreter', 'latex', 'FontSize', 16);
-        ylabel('$z_2$', 'interpreter', 'latex', 'FontSize', 16);
+        xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
+        ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
     else
         xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
         ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);

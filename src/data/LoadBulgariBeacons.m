@@ -112,7 +112,7 @@ end
 
 %% Plot
 if sPlotParams.b_globalPlotEnable
-    fig1 = figure(1); clf;
+    fig1 = figure('Name', 'Bulgari DEM');
     ShowDEM(sFullMap.Z, sFullMap.R); hold on;
     plot(sense.lon, sense.lat, 'yo','MarkerFaceColor','y','MarkerSize',3);
     %text(sense.lon, sense.lat, num2str([1:Nsensors]'));
@@ -226,7 +226,7 @@ y_M = y(sense.ind);
 
 %Show the signal pro map
 if sPlotParams.b_globalPlotEnable
-    fig2 = figure(2); clf; colormap(hot);   
+    fig2 = figure('Name', 'Signal-pro'); colormap(hot);   
     %calc total received power due to SignalPro:
     y_sigPro_mw=0;
     for(source=1:Ns)
@@ -400,7 +400,7 @@ sensors_alt=data(:,7);
 end
 
 function fmap = BuildFullMap(Z,R)
-figure(1); clf; %h=ShowDEM(Z,R);
+%figure;(1); clf; %h=ShowDEM(Z,R);
 % if PRINT
 %     fname='pics\Bulgari'; print(fname,'-dpdf'); print(fname,'-depsc'); print(fname,'-dtiff');
 % end
@@ -419,12 +419,13 @@ if any(isnan(fmap.Z(:)))
     warning('There are still NaN within Z');
 end
 
+fig = figure;
 h=ShowDEM(fmap.Z,fmap.R);
-    
 fmap.Nlat=size(Z,1); %# of latitudes entries
 fmap.Nlon=size(Z,2); %# of longitudes entries
 fmap.lon=h.XData(1,:)'; %all lon points in the figure
 fmap.lat=h.YData(:,1); %all lat points in the figure
+close(fig);
 
 end
 

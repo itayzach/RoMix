@@ -23,19 +23,22 @@ if numel(gmmNumComponents) > 1
     figure; plot(gmmNumComponents, vAIC, 'DisplayName', 'AIC'); 
     legend()
 else
-    fprintf('Running fitgmdist with %d components... ', gmmNumComponents)
+    totalAttempts = 10;
+    fprintf('Running fitgmdist with %d components (%d attempts)... ', gmmNumComponents, totalAttempts)
     converged = false;
     numAttempts = 0;
-    while ~converged && numAttempts < 10
+    warning('off','stats:gmdistribution:FailedToConverge');
+    while ~converged && numAttempts < totalAttempts
         ts = tic;
         options = statset('MaxIter',gmmMaxIter);
         GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
         t(1) = toc(ts);
         converged = GMModel.Converged;
         numAttempts = numAttempts + 1;
+        fprintf('%d... ', numAttempts)
     end
-    assert(GMModel.Converged, 'GMM couldn''t converge...')
-    fprintf('Done after %d attemps (%d iterations with AIC = %.2f)\n', numAttempts, GMModel.NumIterations, GMModel.AIC)
+    assert(converged, 'GMM couldn''t converge...')
+    fprintf('\nDone after %d attempts (%d iterations with AIC = %.2f)\n', numAttempts, GMModel.NumIterations, GMModel.AIC)
 end
 
 gmmNumComponents = GMModel.NumComponents;

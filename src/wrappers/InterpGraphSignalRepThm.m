@@ -1,6 +1,5 @@
 function [mSigCnvrtRecRep, mSigCnvrtRep, tTrain, tInt, mAlpha] = InterpGraphSignalRepThm(sPlotParams, sPreset, sDataset)
 
-interpRatio = sPreset.N/sPreset.n;
 b_normalizeAlpha = false;
 
 xTrain = sDataset.sData.x;
@@ -14,7 +13,7 @@ end
 % Build adjacency and find alpha
 % ------------------------------------------------------------------------------------------
 [W, tTrainVec(1), ~, ~, Ln, tTrainVec(2)] = CalcAdjacency(xTrain, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
-[mAlpha, tTrainVec(3)] = LapRLS(W, mSig, Ln, sPreset.gamma1Rep, sPreset.gamma2Rep, interpRatio, b_normalizeAlpha);
+[mAlpha, tTrainVec(3)] = LapRLS(W, mSig, Ln, sPreset.gamma1Rep, sPreset.gamma2Rep, sPreset.interpRatio, b_normalizeAlpha);
 % ------------------------------------------------------------------------------------------
 % Reconstruction
 % ------------------------------------------------------------------------------------------

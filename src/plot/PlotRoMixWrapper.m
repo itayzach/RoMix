@@ -16,16 +16,6 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotDataVsGmm
         PlotDataset(sPlotParams, sPreset, sDataset.sData.S, sDataset.sData.y, pltTitle, sDistParams, nGmmPoints, plt2Title, windowStyle, b_transform);
     end
 end
-if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotGaussianKernelEigfunc && sPreset.dim <= 3
-    plotInd = [0 4]*(sPreset.dim == 1) + [0 11]*(sPreset.dim > 1);
-    figTitle = 'Eigenfunctions of the Gaussian kernel (on $n$ nodes)';
-    figName = 'Phi';
-    PlotEigenfuncvecScatter([], 'Gaussian', xTrain, [], plotInd(1), plotInd(end), Phi, C, 'C', [], figTitle, figName, '\phi' );
-end
-if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotGaussianKernelEigfunc
-    figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-    PlotSpectrum([], [], lambdaPhi, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
-end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPreset.dim > 1
     PlotGaussianEllipses(sPlotParams, sDistParams);
     PlotCovEigs(sPlotParams, sDistParams);
@@ -35,6 +25,16 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPres
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotNumEigsPerComp
     PlotNumEigsPerComp(sKernelParams);
+end
+if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotGaussianKernelEigfunc && sPreset.dim <= 3
+    plotInd = [0 4]*(sPreset.dim == 1) + [0 11]*(sPreset.dim > 1);
+    figTitle = 'Eigenfunctions of the Gaussian kernel (on $n$ nodes)';
+    figName = 'Phi';
+    PlotEigenfuncvecScatter([], 'Gaussian', xTrain, [], plotInd(1), plotInd(end), Phi, C, 'C', [], figTitle, figName, '\phi' );
+end
+if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotGaussianKernelEigfunc
+    figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
+    PlotSpectrum([], [], lambdaPhi, [], [], '\tilde{\lambda}^{\phi}_m', [], [], figTitle);
 end
 if sPlotParams.b_globalPlotEnable
     mSigCnvrtRecRef = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);

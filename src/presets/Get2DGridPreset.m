@@ -14,7 +14,7 @@ sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
 sPreset.verticesPDF        = 'Grid'; % 'Gaussian' / 'Uniform' / 'Grid' / 'TwoMoons' / 'SwissRoll' / 'MnistLatentVAE' / 'CoraLatentVGAE' / 'BrazilWeather'
 sPreset.adjacencyType      = 'GaussianKernel'; % 'NearestNeighbor' / 'GaussianKernel'
-sPreset.matrixForEigs      = 'Laplacian'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
+sPreset.matrixForEigs      = 'NormLap'; % 'Adjacency' / 'RandomWalk' / 'Laplacian' / 'NormLap'
 %% Number of signals
 sPreset.nSignals           = 1;
 %% Gaussian kernel width

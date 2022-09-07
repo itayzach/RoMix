@@ -6,8 +6,8 @@ PlotGaussianKernelEigenfunsExample(); %Illustrate the first eigenfunctions of th
 PlotGmmSwissRollExample();
 
 %% Run toy examples
-b_clearLastRun = false;
 b_saveFigures = true;
+b_clearLastRun = false;
 selectedEigsPresets = {'Get1DUniformPreset', 'Get2DUniformPreset', 'GetSwissRollPreset'};
 for presetInd = 1:numel(selectedEigsPresets)
    funcName = selectedEigsPresets{presetInd};
@@ -15,8 +15,8 @@ for presetInd = 1:numel(selectedEigsPresets)
 end
 
 %% Run real world examples
-b_clearLastRun = false;
 b_saveFigures = true;
+b_clearLastRun = false;
 selectedGraphSigPresets = {'GetBulgariBeaconsPreset', 'GetMnistVaePreset'};
 for presetInd = 1:numel(selectedGraphSigPresets)
    funcName = selectedGraphSigPresets{presetInd};
@@ -24,8 +24,8 @@ for presetInd = 1:numel(selectedGraphSigPresets)
 end
 
 %% Run all other presets
-b_clearLastRun = true;
 b_saveFigures = false;
+b_clearLastRun = true;
 presetsDir = 'presets';
 sDir = dir(fullfile('presets','*.m'));
 for presetInd = 1:numel(sDir)
@@ -34,6 +34,7 @@ for presetInd = 1:numel(sDir)
         Main(funcName, b_saveFigures, b_clearLastRun);
     end
 end
+
 %% Run additional scripts
 TwoMoonsClassifier;
 DigitsClassifier;

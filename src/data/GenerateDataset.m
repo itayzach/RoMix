@@ -248,10 +248,9 @@ end
 if b_interpEigenvecs
     [WRef, ~, distRef, DRef, LnRef] = CalcAdjacency(sDataset.sData.xt, sPreset.adjacencyType, sPreset.sDistanceParams, sPreset.omega, sPreset.k, sPreset.nnValue);
     [V, VRef] = EigsByTypeWrapper(sPlotParams, sPreset, sDataset, W, D, Ln, WRef, DRef, LnRef);
-    interpRatio = sPreset.N/sPreset.n;
     sDataset.sData.ymasked = zeros(sPreset.n, sPreset.M);
-    sDataset.sData.ymasked(1:sPreset.nLabeled, :) = (1/sqrt(interpRatio))*V(1:sPreset.nLabeled, :);
-    sDataset.sData.y = (1/sqrt(interpRatio))*V;
+    sDataset.sData.ymasked(1:sPreset.nLabeled, :) = (1/sqrt(sPreset.interpRatio))*V(1:sPreset.nLabeled, :);
+    sDataset.sData.y = (1/sqrt(sPreset.interpRatio))*V;
     sDataset.sData.yt = VRef;
 end
 

@@ -15,5 +15,5 @@ PlotAccuracy(sPlotParams, mAccInt, mAccStdInt, sPreset.cMethods, ...
 mTrainTime = reshape([sResults(:).vTrainTime], numel(sPreset.cMethods),[])';
 mTrainTimeStd = reshape([sResults(:).vTrainTimeStd], numel(sPreset.cMethods),[])';
 PlotAccuracy(sPlotParams, mTrainTime, mTrainTimeStd, sPreset.cMethods, ...
-    'nLabelTrainTime', [], xTickNames, 'Train time', 'Time [s]');
+    'nLabelTrainTime', [], xTickNames, 'Interpolation time', 'Time [s]');
 end

@@ -3,7 +3,7 @@ windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
 [M, nMethods] = size(mAcc);
-fig = figure('Name', 'Accuracy');
+fig = figure('Name', figName);
 if ~exist('xTickNames', 'var') || isempty(xTickNames)
     xVals = (0:M-1)';
 else

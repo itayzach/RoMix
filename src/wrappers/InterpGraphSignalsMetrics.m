@@ -4,8 +4,8 @@ function [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, v
 [mAccInt(:,1), mAccStdInt(:,1)] = CalcErrAndAcc(tSigCnvrtInt(:,:,:,1), tSigCnvrtIntRef);
 vTrainTime = mean(tTrainTime,1);
 vIntTime = mean(tIntTime,1);
-vTrainTimeStd = std(tTrainTime,1);
-vIntTimeStd = std(tIntTime,1);
+vTrainTimeStd = std(tTrainTime,[],1);
+vIntTimeStd = std(tIntTime,[],1);
 if sPreset.b_compareMethods
     for methodInd = 2:size(tSigCnvrtRec,4)
         [mAccRec(:,methodInd), mAccStdRec(:,methodInd)] = CalcErrAndAcc(tSigCnvrtRec(:,:,:,methodInd), tSigCnvrtRecRef);

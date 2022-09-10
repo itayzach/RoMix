@@ -1,7 +1,7 @@
 function sPreset = GetMnistCommonPreset(b_runVAE)
 %% VAE parameters
 latentDim                  = 20;
-epochs                     = 200;
+epochs                     = 600;
 batchSize                  = 128;
 nTrainVAE                  = 60000;
 nTestVAE                   = 10000;
@@ -10,9 +10,9 @@ b_forceLoadTrainedVAE      = true; % Forces load of a trained model on entire MN
 %% Dataset parameters
 vPer                       = [0.01 0.05 (0.1:0.2:0.7)];
 sPreset.dim                = b_runVAE*latentDim + (1-b_runVAE)*28*28;
-sPreset.n                  = 15000; % cannot be less than 28*28 due to GMM
+sPreset.n                  = 24000; % cannot be less than 28*28 due to GMM
 sPreset.nLabeled           = round(vPer*sPreset.n);
-sPreset.N                  = 16000;
+sPreset.N                  = sPreset.n + 10000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'
@@ -38,8 +38,8 @@ sPreset.nSignals           = 1; % After conversion from number of classes
 sPreset.omega              = 0.114*sPreset.dim; % for nystrom kernel
 sPreset.omegaTilde         = 0.114*sPreset.dim; % for our method
 %% GMM params
-sPreset.gmmRegVal          = 0.1;
-sPreset.gmmMaxIter         = 100;
+sPreset.gmmRegVal          = 1e-4;
+sPreset.gmmMaxIter         = 200;
 sPreset.gmmNumComponents   = b_runVAE*10 + (1-b_runVAE)*300;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;

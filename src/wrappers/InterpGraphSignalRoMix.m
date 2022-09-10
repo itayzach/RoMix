@@ -42,13 +42,14 @@ mSigInt = PhiInt*C;
 mSigCnvrtInt = ConvertSignalByDataset(sPreset.verticesPDF, mSigInt);
 tIntVec(2) = toc(ts);
 
+% 6. Take time
 tTrain = sum(tTrainVec);
 tInt = sum(tIntVec);
 fprintf('RoMix: train took ');
 fprintf('%.2f + ', tTrainVec(1:end-1))
 fprintf('%.2f = %.2f sec, interp took %.2f sec\n', tTrainVec(end), tTrain, tInt);
 
-% 6. Plot
+% 7. Plot
 PlotRoMixWrapper(sPlotParams, sPreset, sDataset, sDistParams, sKernelParams, Phi, C, lambdaPhi, mSigCnvrtRec, mSigCnvrtInt, PhiInt);
 end
 

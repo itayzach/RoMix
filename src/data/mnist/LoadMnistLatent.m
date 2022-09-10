@@ -9,14 +9,11 @@ if sDatasetParams.b_loadKeras
 else
     modelName = [];
 end
-modelName = [modelName, 'd' num2str(sDatasetParams.latentDim), '_e', num2str(sDatasetParams.epochs), '_b', num2str(sDatasetParams.batchSize)];
-if sDatasetParams.b_forceLoadTrainedVAE
-    modelName = [modelName, '_n60000'];
-else
-    modelName = [modelName, '_n' num2str(size(xTrain,1))];
-end
-decSaveFolder = fullfile(pwd, 'vae','models',modelName,'dec_trained');
-encSaveFolder = fullfile(pwd, 'vae','models',modelName,'enc_trained');
+modelName = [modelName, 'd' num2str(sDatasetParams.latentDim), '_e', num2str(sDatasetParams.epochs), ...
+    '_b', num2str(sDatasetParams.batchSize), '_n' num2str(sDatasetParams.nTrainVAE)];
+modelFolder   = fullfile(pwd,'vae','models',modelName);
+decSaveFolder = fullfile(modelFolder,'dec_trained');
+encSaveFolder = fullfile(modelFolder,'enc_trained');
 if isfolder(decSaveFolder) && isfolder(encSaveFolder) && sDatasetParams.b_forceLoadTrainedVAE
     % Load from trained model
     vae = pyrunfile(fullfile("vae", "vae_load.py"), "vae", enc_save_folder=encSaveFolder, dec_save_folder=decSaveFolder);
@@ -28,16 +25,15 @@ else
         MyMsgBox('Are you sure? trained model already exists (note that b_forceLoadTrainedVAE = false)', 'Train VAE', true)
     end
     tic;
-    [x_train_vae, x_test_vae] = pyrunfile(fullfile("vae", "load_mnist_keras.py"), ["x_train", "x_test", "y_train", "y_test"], num_train=uint32(sDatasetParams.nTrainVAE),num_test=uint32(sDatasetParams.nTestVAE));
+    [x_train_vae, x_test_vae] = pyrunfile(fullfile("vae", "load_mnist_keras.py"), ["x_train", "x_test", "y_train", "y_test"], ...
+        num_train=uint32(sDatasetParams.nTrainVAE),num_test=uint32(sDatasetParams.nTestVAE));
     [vae, history] = pyrunfile(fullfile("vae", "vae_train.py"), ["vae", "history"], x_train=x_train_vae, x_test=x_test_vae, ...
         latent_dim=uint32(sDatasetParams.latentDim), epochs=uint32(sDatasetParams.epochs), batch_size=uint32(sDatasetParams.batchSize), ...
         enc_save_folder=encSaveFolder, dec_save_folder=decSaveFolder);
-    histMat = struct(history.history);
-    figure; plot(cellfun(@double,cell(history.epoch)), cellfun(@double,cell(histMat.loss)));
     t = toc;
     fprintf('Training took %.2f minutes\n', t/60)
+    PlotVAELoss(sPlotParams, history);
 end
-
 
 %% Encoder
 [~, ~, z_train] = pyrunfile(fullfile("vae", "vae_encoder.py"), ["z_mean", "z_log_var", "z"], data=x_train,vae=vae);

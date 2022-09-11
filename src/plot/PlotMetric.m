@@ -1,8 +1,8 @@
-function [] = PlotAccuracy(sPlotParams, mAcc, mStd, cDispName, figName, vylim, xTickNames, pltTitle, ylab, xlab, b_zoomIn)
+function [] = PlotMetric(sPlotParams, mVals, mStd, cDispName, figName, vylim, xTickNames, pltTitle, ylab, xlab, b_zoomIn)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
-[M, nMethods] = size(mAcc);
+[M, nMethods] = size(mVals);
 fig = figure('Name', figName);
 if ~exist('xTickNames', 'var') || isempty(xTickNames)
     xVals = (0:M-1)';
@@ -13,20 +13,19 @@ else
     end
 end
 for methodId = 1:nMethods
-    vAcc = mAcc(:,methodId);
+    vAcc = mVals(:,methodId);
     vStd = mStd(:, methodId);
     errorbar(xVals, vAcc, vStd, 'Marker', 'o', 'LineStyle', '-', 'LineWidth', 2, 'DisplayName', cDispName{methodId});
     hold on;
 end
 
 if ~exist('vylim', 'var') || isempty(vylim)
-    vylim = [min(mAcc(:)), max(mAcc(:))];
+    vylim = [min(mVals(:)), max(mVals(:))];
 end
-if ~exist('ylab', 'var')
+if ~exist('ylab', 'var') || isempty(ylab)
     ylab = 'Accuracy [$\%$]';
 end
 ylim(vylim);
-%xlim([0 M-1]);
 xlim([min(xVals), max(xVals)]);
 ylabel(ylab, 'Interpreter', 'latex', 'FontSize', 14)
 legend('Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2)

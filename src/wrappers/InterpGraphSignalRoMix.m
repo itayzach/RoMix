@@ -10,6 +10,7 @@ end
 % 1. Estimate distribution parameters (GMM)
 [sDistParams, tTrainVec(1:2)] = EstimateDistributionParameters(xTrain, sPreset.gmmNumComponents, sPreset.gmmRegVal, sPreset.gmmMaxIter);
 if isfield(sDataset, 'vae'), sDistParams.vae = sDataset.vae; end
+PlotRoMixDatasetAndGmm(sPlotParams, sPreset, sDataset, sDistParams);
 
 % 2. Calculate Phi(xTrain) and lambdaPhi
 [sKernelParams, tTrainVec(3)] = CalcKernelParams(sDistParams, sPreset.omegaTilde);
@@ -50,6 +51,8 @@ fprintf('%.2f + ', tTrainVec(1:end-1))
 fprintf('%.2f = %.2f sec, interp took %.2f sec\n', tTrainVec(end), tTrain, tInt);
 
 % 7. Plot
-PlotRoMixWrapper(sPlotParams, sPreset, sDataset, sDistParams, sKernelParams, Phi, C, lambdaPhi, mSigCnvrtRec, mSigCnvrtInt, PhiInt);
+PlotRoMixEigsAnalysis(sPlotParams, sPreset, sDataset, sDistParams, sKernelParams, C, Phi, lambdaPhi, PhiInt);
+PlotRoMixGraphSignals(sPlotParams, sPreset, sDataset, sKernelParams, mSigCnvrtRec, mSigCnvrtInt, C);
+
 end
 

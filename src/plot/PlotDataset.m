@@ -16,7 +16,7 @@ else
     actualDataDist = '';
 end
 
-if ~exist('cXAxisLabels', 'var') || ~isempty(cXAxisLabels)
+if ~exist('cXAxisLabels', 'var') || isempty(cXAxisLabels)
     cXAxisLabels{1} = '$z_1$';
     cXAxisLabels{2} = '$z_2$';
 end

@@ -4,6 +4,7 @@ clc; clear; close all;
 %% Run illustrative examples
 PlotGaussianKernelEigenfunsExample(); %Illustrate the first eigenfunctions of the 1-D Guassian kernel
 PlotGmmSwissRollExample();
+PlotSimpleSin();
 
 %% Run toy examples
 b_saveFigures = true;

@@ -2,8 +2,8 @@ function sPreset = Get2DUniformPreset()
 %% Dataset parameters
 sPreset.dim                = 2;
 sPreset.n                  = 2000;
-sPreset.nLabeled           = 1000;
-sPreset.N                  = 3000;
+sPreset.nLabeled           = 1500;
+sPreset.N                  = 5000;
 sPreset.k                  = round(0.01*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
 sPreset.nnValue            = 'ZeroOne'; % 'ZeroOne' / 'Distance'

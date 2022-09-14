@@ -2,9 +2,19 @@
 clc; clear; close all; 
 
 %% Run illustrative examples
-PlotGaussianKernelEigenfunsExample(); %Illustrate the first eigenfunctions of the 1-D Guassian kernel
-PlotGmmSwissRollExample();
 PlotSimpleSin();
+PlotGaussianKernelEigenfunsExample(); %Illustrate the first eigenfunctions of the 1-D Guassian kernel
+
+%% Swiss roll illustrations
+b_vRandn = [true, false];
+b_vGmmLatent = [true,  false];
+for b_randn = b_vRandn
+    for b_gmmLatent = b_vGmmLatent
+        b_saveFigures = ( b_randn &&  b_gmmLatent) || ... Gaussian, latent
+                        (~b_randn && ~b_gmmLatent);   ... Uniform, data
+        PlotGmmSwissRollExample(b_randn, b_gmmLatent, b_saveFigures);
+    end
+end
 
 %% Run toy examples
 b_saveFigures = true;

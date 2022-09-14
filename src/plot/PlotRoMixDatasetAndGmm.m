@@ -11,7 +11,9 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotDataVsGmm
     end
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPreset.dim > 1
-    PlotGaussianEllipses(sPlotParams, sDistParams);
+    %PlotGaussianEllipses(sPlotParams, sDistParams);
+    b_plotCovMean = true;
+    PlotGmmResultWithDataset(sPlotParams, sDataset.sData.x, sDistParams, b_plotCovMean);
     PlotCovEigs(sPlotParams, sDistParams);
     if sDistParams.GMModel.NumComponents < 100
         PlotClustersMeans(sPreset, sPlotParams, sDistParams);

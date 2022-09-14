@@ -19,17 +19,14 @@ xInt = sDataset.sData.xt;
 if isfield(sDataset.sData, 'S')
     S = sDataset.sData.S;
     SInt = sDataset.sData.St;
-else
-    S = sDataset.sData.x;
-    SInt = sDataset.sData.xt;
 end
 if b_debugUseAnalytic
     fprintf('Generating analytic expression for %s %s\n', verticesPDF, matrixForEigs);
     if ismember(verticesPDF, {'Grid', 'Uniform'})
         assert(strcmp(matrixForEigs, 'NormLap') || strcmp(matrixForEigs, 'RandomWalk'))
         len = sDatasetParams.xMax - sDatasetParams.xMin;
-        [V, matLambda] = CalcAnalyticLapEigsGrid(S, M, len);
-        [VRef, matLambdaRef] = CalcAnalyticLapEigsGrid(SInt, M, len);
+        [V, matLambda] = CalcAnalyticLapEigsGrid(xTrain, M, len);
+        [VRef, matLambdaRef] = CalcAnalyticLapEigsGrid(xInt, M, len);
         [~, adjLambda, ~] = EigsByType(W, D, Ln, M, matrixForEigs);
         [~, adjLambdaRef, ~] = EigsByType(WRef, DRef, LnRef, M, matrixForEigs);
     elseif strcmp(verticesPDF, 'SwissRoll')
@@ -51,15 +48,25 @@ if b_debugUseAnalytic
             
             [sKernelParams] = CalcKernelParams(sDistParams, omega);
             [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] = CalcAnalyticEigenvalues(M, sKernelParams);
-            [V, adjLambda] = CalcAnalyticEigenfunctions(M, sKernelParams, xTrain);
-            [VRef, adjLambdaRef] = CalcAnalyticEigenfunctions(M, sKernelParams, xInt);
+            if sDatasetParams.b_gmmLatent
+                [V, adjLambda] = CalcAnalyticEigenfunctions(M, sKernelParams, xTrain);
+                [VRef, adjLambdaRef] = CalcAnalyticEigenfunctions(M, sKernelParams, xInt);
+            else
+                [V, adjLambda] = CalcAnalyticEigenfunctions(M, sKernelParams, S);
+                [VRef, adjLambdaRef] = CalcAnalyticEigenfunctions(M, sKernelParams, SInt);
+            end
             V = sqrt(interpRatio)*V;
             matLambda = adjLambda;
             matLambdaRef = adjLambdaRef;
         else
             len = [SwissRollArclength(sDatasetParams.maxTheta), sDatasetParams.height];
-            [V, matLambda] = CalcAnalyticLapEigsGrid(S, M, len);
-            [VRef, matLambdaRef] = CalcAnalyticLapEigsGrid(SInt, M, len);
+            if sDatasetParams.b_gmmLatent
+                [V, matLambda] = CalcAnalyticLapEigsGrid(xTrain, M, len);
+                [VRef, matLambdaRef] = CalcAnalyticLapEigsGrid(xInt, M, len);
+            else
+                [V, matLambda] = CalcAnalyticLapEigsGrid(S, M, len);
+                [VRef, matLambdaRef] = CalcAnalyticLapEigsGrid(SInt, M, len);
+            end
             [~, adjLambda, ~] = EigsByType(W, D, Ln, M, matrixForEigs);
             [~, adjLambdaRef, ~] = EigsByType(WRef, DRef, LnRef, M, matrixForEigs);
         end

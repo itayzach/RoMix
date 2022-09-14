@@ -157,12 +157,12 @@ elseif strcmp(sPreset.verticesPDF, 'TwoSpirals')
 elseif strcmp(sPreset.verticesPDF, 'SwissRoll')
     if strcmp(sPreset.dataGenTechnique, 'TwoDraws')
         [sDataset.sData.x, sDataset.sData.S] = GenerateSwissRoll(sPreset.n, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, ...
-            sPreset.sDatasetParams.height, sPreset.gmmNumComponents);
+            sPreset.sDatasetParams.height, sPreset.gmmNumComponents*sPreset.sDatasetParams.b_randn, sPreset.sDatasetParams.b_gmmLatent);
         [sDataset.sData.xt, sDataset.sData.St] = GenerateSwissRoll(sPreset.N, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, ...
-            sPreset.sDatasetParams.height, sPreset.gmmNumComponents*sPreset.sDatasetParams.b_randn);
+            sPreset.sDatasetParams.height, sPreset.gmmNumComponents*sPreset.sDatasetParams.b_randn, sPreset.sDatasetParams.b_gmmLatent);
     elseif strcmp(sPreset.dataGenTechnique, 'OneDraw')
         [data, S] = GenerateSwissRoll(sPreset.N, sPreset.sDatasetParams.a, sPreset.sDatasetParams.maxTheta, ...
-            sPreset.sDatasetParams.height, sPreset.gmmNumComponents*sPreset.sDatasetParams.b_randn);
+            sPreset.sDatasetParams.height, sPreset.gmmNumComponents*sPreset.sDatasetParams.b_randn, sPreset.sDatasetParams.b_gmmLatent);
         sDataset.sData.x = data(1:sPreset.n,:);
         sDataset.sData.xt = data;
         sDataset.sData.S = S(1:sPreset.n,:);

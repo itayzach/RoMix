@@ -127,7 +127,7 @@ elseif dim == 2 || dim == 3
             
         else
             if dim == 2
-                scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), vSignal(vCirclesInd), [], ...
+                scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), vSignal(vCirclesInd), 10, ...
                    vSignal(vCirclesInd), 'filled');
                 if vCirclesInd < length(mData)
                     hold on;
@@ -135,11 +135,11 @@ elseif dim == 2 || dim == 3
                         vSignal(vRectInd), 'filled', 's');
                 end
             else % dim == 3
-                scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), mData(vCirclesInd,3), [], ...
+                scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), mData(vCirclesInd,3), 10, ...
                     vSignal(vCirclesInd), 'filled');
                 if vCirclesInd < length(mData)
                     hold on;
-                    scatter3(mData(vRectInd,1), mData(vRectInd,2), mData(vRectInd,3), [], ...
+                    scatter3(mData(vRectInd,1), mData(vRectInd,2), mData(vRectInd,3), 10, ...
                         vSignal(vRectInd), 'filled', 's');
                 end
             end

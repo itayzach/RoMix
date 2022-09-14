@@ -1,9 +1,12 @@
-function sPreset = GetSwissRollPreset(b_randn)
+function sPreset = GetSwissRollPreset(b_randn, b_gmmLatent)
 if ~exist('b_randn', 'var')
     b_randn = false;
 end
+if ~exist('b_gmmLatent','var')
+    b_gmmLatent = false;
+end
 %% Dataset parameters
-sPreset.dim                = 3*(~b_randn) + 2*b_randn;
+sPreset.dim                = 3*(~b_gmmLatent) + 2*b_gmmLatent;
 sPreset.n                  = 2000;
 sPreset.nLabeled           = 1000;
 sPreset.N                  = 3000;
@@ -18,8 +21,13 @@ sDatasetParams.a           = 1;
 sDatasetParams.maxTheta    = 4*pi;
 sDatasetParams.height      = 20;
 sDatasetParams.b_randn     = b_randn;
+sDatasetParams.b_gmmLatent = b_gmmLatent;
+if b_gmmLatent
+    gmmNumComponents = 5;
+else
+    gmmNumComponents = 20;
+end
 if b_randn
-    gmmNumComponents       = 5;
     maxS = SwissRollArclength(sDatasetParams.maxTheta);
     for c = 1:gmmNumComponents
         sDatasetParams.sigma{c}    = [maxS/(5*gmmNumComponents), sDatasetParams.height/5];
@@ -41,11 +49,7 @@ sPreset.omegaTilde         = eps/sqrt(2); % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-5;
 sPreset.gmmMaxIter         = 2000;
-if ~b_randn
-    sPreset.gmmNumComponents = 20;
-else
-    sPreset.gmmNumComponents = gmmNumComponents;
-end
+sPreset.gmmNumComponents   = gmmNumComponents;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
 sPreset.MTilde             = 50*sPreset.gmmNumComponents*(~b_randn) + sPreset.M*b_randn;

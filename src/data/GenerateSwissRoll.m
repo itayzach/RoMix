@@ -1,8 +1,11 @@
-function [x, S] = GenerateSwissRoll(N, a, maxTheta, height, nGmmComp, b_plotSwissRoll, b_squeezeRollLayers)
+function [x, S] = GenerateSwissRoll(N, a, maxTheta, height, nGmmComp, b_gmmLatent, b_plotSwissRoll, b_squeezeRollLayers)
 % Running example:
 %
-% N = 5000; a = 1; maxTheta = 4*pi; height = 20; b_plotSwissRoll = true; nGmmComp = 5;
-% [x, S] = GenerateSwissRoll(N, a, maxTheta, height, b_randn, b_plotSwissRoll);
+% N = 1000; a = 1; maxTheta = 4*pi; height = 20; b_gmmLatent = true; b_plotSwissRoll = true; nGmmComp = 5;
+% [x, S] = GenerateSwissRoll(N, a, maxTheta, height, nGmmComp, b_gmmLatent, b_plotSwissRoll);
+%
+% N = 1000; a = 1; maxTheta = 4*pi; height = 20; b_gmmLatent = true; b_plotSwissRoll = true; nGmmComp = 0;
+% [x, S] = GenerateSwissRoll(N, a, maxTheta, height, nGmmComp, b_gmmLatent, b_plotSwissRoll);
 %
 % According to:
 % Parsimonious representation of nonlinear dynamical systems
@@ -24,6 +27,9 @@ if ~exist('b_plotSwissRoll', 'var')
 end
 if ~exist('nGmmComp', 'var')
     nGmmComp = 0;
+end
+if ~exist('b_gmmLatent', 'var')
+    b_gmmLatent = false;
 end
 if ~exist('b_squeezeRollLayers','var')
     b_squeezeRollLayers = false;
@@ -81,7 +87,7 @@ else
 end
 
 % store all data
-if nGmmComp > 0
+if b_gmmLatent
     S = [x1 x2 x3];
     x = [sN, x3];
 else
@@ -93,9 +99,10 @@ assert(all(~isnan(x(:))))
 
 if b_plotSwissRoll
     figure; 
-    subplot(131); plot(sN,thetaN,'o'); hold on; plot(sN,thetaN, '.'); xlabel('$s$'); ylabel('$\theta(s)$')
-    subplot(132); scatter3(x1, x2, x3, 'filled'); xlabel('$x_1$'); ylabel('$x_2$'); zlabel('$x_3$'); view(30,80);
-    subplot(133); scatter(sN, x3, 'filled'); xlabel('$\theta$'); ylabel('$ht$'); xlim([min(sN), max(sN)]); ylim([min(x3), max(x3)]);
-    set(gcf,'Position', [250 400 1500 400])
+    %subplot(2,2,1); plot(sN,thetaN,'o'); hold on; plot(s,theta); xlabel('$s$'); ylabel('$\theta(s)$'); set(gca,'FontSize',14);
+    subplot(2,2,1); plot(thetaN,sN,'o'); hold on; plot(theta,s); ylabel('$S(\theta)$'); xlabel('$\theta$'); set(gca,'FontSize',14);
+    subplot(2,2,2); scatter3(x1, x2, x3, 'filled'); xlabel('$x_1$'); ylabel('$x_2$'); zlabel('$x_3$'); view(30,80); set(gca,'FontSize',14);
+    subplot(2,2,[3,4]); scatter(sN, x3, 'filled'); xlabel('$\theta$'); ylabel('$ht$'); xlim([min(sN), max(sN)]); ylim([min(x3), max(x3)]); set(gca,'FontSize',14);
+    set(gcf,'Position', [250 400 650 500])
 end
 end

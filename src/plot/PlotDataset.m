@@ -35,7 +35,7 @@ if ismember(actualDataDist, {'USPS', 'MNIST'})
     b_transpose = strcmp(sPlotParams.actualDataDist, 'MNIST') && sDistParams.dim == 28*28;
     PlotDigits(sPlotParams, xDigits, [], b_transpose, strcat(pltTitle, " (", actualDataDist, ")"), 'data');
     
-    if exist('sDistParams', 'var') 
+    if exist('sDistParams', 'var') && ~isempty(sDistParams)
         [xGmm,~] = random(sDistParams.GMModel, nGmmPoints);
         if sDistParams.dim < 28*28 && strcmp(actualDataDist,'MNIST')
             % Transform from z to x
@@ -51,7 +51,7 @@ end
 %% GMM
 fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
 compIdx(:,1) = ones(nGmmPoints,1);
-if exist('sDistParams', 'var')
+if exist('sDistParams', 'var') && ~isempty(sDistParams)
     b_plotDistModel = true;
     b_spectclust = isfield(sDistParams,'SCcompIdx');
     tiledlayout(1,2 + b_spectclust);

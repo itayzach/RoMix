@@ -58,9 +58,9 @@ elseif dim == 2 || dim == 3
 %         nRows = 4;
 %     end
 %     nCols = ceil(nSignals/nRows);
-    if nSignals == 2
+    if nSignals <= 2
         nRows = 1; 
-        nCols = 2;
+        nCols = nSignals;
         x0     = 10;
         y0     = 50;
         height = 400;

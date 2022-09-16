@@ -92,14 +92,14 @@ if exist('sDistParams', 'var') && ~isempty(sDistParams)
             set(gca,'YTick',[],'FontSize', 14);
             xlim([xMin(1), xMax(1)])
         elseif dim == 2
-            if ismember(actualDataDist, {'SwissRoll'})
-                %gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(sDistParams.GMModel,[x0 y0]),x,y);
-                %xMax = max(cell2mat(sDistParams.mu')) + 3*max(cell2mat(sDistParams.sigma'));
-                %xMin = min(cell2mat(sDistParams.mu')) - 3*min(cell2mat(sDistParams.sigma'));
-                %fcontour(gmPDF, [xMin(1), xMax(1), xMin(2), xMax(2)]);
-                %hold on;
+            if sDistParams.GMModel.NumComponents < 20
                 scatter3(xGmm(:,1),xGmm(:,2),compIdx(:,i+1),[],compIdx(:,i+1),'filled');
-                colormap(lines(sDistParams.GMModel.NumComponents));
+                if sDistParams.GMModel.NumComponents <= size(unique(lines,'rows'),1)
+                    cmap = lines(sDistParams.GMModel.NumComponents);
+                else
+                    cmap = jet(sDistParams.GMModel.NumComponents);
+                end
+                colormap(cmap);
                 h = colorbar('TickLabelInterpreter', 'latex');
                 h.Limits = [0 sDistParams.GMModel.NumComponents];
                 h.Ticks = (0.5:sDistParams.GMModel.NumComponents);

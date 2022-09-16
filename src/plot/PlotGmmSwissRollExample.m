@@ -1,4 +1,8 @@
 function PlotGmmSwissRollExample(b_randn, b_gmmLatent, b_saveFigures)
+%
+% b_randn = false; b_gmmLatent = false; b_saveFigures = false;
+% PlotGmmSwissRollExample(b_randn, b_gmmLatent, b_saveFigures); 
+% 
 close all; clc; rng('default')
 
 %% Generate Swiss Roll

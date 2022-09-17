@@ -19,6 +19,7 @@ end
 if ~exist('cXAxisLabels', 'var') || isempty(cXAxisLabels)
     cXAxisLabels{1} = '$z_1$';
     cXAxisLabels{2} = '$z_2$';
+    cXAxisLabels{3} = '$z_3$';
 end
 
 if ismember(actualDataDist, {'USPS', 'MNIST'})
@@ -108,7 +109,7 @@ if exist('sDistParams', 'var') && ~isempty(sDistParams)
                 scatter(xGmm(:,1),xGmm(:,2),[],'filled');
             end
             grid on;
-            if ismember(actualDataDist, {'SwissRoll'})
+            if ismember(actualDataDist, {'SwissRoll'}) || exist('pcaDim', 'var')
                 xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
                 ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
             else
@@ -129,9 +130,15 @@ if exist('sDistParams', 'var') && ~isempty(sDistParams)
             else
                 scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[], 'filled');
             end
-            xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
-            ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
-            zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
+            if exist('pcaDim', 'var')
+                xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
+                ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
+                ylabel(cXAxisLabels{3}, 'interpreter', 'latex', 'FontSize', 16);
+            else
+                xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
+                ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
+                zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
+            end
             view(30,75);
             set(gca,'FontSize', 14);
             xlim([xMin(1), xMax(1)])
@@ -175,7 +182,7 @@ elseif dim == 2
         scatter(x(:,1), x(:,2), 'filled');
         grid on;
     end
-    if ismember(actualDataDist, {'SwissRoll'})
+    if ismember(actualDataDist, {'SwissRoll'}) || exist('pcaDim','var')
         xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
         ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
     else
@@ -190,9 +197,15 @@ elseif dim == 2
     end
 elseif dim == 3
     scatter3(x(:,1), x(:,2), x(:,3), 'filled');
-    xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
-    ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
-    zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
+    if exist('pcaDim','var')
+        xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
+        ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
+        ylabel(cXAxisLabels{3}, 'interpreter', 'latex', 'FontSize', 16);
+    else
+        xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
+        ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
+        zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
+    end
 %     view(10,5);
     view(30,75);
     set(gca,'FontSize', 14);

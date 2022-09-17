@@ -30,9 +30,9 @@ sDistParams.GMModel.ComponentProportion = 1;
 sKernelParams = CalcKernelParams(sDistParams, omega);
 [sKernelParams.vLambdaAnalytic, sKernelParams.vComponentIndex, sKernelParams.vEigIndex] ...
     = CalcAnalyticEigenvalues(M, sKernelParams);
-[ Phi, lambda ] = CalcAnalyticEigenfunctions(M, sKernelParams, x);
+Phi = CalcAnalyticEigenfunctions(M, sKernelParams, x);
 
-figTitle = 'Eigenfunctions of the Gaussian kernel on $\mathbb{R}$';
+% figTitle = 'Eigenfunctions of the Gaussian kernel on $\mathbb{R}$';
 plotInd = firstEigInd:lastEigInd;
 [cData{1:numel(plotInd)}] = deal(x);
 cSigStr = RepLegend('\\phi', plotInd);
@@ -43,6 +43,8 @@ PlotGraphSignals(sPlotParams, [], ...
     [mat2cell(Phi(:,plotInd+1),n,ones(1,numel(plotInd))), mat2cell(Phi(:,plotInd+1),n,ones(1,numel(plotInd)))], ...
     cSigStr, cNumCircles, cMarkers, [], [], [min(min(Phi(:,plotInd+1))), max(max(Phi(:,plotInd+1)))]);
 
-% figTitle = 'Analytic eigenvalues of $\tilde{{\bf W}}$ (from $x_{{\bf train}})$';
-PlotSpectrum([], [], lambda, [], [], '\lambda_m', [], [], []);
+% figTitle = 'Analytic eigenvalues of Gaussian kernel on $\mathbb{R}$';
+Mlambda = 20;
+lambda = CalcAnalyticEigenvalues(Mlambda, sKernelParams);
+PlotSpectrum(sPlotParams, [], lambda, [], [], '\lambda_m', [], [], []);
 end

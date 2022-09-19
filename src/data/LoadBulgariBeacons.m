@@ -85,7 +85,7 @@ noise_level_mW = 10^(NoiseFloor_dBm/10);
 [tx, sense, y, y_M] = MyBuildMeasurements(sPlotParams, nLabeled, vGridLat, vGridLon, noise_level_mW);
 
 %% Build sDataset
-assert(N == n);
+%assert(N == n);
 assert(nLabeled <= n);
 wgs84 = wgs84Ellipsoid('kilometer');
 [X,Y,Z] = geodetic2ecef(wgs84,mGridLat(:),mGridLon(:),mGridZ(:));
@@ -123,12 +123,50 @@ if sPlotParams.b_globalPlotEnable
 end
 
 %% Save dataset and grid for plots
-sDataset.sData.x = data;
-sDataset.sData.xt = data;
-sDataset.sData.y = 10*log10(abs(y)); % from Signal-Pro 
+% Arrange data to 
+% 1     ->  ell : sensors (measurements)
+% ell+1 ->  n   : for interp
+% n+1   ->  N   : for extrap
+ell = numel(sense.ind');
+vIndNoSense = setdiff(1:N,sense.ind');
+rperm = randperm(N-ell);
+vIndNoSenseShuffled = vIndNoSense(rperm);
+
+vShuffleMap = [sense.ind, vIndNoSenseShuffled]';
+
+dataRearranged = data(vShuffleMap,:);
+yRearranged = y(vShuffleMap);
+assert(isequal(yRearranged(1:ell), y_M))
+sDataset.sData.x = dataRearranged(1:n,:);
+sDataset.sData.xt = dataRearranged;
+sDataset.sData.y = 10*log10(abs(yRearranged(1:n))); % from Signal-Pro 
 sDataset.sData.ymasked = zeros(n,1);
-sDataset.sData.ymasked(sense.ind') = 10*log10(abs(y_M)); % vLabeledInd = sense.ind';
-sDataset.sData.yt = 10*log10(abs(y)); % from Signal-Pro 
+sDataset.sData.ymasked(1:ell) = 10*log10(abs(y_M)); % vLabeledInd = sense.ind';
+sDataset.sData.yt = 10*log10(abs(yRearranged)); % from Signal-Pro 
+
+dim = size(data,2);
+xtOrig = zeros(N,dim);
+xtOrig(vShuffleMap,:) = sDataset.sData.xt;
+ytOrig = zeros(N,1);
+ytOrig(vShuffleMap) = sDataset.sData.yt;
+xOrig = xtOrig(1:n,:);
+yOrig = ytOrig((1:n)');
+ymaskedOrig = zeros(n,1);
+ymaskedOrig((1:ell)') = ytOrig(sense.ind');
+
+assert(isequal(xtOrig, data))
+assert(isequal(xOrig, data(1:n,:)))
+assert(isequal(yOrig, 10*log10(abs(y(1:n)))))
+assert(isequal(ymaskedOrig(1:ell), 10*log10(abs(y_M))))
+assert(isequal(ymaskedOrig(ell+1:end), zeros(n-ell,1)))
+assert(isequal(ytOrig, 10*log10(abs(y))))
+
+% sDataset.sData.x = data;
+% sDataset.sData.xt = data;
+% sDataset.sData.y = 10*log10(abs(y)); % from Signal-Pro 
+% sDataset.sData.ymasked = zeros(n,1);
+% sDataset.sData.ymasked(sense.ind') = 10*log10(abs(y_M)); % vLabeledInd = sense.ind';
+% sDataset.sData.yt = 10*log10(abs(y)); % from Signal-Pro 
 
 % Used only for plots
 sDataset.sData.mGrid = [mGridLon(:), mGridLat(:)];
@@ -136,6 +174,7 @@ sDataset.sData.vGridLon = vGridLon;
 sDataset.sData.vGridLat = vGridLat;
 sDataset.sData.sense = sense;
 sDataset.sData.tx = tx;
+sDataset.sData.vShuffleMap = vShuffleMap;
 
 
 end

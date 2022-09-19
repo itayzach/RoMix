@@ -1,6 +1,7 @@
 function sResults = RunGraphSignalInterp(sPreset, sPlotParams, b_interpEigenvecs)
 
 vNumLabeled = sPreset.nLabeled;
+vSimTimeSec = zeros(numel(vNumLabeled),sPreset.R);
 for iRun = 1:numel(vNumLabeled)
     sPreset = UpdatePreset(sPreset, b_interpEigenvecs, vNumLabeled(iRun));
     nMethods = numel(sPreset.cMethods);
@@ -27,12 +28,15 @@ for iRun = 1:numel(vNumLabeled)
         % Convert expected signals
         tSigCnvrtRecRef(:,:,r) = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);
         tSigCnvrtIntRef(:,:,r) = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.yt);
-        fprintf('Iteration r = %d of R = %d finished (took %.2f min)\n',r,sPreset.R,toc(t)/60)
+        vSimTimeSec(iRun,r) = toc(t);
+        fprintf('Iteration r = %d of R = %d finished (took %.2f min)\n',r,sPreset.R,vSimTimeSec(iRun,r)/60)
     end
+    fprintf('Run %d/%d finished (took %.2f min)\n',iRun,numel(vNumLabeled),sum(vSimTimeSec(iRun,:))/60)
     [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd] = ...
         InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tTrainTime, tIntTime);
     sResults(iRun) = SaveResults(sPreset, sPlotParams, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd);
 end
+fprintf('Experiment finished (took %.2f min)\n\n\n',sum(vSimTimeSec(:))/60)
 if numel(vNumLabeled) > 1
     PlotMetricsVsNumLabeled(sPreset, sPlotParams, sResults)
 end

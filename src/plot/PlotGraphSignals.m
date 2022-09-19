@@ -110,7 +110,10 @@ elseif dim == 2 || dim == 3
         ax(m) = nexttile;
         if exist('tx', 'var') % Meaning: strcmp(sPlotParams.actualDataDist, 'BulgariBeacons') == 1
             colormap(hot);
-            imagesc(grid.lon, (grid.lat), (reshape(vSignal, length(grid.lat), length(grid.lon))));
+            %imagesc(grid.lon, (grid.lat), (reshape(vSignal, length(grid.lat), length(grid.lon))));
+            scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), vSignal(vCirclesInd), 10, ...
+                   vSignal(vCirclesInd), 'filled');
+            view(2);
             c=colorbar('TickLabelInterpreter', 'latex');
             c.Label.String='dBm';
             if cMapMin < cMapMax

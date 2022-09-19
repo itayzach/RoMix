@@ -1,8 +1,8 @@
 function sPreset = GetBulgariBeaconsPreset()
 %% Dataset parameters
 sPreset.dim                = 9;
-sPreset.NLat               = 75; % 100 % 120
-sPreset.NLon               = 75; % 100 % 120
+sPreset.NLat               = 100; % 100 % 120
+sPreset.NLon               = 100; % 100 % 120
 sPreset.N                  = sPreset.NLat*sPreset.NLon;
 sPreset.nLat               = 75;
 sPreset.nLon               = 75;

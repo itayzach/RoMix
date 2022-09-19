@@ -25,7 +25,7 @@ if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotC
     CRep = diag(lambdaPhi)*Phi.'*mAlpha;
     PlotCoeffsMatrix(C, '${\bf C}$', CRep, '${\bf C^{\bf rep}} = {\bf \Lambda}{\Phi}^T{\bf \alpha}$', mAlpha, '$\alpha$');
     LnRef = [];
-    Cint = RoMix(PhiInt, sPreset.gamma1, sPreset.gamma2, lambdaPhi, LnRef, mSigCnvrtIntRef);
+    Cint = RoMix(PhiInt, sPreset.gamma1, sPreset.gamma2, lambdaPhi, LnRef, sDataset.sData.yt);
     PlotCoeffsMatrix(C, '${\bf C}$', Cint, '${\bf C^{\bf int}}$');
 end
 end

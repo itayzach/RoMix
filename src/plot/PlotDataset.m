@@ -65,6 +65,9 @@ if exist('sDistParams', 'var') && ~isempty(sDistParams)
         xGmm = zGmm(:,1:pcaDim);
         [~,z] = pca(x);
         x = z(:,1:pcaDim);
+        cXAxisLabels{1} = 'PC$_1({\bf z})$';
+        cXAxisLabels{2} = 'PC$_2({\bf z})$';
+        cXAxisLabels{3} = 'PC$_3({\bf z})$';
     end
     if b_transform && ismember(actualDataDist, {'SwissRoll'})
         sN = xGmm(:,1);

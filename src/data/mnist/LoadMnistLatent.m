@@ -48,7 +48,7 @@ if sPlotParams.b_globalPlotEnable
     plotInd = 1:50; %randperm(size(xTrain,1),50);
     xTrainRec = reshape(xTrainRec(plotInd,:,:),[],28*28);
     xTrainPlt = reshape(xTrain(plotInd,:,:),[],28*28);
-    PlotDigits([],xTrainPlt,[],0,'Train','Train');
+    PlotDigits(sPlotParams,xTrainPlt,[],0,'Train','Train');
     PlotDigits(sPlotParams,xTrainRec,[],0,'Reconstructed','Reconstructed');
 end
 

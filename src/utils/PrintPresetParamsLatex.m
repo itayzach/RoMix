@@ -23,6 +23,17 @@ if isfield(sPreset.sDatasetParams, 'b_runVAE') && sPreset.sDatasetParams.b_runVA
     s = [s, '    Latent dim & $d = ' num2str(sPreset.sDatasetParams.latentDim) '$ \\', newline ];
     s = [s, '    \hline', newline ];
 end
+if numel(sPreset.nLabeled) > 1
+    s = [s, '    $|\V_\ell|$ & $\ell = $ varying percentage of $n$\\', newline ];
+else
+    s = [s, '    $|\V_\ell|$ & $\ell = ' num2str(sPreset.nLabeled, '%d') ' $\\', newline ];
+end
+s = [s, '    \hline', newline ];
+s = [s, '    $|\V|$ & $n = ' num2str(sPreset.n, '%d') ' $\\', newline ];
+s = [s, '    \hline', newline ];
+s = [s, '    $|\V_N|$ & $N = ' num2str(sPreset.N, '%d') ' $\\', newline ];
+s = [s, '    \hline', newline ];
+
 s = [s, '    \end{tabular}', newline ];
 %s = [s, '    \captionof{table}{Parameters for ' AddSpaceBeforeUpper(sPreset.verticesPDF) ' dataset}', newline ];
 %s = [s, '    \label{tab:params_' sPreset.verticesPDF '}', newline ];

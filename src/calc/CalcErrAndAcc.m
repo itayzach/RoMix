@@ -1,4 +1,4 @@
-function [vAcc, vAccStd, vRmse, vMse, vCoh, mErrors] = CalcErrAndAcc(tSig, tSigRef, compareTo)
+function [vAcc, vAccStd, vRmse, vMse, vCoh, mErrors] = CalcErrAndAcc(tSig, tSigRef, b_compareDb)
 [n, nSignals, R] = size(tSig);
 if isequal(tSig(:,1,1),floor(tSig(:,1,1)))
     errFunc = '0-1';
@@ -15,9 +15,15 @@ for r = 1:R
     mSig = squeeze(tSig(:,:,r));
     mSigRef = squeeze(tSigRef(:,:,r));
     if strcmp(errFunc, 'norm')
-        mErr(r,:) = vecnorm(mSig-mSigRef,2);
-        mErrNormed(r,:) = min(vecnorm(mSig-mSigRef,2)./vecnorm(mSig,2),1);
-        mCoherence(r,:) = (vecnorm(mSig-mSigRef,2).^2)./(vecnorm(mSig,2).*vecnorm(mSigRef,2));
+        if b_compareDb
+            mErr(r,:) = vecnorm(mSig-mSigRef,2)/n;
+            mErrNormed(r,:) = vecnorm(mSig-mSigRef,2)/n;
+            mCoherence(r,:) = vecnorm(mSig-mSigRef,2)/n;
+        else
+            mErr(r,:) = vecnorm(mSig-mSigRef,2);
+            mErrNormed(r,:) = min(vecnorm(mSig-mSigRef,2)./vecnorm(mSig,2),1);
+            mCoherence(r,:) = (vecnorm(mSig-mSigRef,2).^2)./(vecnorm(mSig,2).*vecnorm(mSigRef,2));
+        end
     elseif strcmp(errFunc, '0-1')
         mErr(r,:)       = sum(mSig ~= mSigRef) / n;
         mErrNormed(r,:) = sum(mSig ~= mSigRef) / n;

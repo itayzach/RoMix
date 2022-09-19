@@ -265,7 +265,8 @@ y_M = y(sense.ind);
 
 %Show the signal pro map
 if sPlotParams.b_globalPlotEnable
-    fig2 = figure('Name', 'Signal-pro'); colormap(hot);   
+    fig2 = figure('Name', 'Signal-pro'); 
+    colormap(jet);
     %calc total received power due to SignalPro:
     y_sigPro_mw=0;
     for(source=1:Ns)

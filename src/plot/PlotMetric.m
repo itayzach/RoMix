@@ -53,8 +53,23 @@ set(gcf,'Position', [x0 y0 width height])
 %% Zoom in
 if exist('b_zoomIn', 'var') && ~isempty(b_zoomIn) && b_zoomIn
     p_ax=gca;
-    srcPos =[45 92 150 93.5];
-    targetPos = [50 72 145 80];    
+
+    top3min = sort(min(mVals(2:end,:)));
+    top3min = top3min(3);
+
+    top3max = sort(max(mVals(2:end,:)));
+    top3max = top3max(end);
+
+    x0src = 45;  y0src = top3min-0.1;
+    x1src = 150; y1src = top3max+0.1;
+    srcPos =[x0src y0src x1src y1src];
+    
+    minValsSorted = sort(mVals(:));
+
+    x0tar = 60;  y0tar = min(mVals(:))+1;
+    x1tar = 145; y1tar = minValsSorted(2)+2;
+    targetPos = [x0tar y0tar x1tar y1tar];
+
     az = zoomPlot(p_ax, srcPos, targetPos);
 end
 %% Save

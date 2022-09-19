@@ -1,17 +1,27 @@
 function [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd] = ...
-    InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tTrainTime, tIntTime)
-[mAccRec(:,1), mAccStdRec(:,1)] = CalcErrAndAcc(tSigCnvrtRec(:,:,:,1), tSigCnvrtRecRef);
-[mAccInt(:,1), mAccStdInt(:,1)] = CalcErrAndAcc(tSigCnvrtInt(:,:,:,1), tSigCnvrtIntRef);
+    InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tSigCnvrtLabRef, tTrainTime, tIntTime)
+
+assert(isequal(tSigCnvrtLabRef(sPreset.nLabeled+1:end,:,:), zeros(sPreset.n-sPreset.nLabeled, sPreset.nSignals, sPreset.R)));
+assert(isequal(tSigCnvrtLabRef(1:sPreset.nLabeled,:,:), tSigCnvrtRecRef(1:sPreset.nLabeled,:,:)));
+assert(isequal(tSigCnvrtLabRef(1:sPreset.nLabeled,:,:), tSigCnvrtIntRef(1:sPreset.nLabeled,:,:)));
+assert(isequal(tSigCnvrtRecRef, tSigCnvrtIntRef(1:sPreset.n,:,:)));
+
+vRecInd = 1:sPreset.n; %sPreset.nLabeled+1:sPreset.n;
+vIntInd = 1:sPreset.N; %sPreset.n+1:sPreset.N;
+b_compareDb = ismember(sPreset.verticesPDF, {'BulgariBeacons'});
+
+[mAccRec(:,1), mAccStdRec(:,1)] = CalcErrAndAcc(tSigCnvrtRec(vRecInd,:,:,1), tSigCnvrtRecRef(vRecInd,:,:), b_compareDb);
+[mAccInt(:,1), mAccStdInt(:,1)] = CalcErrAndAcc(tSigCnvrtInt(vIntInd,:,:,1), tSigCnvrtIntRef(vIntInd,:,:), b_compareDb);
 vTrainTime = mean(tTrainTime,1);
 vIntTime = mean(tIntTime,1);
 vTrainTimeStd = std(tTrainTime,[],1);
 vIntTimeStd = std(tIntTime,[],1);
 if sPreset.b_compareMethods
     for methodInd = 2:size(tSigCnvrtRec,4)
-        [mAccRec(:,methodInd), mAccStdRec(:,methodInd)] = CalcErrAndAcc(tSigCnvrtRec(:,:,:,methodInd), tSigCnvrtRecRef);
+        [mAccRec(:,methodInd), mAccStdRec(:,methodInd)] = CalcErrAndAcc(tSigCnvrtRec(vRecInd,:,:,methodInd), tSigCnvrtRecRef(vRecInd,:,:), b_compareDb);
     end
     for methodInd = 2:size(tSigCnvrtInt,4)
-        [mAccInt(:,methodInd), mAccStdInt(:,methodInd)] = CalcErrAndAcc(tSigCnvrtInt(:,:,:,methodInd), tSigCnvrtIntRef);
+        [mAccInt(:,methodInd), mAccStdInt(:,methodInd)] = CalcErrAndAcc(tSigCnvrtInt(vIntInd,:,:,methodInd), tSigCnvrtIntRef(vIntInd,:,:), b_compareDb);
     end
     if sPreset.nSignals == 1
         PrintAccuracyLatex(sPreset, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, sPreset.cMethods);

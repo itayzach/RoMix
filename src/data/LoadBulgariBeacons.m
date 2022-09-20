@@ -10,19 +10,38 @@ nLon = size(LON,1);
 nLat = size(LAT,1);
 
 %% Create grid
-assert((nLat-2)/sqrt(N) == floor((nLat-2)/sqrt(N)) && (nLon-2)/sqrt(N) == floor((nLon-2)/sqrt(N)))
 b_zoom = false;
 if b_zoom
-    % Not working so well...
-    dlat = 100/NLat; %jump in latitude every dn_lat points
-    dlon = 200/NLon; %jump in longitude every dn_lon points
-    grid_lat_ind=100:dlat:200-1;
-    grid_lon_ind=1:dlon:200;
+    %Build grid:
+    latStartInd = 701;
+    latEndInd = 800;
+
+    lonStartInd = 451;
+    lonEndInd = 550;
+    dlat=(latEndInd-latStartInd+1)/NLat; 
+    dlon=(lonEndInd-lonStartInd+1)/NLon;
+    assert(dlat == round(dlat) && dlon == round(dlon), 'number of points must be integer')
+    grid_lat_ind=latStartInd:dlat:latEndInd;
+    grid_lon_ind=lonStartInd:dlon:lonEndInd;
+
+    dn_lat = (nLat-2)/NLat; %jump in latitude every dn_lat points
+    dn_lon = (nLon-2)/NLon; %jump in longitude every dn_lon points
+    
+    if sPlotParams.b_globalPlotEnable
+        figure; ShowDEM(sFullMap.Z, sFullMap.R); hold on; 
+        patch(sFullMap.lon([grid_lon_ind(1)*ones(1,2),grid_lon_ind(end)*ones(1,2)]), ...
+              sFullMap.lat([grid_lat_ind(1),grid_lat_ind(end)*ones(1,2),grid_lat_ind(1)]),...
+              'b:', 'FaceColor','none','EdgeColor','blue');
+
+        %grid=BuildGrid(grid_lat_ind, grid_lon_ind, sFullMap);   
+        %figure; ShowDEM(grid.Z, grid.R);
+    end
 else
     dn_lat = (nLat-2)/NLat; %jump in latitude every dn_lat points
     dn_lon = (nLon-2)/NLon; %jump in longitude every dn_lon points
     grid_lat_ind = dn_lat/2+1:dn_lat:nLat-dn_lat/2;
     grid_lon_ind = dn_lon/2+1:dn_lon:nLon-dn_lon/2;
+    assert((nLat-2)/sqrt(N) == floor((nLat-2)/sqrt(N)) && (nLon-2)/sqrt(N) == floor((nLon-2)/sqrt(N)))
 end
 
 %grid=BuildGrid(grid_lat_ind, grid_lon_ind, sFullMap);
@@ -35,7 +54,9 @@ vGridLat = LAT(grid_lat_ind);
 mGridZ = double(sFullMap.Z(grid_lat_ind, grid_lon_ind));
 if b_zoom
     vGridR = [(nGridLat-1)/(vGridLat(end)-vGridLat(1)), vGridLat(end), vGridLon(1)]; %redefine the number of cells
-    figure; ShowDEM(mGridZ(:),vGridR);
+    if sPlotParams.b_globalPlotEnable
+        figure; ShowDEM(mGridZ,vGridR);
+    end
 else
     vGridR = [nGridLat-1, sFullMap.R(2), sFullMap.R(3)];
 end
@@ -47,8 +68,58 @@ fprintf(1,'Using grid of %d x %d points (resolution %.1f[Km] x %.1f[Km])\n',...
 fprintf(1,'Total tested area of %.1f[Km] x %.1f[Km]\n', (2*pi*Re/360/1e3)*(vGridLat(end)-vGridLat(1)),(2*pi*Re/360/1e3)*(vGridLon(end)-vGridLon(1)));
 
 assert(numel(mGridZ(:)) == N)
+
+%% Measurments
+NoiseFloor_dBm = -154; 
+noise_level_mW = 10^(NoiseFloor_dBm/10);
+[tx, sense, y, y_M] = MyBuildMeasurements(sPlotParams, nLabeled, vGridLat, vGridLon, noise_level_mW);
+
+%% Plot
+if sPlotParams.b_globalPlotEnable
+    for i=1:2
+        if i == 1
+            figName = 'BulgariDEM_noGrid';
+        elseif i == 2
+            figName = 'BulgariDEM_grid';
+        end
+        fig1 = figure('Name', figName);
+        ShowDEM(sFullMap.Z, sFullMap.R); hold on;
+        %ShowDEM(mGridZ, vGridR); hold on;
+        plot(sense.lon, sense.lat, 'yo','MarkerFaceColor','y','MarkerSize',3);
+        %text(sense.lon, sense.lat, num2str([1:Nsensors]'));
+        plot(tx.lon, tx.lat, 'bd','MarkerFaceColor','b','MarkerSize',3); %test sites
+        if i == 2
+            plot(mGridLon, mGridLat,'k.','MarkerSize',2);
+        end
+        if b_zoom
+            patch(sFullMap.lon([grid_lon_ind(1)*ones(1,2),grid_lon_ind(end)*ones(1,2)]),...
+                  sFullMap.lat([grid_lat_ind(1),grid_lat_ind(end)*ones(1,2),grid_lat_ind(1)]),...
+                  'b:', 'FaceColor','none','EdgeColor','blue');
+        end
+        SaveFigure(sPlotParams, fig1, figName, {'epsc', 'png'});
+    end
+    
+    % Just for visualization of missing points in the DEM
+    rperm2 = randperm(numel(sFullMap.Z(:)));
+    mFullGridZmissing = sFullMap.Z;
+    mFullGridZmissing(rperm2(1:100000)) = nan;
+    vGridR = sFullMap.R;
+    
+    figName = 'BulgariDEM_missing';
+    fig1 = figure('Name', figName);
+    ShowDEM(mFullGridZmissing, vGridR); hold on;
+    plot(sense.lon, sense.lat, 'yo','MarkerFaceColor','y','MarkerSize',3);
+    plot(tx.lon, tx.lat, 'bd','MarkerFaceColor','b','MarkerSize',3); %test sites
+    SaveFigure(sPlotParams, fig1, figName, {'epsc', 'png'});
+end
+
+
 %% Visibility (LoS)
-visPath = fullfile('data', 'bulgari', ['tVis_', 'lat', num2str(nGridLat) '_lon', num2str(nGridLon) '.mat']);
+if b_zoom
+    visPath = fullfile('data', 'bulgari', ['tVis_zoom_', 'lat', num2str(nGridLat) '_lon', num2str(nGridLon) '.mat']);
+else
+    visPath = fullfile('data', 'bulgari', ['tVis_', 'lat', num2str(nGridLat) '_lon', num2str(nGridLon) '.mat']);
+end
 if ~isfile(visPath)
    assert(all(~isnan(mGridZ(:))))
    tVis = MyCalcVisibility(mGridZ, vGridR, vGridLat, vGridLon);
@@ -79,11 +150,6 @@ sub_grid_gain = 1/(sub_grid_distance^2);
 A_gain_mW = A_gain_mW + sub_grid_gain*eye(N); %gain only mat
 A_gain_dB = 10*log10(A_gain_mW);
 
-%% Measurments
-NoiseFloor_dBm = -154; 
-noise_level_mW = 10^(NoiseFloor_dBm/10);
-[tx, sense, y, y_M] = MyBuildMeasurements(sPlotParams, nLabeled, vGridLat, vGridLon, noise_level_mW);
-
 %% Build sDataset
 %assert(N == n);
 assert(nLabeled <= n);
@@ -100,7 +166,7 @@ b_normalizeUniform = false;
 % data = [X, Y, Z, A_gain_dB(:,tx.ind), A_LoS_2m(:,tx.ind)];  b_normalizeUniform = true;% 92.34% omega = 1.5; gmm = 10; gamma = 0.05; nLabeled = 50;
 % data = [Z, A_gain_dB(:,tx.ind), A_LoS_2m(:,tx.ind), A_LoS_2m_sq(:,tx.ind)];  b_normalizeUniform = true; % 92.56%  omega = 1.5; gmm = 10; gamma = 0.05; nLabeled = 50;
 data = [X, Y, Z, A_gain_dB(:,tx.ind), A_LoS_2m(:,tx.ind), A_LoS_2m_sq(:,tx.ind)];  b_normalizeUniform = true; % 92.45% omega = 1.5; gmm = 10; gamma = 0.05; nLabeled = 50;
-
+assert(size(data,2) == sPlotParams.dim);
 
 % Normalize
 if b_normalizeUniform
@@ -110,17 +176,7 @@ if b_normalizeNormal
     data = (data - mean(data)) ./ std(data);
 end
 
-%% Plot
-if sPlotParams.b_globalPlotEnable
-    fig1 = figure('Name', 'Bulgari DEM');
-    ShowDEM(sFullMap.Z, sFullMap.R); hold on;
-    plot(sense.lon, sense.lat, 'yo','MarkerFaceColor','y','MarkerSize',3);
-    %text(sense.lon, sense.lat, num2str([1:Nsensors]'));
-    plot(tx.lon, tx.lat, 'bd','MarkerFaceColor','b','MarkerSize',3); %test sites
-    plot(mGridLon, mGridLat,'k.','MarkerSize',2);
-    assert(size(data,2) == 9);
-    SaveFigure(sPlotParams, fig1, 'BulgariDEM', {'epsc', 'png'});
-end
+
 
 %% Save dataset and grid for plots
 % Arrange data to 
@@ -140,9 +196,12 @@ assert(isequal(yRearranged(1:ell), y_M))
 sDataset.sData.x = dataRearranged(1:n,:);
 sDataset.sData.xt = dataRearranged;
 sDataset.sData.y = 10*log10(abs(yRearranged(1:n))); % from Signal-Pro 
+%sDataset.sData.y = yRearranged(1:n); % from Signal-Pro 
 sDataset.sData.ymasked = zeros(n,1);
 sDataset.sData.ymasked(1:ell) = 10*log10(abs(y_M)); % vLabeledInd = sense.ind';
+%sDataset.sData.ymasked(1:ell) = y_M; % vLabeledInd = sense.ind';
 sDataset.sData.yt = 10*log10(abs(yRearranged)); % from Signal-Pro 
+%sDataset.sData.yt = yRearranged; %from Signal-Pro 
 
 dim = size(data,2);
 xtOrig = zeros(N,dim);
@@ -156,9 +215,12 @@ ymaskedOrig((1:ell)') = ytOrig(sense.ind');
 
 assert(isequal(xtOrig, data))
 assert(isequal(xOrig, data(1:n,:)))
+%assert(isequal(yOrig, y(1:n)))
 assert(isequal(yOrig, 10*log10(abs(y(1:n)))))
+%assert(isequal(ymaskedOrig(1:ell), y_M))
 assert(isequal(ymaskedOrig(1:ell), 10*log10(abs(y_M))))
 assert(isequal(ymaskedOrig(ell+1:end), zeros(n-ell,1)))
+%assert(isequal(ytOrig, y)) 
 assert(isequal(ytOrig, 10*log10(abs(y))))
 
 % sDataset.sData.x = data;

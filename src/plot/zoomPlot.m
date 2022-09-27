@@ -1,4 +1,4 @@
-function az = zoomPlot(ah, source_pos, target_pos)
+function az = zoomPlot(ah, source_pos, target_pos, lgd)
 % FUNCTION ZOOMPLOT(AH, source_pos, target_pos)
 %
 % This function takes in a handle to an axes, makes a zoom-in plot on top
@@ -63,11 +63,17 @@ ylim([source_pos(2) source_pos(4)]);
 
 % customize the zoom-in plot 
 set(az, 'xtick', [], 'ytick', []);
-set(source_rect, 'linestyle','--', 'Edgecolor', 'k');
+set(source_rect, 'linestyle',':', 'Edgecolor', 'k');
 box on;
 
 % making the original plot the active plot. 
 axes(ah); 
 % making sure the original plot is behind all the other elements  
 uistack(ah, 'bottom');
+
+plot([source_pos(1) tx1], [source_pos(4) ty1], 'k:')
+plot([source_pos(3) tx2], [source_pos(4) ty1], 'k:')
+lgd.String = lgd.String(1:end-2); % remove 'data' from legend of above plots
+
+
 

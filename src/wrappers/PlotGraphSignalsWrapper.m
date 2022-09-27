@@ -26,29 +26,8 @@ vSigRec    = mSigCnvrtRec(:,sigIndToPlot);
 vSigInt    = mSigCnvrtInt(:,sigIndToPlot);
 
 if ismember(sPreset.verticesPDF, {'BulgariBeacons'})
-%     grid.lat = sDataset.sData.vGridLat;
-%     grid.lon = sDataset.sData.vGridLon;
-%     PlotGraphSignals(sPlotParams, ['Graph signal interpolation \& extrapolation'], 'InterpExtrap', ...
-%        {sDataset.sData.mGrid, sDataset.sData.mGrid}, ...
-%        {vSigRecRef, vSigRec}, ... 
-%        {'$s$', ['$s^{{\bf ' methodName '}}$']}, ...
-%        {1:size(xTrain,1), 1:size(xTrain,1)}, [], [], [], [], grid, sDataset.sData.tx, sDataset.sData.sense);
     grid.lat = sDataset.sData.vGridLat;
     grid.lon = sDataset.sData.vGridLon;
-    
-%     dim = size(data,2);
-%     xtOrig = zeros(N,dim);
-%     xtOrig(vShuffleMap,:) = sDataset.sData.xt;
-%     ytOrig = zeros(N,1);
-%     ytOrig(vShuffleMap) = sDataset.sData.yt;
-%     xOrig = xtOrig(1:n,:);
-%     yOrig = ytOrig((1:n)');
-%     ymaskedOrig = zeros(n,1);
-%     ymaskedOrig((1:ell)') = ytOrig(sense.ind');
-    
-%     mUnshuffledGridInt = zeros(sPreset.N,2);
-%     mUnshuffledGridInt(vShuffleMap,:) = sDataset.sData.mGrid;
-%     mUnshuffledGridRec = mUnshuffledGridInt(1:n,:);
     mGridShuffledInt = sDataset.sData.mGrid(sDataset.sData.vShuffleMap,:);
     mGridShuffledRec = mGridShuffledInt(1:sPreset.n,:);
 
@@ -57,10 +36,8 @@ if ismember(sPreset.verticesPDF, {'BulgariBeacons'})
     yOrig = ytOrig((1:sPreset.n)');
     vUnshuffledSigRecRef = yOrig;
     vUnshuffledSigIntRef = ytOrig;
-
     vUnshuffledSigInt = zeros(sPreset.N,1);
     vUnshuffledSigInt(sDataset.sData.vShuffleMap) = vSigInt;
-    vUnshuffledSigRec = vUnshuffledSigInt((1:sPreset.n)');
     
     if ismember(methodName, {'RoMix'})
         PlotGraphSignals(sPlotParams, [], 'GroundTruthInterp', ...

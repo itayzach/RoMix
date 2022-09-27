@@ -35,7 +35,7 @@ sPreset.gamma2             = 0;
 sPreset.gamma1Rep          = 0.05;
 sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
-sPreset.R                  = 5;
+sPreset.R                  = 10;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;

@@ -1,4 +1,5 @@
 function sDataset = LoadBulgariBeacons(sPlotParams, NLat, NLon, N, n, nLabeled)
+assert(nLabeled <= n && n <= N);
 %% Load DEM
 fnameDem = fullfile('data', 'bulgari', 'DEM_Bulgari', 'N42E024_E24_N42.dt1');
 [Z,R] = dted(fnameDem);
@@ -135,7 +136,6 @@ end
 A_LoS_2m = max(A_LoS_2m,A_LoS_2m'); % assure symmetry (assumes LoS if one way exists)
 A_LoS_2m = A_LoS_2m-diag(diag(A_LoS_2m)); % remove self loops
 A_LoS_2m_sq = A_LoS_2m*A_LoS_2m; % 2-hop neighborhoods
-%A_LoS_2m_qub = A_LoS_2m*A_LoS_2m_sq; % 2-hop neighborhoods
 
 %% Free Space Attenuation
 attenuationAlpha = 2;
@@ -151,92 +151,30 @@ A_gain_mW = A_gain_mW + sub_grid_gain*eye(N); %gain only mat
 A_gain_dB = 10*log10(A_gain_mW);
 
 %% Build sDataset
-%assert(N == n);
-assert(nLabeled <= n);
 wgs84 = wgs84Ellipsoid('kilometer');
 [X,Y,Z] = geodetic2ecef(wgs84,mGridLat(:),mGridLon(:),mGridZ(:));
 
-A_LoS_2m_plusMinus = (-1+2*A_LoS_2m);
-b_normalizeNormal = false;
-b_normalizeUniform = false;
-
-% data = [X, Y, Z]; b_normalizeUniform = true;
-% data = [X, Y, Z, A_gain_dB(:,tx.ind)];  b_normalizeUniform = true;%
-% data = [X, Y, Z, A_LoS_2m(:,tx.ind)];  b_normalizeUniform = true;%
-% data = [X, Y, Z, A_gain_dB(:,tx.ind), A_LoS_2m(:,tx.ind)];  b_normalizeUniform = true;% 92.34% omega = 1.5; gmm = 10; gamma = 0.05; nLabeled = 50;
-% data = [Z, A_gain_dB(:,tx.ind), A_LoS_2m(:,tx.ind), A_LoS_2m_sq(:,tx.ind)];  b_normalizeUniform = true; % 92.56%  omega = 1.5; gmm = 10; gamma = 0.05; nLabeled = 50;
-data = [X, Y, Z, A_gain_dB(:,tx.ind), A_LoS_2m(:,tx.ind), A_LoS_2m_sq(:,tx.ind)];  b_normalizeUniform = true; % 92.45% omega = 1.5; gmm = 10; gamma = 0.05; nLabeled = 50;
-assert(size(data,2) == sPlotParams.dim);
-
-% Normalize
-if b_normalizeUniform
-    data = (data - min(data))./(max(data) - min(data));
-end
-if b_normalizeNormal    
-    data = (data - mean(data)) ./ std(data);
-end
-
-
+latent = [X, Y, Z, A_gain_dB(:,tx.ind), A_LoS_2m(:,tx.ind), A_LoS_2m_sq(:,tx.ind)];   % 92.45% omega = 1.5; gmm = 10; gamma = 0.05; nLabeled = 50;
+latent = (latent - min(latent))./(max(latent) - min(latent));
+assert(size(latent,2) == sPlotParams.dim);
 
 %% Save dataset and grid for plots
-% Arrange data to 
-% 1     ->  ell : sensors (measurements)
-% ell+1 ->  n   : for interp
-% n+1   ->  N   : for extrap
-ell = numel(sense.ind');
-vIndNoSense = setdiff(1:N,sense.ind');
-rperm = randperm(N-ell);
-vIndNoSenseShuffled = vIndNoSense(rperm);
+sDataset = BuildDataset(N, n, latent, sense, tx, y, y_M, mGridLon, mGridLat, vGridLon, vGridLat);
 
-vShuffleMap = [sense.ind, vIndNoSenseShuffled]';
-
-dataRearranged = data(vShuffleMap,:);
-yRearranged = y(vShuffleMap);
-assert(isequal(yRearranged(1:ell), y_M))
-sDataset.sData.x = dataRearranged(1:n,:);
-sDataset.sData.xt = dataRearranged;
-sDataset.sData.y = 10*log10(abs(yRearranged(1:n))); % from Signal-Pro 
-%sDataset.sData.y = yRearranged(1:n); % from Signal-Pro 
-sDataset.sData.ymasked = zeros(n,1);
-sDataset.sData.ymasked(1:ell) = 10*log10(abs(y_M)); % vLabeledInd = sense.ind';
-%sDataset.sData.ymasked(1:ell) = y_M; % vLabeledInd = sense.ind';
-sDataset.sData.yt = 10*log10(abs(yRearranged)); % from Signal-Pro 
-%sDataset.sData.yt = yRearranged; %from Signal-Pro 
-
-dim = size(data,2);
-xtOrig = zeros(N,dim);
-xtOrig(vShuffleMap,:) = sDataset.sData.xt;
-ytOrig = zeros(N,1);
-ytOrig(vShuffleMap) = sDataset.sData.yt;
-xOrig = xtOrig(1:n,:);
-yOrig = ytOrig((1:n)');
-ymaskedOrig = zeros(n,1);
-ymaskedOrig((1:ell)') = ytOrig(sense.ind');
-
-assert(isequal(xtOrig, data))
-assert(isequal(xOrig, data(1:n,:)))
-%assert(isequal(yOrig, y(1:n)))
-assert(isequal(yOrig, 10*log10(abs(y(1:n)))))
-%assert(isequal(ymaskedOrig(1:ell), y_M))
-assert(isequal(ymaskedOrig(1:ell), 10*log10(abs(y_M))))
-assert(isequal(ymaskedOrig(ell+1:end), zeros(n-ell,1)))
-%assert(isequal(ytOrig, y)) 
-assert(isequal(ytOrig, 10*log10(abs(y))))
-
-% sDataset.sData.x = data;
-% sDataset.sData.xt = data;
-% sDataset.sData.y = 10*log10(abs(y)); % from Signal-Pro 
-% sDataset.sData.ymasked = zeros(n,1);
-% sDataset.sData.ymasked(sense.ind') = 10*log10(abs(y_M)); % vLabeledInd = sense.ind';
-% sDataset.sData.yt = 10*log10(abs(y)); % from Signal-Pro 
-
-% Used only for plots
-sDataset.sData.mGrid = [mGridLon(:), mGridLat(:)];
-sDataset.sData.vGridLon = vGridLon;
-sDataset.sData.vGridLat = vGridLat;
-sDataset.sData.sense = sense;
-sDataset.sData.tx = tx;
-sDataset.sData.vShuffleMap = vShuffleMap;
+% grid.lat = sDataset.sData.vGridLat;
+% grid.lon = sDataset.sData.vGridLon;
+% mGridShuffledInt = sDataset.sData.mGrid(sDataset.sData.vShuffleMap,:);
+% mGridShuffledRec = mGridShuffledInt(1:n,:);
+% 
+% ytOrig = zeros(N,1);
+% ytOrig(sDataset.sData.vShuffleMap) = sDataset.sData.yt;
+% vUnshuffledSigIntRef = ytOrig;
+% PlotGraphSignals(sPlotParams, [], 'GroundTruthInterp', ...
+%    {mGridShuffledRec}, {sDataset.sData.y}, {'$s$'}, {1:n}, ...
+%    [], [], [], [], grid, sDataset.sData.tx, sDataset.sData.sense);
+% PlotGraphSignals(sPlotParams, [], 'GroundTruthExtrap', ...
+%    {sDataset.sData.mGrid}, {vUnshuffledSigIntRef}, {'$\tilde{s}$'}, {1:N}, ...
+%    [], [], [], [], grid, sDataset.sData.tx, sDataset.sData.sense);
 
 
 end
@@ -551,4 +489,64 @@ grid.LAT=gridLat;
 grid.LON=gridLon;
 grid.Z=fmap.Z(grid_lat_ind, grid_lon_ind);
 grid.R=[(grid.Nlat-1)/(grid.lat(end)-grid.lat(1)), grid.lat(end), grid.lon(1)]; %redefine the number of cells
+end
+
+
+function sDataset = BuildDataset(N, n, latent, sense, tx, y, y_M, mGridLon, mGridLat, vGridLon, vGridLat)
+% Arrange data to 
+% 1     ->  ell : sensors (measurements)
+% ell+1 ->  n   : for interp
+% n+1   ->  N   : for extrap
+ell = numel(sense.ind');
+vIndNoSense = setdiff(1:N,sense.ind');
+rperm = randperm(N-ell);
+vIndNoSenseShuffled = vIndNoSense(rperm);
+
+vShuffleMap = [sense.ind, vIndNoSenseShuffled]';
+
+dataRearranged = latent(vShuffleMap,:);
+yRearranged = y(vShuffleMap);
+assert(isequal(yRearranged(1:ell), y_M))
+sDataset.sData.x = dataRearranged(1:n,:);
+sDataset.sData.xt = dataRearranged;
+sDataset.sData.y = 10*log10(abs(yRearranged(1:n))); % from Signal-Pro 
+%sDataset.sData.y = yRearranged(1:n); % from Signal-Pro 
+sDataset.sData.ymasked = zeros(n,1);
+sDataset.sData.ymasked(1:ell) = 10*log10(abs(y_M)); % vLabeledInd = sense.ind';
+%sDataset.sData.ymasked(1:ell) = y_M; % vLabeledInd = sense.ind';
+sDataset.sData.yt = 10*log10(abs(yRearranged)); % from Signal-Pro 
+%sDataset.sData.yt = yRearranged; %from Signal-Pro 
+
+% Used only for plots
+sDataset.sData.mGrid = [mGridLon(:), mGridLat(:)];
+sDataset.sData.vGridLon = vGridLon;
+sDataset.sData.vGridLat = vGridLat;
+sDataset.sData.sense = sense;
+sDataset.sData.tx = tx;
+sDataset.sData.vShuffleMap = vShuffleMap;
+
+VerifyShuffle(sDataset, latent, N, n, ell, sense, y, y_M, vShuffleMap);
+end
+
+
+function VerifyShuffle(sDataset, data, N, n, ell, sense, y, y_M, vShuffleMap)
+dim = size(data,2);
+xtOrig = zeros(N,dim);
+xtOrig(vShuffleMap,:) = sDataset.sData.xt;
+ytOrig = zeros(N,1);
+ytOrig(vShuffleMap) = sDataset.sData.yt;
+xOrig = xtOrig(1:n,:);
+yOrig = ytOrig((1:n)');
+ymaskedOrig = zeros(n,1);
+ymaskedOrig((1:ell)') = ytOrig(sense.ind');
+
+assert(isequal(xtOrig, data))
+assert(isequal(xOrig, data(1:n,:)))
+%assert(isequal(yOrig, y(1:n)))
+assert(isequal(yOrig, 10*log10(abs(y(1:n)))))
+%assert(isequal(ymaskedOrig(1:ell), y_M))
+assert(isequal(ymaskedOrig(1:ell), 10*log10(abs(y_M))))
+assert(isequal(ymaskedOrig(ell+1:end), zeros(n-ell,1)))
+%assert(isequal(ytOrig, y)) 
+assert(isequal(ytOrig, 10*log10(abs(y))))
 end

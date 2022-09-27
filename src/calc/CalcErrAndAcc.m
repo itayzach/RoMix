@@ -42,12 +42,18 @@ end
 mErrors = mErrNormed.';
 
 % The sum is over the iterations, r=1:R
-vRmse = sqrt(sum(mErr.^2,1)/R).';
-vRmseStd = std(mErr,[],1).';
-vMse = (sum(mErrNormed.^2,1)/R).';
-vCoh = (sum(mCoherence,1)/R).';
-vAcc = (100*sum((1-mErrNormed),1)/R).';
-vAccStd = 100*std(mErrNormed,[],1).';
+if b_compareDb
+    vAcc = (sum(mErrNormed,1)/R).';
+    vAccStd = std(mErrNormed,[],1).';
+else
+    vRmse = sqrt(sum(mErr.^2,1)/R).';
+    vRmseStd = std(mErr,[],1).';
+    vMse = (sum(mErrNormed.^2,1)/R).';
+    vCoh = (sum(mCoherence,1)/R).';
+    vAcc = (100*sum((1-mErrNormed),1)/R).';
+    vAccStd = 100*std(mErrNormed,[],1).';
+end
+
 assert(all(vAcc >= 0) && all(vAccStd >= 0));
 
 %vAcc = vRmse;

@@ -49,7 +49,6 @@ else
         PlotMetric(sPlotParams, [mAccRec(:,1), mAccInt(:,1)], [mAccStdRec(:,1), mAccStdInt(:,1)], ...
             {'Interp.', 'Extrap.'}, ...{'Acc$(s^{{\bf RoMix}}_m, s_m)$', 'Acc$(\tilde{s}^{{\bf RoMix}}_m, \tilde{s}_m)$'}, ...
             'InterpExtrapAcc', [], sPreset.sDatasetParams.xTickNames, 'Interpolation \& extrapolation accuracy');
-
     end
 end
 end

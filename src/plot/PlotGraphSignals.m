@@ -111,8 +111,8 @@ elseif dim == 2 || dim == 3
         if exist('tx', 'var') % Meaning: strcmp(sPlotParams.actualDataDist, 'BulgariBeacons') == 1
             colormap(jet);
             %imagesc(grid.lon, (grid.lat), (reshape(vSignal, length(grid.lat), length(grid.lon))));
-            scatter(mData(vCirclesInd,1), mData(vCirclesInd,2), 10, vSignal(vCirclesInd), 'filled','s');
-            %view(2);
+            scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), vSignal(vCirclesInd), 10, vSignal(vCirclesInd), 'filled','s');
+            view(2);
             c=colorbar('TickLabelInterpreter', 'latex');
             c.Label.String='dBm';
             if cMapMin < cMapMax

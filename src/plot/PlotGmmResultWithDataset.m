@@ -1,12 +1,6 @@
-function fig = PlotGmmResultWithDataset(sPlotParams, x, sDistParams, b_plotCovMean, windowStyle)
+function fig = PlotGmmResultWithDataset(sPlotParams, x, sDistParams, b_plotCovMean, cXAxisLabels)
 [n, dim] = size(x);
 if dim <= 3
-    prevWindowStyle = get(0,'DefaultFigureWindowStyle');
-    if ~exist('windowStyle', 'var')
-        windowStyle = prevWindowStyle;
-    end
-    set(0,'DefaultFigureWindowStyle',windowStyle)
-
     if exist('sPlotParams', 'var') && ~isempty(sPlotParams)
         actualDataDist = sPlotParams.actualDataDist;
     else
@@ -76,27 +70,28 @@ if dim <= 3
     %         h.Face.Texture.CData(4,:) = (alphaVal+0.2) * h.Face.Texture.CData(4,:);
         end
     end
-    axis off
+    if exist('cXAxisLabels','var') && ~isempty(cXAxisLabels)
+        if numel(cXAxisLabels) >= 1, xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16); end
+        if numel(cXAxisLabels) >= 2, ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16); end
+        if numel(cXAxisLabels) == 3, zlabel(cXAxisLabels{3}, 'interpreter', 'latex', 'FontSize', 16); end
+    else
+        axis off
+    end
     set(gca,'FontSize', 14);
     
     %% Size
-    if strcmp(windowStyle, 'normal')
-        if dim == 2
-            hRatio = 2*(xMax(2)-xMin(2))/(xMax(1)-xMin(1));
-        else
-            hRatio = 1;
-            view(30,80);
-        end
-        x0     = 400;
-        y0     = 400;
-        height = hRatio*400;
-        width  = 600;
-        set(gcf,'Position', [x0 y0 width height])
+    if dim == 2
+        hRatio = 2*(xMax(2)-xMin(2))/(xMax(1)-xMin(1));
+    else
+        hRatio = 1;
+        %view(30,80);
+        view(30,75);
     end
-    if ~(dim == 3 && b_plotCovMean)
-        set(fig,'renderer','Painters')
-    end
-    set(0,'DefaultFigureWindowStyle',prevWindowStyle)
+    x0     = 400;
+    y0     = 400;
+    height = hRatio*400;
+    width  = 600;
+    set(gcf,'Position', [x0 y0 width height])
     %% Save
     if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder') && exist('fig','var')
         if b_plotCovMean
@@ -104,7 +99,12 @@ if dim <= 3
         else
             figName = 'gmm_data';
         end
-        SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
+        set(fig,'renderer','Painters')
+        if exist('alphaVal', 'var')
+            SaveFigure(sPlotParams, fig, figName, {'pdf', 'png'});
+        else
+            SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
+        end
     end
 end
 end

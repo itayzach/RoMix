@@ -38,6 +38,11 @@ if b_gmmLatent
 else
     b_transform = false; PlotDataset(sPlotParams, sPreset, S, sDataset.sData.y, pltTitle, [], nGmmPoints, plt2Title, windowStyle, b_transform, cXAxisLabels);
 end
-b_plotCovMean = true; PlotGmmResultWithDataset(sPlotParams, x, sDistParams, b_plotCovMean);
-b_plotCovMean = false; PlotGmmResultWithDataset(sPlotParams, x, sDistParams, b_plotCovMean);
+if ~b_randn && ~b_gmmLatent
+    cXAxisLabels = {'$x_1$','$x_2$','$x_3$'};
+else
+    cXAxisLabels = [];
+end
+b_plotCovMean = true; PlotGmmResultWithDataset(sPlotParams, x, sDistParams, b_plotCovMean, cXAxisLabels);
+b_plotCovMean = false; PlotGmmResultWithDataset(sPlotParams, x, sDistParams, b_plotCovMean, cXAxisLabels);
 end

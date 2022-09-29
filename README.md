@@ -13,6 +13,13 @@ For MNIST simulation:
   conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
   pip install -r requirements.txt
   ```
+* Verify:
+  ```
+  # CPU:
+  python -c "import tensorflow as tf; print(tf.reduce_sum(tf.random.normal([1000, 1000])))"
+  # GPU:
+  python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+  ```
 * You must link your MATLAB to your python installation.
 
   

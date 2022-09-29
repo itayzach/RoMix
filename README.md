@@ -8,7 +8,7 @@ This repo contains [GSPBox](https://epfl-lts2.github.io/gspbox-html/) as a submo
 All simulations were conducted with MATLAB 2021b on Windows 10. Other OS's or MATLAB versions might not be supported.
 
 For MNIST simulation:
-* Training VAE was done with Python 3.9.0 and the packages in requirements.txt. You may install them by:
+* Training VAE was done with Python 3.9.0 and the packages in requirements.txt. You may install them by (Anaconda 2.1.1):
   ```
   conda install -c conda-forge cudatoolkit=11.2 cudnn=8.1.0
   pip install -r requirements.txt

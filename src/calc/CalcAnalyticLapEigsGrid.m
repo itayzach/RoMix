@@ -12,11 +12,11 @@ function [V, matLambda] = CalcAnalyticLapEigsGrid(x, M, len)
 V = zeros(n,M);
 matLambda = zeros(M,1);
 OneDim2MultiDimIndexMatrix = LoadOneDim2MultiDimIndexMatrix(M, dim);
-for i = 1:M
-    m = OneDim2MultiDimIndexMatrix(i,:);
+for m = 1:M
+    I = OneDim2MultiDimIndexMatrix(m,:);
     normFactorV = 1; %(m == 0)*sqrt(1/n^(1/dim)) + (m > 0)*sqrt(2/n^(1/dim));
-    V(:,i) = prod(normFactorV.*cos(pi*m.*x./len),2);
-    matLambda(i) = sum((pi*m./len).^2);
+    V(:,m) = prod(normFactorV.*cos(pi*I.*x./len),2);
+    matLambda(m) = sum((pi*I./len).^2);
 end
 [matLambda, vMultindexToSingleIndexMap] = sort(matLambda);
 V = V(:,vMultindexToSingleIndexMap);

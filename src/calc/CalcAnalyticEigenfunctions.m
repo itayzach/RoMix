@@ -5,11 +5,11 @@ OneDim2MultiDimIndexMatrix = LoadOneDim2MultiDimIndexMatrix(nEigs,dim);
 fprintf('Calculating %d eigenfunctions (max m = %d) d = %d, n = %d... ',nEigs, max(OneDim2MultiDimIndexMatrix(:)), dim, nTotal)
 ts = tic;
 mPhiAnalytic = zeros(nTotal, nEigs);
-for i = 1:nEigs
-    c = sKernelParams.vComponentIndex(i);
-    j = sKernelParams.vEigIndex(i);
-    m = OneDim2MultiDimIndexMatrix(j,:);
-    mPhiAnalytic(:,i) = phiD(sKernelParams, c, m, mData);
+for m = 1:nEigs
+    c = sKernelParams.vComponentIndex(m);
+    j = sKernelParams.vEigIndex(m);
+    I = OneDim2MultiDimIndexMatrix(j,:);
+    mPhiAnalytic(:,m) = phiD(sKernelParams, c, I, mData);
 end
 
 vNormFactor = reshape(sKernelParams.sDistParams.GMModel.ComponentProportion(sKernelParams.vComponentIndex), 1, []);

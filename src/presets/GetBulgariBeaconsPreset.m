@@ -4,7 +4,7 @@ sPreset.dim                = 9;
 sPreset.NLat               = 100; % 100 % 120
 sPreset.NLon               = 100; % 100 % 120
 sPreset.N                  = sPreset.NLat*sPreset.NLon;
-sPreset.n                  = 75*75;
+sPreset.n                  = 6000;
 sPreset.nLabeled           = [25 50 100 150];
 sPreset.k                  = round(0.1*sPreset.N);
 sPreset.nGenDataCompnts    = 0;
@@ -27,7 +27,7 @@ sPreset.gmmMaxIter         = 100;
 sPreset.gmmNumComponents   = 8;
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 10; % If M is too big eigs(W,M) is not stable numerically
-sPreset.MTilde             = 50;
+sPreset.MTilde             = 100;
 %% Regularizations
 sPreset.gamma1             = 0.05;
 sPreset.gamma2             = 0;
@@ -52,6 +52,6 @@ sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 %% Other methods
 sPreset.cMethods = {'RoMix', 'Rep. Thm.', 'PW', 'Nystrom', 'kNN'};
 sPreset.knn = 5;
-sPreset.sPwParams.regularize_epsilon = 0.001;
+sPreset.sPwParams.regularize_epsilon = 0;
 sPreset.sPwParams.order = 50;
 end

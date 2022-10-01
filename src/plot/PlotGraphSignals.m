@@ -25,7 +25,7 @@ if dim == 1
     y0     = 100;
     width  = 800;
     height = 400;
-    fig = figure('Name', 'Graph signals');
+    fig = figure('Name', figName);
     for m = 1:nSignals
         dispName = cSigStr{m};
         if exist('cColors', 'var') && ~isempty(cColors)
@@ -85,7 +85,7 @@ elseif dim == 2 || dim == 3
     end
    
     %% Plot
-    fig = figure('Name', 'Graph signals');
+    fig = figure('Name', figName);
     tiledlayout(nRows, nCols);
     ax = zeros(nSignals,1);
     if exist('cmap', 'var') && ~isempty(cmap)

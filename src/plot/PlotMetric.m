@@ -58,7 +58,7 @@ if exist('b_zoomIn', 'var') && ~isempty(b_zoomIn) && b_zoomIn
     top3min = v2ndRunSorted(1);
     top3max = v2ndRunSorted(end-1);
 
-    x0src = 45;  y0src = top3min-abs(top3min/20);
+    x0src = 25;  y0src = top3min-abs(top3min/10);
     x1src = 150; y1src = top3max+abs(top3max/50);
     srcPos =[x0src y0src x1src y1src];
     
@@ -66,8 +66,8 @@ if exist('b_zoomIn', 'var') && ~isempty(b_zoomIn) && b_zoomIn
     %x0tar = 60;  y0tar = min(mVals(:))+1;
     %x1tar = 145; y1tar = minValsSorted(2)+2;
     vValsSorted = sort(mVals(:));
-    x0tar = 60;  y0tar = vValsSorted(end-1)*0.99;
-    x1tar = 145; y1tar = vValsSorted(end)*0.99;   
+    x0tar = 60;  y0tar = vValsSorted(end-1)*0.55;
+    x1tar = 145; y1tar = vValsSorted(end)*0.90;   
     targetPos = [x0tar y0tar x1tar y1tar];
 
     az = zoomPlot(p_ax, srcPos, targetPos, lgd);

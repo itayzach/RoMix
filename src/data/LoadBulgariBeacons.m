@@ -4,11 +4,8 @@ assert(nLabeled <= n && n <= N);
 fnameDem = fullfile('data', 'bulgari', 'DEM_Bulgari', 'N42E024_E24_N42.dt1');
 [Z,R] = dted(fnameDem);
 sFullMap = BuildFullMap(Z,R); %close(1);
-LON = sFullMap.lon;
-LAT = sFullMap.lat;
-
-nLon = size(LON,1);
-nLat = size(LAT,1);
+nLon = size(sFullMap.lon,1);
+nLat = size(sFullMap.lat,1);
 
 %% Create grid
 b_zoom = false;
@@ -49,8 +46,8 @@ end
 
 nGridLon = size(grid_lon_ind,2);
 nGridLat = size(grid_lat_ind,2);
-vGridLon = LON(grid_lon_ind);
-vGridLat = LAT(grid_lat_ind);
+vGridLon = sFullMap.lon(grid_lon_ind);
+vGridLat = sFullMap.lat(grid_lat_ind);
 [mGridLon, mGridLat] = meshgrid(vGridLon, vGridLat);
 mGridZ = double(sFullMap.Z(grid_lat_ind, grid_lon_ind));
 if b_zoom
@@ -138,23 +135,20 @@ A_LoS_2m = A_LoS_2m-diag(diag(A_LoS_2m)); % remove self loops
 A_LoS_2m_sq = A_LoS_2m*A_LoS_2m; % 2-hop neighborhoods
 
 %% Free Space Attenuation
-attenuationAlpha = 2;
-WITH_SELF_LOOPS = false;
-Atten2 = MyCalcAttenuation(mGridLat, mGridLon, mGridZ, attenuationAlpha, WITH_SELF_LOOPS);
-A_gain_mW = 10.^(-Atten2/10);
-
-%Fix synthesis model to describe small attenuation (large gain) from a node to iself.
-Re=6371000; %[m] earth radius.
-sub_grid_distance = 0.5*Re*diff(LAT(1:2,1))*(pi/180)*dn_lat;
-sub_grid_gain = 1/(sub_grid_distance^2);
-A_gain_mW = A_gain_mW + sub_grid_gain*eye(N); %gain only mat
-A_gain_dB = 10*log10(A_gain_mW);
-
-%% Build sDataset
-wgs84 = wgs84Ellipsoid('kilometer');
+wgs84 = wgs84Ellipsoid('meter');
 [X,Y,Z] = geodetic2ecef(wgs84,mGridLat(:),mGridLon(:),mGridZ(:));
 
-latent = [X, Y, Z, A_gain_dB(:,tx.ind), A_LoS_2m(:,tx.ind), A_LoS_2m_sq(:,tx.ind)];   % 92.45% omega = 1.5; gmm = 10; gamma = 0.05; nLabeled = 50;
+% Due to the grid sampling, we get distance = 0 on the diagonal.
+% To fix this, we set the distance of node to itself according to farthest point in the cell: 
+sub_grid_distance = 0.5*Re*diff(sFullMap.lat(1:2,1))*(pi/180)*dn_lat;
+
+dist = squareform(pdist([X(:), Y(:), Z(:)])) + sub_grid_distance*eye(N);
+fRF = 150e6; c = 3e8; lambda = c/fRF;
+FSPL = (4*pi*dist/lambda).^2;
+A_gain = 1./FSPL;
+
+%% Build sDataset
+latent = [X, Y, Z, A_gain(:,tx.ind), A_LoS_2m(:,tx.ind), A_LoS_2m_sq(:,tx.ind)];
 latent = (latent - min(latent))./(max(latent) - min(latent));
 assert(size(latent,2) == sPlotParams.dim);
 

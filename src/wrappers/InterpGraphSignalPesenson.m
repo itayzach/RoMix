@@ -37,11 +37,11 @@ mSigCnvrtPw = ConvertSignalByDataset(sPreset.verticesPDF, mSigPwInt);
 tIntVec(2) = toc(ts);
 intTime = sum(tIntVec);
 
-fprintf('PW: train took %.2f sec, interp took %.2f sec\n', trainTime, intTime);
+fprintf('VSPW: train took %.2f sec, interp took %.2f sec\n', trainTime, intTime);
 
 if sPlotParams.b_globalPlotEnable && sPreset.b_runGraphSignals
     mSigRef    = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);
     mSigRefInt = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.yt);
-    PlotGraphSignalsWrapper(sPlotParams, sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtRecPw, mSigCnvrtPw, [], 'PW')
+    PlotGraphSignalsWrapper(sPlotParams, sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtRecPw, mSigCnvrtPw, [], 'VSPW')
 end
 end

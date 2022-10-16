@@ -113,8 +113,11 @@ elseif dim == 2 || dim == 3
             %imagesc(grid.lon, (grid.lat), (reshape(vSignal, length(grid.lat), length(grid.lon))));
             scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), vSignal(vCirclesInd), 10, vSignal(vCirclesInd), 'filled','s');
             view(2);
-            c=colorbar('TickLabelInterpreter', 'latex');
-            c.Label.String='dBm';
+            c=colorbar;
+            c.Label.String='Power [dBm]';
+            c.Label.Interpreter='latex'; 
+            c.Label.FontSize = 14;
+            c.TickLabelInterpreter = 'latex';
             if cMapMin < cMapMax
                caxis([cMapMin cMapMax]);
             end

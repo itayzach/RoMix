@@ -50,13 +50,12 @@ if ismember(actualDataDist, {'USPS', 'MNIST'})
 end
 
 %% GMM
-fig = figure('Name', sprintf('%d-D %s', dim, actualDataDist));
-compIdx(:,1) = ones(nGmmPoints,1);
 if exist('sDistParams', 'var') && ~isempty(sDistParams)
-    b_plotDistModel = true;
-    b_spectclust = isfield(sDistParams,'SCcompIdx');
-    tiledlayout(1,2 + b_spectclust);
-    vAx(2) = nexttile(2);
+    fig = figure('Name', sprintf('%d-D %s GMM', dim, actualDataDist));
+    compIdx(:,1) = ones(nGmmPoints,1);
+    %b_spectclust = isfield(sDistParams,'SCcompIdx');
+    %tiledlayout(1,2 + b_spectclust);
+    %vAx(2) = nexttile(2);
     [xGmm,compIdx(:,2)] = random(sDistParams.GMModel, nGmmPoints);
     if dim > 3 % Apply PCA
         pcaDim = 2;
@@ -83,89 +82,108 @@ if exist('sDistParams', 'var') && ~isempty(sDistParams)
     end
     xMax = max(x);
     xMin = min(x);
-    for i=1:1+b_spectclust
-        if i == 2
-            xGmm = x;
-            compIdx(:,3) = sDistParams.SCcompIdx;
-            vAx(3) = nexttile(3);
+    if dim == 1
+        %scatter(xGmm, zeros(1,nGmmPoints), 50, compIdx(:,i+1), 'filled')
+        scatter(xGmm, zeros(1,nGmmPoints), 50, 'filled')
+        xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
+        set(gca,'YTick',[],'FontSize', 14);
+        xlim([xMin(1), xMax(1)])
+    elseif dim == 2
+        if sDistParams.GMModel.NumComponents < 20
+            scatter3(xGmm(:,1),xGmm(:,2),compIdx(:,2),[],compIdx(:,2),'filled');
+            if sDistParams.GMModel.NumComponents <= size(unique(lines,'rows'),1)
+                cmap = lines(sDistParams.GMModel.NumComponents);
+            else
+                cmap = jet(sDistParams.GMModel.NumComponents);
+            end
+            colormap(cmap);
+            h = colorbar('TickLabelInterpreter', 'latex');
+            h.Limits = [0 sDistParams.GMModel.NumComponents];
+            h.Ticks = (0.5:sDistParams.GMModel.NumComponents);
+            h.TickLabels = 1:sDistParams.GMModel.NumComponents;
+            h.Label.String='GMM comp.';
+            h.Label.Interpreter='latex'; 
+            h.Label.FontSize = 14;
+            h.TickLabelInterpreter = 'latex';
+        else
+            scatter(xGmm(:,1),xGmm(:,2),[],'filled');
         end
-        if dim == 1
-            %scatter(xGmm, zeros(1,nGmmPoints), 50, compIdx(:,i+1), 'filled')
-            scatter(xGmm, zeros(1,nGmmPoints), 50, 'filled')
-            xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
-            set(gca,'YTick',[],'FontSize', 14);
-            xlim([xMin(1), xMax(1)])
-        elseif dim == 2
-            if sDistParams.GMModel.NumComponents < 20
-                scatter3(xGmm(:,1),xGmm(:,2),compIdx(:,i+1),[],compIdx(:,i+1),'filled');
-                if sDistParams.GMModel.NumComponents <= size(unique(lines,'rows'),1)
-                    cmap = lines(sDistParams.GMModel.NumComponents);
-                else
-                    cmap = jet(sDistParams.GMModel.NumComponents);
-                end
-                colormap(cmap);
-                h = colorbar('TickLabelInterpreter', 'latex');
-                h.Limits = [0 sDistParams.GMModel.NumComponents];
-                h.Ticks = (0.5:sDistParams.GMModel.NumComponents);
-                h.TickLabels = 1:sDistParams.GMModel.NumComponents;
-            else
-                scatter(xGmm(:,1),xGmm(:,2),[],'filled');
-            end
-            grid on;
-            if ismember(actualDataDist, {'SwissRoll'}) || exist('pcaDim', 'var')
-                xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
-                ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
-            else
-                xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
-                ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
-            end
-            view(2);
-            set(gca,'FontSize', 14);
-            xlim([xMin(1), xMax(1)])
-            ylim([xMin(2), xMax(2)])
-        elseif dim == 3
-            if ismember(actualDataDist, {'SwissRoll'}) && sPreset.sDatasetParams.b_randn
-                scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[],compIdx(:,i+1), 'filled');
-                colormap(lines(sDistParams.GMModel.NumComponents));
-                h = colorbar('TickLabelInterpreter', 'latex');
-                h.Ticks = (1:sDistParams.GMModel.NumComponents);
-                h.TickLabels = 1:sDistParams.GMModel.NumComponents;
-            else
-                scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[], 'filled');
-            end
-            if exist('pcaDim', 'var')
-                xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
-                ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
-                ylabel(cXAxisLabels{3}, 'interpreter', 'latex', 'FontSize', 16);
-            else
-                xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
-                ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
-                zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
-            end
-            view(30,75);
-            set(gca,'FontSize', 14);
-            xlim([xMin(1), xMax(1)])
-            ylim([xMin(2), xMax(2)])
-            zlim([xMin(3), xMax(3)])
+        grid on;
+        if ismember(actualDataDist, {'SwissRoll'}) || exist('pcaDim', 'var')
+            xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
+            ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
+        else
+            xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
+            ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
         end
-        if ~isempty(plt2Title)
-            title(plt2Title, 'Interpreter', 'latex', 'FontSize', 14)
+        view(2);
+        set(gca,'FontSize', 14);
+        xlim([xMin(1), xMax(1)])
+        ylim([xMin(2), xMax(2)])
+    elseif dim == 3
+        if ismember(actualDataDist, {'SwissRoll'}) && sPreset.sDatasetParams.b_randn
+            scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[],compIdx(:,2), 'filled');
+            colormap(lines(sDistParams.GMModel.NumComponents));
+            h = colorbar('TickLabelInterpreter', 'latex');
+            h.Ticks = (1:sDistParams.GMModel.NumComponents);
+            h.TickLabels = 1:sDistParams.GMModel.NumComponents;
+            h.Label.String='GMM comp.';
+            h.Label.Interpreter='latex'; 
+            h.Label.FontSize = 14;
+            h.TickLabelInterpreter = 'latex';
+        else
+            scatter3(xGmm(:,1), xGmm(:,2), xGmm(:,3),[], 'filled');
         end
+        if exist('pcaDim', 'var')
+            xlabel(cXAxisLabels{1}, 'interpreter', 'latex', 'FontSize', 16);
+            ylabel(cXAxisLabels{2}, 'interpreter', 'latex', 'FontSize', 16);
+            ylabel(cXAxisLabels{3}, 'interpreter', 'latex', 'FontSize', 16);
+        else
+            xlabel('$x_1$', 'interpreter', 'latex', 'FontSize', 16);
+            ylabel('$x_2$', 'interpreter', 'latex', 'FontSize', 16);
+            zlabel('$x_3$', 'interpreter', 'latex', 'FontSize', 16);
+        end
+        view(30,75);
+        set(gca,'FontSize', 14);
+        xlim([xMin(1), xMax(1)])
+        ylim([xMin(2), xMax(2)])
+        zlim([xMin(3), xMax(3)])
     end
-    vAx(1) = nexttile(1);
-    UpdateCursorDataTip(fig, vAx, compIdx);
+    if ~isempty(plt2Title)
+        title(plt2Title, 'Interpreter', 'latex', 'FontSize', 14)
+    end
+    %vAx(1) = nexttile(1);
+    %UpdateCursorDataTip(fig, vAx, compIdx);
     
 else
     xMax = max(x);
     xMin = min(x);
 end
-
-%% Dataset
+% Size
 if ismember(actualDataDist, {'Uniform', 'SwissRoll'}) && dim == 2
     hRatio = 2*(xMax(2)-xMin(2))/(xMax(1)-xMin(1));
 else
     hRatio = 1;
 end
+if exist('fig','var')
+    x0 = 10; y0 = 50; height = hRatio*400; width  = 500;
+    set(gcf,'Position', [x0 y0 width height])
+end
+% Save
+if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder') && exist('fig','var')
+    figName = 'gmm';
+    if ismember(actualDataDist, {'SwissRoll'})
+        if dim == 3
+            figName = [figName, '_x'];
+        else
+            figName = [figName, '_z'];
+        end
+    end
+    set(fig,'renderer','Painters')
+    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
+end
+%% Dataset
+fig = figure('Name', sprintf('%d-D %s dataset', dim, actualDataDist));
 if dim == 1
     scatter(x, zeros(1,n), 50, ones(1,n), 'filled')
     xlabel('$x$', 'interpreter', 'latex', 'FontSize', 16);
@@ -228,22 +246,17 @@ if ~isempty(pltTitle)
     title(strcat(pltTitle, " (", actualDataDist, ")"), 'Interpreter', 'latex', 'FontSize', 14)
 end
 
-%% Size
-if strcmp(windowStyle, 'normal')
-    x0     = 400;
-    y0     = 400;
-    height = hRatio*400;
-    width  = 600*(1 + (exist('b_plotDistModel', 'var') && b_plotDistModel));
-    set(gcf,'Position', [x0 y0 width height])
+% Size
+if ismember(actualDataDist, {'Uniform', 'SwissRoll'}) && dim == 2
+    hRatio = 2*(xMax(2)-xMin(2))/(xMax(1)-xMin(1));
+else
+    hRatio = 1;
 end
-set(0,'DefaultFigureWindowStyle',prevWindowStyle)
-%% Save
+x0 = 10; y0 = 50; height = hRatio*400; width  = 500;
+set(gcf,'Position', [x0 y0 width height])
+% Save
 if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder') && exist('fig','var')
-    if exist('b_plotDistModel', 'var') && b_plotDistModel
-        figName = 'dataset_vs_dist';
-    else
-        figName = 'dataset';
-    end
+    figName = 'data';
     if ismember(actualDataDist, {'SwissRoll'})
         if dim == 3
             figName = [figName, '_x'];

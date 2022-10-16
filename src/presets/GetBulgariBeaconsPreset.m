@@ -29,10 +29,10 @@ sPreset.gmmNumComponents   = 8;
 sPreset.M                  = 10; % If M is too big eigs(W,M) is not stable numerically
 sPreset.MTilde             = 100;
 %% Regularizations
-sPreset.gamma1             = 0.05;
+sPreset.gamma1             = 0.3;
 sPreset.gamma2             = 0;
 %% Representer theorem
-sPreset.gamma1Rep          = 0.05;
+sPreset.gamma1Rep          = 0.3;
 sPreset.gamma2Rep          = 0;
 %% Number of runs (=realizations)
 sPreset.R                  = 10;
@@ -50,8 +50,10 @@ sPreset.b_compareMethods   = true;
 sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 %% Other methods
-sPreset.cMethods = {'RoMix', 'Rep. Thm.', 'PW', 'Nystrom', 'kNN'};
+sPreset.cMethods = {'RoMix', 'Rep. Thm.', 'VSPW', 'Nystr\"{o}m', 'w-kNN'};
 sPreset.knn = 5;
 sPreset.sPwParams.regularize_epsilon = 0;
-sPreset.sPwParams.order = 50;
+% Now using exact decomposition of Laplacian for the basis (instead of cheb. approx of some order)
+% sPreset.sPwParams.order = 50;
+sPreset.sPwParams.method = 'exact'; 
 end

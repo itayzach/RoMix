@@ -66,7 +66,7 @@ sPreset.b_compareMethods   = true;
 sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 %% Other methods
-sPreset.cMethods = {'RoMix', 'Rep. Thm.', 'PW', 'Nystrom', 'kNN'};
+sPreset.cMethods = {'RoMix', 'Rep. Thm.', 'VSPW', 'Nystr\"{o}m', 'w-kNN'};
 sPreset.knn = 5;
 sPreset.sPwParams.regularize_epsilon = 0.01;
 sPreset.sPwParams.order = 100;

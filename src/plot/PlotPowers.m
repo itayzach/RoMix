@@ -11,7 +11,10 @@ if SHOW_COLORBAR
     else
         c=colorbar;
     end
-    c.Label.String='dBm';
+    c.Label.String='Power [dBm]';
+    c.Label.Interpreter='latex'; 
+    c.Label.FontSize = 14;
+    c.TickLabelInterpreter = 'latex';
 end
 xlabel('Lon. [deg]'); ylabel('Lat. [deg]');
 set(get(gcf,'Children'),'YDir','normal');

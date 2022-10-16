@@ -94,6 +94,9 @@ if sPlotParams.b_globalPlotEnable
                   sFullMap.lat([grid_lat_ind(1),grid_lat_ind(end)*ones(1,2),grid_lat_ind(1)]),...
                   'b:', 'FaceColor','none','EdgeColor','blue');
         end
+        set(gca,'FontSize', 14);
+        x0 = 10; y0 = 50; height = 400; width = 500;
+        set(gcf,'Position', [x0 y0 width height])
         SaveFigure(sPlotParams, fig1, figName, {'epsc', 'png'});
     end
     
@@ -108,6 +111,9 @@ if sPlotParams.b_globalPlotEnable
     ShowDEM(mFullGridZmissing, vGridR); hold on;
     plot(sense.lon, sense.lat, 'yo','MarkerFaceColor','y','MarkerSize',3);
     plot(tx.lon, tx.lat, 'bd','MarkerFaceColor','b','MarkerSize',3); %test sites
+    set(gca,'FontSize', 14);
+    x0 = 10; y0 = 50; height = 400; width = 500;
+    set(gcf,'Position', [x0 y0 width height])
     SaveFigure(sPlotParams, fig1, figName, {'epsc', 'png'});
 end
 
@@ -125,14 +131,13 @@ if ~isfile(visPath)
 else
    load(visPath,'tVis')
 end
-A_LoS_2m = zeros(size(tVis,3));
+A_LoS = zeros(size(tVis,3));
 N = nGridLon*nGridLat; % number of grid points
 for i = 1:N
-   A_LoS_2m(:,i) = reshape(tVis(:,:,i), N, []);
+   A_LoS(:,i) = reshape(tVis(:,:,i), N, []);
 end
-A_LoS_2m = max(A_LoS_2m,A_LoS_2m'); % assure symmetry (assumes LoS if one way exists)
-A_LoS_2m = A_LoS_2m-diag(diag(A_LoS_2m)); % remove self loops
-A_LoS_2m_sq = A_LoS_2m*A_LoS_2m; % 2-hop neighborhoods
+A_LoS = max(A_LoS,A_LoS'); % assure symmetry (assumes LoS if one way exists)
+A2_LoS = A_LoS*A_LoS; % 2-hop neighborhoods
 
 %% Free Space Attenuation
 wgs84 = wgs84Ellipsoid('meter');
@@ -145,16 +150,15 @@ sub_grid_distance = 0.5*Re*diff(sFullMap.lat(1:2,1))*(pi/180)*dn_lat;
 dist = squareform(pdist([X(:), Y(:), Z(:)])) + sub_grid_distance*eye(N);
 fRF = 150e6; c = 3e8; lambda = c/fRF;
 FSPL = (4*pi*dist/lambda).^2;
-A_gain = 1./FSPL;
 
 %% Build sDataset
-latent = [X, Y, Z, A_gain(:,tx.ind), A_LoS_2m(:,tx.ind), A_LoS_2m_sq(:,tx.ind)];
+latent = [X, Y, Z, FSPL(:,tx.ind), A_LoS(:,tx.ind), A2_LoS(tx.ind,:).'];
 latent = (latent - min(latent))./(max(latent) - min(latent));
 assert(size(latent,2) == sPlotParams.dim);
 
 %% Save dataset and grid for plots
 sDataset = BuildDataset(N, n, latent, sense, tx, y, y_M, mGridLon, mGridLat, vGridLon, vGridLat);
-
+rng(3);
 % grid.lat = sDataset.sData.vGridLat;
 % grid.lon = sDataset.sData.vGridLon;
 % mGridShuffledInt = sDataset.sData.mGrid(sDataset.sData.vShuffleMap,:);
@@ -272,6 +276,9 @@ if sPlotParams.b_globalPlotEnable
     hold on;
     plot(tx.lon, tx.lat, 'db','MarkerFaceColor','b','MarkerSize',2.5);
     plot(sense.lon, sense.lat, 'yo','MarkerSize',3);
+    set(gca,'FontSize', 14);
+    x0 = 10; y0 = 50; height = 400; width = 500;
+    set(gcf,'Position', [x0 y0 width height])
     SaveFigure(sPlotParams, fig2, 'BulgariSignalPro', {'epsc', 'png'});
 end
 end
@@ -467,10 +474,14 @@ function h=ShowDEM(Z,R) %show elevation map
 h=geoshow(Z,R,'DisplayType','texturemap','CData',Z);
 zlimits = [min(Z(:)) max(Z(:))];
 demcmap(zlimits); %Colormaps appropriate to terrain elevation data
-c=colorbar;  c.Label.String='Height [m]';
+c=colorbar;  
+c.Label.String='Height [m]'; 
+c.Label.Interpreter='latex'; 
+c.Label.FontSize = 14;
+c.TickLabelInterpreter = 'latex';
 axis tight;
-xlabel('Longitude [deg]');
-ylabel('Latitude [deg]');
+xlabel('Lon. [deg]','FontSize', 14);
+ylabel('Lat. [deg]','FontSize', 14);
 end
 
 function grid=BuildGrid(grid_lat_ind, grid_lon_ind, fmap)

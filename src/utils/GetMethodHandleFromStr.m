@@ -4,11 +4,11 @@ switch methodStr
         funcName = 'InterpGraphSignalRoMix';
     case 'Rep. Thm.'
         funcName = 'InterpGraphSignalRepThm';
-    case 'PW'
+    case 'VSPW'
         funcName = 'InterpGraphSignalPesenson';
-    case 'Nystrom'
+    case 'Nystr\"{o}m'
         funcName = 'InterpGraphSignalNystrom';
-    case 'kNN'
+    case 'w-kNN'
         funcName = 'InterpGraphSignalKnn';
     otherwise
         error('invalid methodStr')

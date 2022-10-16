@@ -1,9 +1,6 @@
 function [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd] = ...
-    InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tSigCnvrtLabRef, tTrainTime, tIntTime)
+    InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tTrainTime, tIntTime)
 
-assert(isequal(tSigCnvrtLabRef(sPreset.nLabeled+1:end,:,:), zeros(sPreset.n-sPreset.nLabeled, sPreset.nSignals, sPreset.R)));
-assert(isequal(tSigCnvrtLabRef(1:sPreset.nLabeled,:,:), tSigCnvrtRecRef(1:sPreset.nLabeled,:,:)));
-assert(isequal(tSigCnvrtLabRef(1:sPreset.nLabeled,:,:), tSigCnvrtIntRef(1:sPreset.nLabeled,:,:)));
 assert(isequal(tSigCnvrtRecRef, tSigCnvrtIntRef(1:sPreset.n,:,:)));
 
 vRecInd = 1:sPreset.n; %sPreset.nLabeled+1:sPreset.n;

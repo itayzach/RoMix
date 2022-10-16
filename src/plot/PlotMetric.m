@@ -28,7 +28,7 @@ end
 ylim(vylim);
 xlim([min(xVals), max(xVals)]);
 ylabel(ylab, 'Interpreter', 'latex', 'FontSize', 14)
-lgd = legend(p, 'Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 2);
+lgd = legend(p, 'Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 3);
 if exist('pltTitle', 'var')
     title(pltTitle, 'Interpreter', 'latex', 'FontSize', 14)
 end
@@ -54,20 +54,32 @@ set(gcf,'Position', [x0 y0 width height])
 if exist('b_zoomIn', 'var') && ~isempty(b_zoomIn) && b_zoomIn
     p_ax=gca;
     
-    v2ndRunSorted = sort(mVals(2,:));
-    top3min = v2ndRunSorted(1);
-    top3max = v2ndRunSorted(end-1);
+    %v2ndRunSorted = sort(mVals(2,:));
+    %top3min = v2ndRunSorted(1);
+    %top3max = v2ndRunSorted(end-1);
 
-    x0src = 25;  y0src = top3min-abs(top3min/10);
-    x1src = 150; y1src = top3max+abs(top3max/50);
-    srcPos =[x0src y0src x1src y1src];
+    %x0src = 25;  y0src = top3min-abs(top3min/10);
+    %x1src = 150; y1src = top3max+abs(top3max/50);
+    %srcPos =[x0src y0src x1src y1src];
     
+    [mValsMax, maxInd] = max(mVals,[],2);
+    keepind = setdiff(repmat(1:nMethods,M,1)', maxInd','rows');
+    mValsNoMax = zeros(size(mVals,1),size(mVals,2)-1);
+    for ii=1:M
+        mValsNoMax(ii,:) = mVals(ii,keepind(:,ii));
+    end
+    x0src = 25;  y0src = min(mValsNoMax(:));
+    x1src = 150; y1src = max(mValsNoMax(:));
+    srcPos =[x0src y0src x1src y1src];
+
+
     %minValsSorted = sort(mVals(:));
     %x0tar = 60;  y0tar = min(mVals(:))+1;
     %x1tar = 145; y1tar = minValsSorted(2)+2;
-    vValsSorted = sort(mVals(:));
-    x0tar = 60;  y0tar = vValsSorted(end-1)*0.55;
-    x1tar = 145; y1tar = vValsSorted(end)*0.90;   
+    %vValsSorted = sort(mVals(:));
+    range = min(mValsMax)-max(mValsNoMax(:));
+    x0tar = 60;  y0tar = max(mValsNoMax(:)) + range*0.1;
+    x1tar = 145; y1tar = min(mValsMax) - range*0.1;   
     targetPos = [x0tar y0tar x1tar y1tar];
 
     az = zoomPlot(p_ax, srcPos, targetPos, lgd);

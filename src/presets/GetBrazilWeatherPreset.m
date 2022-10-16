@@ -48,7 +48,7 @@ sPreset.dataGenTechnique = 'OneDraw';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'
 sPreset.sDistanceParams.earthRadius = 50; %6371; % km (approximation)
 %% Other methods
-sPreset.cMethods = {'RoMix', 'Rep. Thm.', 'PW', 'Nystrom', 'kNN'};
+sPreset.cMethods = {'RoMix', 'Rep. Thm.', 'VSPW', 'Nystr\"{o}m', 'w-kNN'};
 sPreset.knn = 5;
 sPreset.sPwParams.regularize_epsilon = 0.01;
 sPreset.sPwParams.order = 100;

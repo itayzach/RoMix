@@ -39,14 +39,14 @@ set(gca,'FontSize', 14);
 %         stem(0:M-1, mLambda3(r,:),'*', 'LineStyle','none', 'DisplayName', [['$\log(' lambda3Str ')$'] ' (' num2str(nysRatio*100, '%d') '\%)']);
 %     end
 % end
-set(gca, 'YScale', 'log')
+% set(gca, 'YScale', 'log')
 % legend('Interpreter', 'latex', 'FontSize', 14, 'Location', 'northeast');
 % xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
 % xlim([0 M + 8])
 % title([figTitle, ' (log-scale)'], 'Interpreter', 'latex', 'FontSize', 14);
 % set(gca,'FontSize', 14);
 
-set(gcf,'Position',[-1000 100 600 200])
+set(gcf,'Position',[10 100 600 250])
 set(0,'DefaultFigureWindowStyle',windowStyle)
 %% Save
 if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')

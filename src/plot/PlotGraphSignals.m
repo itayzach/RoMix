@@ -23,8 +23,8 @@ if dim == 1
     %% Plot params
     x0     = 10;
     y0     = 100;
-    width  = 800;
-    height = 400;
+    width  = 600;
+    height = 350;
     fig = figure('Name', figName);
     for m = 1:nSignals
         dispName = cSigStr{m};
@@ -48,6 +48,7 @@ if dim == 1
     if nCols == 1
         nCols = 2;
     end
+    xlabel('$x$', 'interpreter', 'latex', 'FontSize', 14)
     legend('Interpreter', 'latex', 'Location', 'SouthOutside', 'FontSize', 14,'NumColumns',nCols)
     set(gcf,'Position', [x0 y0 width height])
     localCmap = [];

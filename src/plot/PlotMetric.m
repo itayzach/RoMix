@@ -1,4 +1,4 @@
-function [] = PlotMetric(sPlotParams, mVals, mStd, cDispName, figName, vylim, xTickNames, pltTitle, ylab, xlab, b_zoomIn)
+function [] = PlotMetric(sPlotParams, mVals, mStd, cDispName, figName, vylim, xTickNames, pltTitle, ylab, xlab, b_zoomIn, b_ylog)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
 
@@ -84,6 +84,12 @@ if exist('b_zoomIn', 'var') && ~isempty(b_zoomIn) && b_zoomIn
 
     az = zoomPlot(p_ax, srcPos, targetPos, lgd);
 end
+if exist('b_ylog', 'var') && ~isempty(b_ylog) && b_ylog
+    set(gca, 'YScale', 'log');
+    set(gca, 'YTickLabel', {'10^{0}', '10^{1}'})
+    set(gca, 'YTick', [1 10])
+end
+
 %% Save
 SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
 

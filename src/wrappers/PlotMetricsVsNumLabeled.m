@@ -1,6 +1,7 @@
 function PlotMetricsVsNumLabeled(sPreset, sPlotParams, sResults)
 b_zoomIn = sPreset.sDatasetParams.b_zoomInAcc;
 b_compareDb = ismember(sPreset.verticesPDF, {'BulgariBeacons'});
+b_ylog = ismember(sPreset.verticesPDF, {'BulgariBeacons'});
 xTickNames = sPreset.sDatasetParams.xTickNames;
 if ismember(sPreset.verticesPDF, {'MNIST'})
     xlab = '$\ell / n [\%]$';
@@ -29,13 +30,15 @@ else
         'nLabelExtrapAcc', xylim, xTickNames, 'Extrapolation accuracy', 'Accuracy $[\%]$', xlab, b_zoomIn);
 end
 
+b_zoomIn = false;
 mInterpTime = reshape([sResults(:).vTrainTime], numel(sPreset.cMethods),[])';
 mInterpTimeStd = reshape([sResults(:).vTrainTimeStd], numel(sPreset.cMethods),[])';
 PlotMetric(sPlotParams, mInterpTime, mInterpTimeStd, sPreset.cMethods, ...
-    'nLabelInterpTime', [], xTickNames, 'Interpolation time', 'Time [s]', xlab);
+    'nLabelInterpTime', [], xTickNames, 'Interpolation time', 'Time [s]', xlab, b_zoomIn, b_ylog);
 
+b_zoomIn = false;
 mExtrapTime = reshape([sResults(:).vIntTime], numel(sPreset.cMethods),[])';
 mExtrapTimeStd = reshape([sResults(:).vIntTimeStd], numel(sPreset.cMethods),[])';
 PlotMetric(sPlotParams, mExtrapTime, mExtrapTimeStd, sPreset.cMethods, ...
-    'nLabelExtrapTime', [], xTickNames, 'Extrapolation time', 'Time [s]', xlab);
+    'nLabelExtrapTime', [], xTickNames, 'Extrapolation time', 'Time [s]', xlab, b_zoomIn, b_ylog);
 end

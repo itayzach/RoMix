@@ -82,10 +82,8 @@ if sPlotParams.b_globalPlotEnable
         end
         fig1 = figure('Name', figName);
         ShowDEM(sFullMap.Z, sFullMap.R); hold on;
-        %ShowDEM(mGridZ, vGridR); hold on;
-        plot(sense.lon, sense.lat, 'yo','MarkerFaceColor','y','MarkerSize',3);
-        %text(sense.lon, sense.lat, num2str([1:Nsensors]'));
-        plot(tx.lon, tx.lat, 'bd','MarkerFaceColor','b','MarkerSize',3); %test sites
+        plot(tx.lon, tx.lat, 'd','MarkerFaceColor','blue','MarkerEdgeColor','black','MarkerSize',5);
+        plot(sense.lon, sense.lat, 'o','MarkerFaceColor','green','MarkerEdgeColor','black','MarkerSize',5);
         if i == 2
             plot(mGridLon, mGridLat,'k.','MarkerSize',2);
         end
@@ -109,8 +107,8 @@ if sPlotParams.b_globalPlotEnable
     figName = 'BulgariDEM_missing';
     fig1 = figure('Name', figName);
     ShowDEM(mFullGridZmissing, vGridR); hold on;
-    plot(sense.lon, sense.lat, 'yo','MarkerFaceColor','y','MarkerSize',3);
-    plot(tx.lon, tx.lat, 'bd','MarkerFaceColor','b','MarkerSize',3); %test sites
+    plot(tx.lon, tx.lat, 'd','MarkerFaceColor','blue','MarkerEdgeColor','black','MarkerSize',5);
+    plot(sense.lon, sense.lat, 'o','MarkerFaceColor','green','MarkerEdgeColor','black','MarkerSize',5);
     set(gca,'FontSize', 14);
     x0 = 10; y0 = 50; height = 400; width = 500;
     set(gcf,'Position', [x0 y0 width height])
@@ -264,7 +262,7 @@ y_M = y(sense.ind);
 %Show the signal pro map
 if sPlotParams.b_globalPlotEnable
     fig2 = figure('Name', 'Signal-pro'); 
-    colormap(jet);
+    colormap(hot);
     %calc total received power due to SignalPro:
     y_sigPro_mw=0;
     for(source=1:Ns)
@@ -274,8 +272,9 @@ if sPlotParams.b_globalPlotEnable
     y_sigPro_mw=max(y_sigPro_mw,noise_level_mW);
     PlotPowers(10*log10(y_sigPro_mw), Site(1)); %title('Signal Pro');
     hold on;
-    plot(tx.lon, tx.lat, 'db','MarkerFaceColor','b','MarkerSize',2.5);
-    plot(sense.lon, sense.lat, 'yo','MarkerSize',3);
+    plot(tx.lon, tx.lat, 'd','MarkerFaceColor','blue','MarkerEdgeColor','black','MarkerSize',5);
+    plot(sense.lon, sense.lat, 'o','MarkerFaceColor','green','MarkerEdgeColor','black','MarkerSize',5);
+           
     set(gca,'FontSize', 14);
     x0 = 10; y0 = 50; height = 400; width = 500;
     set(gcf,'Position', [x0 y0 width height])

@@ -16,9 +16,9 @@ for r = 1:R
     mSigRef = squeeze(tSigRef(:,:,r));
     if strcmp(errFunc, 'norm')
         if b_compareDb
-            mErr(r,:) = vecnorm(mSig-mSigRef,2)/n;
-            mErrNormed(r,:) = vecnorm(mSig-mSigRef,2)/n;
-            mCoherence(r,:) = vecnorm(mSig-mSigRef,2)/n;
+            mErr(r,:) = vecnorm(mSig-mSigRef,2)/sqrt(n);
+            mErrNormed(r,:) = vecnorm(mSig-mSigRef,2)/sqrt(n);
+            mCoherence(r,:) = vecnorm(mSig-mSigRef,2)/sqrt(n);
         else
             mErr(r,:) = vecnorm(mSig-mSigRef,2);
             mErrNormed(r,:) = min(vecnorm(mSig-mSigRef,2)./vecnorm(mSig,2),1);

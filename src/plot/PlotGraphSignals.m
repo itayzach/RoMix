@@ -110,9 +110,12 @@ elseif dim == 2 || dim == 3
         end
         ax(m) = nexttile;
         if exist('tx', 'var') % Meaning: strcmp(sPlotParams.actualDataDist, 'BulgariBeacons') == 1
-            colormap(jet);
+            colormap(hot);
+            grayColor = [220,220,220]/255;
+            rectangle('Position',round([min(mData), max(mData)-min(mData)]),'FaceColor',grayColor,'EdgeColor','black')
+            hold on;
             %imagesc(grid.lon, (grid.lat), (reshape(vSignal, length(grid.lat), length(grid.lon))));
-            scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), vSignal(vCirclesInd), 10, vSignal(vCirclesInd), 'filled','s');
+            scatter(mData(vCirclesInd,1), mData(vCirclesInd,2), 10, vSignal(vCirclesInd), 'filled','s');
             view(2);
             c=colorbar;
             c.Label.String='Power [dBm]';
@@ -128,9 +131,8 @@ elseif dim == 2 || dim == 3
             %set(get(gcf,'Children'),'YDir','normal');
 
             hold on;
-            plot(tx.lon, tx.lat, 'db','MarkerFaceColor','b','MarkerSize',2.5);
-            plot(sense.lon, sense.lat, 'yo','MarkerSize',3);
-            
+            plot(tx.lon, tx.lat, 'd','MarkerFaceColor','blue','MarkerEdgeColor','black','MarkerSize',5);
+            plot(sense.lon, sense.lat, 'o','MarkerFaceColor','green','MarkerEdgeColor','black','MarkerSize',5);            
         else
             if dim == 2
                 scatter3(mData(vCirclesInd,1), mData(vCirclesInd,2), vSignal(vCirclesInd), 10, ...

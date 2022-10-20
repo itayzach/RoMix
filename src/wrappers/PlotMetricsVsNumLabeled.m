@@ -15,9 +15,9 @@ mAccInt = reshape([sResults(:).mAccInt], numel(sPreset.cMethods),[])';
 mAccStdInt = reshape([sResults(:).mAccStdInt], numel(sPreset.cMethods),[])';
 if b_compareDb
     PlotMetric(sPlotParams, mAccRec, mAccStdRec, sPreset.cMethods, ...
-        'nLabelInterpErr', [], xTickNames, 'Interpolation error', 'Error [dBm/node]', xlab, b_zoomIn);
+        'nLabelInterpErr', [], xTickNames, 'Interpolation error', 'Error [dB/node]', xlab, b_zoomIn);
     PlotMetric(sPlotParams, mAccInt, mAccStdInt, sPreset.cMethods, ...
-        'nLabelExtrapErr', [], xTickNames, 'Extrapolation error', 'Error [dBm/node]', xlab, b_zoomIn);
+        'nLabelExtrapErr', [], xTickNames, 'Extrapolation error', 'Error [dB/node]', xlab, b_zoomIn);
 else
     if ismember(sPreset.verticesPDF, {'MNIST'})
         xylim = [0 100];

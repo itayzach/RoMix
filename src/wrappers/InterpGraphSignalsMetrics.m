@@ -1,7 +1,7 @@
 function [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd] = ...
     InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tTrainTime, tIntTime)
 
-assert(isequal(tSigCnvrtRecRef, tSigCnvrtIntRef(1:sPreset.n,:,:)));
+%assert(isequal(tSigCnvrtRecRef, tSigCnvrtIntRef(1:sPreset.n,:,:)));
 
 vRecInd = 1:sPreset.n; %sPreset.nLabeled+1:sPreset.n;
 vIntInd = 1:sPreset.N; %sPreset.n+1:sPreset.N;

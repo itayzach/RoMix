@@ -65,6 +65,6 @@ for iter = 1:30
     A = sparse(A);
     
     % save adjacency matrix
-    save(['set' num2str(iter) '.mat'],'A','mem_fn', 'X', 'sigma');
+    save(['usps_set' num2str(iter) '.mat'],'A','mem_fn', 'X', 'sigma');
 
 end

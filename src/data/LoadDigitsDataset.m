@@ -2,8 +2,11 @@ function sDataset = LoadDigitsDataset(sPlotParams,actualDataDist, sDatasetParams
     nSets = ceil(N/1000);
     datasetInd = randperm(10, nSets);
     fprintf('Loading %s set %d... ',actualDataDist, datasetInd(1))
-    digitsDataset = load(['data', filesep, lower(actualDataDist), filesep, lower(actualDataDist), '_set', num2str(datasetInd(1)), '.mat']);
-
+    datasetfname = ['data', filesep, lower(actualDataDist), filesep, lower(actualDataDist), '_set', num2str(datasetInd(1)), '.mat'];
+    if ~exist(datasetfname,'file')
+        eval(['Preprocess', actualDataDist])
+    end
+    digitsDataset = load(datasetfname);
     for setInd = 2:nSets
         fprintf('Loading %s set %d... ',actualDataDist, datasetInd(setInd))
         digitsDataset2 = load(['data', filesep, lower(actualDataDist), filesep, lower(actualDataDist), '_set', num2str(datasetInd(setInd)), '.mat']);

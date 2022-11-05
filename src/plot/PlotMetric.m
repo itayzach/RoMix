@@ -1,6 +1,14 @@
-function [] = PlotMetric(sPlotParams, mVals, mStd, cDispName, figName, vylim, xTickNames, pltTitle, ylab, xlab, b_zoomIn, b_ylog)
+function PlotMetric(sPlotParams, mVals, mStd, cDispName, figName, vylim, xTickNames, pltTitle, ylab, xlab, b_zoomIn, b_ylog, b_legend)
 windowStyle = get(0,'DefaultFigureWindowStyle');
 set(0,'DefaultFigureWindowStyle','normal')
+
+if ~exist('b_ylog','var') || isempty(b_ylog)
+    b_ylog = false;
+end
+
+if ~exist('b_legend','var') || isempty(b_legend)
+    b_legend = true;
+end
 
 [M, nMethods] = size(mVals);
 fig = figure('Name', figName);
@@ -28,7 +36,12 @@ end
 ylim(vylim);
 xlim([min(xVals), max(xVals)]);
 ylabel(ylab, 'Interpreter', 'latex', 'FontSize', 14)
-lgd = legend(p, 'Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 3);
+if b_legend
+    lgd = legend(p, 'Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthOutside', 'NumColumns', 3);
+    %lgd = legend(p, 'Interpreter', 'latex', 'FontSize', 14, 'Location',  'SouthEastOutside', 'NumColumns', 1);
+else
+    lgd = [];
+end
 if exist('pltTitle', 'var')
     title(pltTitle, 'Interpreter', 'latex', 'FontSize', 14)
 end
@@ -86,7 +99,7 @@ if exist('b_zoomIn', 'var') && ~isempty(b_zoomIn) && b_zoomIn
 end
 if exist('b_ylog', 'var') && ~isempty(b_ylog) && b_ylog
     set(gca, 'YScale', 'log');
-    set(gca, 'YTickLabel', {'10^{0}', '10^{1}'})
+    set(gca, 'YTickLabel', {'$10^{0}$', '$10^{1}$'})
     set(gca, 'YTick', [1 10])
 end
 

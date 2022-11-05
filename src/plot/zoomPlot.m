@@ -73,7 +73,8 @@ uistack(ah, 'bottom');
 
 plot([source_pos(1) tx1], [source_pos(4) ty1], 'k:')
 plot([source_pos(3) tx2], [source_pos(4) ty1], 'k:')
-lgd.String = lgd.String(1:end-2); % remove 'data' from legend of above plots
-
+if ~isempty(lgd)
+    lgd.String = lgd.String(1:end-2); % remove 'data' from legend of above plots
+end
 
 

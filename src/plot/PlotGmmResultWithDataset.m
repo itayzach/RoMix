@@ -21,6 +21,10 @@ if dim <= 3
             hold on;
             fcontour(gmPDF, [xMin(1), xMax(1), xMin(2), xMax(2)]);
             scatter(mMu(:,1),mMu(:,2),[],'filled','red')
+            propStr = strrep(strrep(['{\boldmath$p$} $ = [\quad', num2str(sDistParams.GMModel.ComponentProportion,'%.3f|'), ']$'],'|',' \quad\quad'),'\quad\quad]','\quad]^T');
+            text(-0.02, -0.2, propStr, 'Units', 'normalized', 'VerticalAlignment','Bottom', 'FontWeight','bold','Interpreter','latex','FontSize',14);
+        else
+            title(' ')
         end
         xlim([xMin(1), xMax(1)])
         ylim([xMin(2), xMax(2)])

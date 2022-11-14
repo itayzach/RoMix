@@ -1,4 +1,4 @@
-function PlotGraphSignalsWrapper(sPlotParams, sPreset, sKernelParams, sDataset, mSigCnvrtRecRef, mSigCnvrtIntRef, mSigCnvrtRec, mSigCnvrtInt, mSigCoeffsPhi, methodName)
+function PlotGraphSignalsWrapper(sPlotParams, sPreset, sKernelParams, sDataset, mSigCnvrtRecRef, mSigCnvrtIntRef, mSigCnvrtRec, mSigCnvrtInt, mSigRecPhi, mSigInt, mSigCoeffsPhi, methodName)
 
 xTrain = sDataset.sData.x;
 xInt = sDataset.sData.xt;
@@ -18,7 +18,7 @@ vLabeledInd = GetUnlabeledNodesMask(mSig);
 % ------------------------------------------------------------------------------------------
 % Plots
 % ------------------------------------------------------------------------------------------
-sigIndToPlot = min(7, size(mSigCnvrtRecRef,2));
+sigIndToPlot = 1; %min(7, size(mSigCnvrtRecRef,2));
 
 vSigRecRef = mSigCnvrtRecRef(:,sigIndToPlot);
 vSigIntRef = mSigCnvrtIntRef(:,sigIndToPlot);
@@ -97,10 +97,9 @@ if sPreset.dim <=3
 end
 
 if ismember(sPreset.verticesPDF, {'TwoMoons'})
-    % make sure mSigCnvrtRecPhi instead of mSigRecPhi
     warning('TODO: Update PlotTwoMoonsRoMix to support other methods')
     if(strcmp(methodName,'RoMix'))
-        PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigCnvrtRec, mSigCoeffsPhi, sPreset.gamma1, sPreset.gamma2);
+        PlotTwoMoonsRoMix(sPlotParams, sDataset, sKernelParams, mSigRecPhi, mSigInt, mSigCoeffsPhi, sPreset.gamma1, sPreset.gamma2);
     end
 
 elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'}) && ~isempty(sKernelParams)

@@ -23,6 +23,9 @@ for iRun = 1:numel(vNumLabeled)
         for methodInd = 1:numel(sPreset.cMethods)
             funcHandle = GetMethodHandleFromStr(sPreset.cMethods{methodInd});
             [tSigCnvrtRec(:,:,r,methodInd), tSigCnvrtInt(:,:,r,methodInd), tTrainTime(r,methodInd), tIntTime(r,methodInd)] = funcHandle(sPlotParams, sPreset, sDataset);
+            if ~sPreset.b_compareMethods
+                break
+            end
         end
         
         % Convert expected signals

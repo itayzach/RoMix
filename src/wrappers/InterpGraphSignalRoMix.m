@@ -52,7 +52,7 @@ fprintf('%.2f = %.2f sec, interp took %.2f sec\n', tTrainVec(end), tTrain, tInt)
 
 % 7. Plot
 PlotRoMixEigsAnalysis(sPlotParams, sPreset, sDataset, sDistParams, sKernelParams, C, Phi, lambdaPhi, PhiInt);
-PlotRoMixGraphSignals(sPlotParams, sPreset, sDataset, sKernelParams, mSigCnvrtRec, mSigCnvrtInt, C);
+PlotRoMixGraphSignals(sPlotParams, sPreset, sDataset, sKernelParams, mSigRecPhi, mSigInt, mSigCnvrtRec, mSigCnvrtInt, C);
 
 end
 

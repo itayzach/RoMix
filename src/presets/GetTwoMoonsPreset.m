@@ -31,7 +31,7 @@ sPreset.gamma2             = 1;
 sPreset.gamma1Rep          = 0.1;
 sPreset.gamma2Rep          = 1;
 %% Number of runs (=realizations)
-sPreset.R                  = 1;
+sPreset.R                  = 10;
 %% Method parameters
 sPreset.b_debugUseAnalytic = false;
 sPreset.b_forceCtoIdentity = false;
@@ -41,7 +41,7 @@ sPreset.b_pairwiseFlipSign = true;
 sPreset.b_interpEigenvecs  = false;
 sPreset.b_runGraphSignals  = true;
 sPreset.b_maskDataFitTerm  = true;
-sPreset.b_compareMethods   = true;
+sPreset.b_compareMethods   = false;
 %% 
 sPreset.dataGenTechnique = 'TwoDraws';
 sPreset.sDistanceParams.distType = 'Euclidean'; % 'Euclidean' / 'Haversine'

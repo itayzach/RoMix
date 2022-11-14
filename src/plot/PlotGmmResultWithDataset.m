@@ -14,18 +14,27 @@ if dim <= 3
         
         % GMM
         gmPDF = @(x,y) arrayfun(@(x0,y0) pdf(sDistParams.GMModel,[x0 y0]),x,y);
-        xMax = max(cell2mat(sDistParams.mu')) + 3*max(cell2mat(sDistParams.sigma'));
-        xMin = min(cell2mat(sDistParams.mu')) - 3*min(cell2mat(sDistParams.sigma'));
+        xMax = max(cell2mat(sDistParams.mu')) + 5*max(cell2mat(sDistParams.sigma'));
+        xMin = min(cell2mat(sDistParams.mu')) - 5*min(cell2mat(sDistParams.sigma'));
         mMu = cell2mat(sDistParams.mu');
         if b_plotCovMean
             hold on;
             fcontour(gmPDF, [xMin(1), xMax(1), xMin(2), xMax(2)]);
             scatter(mMu(:,1),mMu(:,2),[],'filled','red')
-            propStr = strrep(strrep(['{\boldmath$p$} $ = [\quad', num2str(sDistParams.GMModel.ComponentProportion,'%.3f|'), ']$'],'|',' \quad\quad'),'\quad\quad]','\quad]^T');
-            text(-0.02, -0.2, propStr, 'Units', 'normalized', 'VerticalAlignment','Bottom', 'FontWeight','bold','Interpreter','latex','FontSize',14);
+            p = sDistParams.GMModel.ComponentProportion;
+            if numel(p) > 5
+                propStr = strrep(strrep(['{\boldmath$\pi$} $ = [\quad', num2str(p(1:4),'%.3f|') , '$', newline, ...
+                    '$ \quad \quad \quad \, \,', num2str(p(5:end),'%.3f|'), ']$'],'|',',\quad\,\,'),',\quad\,\,]','\quad]^T');
+                propLoc = -0.13;
+            else
+                propStr = strrep(strrep(['{\boldmath$\pi$} $ = [\quad', num2str(p,'%.3f|'), ']$'],'|',',\quad\,\,'),',\quad\,\,]','\quad]^T');
+                propLoc = -0.07;
+            end
+            text(0, propLoc, propStr, 'Units', 'normalized', 'VerticalAlignment','Bottom', 'FontWeight','bold','Interpreter','latex','FontSize',14);
         else
-            title(' ')
+            %propStr = ['$' repmat('\,',1,numel(propStr)) '$'];
         end
+        
         xlim([xMin(1), xMax(1)])
         ylim([xMin(2), xMax(2)])
     else

@@ -49,29 +49,47 @@ if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
 end
 
 %% 2D Classifier
-fig = figure;
-contourf(XX1,XX2,mPhi_X_c,[0 0]);shading flat;
-colormap('hot')
-%h = colorbar('TickLabelInterpreter', 'latex');
-%h.TickLabels = [-1, 1];
-%h.Ticks = [ -0.5, 0.5];
-hold on;
-scatter(sDataset.sData.xt(:,1), sDataset.sData.xt(:,2), [], [0.4940 0.1840 0.5560], 'filled','d');
-plot2D(sDataset.sData.x,sDataset.sData.y,15,'ks');
-%plot2D(sDataset.sData.xt,zeros(size(sDataset.sData.xt,1),1),15,'k*');
-xlabel('$x_1$', 'Interpreter', 'latex')
-ylabel('$x_2$', 'Interpreter', 'latex')
-set(fig,'renderer','Painters')
-set(gca,'FontSize', 14);
-x0     = 10;
-y0     = 100;
-width  = 450;
-height = 300;
-set(gcf,'Position',[x0+width y0 width height])
+for i = 1:2
+    % plot once with decision boundary and once without decision boundary
+    fig = figure;
+    if i == 1
+        contourf(XX1,XX2,mPhi_X_c,[0 0]);shading flat;
+    end
+    colormap('hot')
+    %h = colorbar('TickLabelInterpreter', 'latex');
+    %h.TickLabels = [-1, 1];
+    %h.Ticks = [ -0.5, 0.5];
+    hold on;
 
-if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
-    figName = 'classifier'; 
-    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
+    % test set
+    if i == 1
+        scatter(sDataset.sData.xt(:,1), sDataset.sData.xt(:,2), [], [0.4940 0.1840 0.5560], 'filled','d');
+    end
+    % train set
+    plot2D(sDataset.sData.x,sDataset.sData.y,15);
+    if i == 2
+        axis off
+    end
+    
+    %plot2D(sDataset.sData.xt,zeros(size(sDataset.sData.xt,1),1),15,'k*');
+    xlabel('$x_1$', 'Interpreter', 'latex')
+    ylabel('$x_2$', 'Interpreter', 'latex')
+    set(fig,'renderer','Painters')
+    set(gca,'FontSize', 14);
+    x0     = 10;
+    y0     = 100;
+    width  = 450;
+    height = 300;
+    set(gcf,'Position',[x0+width y0 width height])
+    
+    if ~isempty(sPlotParams) && isfield(sPlotParams, 'outputFolder')
+        if i == 1
+            figName = 'classifier'; 
+        else
+            figName = 'classes'; 
+        end
+        SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
+    end
 end
 end
 

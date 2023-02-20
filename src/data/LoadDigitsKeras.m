@@ -37,6 +37,8 @@ else
     sDataset.sData.xt = [xTrain; xTest];
     sDataset.sData.y = oneHotTrain;
     sDataset.sData.yt = [oneHotTrain; oneHotTest];
+    sDataset.sData.ymasked = oneHotTrain;
+    sDataset.sData.ymasked(vNonLabeledInd,:) = 0;
 end
 
 end

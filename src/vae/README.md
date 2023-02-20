@@ -1,0 +1,1 @@
+The implementation is based on https://keras.io/examples/generative/vae/ found here https://github.com/keras-team/keras-io/blob/master/examples/generative/vae.py

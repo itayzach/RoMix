@@ -52,7 +52,7 @@ if exist('xTickNames', 'var') && ~isempty(xTickNames)
         xlabel(xlab, 'Interpreter', 'latex', 'FontSize', 14)
     end
 else
-    xlabel('$m$', 'Interpreter', 'latex', 'FontSize', 14)
+    xlabel('$q$', 'Interpreter', 'latex', 'FontSize', 14)
 end
 set(gca,'FontSize', 14);
 

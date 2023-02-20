@@ -49,7 +49,7 @@ fprintf('KNN: train took %.2f sec, interp took %.2f sec\n', trainTime, intTime);
 if sPlotParams.b_globalPlotEnable && sPreset.b_runGraphSignals
     mSigRef    = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);
     mSigRefInt = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.yt);
-    PlotGraphSignalsWrapper(sPlotParams, sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtKnnRec, mSigCnvrtKnnInt, [], 'w-kNN')
+    PlotGraphSignalsWrapper(sPlotParams, sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtKnnRec, mSigCnvrtKnnInt, [], [], [], 'w-kNN')
 end
 
 end

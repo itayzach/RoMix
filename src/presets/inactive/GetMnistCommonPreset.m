@@ -41,6 +41,9 @@ sPreset.omegaTilde         = 0.114*sPreset.dim; % for our method
 sPreset.gmmRegVal          = 1e-4;
 sPreset.gmmMaxIter         = 200;
 sPreset.gmmNumComponents   = b_runVAE*10 + (1-b_runVAE)*300;
+if b_runVAE
+    sPreset.vGmmNumCompAicBic  = [3, 5, 10, 15, 20];
+end
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
 sPreset.MTilde             = b_runVAE*7500 + (1-b_runVAE)*1000;

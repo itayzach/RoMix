@@ -13,12 +13,20 @@ end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotClustersAnalysis && sPreset.dim > 1
     %PlotGaussianEllipses(sPlotParams, sDistParams);
     b_plotCovMean = true; 
-    PlotGmmResultWithDataset(sPlotParams, sDataset.sData.x, sDistParams, b_plotCovMean);
+    if ismember(sPreset.verticesPDF, {'SwissRoll'})
+        cXAxisLabels = RepLegend('x', 1:sPreset.dim);
+    else
+        cXAxisLabels = [];
+    end
+    PlotGmmResultWithDataset(sPlotParams, sDataset.sData.x, sDistParams, b_plotCovMean, cXAxisLabels);
     b_plotCovMean = false; 
-    PlotGmmResultWithDataset(sPlotParams, sDataset.sData.x, sDistParams, b_plotCovMean);
+    PlotGmmResultWithDataset(sPlotParams, sDataset.sData.x, sDistParams, b_plotCovMean, cXAxisLabels);
     PlotCovEigs(sPlotParams, sDistParams);
     if sDistParams.GMModel.NumComponents < 100
         PlotClustersMeans(sPreset, sPlotParams, sDistParams);
     end
+end
+if sPlotParams.b_globalPlotEnable && isfield(sPreset, 'vGmmNumCompAicBic')
+    PlotAicBic(sPlotParams, sPreset, sDataset, sDistParams);
 end
 end

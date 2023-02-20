@@ -4,42 +4,22 @@ sDistParams.estDataDist = 'Gaussian';
 dim = size(x,2);
 sDistParams.dim = dim;
 
-if numel(gmmNumComponents) > 1
-    vGMModels = cell(size(gmmNumComponents(:),1),1);
-    vAIC = zeros(size(gmmNumComponents(:),1),1);
-    i = 1;
-    for nComp = gmmNumComponents
-        fprintf('Running fitgmdist with %d components... ', nComp)
-        options = statset('MaxIter',gmmMaxIter);
-        vGMModels{i} = fitgmdist(x, nComp, 'RegularizationValue', gmmRegVal, 'Options', options);
-        assert(vGMModels{i}.Converged, 'GMM couldn''t converge...')
-        fprintf('Done after %d iterations with AIC = %.2f\n', vGMModels{i}.NumIterations, vGMModels{i}.AIC)
-        vAIC(i) = vGMModels{i}.AIC;
-        i = i + 1;
-    end
-    [~, argminAIC] = min(vAIC);
-    GMModel = vGMModels{argminAIC};
-    
-    figure; plot(gmmNumComponents, vAIC, 'DisplayName', 'AIC'); 
-    legend()
-else
-    totalAttempts = 10;
-    fprintf('Running fitgmdist with %d components (%d attempts)... ', gmmNumComponents, totalAttempts)
-    converged = false;
-    numAttempts = 0;
-    warning('off','stats:gmdistribution:FailedToConverge');
-    while ~converged && numAttempts < totalAttempts
-        ts = tic;
-        options = statset('MaxIter',gmmMaxIter);
-        GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
-        t(1) = toc(ts);
-        converged = GMModel.Converged;
-        numAttempts = numAttempts + 1;
-        fprintf('%d... ', numAttempts)
-    end
-    assert(converged, 'GMM couldn''t converge...')
-    fprintf('\nDone after %d attempts (%d iterations with AIC = %.2f)\n', numAttempts, GMModel.NumIterations, GMModel.AIC)
+totalAttempts = 10;
+fprintf('Running fitgmdist with %d components (%d attempts)... ', gmmNumComponents, totalAttempts)
+converged = false;
+numAttempts = 0;
+warning('off','stats:gmdistribution:FailedToConverge');
+while ~converged && numAttempts < totalAttempts
+    ts = tic;
+    options = statset('MaxIter',gmmMaxIter);
+    GMModel = fitgmdist(x, gmmNumComponents, 'RegularizationValue', gmmRegVal, 'Options', options);
+    t(1) = toc(ts);
+    converged = GMModel.Converged;
+    numAttempts = numAttempts + 1;
+    fprintf('%d... ', numAttempts)
 end
+assert(converged, 'GMM couldn''t converge...')
+fprintf('\nDone after %d attempts (%d iterations with AIC = %.2f, BIC =%.2f)\n', numAttempts, GMModel.NumIterations, GMModel.AIC, GMModel.BIC)
 
 gmmNumComponents = GMModel.NumComponents;
 sDistParams.GMModelPreOrder = GMModel;
@@ -67,7 +47,7 @@ sDistParams.GMModel = GMModel;
 
 [minSigmaAllComp, minSigmaCompDim] = cellfun(@min, sDistParams.sigma);
 [minSigma, minSigmaCompInd] = min(minSigmaAllComp);
-fprintf('Done (took %2.f). min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', sum(t), gmmNumComponents, minSigma, minSigmaCompInd, minSigmaCompDim(minSigmaCompInd))
+fprintf('Done (took %2.f sec). min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', sum(t), gmmNumComponents, minSigma, minSigmaCompInd, minSigmaCompDim(minSigmaCompInd))
 
 % Caluclate the probability for each data point x
 % sDistParams.vPr = zeros(length(x),1);
@@ -85,3 +65,4 @@ fprintf('Done (took %2.f). min(sigma{1:%d}) = %.4f (c = %d, dim = %d)\n', sum(t)
 % end
 
 end
+

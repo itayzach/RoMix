@@ -12,10 +12,18 @@ if strcmp(adjacencyType, 'GaussianKernel')
     distWithoutDiag = reshape(distWithoutDiag,n-1,n);
     assert(~isempty(find(distWithoutDiag > 0,1)), 'Maybe you have duplications of points?')
     minDist = min(distWithoutDiag);
-    lafonEps = (1/n)*sum(minDist.^2);
+    lafonEps = (1/n)*sum(minDist.^2); % Lafon2004DiffusionHarmonics
     lafonOmega = sqrt(lafonEps/2);
-%     fprintf('Lafon eps = %2.2f --> Lafon omega = 2*eps^2 = %2.2f\n', lafonEps, lafonOmega)
-%     fprintf('Your  eps = %2.2f --> Your  omega = 2*eps^2 = %2.2f\n', epsilon, omega)
+    stdOmega = std(xTrain(:));
+    stdEps = 2*stdOmega^2;
+    maxminEps = 2*max(min(distWithoutDiag.^2));
+    maxminOmega = sqrt(maxminEps/2);
+    fprintf('\n')
+    fprintf('Lafon  eps = %.5f --> omega = %.5f\n', lafonEps, lafonOmega)
+    fprintf('std    eps = %.5f --> omega = %.5f\n', stdEps, stdOmega)
+    fprintf('maxmin eps = %.5f --> omega = %.5f\n', maxminEps, maxminOmega)
+    fprintf('Your   eps = %.5f --> omega = %.5f\n', epsilon, omega)
+    
 %     if(epsilon < max(min(distWithoutDiag.^2)))
 %         warning(['Your graph is not fully connected, your omega = %.2f is too small. ',...
 %          'Consider a bigger omega, like omega > %.2f\n'], ...

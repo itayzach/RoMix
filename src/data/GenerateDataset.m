@@ -22,7 +22,7 @@ elseif ismember(sPreset.verticesPDF, {'USPS', 'MNIST'})
         assert(strcmp(sPreset.verticesPDF, 'MNIST'))
         sDataset = LoadDigitsKeras(sPlotParams, sPreset.sDatasetParams, sPreset.N, sPreset.n, sPreset.nLabeled);
     else
-        sDataset = LoadDigitsDataset(sPlotParams,sPreset.verticesPDF, sPreset.sDatasetParams, sPreset.N, sPreset.n);
+        sDataset = LoadDigitsDataset(sPlotParams,sPreset.verticesPDF, sPreset.sDatasetParams, sPreset.N, sPreset.n, sPreset.nLabeled);
     end
     
 elseif strcmp(sPreset.verticesPDF, 'MnistDist')

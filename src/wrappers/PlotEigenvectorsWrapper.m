@@ -6,11 +6,12 @@ xInt = sDataset.sData.xt;
 % ----------------------------------------------------------------------------------------------
 if sPlotParams.b_globalPlotEnable && sPreset.dim <= 3
     if sPreset.dim == 1
-        plotInd = 0:4;
+        plotInd = [0:3, sPreset.M-1];
+        cMarkers = cell(1,2*numel(plotInd));
         [cMarkers{1:numel(plotInd)}] = deal('o');
         [cMarkers{numel(plotInd)+1:numel(plotInd)*2}] = deal('.');
     else
-        plotInd = 1:4;
+        plotInd = round(linspace(1,sPreset.M-1,4));
         [cMarkers{1:numel(plotInd)*2}] = deal('.');
     end
 

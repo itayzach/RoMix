@@ -44,7 +44,7 @@ fprintf('Nystrom: train took %.2f sec, interp took %.2f sec\n', tTrain, tInt);
 if sPlotParams.b_globalPlotEnable && sPreset.b_runGraphSignals
     mSigRef    = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.y);
     mSigRefInt = ConvertSignalByDataset(sPreset.verticesPDF, sDataset.sData.yt);
-    PlotGraphSignalsWrapper(sPlotParams, sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtRecV, mSigCnvrtNys, [], 'Nystrom')
+    PlotGraphSignalsWrapper(sPlotParams, sPreset, [], sDataset, mSigRef, mSigRefInt, mSigCnvrtRecV, mSigCnvrtNys, [], [], [], 'Nystrom')
 end
 if sPlotParams.b_globalPlotEnable && sPlotParams.b_plotInnerProductMatrices
     PlotInnerProductMatrix([], VNys, [], '${\bf V}_{{\bf nys}}^T {\bf V}_{{\bf nys}}$', 'VNys');

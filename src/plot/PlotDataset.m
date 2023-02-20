@@ -89,7 +89,7 @@ if exist('sDistParams', 'var') && ~isempty(sDistParams)
         set(gca,'YTick',[],'FontSize', 14);
         xlim([xMin(1), xMax(1)])
     elseif dim == 2
-        if sDistParams.GMModel.NumComponents < 20
+        if sDistParams.GMModel.NumComponents < 50
             scatter3(xGmm(:,1),xGmm(:,2),compIdx(:,2),[],compIdx(:,2),'filled');
             if sDistParams.GMModel.NumComponents <= size(unique(lines,'rows'),1)
                 cmap = lines(sDistParams.GMModel.NumComponents);

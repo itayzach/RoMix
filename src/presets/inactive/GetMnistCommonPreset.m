@@ -40,13 +40,15 @@ sPreset.omegaTilde         = 0.114*sPreset.dim; % for our method
 %% GMM params
 sPreset.gmmRegVal          = 1e-4;
 sPreset.gmmMaxIter         = 200;
-sPreset.gmmNumComponents   = b_runVAE*10 + (1-b_runVAE)*300;
+sPreset.gmmNumComponents   = b_runVAE*10 + (1-b_runVAE)*10;
 if b_runVAE
     sPreset.vGmmNumCompAicBic  = [3, 5, 10, 15, 20];
+else
+    %sPreset.vGmmNumCompAicBic  = [25 50 100 150 200 300];    
 end
 %% Number of eigenvectors/eigenfunctions
 sPreset.M                  = 20;
-sPreset.MTilde             = b_runVAE*7500 + (1-b_runVAE)*1000;
+sPreset.MTilde             = b_runVAE*1000 + (1-b_runVAE)*1000;
 %% Regularizations
 sPreset.gamma1             = 0.1;
 sPreset.gamma2             = 0;

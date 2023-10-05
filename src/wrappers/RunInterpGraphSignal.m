@@ -37,7 +37,7 @@ for iRun = 1:numel(vNumLabeled)
     fprintf('Run %d/%d finished (took %.2f min)\n',iRun,numel(vNumLabeled),sum(vSimTimeSec(iRun,:))/60)
     [mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd] = ...
         InterpGraphSignalsMetrics(sPlotParams, sPreset, b_interpEigenvecs, tSigCnvrtRec, tSigCnvrtRecRef, tSigCnvrtInt, tSigCnvrtIntRef, tTrainTime, tIntTime);
-    sResults(iRun) = SaveResults(sPreset, sPlotParams, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd);
+    sResults(iRun) = SaveResults(sPreset, sPlotParams, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd, vSimTimeSec);
 end
 fprintf('Experiment finished (took %.2f min)\n\n\n',sum(vSimTimeSec(:))/60)
 if numel(vNumLabeled) > 1

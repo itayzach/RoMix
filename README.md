@@ -32,6 +32,10 @@ On MATLAB startup, run `startup.m` for all required addpaths.
   ```
   Main(GetBulgariBeaconsPreset);
   ```
+* Reproduce paper simulations:
+   ```
+   RunAllPaperPresets;
+   ```
 * Run all presets:
    ```
    RunAllPresets;

@@ -1,4 +1,4 @@
-function sResults = SaveResults(sPreset, sPlotParams, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd)
+function sResults = SaveResults(sPreset, sPlotParams, mAccRec, mAccStdRec, mAccInt, mAccStdInt, vTrainTime, vTrainTimeStd, vIntTime, vIntTimeStd, vSimTimeSec)
 sResults.sPreset         = sPreset;
 sResults.sPlotParams     = sPlotParams;
 %sResults.tSigCnvrtRec    = tSigCnvrtRec;
@@ -13,4 +13,5 @@ sResults.vTrainTime      = vTrainTime;
 sResults.vTrainTimeStd   = vTrainTimeStd;
 sResults.vIntTime        = vIntTime;
 sResults.vIntTimeStd     = vIntTimeStd;
+sResults.vSimTimeSec     = vSimTimeSec;
 end

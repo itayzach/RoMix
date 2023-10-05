@@ -258,7 +258,7 @@ end
 % sanity checks
 assert(sPreset.n == size(sDataset.sData.x,1) && sPreset.N == size(sDataset.sData.xt,1));
 if strcmp(sPreset.dataGenTechnique, 'TwoDraws')
-    warning('sPreset.sPreset.dataGenTechnique is TwoDraws, should make sure its okay...')
+    warning('sPreset.dataGenTechnique is TwoDraws, should make sure its okay...')
     pause(0.5)
 else
     assert(isequal(sDataset.sData.x, sDataset.sData.xt(1:sPreset.n,:)));

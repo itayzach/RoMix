@@ -112,12 +112,13 @@ if dim <= 3
         else
             figName = 'gmm_data';
         end
-        set(fig,'renderer','Painters')
-        if exist('alphaVal', 'var')
-            SaveFigure(sPlotParams, fig, figName, {'pdf', 'png'});
-        else
-            SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
-        end
+        %set(fig,'renderer','Painters')
+        %if exist('alphaVal', 'var')
+        %    SaveFigure(sPlotParams, fig, figName, {'pdf', 'png'});
+        %else
+        %    SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
+        %end
+        SaveFigure(sPlotParams, fig, figName, {'epsc', 'png'});
     end
 end
 end
